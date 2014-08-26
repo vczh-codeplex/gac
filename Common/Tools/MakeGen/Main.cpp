@@ -39,7 +39,7 @@ WString ConcatFolder(const WString& first, const WString& second)
 	}
 	else
 	{
-		return first;
+		return first + second;
 	}
 }
 
@@ -118,6 +118,7 @@ public:
 
 bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 {
+	Console::WriteLine(L"Processing \""+fileName+L"\" ...");
 	FileStream fileStream(fileName, FileStream::ReadOnly);
 	if(!fileStream.IsAvailable())
 	{
@@ -721,6 +722,7 @@ int main(int argc, char* argv[])
 	if (LoadMakeGen(config, input))
 	{
 		PrintMakeFile(config, output);
+		Console::WriteLine(L"Makefile \""+output+L"\" is generated.");
 	}
 	return 0;
 }

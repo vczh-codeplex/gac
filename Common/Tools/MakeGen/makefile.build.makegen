@@ -1,7 +1,7 @@
 include
 	makefile.vlpp.makegen
 	makefile.sample.makegen
-	
+
 targets
 	obj = ./Obj/
 	bin = ./Bin/
