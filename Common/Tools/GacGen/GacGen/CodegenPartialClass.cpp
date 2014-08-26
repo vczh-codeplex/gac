@@ -94,9 +94,9 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		{
 			writer.WriteString(prefix + L"\t");
 			writer.WriteString(L"Ptr<");
-			writer.WriteString(parameter->className);
+			writer.WriteString(parameter->className.ToString());
 			writer.WriteString(L"> ");
-			writer.WriteString(parameter->name);
+			writer.WriteString(parameter->name.ToString());
 			writer.WriteLine(L"_;");
 		}
 		writer.WriteLine(prefix + L"protected:");
@@ -113,18 +113,18 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 				writer.WriteString(L", ");
 			}
 			writer.WriteString(L"Ptr<");
-			writer.WriteString(parameter->className);
+			writer.WriteString(parameter->className.ToString());
 			writer.WriteString(L"> ");
-			writer.WriteString(parameter->name);
+			writer.WriteString(parameter->name.ToString());
 		}
 		writer.WriteLine(L")");
 		writer.WriteLine(prefix + L"\t{");
 		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
 		{
 			writer.WriteString(prefix + L"\t\t");
-			writer.WriteString(parameter->name);
+			writer.WriteString(parameter->name.ToString());
 			writer.WriteString(L"_ = ");
-			writer.WriteString(parameter->name);
+			writer.WriteString(parameter->name.ToString());
 			writer.WriteLine(L";");
 		}
 		writer.WriteLine(prefix + L"\t\tif (InitializeFromResource())");
@@ -139,7 +139,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
 		{
 			writer.WriteString(prefix + L"\t\t\t");
-			writer.WriteString(parameter->name);
+			writer.WriteString(parameter->name.ToString());
 			writer.WriteLine(L"_ = 0;");
 		}
 		writer.WriteLine(prefix + L"\t\t}");
@@ -150,12 +150,12 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		if (instance->baseType == GetTypeDescriptor<GuiWindow>())
 		{
 			auto& atts = instance->context->instance->setters;
-			vint index = atts.Keys().IndexOf(L"ControlTemplate");
+			vint index = atts.Keys().IndexOf(GlobalStringKey::Get(L"ControlTemplate"));
 			WString controlTemplate;
 			if (index != -1)
 			{
 				auto value = atts.Values()[index];
-				if (value->binding == L"" && value->values.Count() == 1)
+				if (value->binding == GlobalStringKey::Empty && value->values.Count() == 1)
 				{
 					if (auto text = value->values[0].Cast<GuiTextRepr>())
 					{
@@ -195,12 +195,12 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteLine(L"");
 			writer.WriteString(prefix + L"\t");
 			writer.WriteString(L"Ptr<");
-			writer.WriteString(parameter->className);
+			writer.WriteString(parameter->className.ToString());
 			writer.WriteString(L"> Get");
-			writer.WriteString(parameter->name);
+			writer.WriteString(parameter->name.ToString());
 			writer.WriteLine(L"()");
 			writer.WriteLine(prefix + L"\t{");
-			writer.WriteLine(prefix + L"\t\treturn " + parameter->name + L"_;");
+			writer.WriteLine(prefix + L"\t\treturn " + parameter->name.ToString() + L"_;");
 			writer.WriteLine(prefix + L"\t}");
 		}
 		writer.WriteLine(prefix + L"};");
@@ -364,7 +364,7 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 				writer.WriteString(L", ");
 			}
 			writer.WriteString(L"Ptr<");
-			writer.WriteString(parameter->className);
+			writer.WriteString(parameter->className.ToString());
 			writer.WriteString(L">");
 		}
 		writer.WriteString(L"), ");
@@ -382,7 +382,7 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 					writer.WriteString(L" _ ");
 				}
 				writer.WriteString(L"L\"");
-				writer.WriteString(parameter->name);
+				writer.WriteString(parameter->name.ToString());
 				writer.WriteString(L"\"");
 			}
 			writer.WriteString(L" }");
@@ -404,7 +404,7 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 			FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
 			{
 				writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_READONLY_FAST(");
-				writer.WriteString(parameter->name);
+				writer.WriteString(parameter->name.ToString());
 				writer.WriteLine(L")");
 			}
 		}

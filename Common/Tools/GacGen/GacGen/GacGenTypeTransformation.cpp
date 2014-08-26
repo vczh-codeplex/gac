@@ -9,7 +9,7 @@ bool DetermineCppType(
 	Dictionary<WString, Ptr<Instance>>& instances,
 	Ptr<Instance> instance,
 	GuiConstructorRepr* ctor,
-	WString& typeName,
+	GlobalStringKey& typeName,
 	IGuiInstanceLoader*& loader,
 	const Func<bool()>& stop
 	)
@@ -17,7 +17,7 @@ bool DetermineCppType(
 	Ptr<GuiResourcePathResolver> resolver = new GuiResourcePathResolver(config->resource, config->resource->GetWorkingDirectory());
 	Ptr<GuiInstanceContext> currentContext = instance->context;
 	GuiConstructorRepr* currentCtor = ctor;
-	typeName = L"";
+	typeName = GlobalStringKey::Empty;
 	loader = 0;
 
 	while (currentContext)
@@ -45,14 +45,14 @@ WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
 
 WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
 {
-	WString typeName;
+	GlobalStringKey typeName;
 	IGuiInstanceLoader* loader = 0;
 	if (DetermineCppType(config, instances, instance, ctor, typeName, loader, [&]()
 		{
-			return instances.Keys().Contains(typeName);
+			return instances.Keys().Contains(typeName.ToString());
 		}))
 	{
-		return typeName;
+		return typeName.ToString();
 	}
 	else
 	{
@@ -63,7 +63,7 @@ WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instan
 
 IGuiInstanceLoader::TypeInfo GetCppTypeInfo(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
 {
-	WString typeName;
+	GlobalStringKey typeName;
 	IGuiInstanceLoader* loader = 0;
 	DetermineCppType(config, instances, instance, ctor, typeName, loader, [&]()
 	{
