@@ -653,6 +653,46 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
 	writer.WriteLine(L"");
 	
 	// write rules
+	FOREACH(WString, outputCategory, config->mappingOrder)
+	{
+		bool found=false;
+		FOREACH(Ptr<BuildingConfig>, building, config->buildings)
+		{
+			if(!building->aggregation)
+			{
+				FOREACH(Ptr<BuildingOutputConfig>, output, building->outputs)
+				{
+					if(output->outputCategory==outputCategory)
+					{
+						vint indexCf=config->categoryFolders.Keys().IndexOf(outputCategory);
+						if(indexCf!=-1)
+						{
+							const auto& folders=config->categoryFolders.GetByIndex(indexCf);
+							FOREACH(WString, folder, folders)
+							{
+								FOREACH(WString, inputCategory, building->inputCategories)
+								{
+									if(config->categoryFolders.Contains(inputCategory, folder))
+									{
+										found=true;
+										writer.WriteLine(L"$("+folder+L"_"+outputCategory+L") : $("+output->target+L"_TARGET)"+output->outputPattern+L" : "+L"$("+folder+L"_DIR)"+building->inputPattern);
+										FOREACH(WString, command, building->commands)
+										{
+											writer.WriteLine(L"\t"+command);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if(found)
+		{
+			writer.WriteLine(L"");
+		}
+	}
 	
 	// write clean
 	writer.WriteLine(L"clean:");
