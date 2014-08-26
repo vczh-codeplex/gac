@@ -109,9 +109,13 @@ public:
 	Dictionary<WString, Ptr<FolderConfig>>		folders;
 	Dictionary<DependencyItem, DependencyItem>	dependencies;
 	List<Ptr<BuildingConfig>>					buildings;
+
+	List<DependencyItem>						dependencyOrder;
+	List<WString>								mappingOrder;
+	List<WString>								linkingOrder;
 };
 
-bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<DependencyItem>& usedDependencies)
+bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 {
 	FileStream fileStream(fileName, FileStream::ReadOnly);
 	if(!fileStream.IsAvailable())
@@ -149,7 +153,7 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 					{
 						auto path=match->Groups()[L"path"][0].Value();
 						auto includeFileName=ConcatFolder(GetFolderName(fileName), path);
-						if (!LoadMakeGen(config, includeFileName, usedDependencies))
+						if (!LoadMakeGen(config, includeFileName))
 						{
 							return false;
 						}
@@ -245,6 +249,10 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 						{
 							folderConfig->categories.Add(category, pattern);
 						}
+						if(!config->mappingOrder.Contains(category))
+						{
+							config->mappingOrder.Add(category);
+						}
 					}
 					else
 					{
@@ -297,7 +305,7 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 						di1.folder=match->Groups()[L"folder1"][0].Value();
 						di1.category=match->Groups()[L"category1"][0].Value();
 
-						if(usedDependencies.Contains(di1))
+						if(config->dependencyOrder.Contains(di1))
 						{
 							Console::WriteLine(L"Dependency items should be listed in partial order, \""+di1.folder+L":"+di1.category+L"\" has already been dependented before, so it's dependencies cannot be sepcified here, in file \""+GetFileName(fileName)+L"\".");
 							return false;
@@ -315,9 +323,9 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 							di2.category=match->Groups()[L"category2"][i].Value();
 	
 							config->dependencies.Add(di1, di2);
-							if(!usedDependencies.Contains(di2))
+							if(!config->dependencyOrder.Contains(di2))
 							{
-								usedDependencies.Add(di2);
+								config->dependencyOrder.Add(di2);
 							}
 						}
 					}	
@@ -343,6 +351,8 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 			auto buildingConfig=MakePtr<BuildingConfig>();
 			config->buildings.Add(buildingConfig);
 			buildingConfig->aggregation=line[0]==L'l';
+			auto& usedCategories=buildingConfig->aggregation?config->linkingOrder:config->mappingOrder;
+
 			FOREACH(RegexString, category, match->Groups()[L"category"])
 			{
 				auto inputCategory=category.Value();
@@ -364,6 +374,10 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 						auto target=match->Groups()[L"target"][0].Value();
 						auto pattern=match->Groups()[L"pattern"][0].Value();
 
+						if(usedCategories.Contains(category))
+						{
+							Console::WriteLine(L"Mapping/Linking categories should be listed in partial order, \""+category+L"\" has already been transformed before, so it's transformation cannot be sepcified here, in file \""+GetFileName(fileName)+L"\".");
+						}
 						auto outputConfig=MakePtr<BuildingOutputConfig>();
 						outputConfig->outputCategory=category;
 						outputConfig->target=target;
@@ -384,6 +398,14 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 				else
 				{
 					break;
+				}
+			}
+
+			FOREACH(WString, category, buildingConfig->inputCategories)
+			{
+				if(!usedCategories.Contains(category))
+				{
+					usedCategories.Add(category);
 				}
 			}
 		}
@@ -491,7 +513,7 @@ int main(int argc, char* argv[])
 
 	auto config=MakePtr<MakeGenConfig>();
 	SortedList<DependencyItem> usedDependencies;
-	if (LoadMakeGen(config, input, usedDependencies))
+	if (LoadMakeGen(config, input))
 	{
 		PrintMakeFile(config, output);
 	}
