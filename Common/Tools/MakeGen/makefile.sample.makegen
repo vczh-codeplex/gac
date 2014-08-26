@@ -11,6 +11,8 @@ folder VLPP = ../../../Libraries/GacUI/Public/Source
 	h = Vlpp.h
 	cpp = Vlpp.cpp
 
+group GACUI = VLPP WORKFLOW GACUI
+
 folder MAKEGEN = .
 	h = *.h
 	cpp = *.cpp
