@@ -1,33 +1,33 @@
-CPP = g++ -std=c++11 -g
-OBJ = ./Obj/
-BIN = ./Bin/
+# This file is generated from "./makefile.debug.makegen" by Vczh Makefile Generator
 
-VLPP_CPP = ../../../Libraries/GacUI/Public/Source/Vlpp.cpp
-VLPP_H = ../../../Libraries/GacUI/Public/Source/Vlpp.h
-VLPP_OBJ = $(OBJ)Vlpp.o
+.PHONY : all clean
 
-MAKEGEN_CPP = $(wildcard ./*.cpp)
-MAKEGEN_OBJ = $(patsubst ./%.cpp, $(OBJ)%.o, $(MAKEGEN_CPP))
+bin_TARGET = ./Bin/
+obj_TARGET = ./Obj/
 
-ALL_OBJ = $(MAKEGEN_OBJ) $(VLPP_OBJ)
+MAKEGEN_DIR = ./
+MAKEGEN_cpp = $(wildcard $(MAKEGEN_DIR)*.cpp) 
+MAKEGEN_h = $(wildcard $(MAKEGEN_DIR)*.h) 
+VLPP_DIR = ../../../Libraries/GacUI/Public/Source/
+VLPP_cpp = $(VLPP_DIR)Vlpp.cpp
+VLPP_h = $(VLPP_DIR)Vlpp.h
 
-.PHONY : all clean print
+MAKEGEN_o = $(patsubst $(MAKEGEN_DIR)%.cpp, $(obj_TARGET)%.o, $(MAKEGEN_cpp))
+VLPP_o = $(patsubst $(VLPP_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_cpp))
 
-all: $(ALL_OBJ)
-	$(CPP) -o $(BIN)MakeGen $(ALL_OBJ)
+ALL_o = $(MAKEGEN_o) $(VLPP_o)
+all : $(ALL_o)
+	g++ -std=c++11 -g -o $(bin_TARGET)MakeGen $(ALL_o)
 
-$(VLPP_OBJ) : $(VLPP_CPP) $(VLPP_H)
-	$(CPP) -o $(VLPP_OBJ) -c $(VLPP_CPP)
+$(MAKEGEN_h) : $(VLPP_h)
+$(MAKEGEN_cpp) : $(MAKEGEN_h)
+$(VLPP_cpp) : $(VLPP_h)
 
-$(MAKEGEN_CPP) : $(VLPP_H)
-$(MAKEGEN_OBJ) : $(OBJ)%.o : ./%.cpp
-	$(CPP) -o $@ -c $<
+$(MAKEGEN_o) : $(obj_TARGET)%.o : $(MAKEGEN_DIR)%.cpp
+	g++ -std=c++11 -g -o $@ -c $<
+$(VLPP_o) : $(obj_TARGET)%.o : $(VLPP_DIR)%.cpp
+	g++ -std=c++11 -g -o $@ -c $<
 
 clean:
-	rm $(OBJ)* -rf
-	rm $(OBJ)* -rf
-
-print:
-	echo MAKEGEN_CPP : $(MAKEGEN_CPP) > /dev/null
-	echo MAKEGEN_OBJ : $(MAKEGEN_OBJ) > /dev/null
-
+	rm $(bin_TARGET)* -rf
+	rm $(obj_TARGET)* -rf
