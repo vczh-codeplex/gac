@@ -4,6 +4,7 @@ using namespace vl;
 using namespace vl::collections;
 using namespace vl::stream;
 using namespace vl::regex;
+using namespace vl::console;
 
 Regex regexInclude(LR"r(^include$)r");
 Regex regexIncludeBody(LR"r(^\t(<arg>/.*)$)r");
@@ -95,7 +96,22 @@ public:
 	List<Ptr<BuildingConfig>>					buildings;
 };
 
-int main()
+bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 {
+}
+
+int main(int argc, char* argv[])
+{
+	if (argc < 2 || argc > 3)
+	{
+		Console::WriteLine(L"MakeGen <input-makegen>");
+		Console::WriteLine(L"\tConvert \"makefile.<input-makegen>.makegen\" to \"makefile\".");
+		Console::WriteLine(L"MakeGen <input-makegen> <output-makefile>");
+		Console::WriteLine(L"\tConvert \"makefile.<input-makegen>.makegen\" to \"<output-makefile>\".");
+		return 1;
+	}
+	WString input = L"./makefile."+atow(argv[1])+L".makegen";
+	WString output = argc==3 ? atow(argv[2]) : L"./makefile";
+	Console::WriteLine(L"Converting \""+input+L"\" to \""+output+L"\" ...");
 	return 0;
 }
