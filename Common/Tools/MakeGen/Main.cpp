@@ -437,6 +437,19 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 			config->categoryFolders.Add(category, folder->name);
 		}
 	}
+
+	FOREACH(Ptr<BuildingConfig>, building, config->buildings)
+	{
+		auto& usedCategories=building->aggregation ? config->linkingOrder : config->mappingOrder;
+		FOREACH(Ptr<BuildingOutputConfig>, output, building->outputs)
+		{
+			if(!usedCategories.Contains(output->outputCategory))
+			{
+				usedCategories.Add(output->outputCategory);
+			}
+		}
+	}
+
 	FOREACH(WString, category, config->mappingOrder)
 	{
 		FOREACH(Ptr<BuildingConfig>, building, config->buildings)
@@ -504,7 +517,14 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
 			WString pattern;
 			FOREACH(WString, path, folder->categories.GetByIndex(index))
 			{
-				pattern+=L"$(wildcard $("+name+L"_DIR)"+path+L") ";
+				if(wcschr(path.Buffer(), L'*'))
+				{
+					pattern+=L"$(wildcard $("+name+L"_DIR)"+path+L") ";
+				}
+				else
+				{
+					pattern+=L"$("+name+L"_DIR)"+path;
+				}
 			}
 			writer.WriteLine(name+L"_"+category+L" = "+pattern);
 		}
