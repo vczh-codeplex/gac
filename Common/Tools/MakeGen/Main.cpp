@@ -15,8 +15,8 @@ Regex regexFolderBody(LR"r(^\t(<category>/w+)/s*=/s*(<pattern>/.*)$)r");
 Regex regexGroup(LR"r(^group/s+(<name>/w+)/s*=(/s*(<folder>[^ ]+))+$)r");
 Regex regexDependency(LR"r(^dependency$)r");
 Regex regexDependencyBody(LR"r(^\t(<folder1>/w+):(<category1>/w+)/s*/<(/s*(<folder2>/w+):(<category2>/w+))+$)r");
-Regex regexMap(LR"r(^map(/s+(<category>/w+))+/s*:/s*(<pattern>/s*)$)r");
-Regex regexLink(LR"r(^link(/s+(<category>/w+))+/s*:/s*(<pattern>/s*)$)r");
+Regex regexMap(LR"r(^map(/s+(<category>/w+))+/s*:/s*(<pattern>/.*)$)r");
+Regex regexLink(LR"r(^link(/s+(<category>/w+))+/s*:/s*(<pattern>/.*)$)r");
 Regex regexOutput(LR"r(^\t/>/s*(<category>/w+)/s*:/s*(<target>/w+)/s+(<pattern>/.*)$)r");
 Regex regexCommand(LR"r(^\t(<command>/.*)$)r");
 
@@ -58,6 +58,7 @@ class FolderConfig
 {
 public:
 	WString									name;
+	WString									path;
 	List<WString>							subFolders;
 	Group<WString, WString>					categories;
 };
@@ -210,6 +211,7 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 
 			auto folderConfig=MakePtr<FolderConfig>();
 			folderConfig->name=name;
+			folderConfig->path=match->Groups()[L"path"][0].Value();
 			config->folders.Add(name, folderConfig);
 
 			while(!reader.IsEnd())
@@ -391,7 +393,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	WString input = L"./makefile."+atow(argv[1])+L".makegen";
-	WString output = argc==3 ? atow(argv[2]) : L"./makefile";
+	WString output = argc==3 ? atow(argv[2]) : L"./makefile.makegen";
 	Console::WriteLine(L"Converting \""+input+L"\" to \""+output+L"\" ...");
 
 	auto config=MakePtr<MakeGenConfig>();
