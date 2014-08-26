@@ -107,7 +107,7 @@ class MakeGenConfig
 public:
 	Dictionary<WString, WString>				targets;
 	Dictionary<WString, Ptr<FolderConfig>>		folders;
-	Dictionary<DependencyItem, DependencyItem>	dependencies;
+	Group<DependencyItem, DependencyItem>		dependencies;
 	List<Ptr<BuildingConfig>>					buildings;
 
 	List<DependencyItem>						dependencyOrder;
@@ -415,6 +415,14 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 			return false;
 		}
 	}while(!reader.IsEnd() || line!=L"");
+
+	FOREACH(DependencyItem, di, config->dependencies.Keys())
+	{
+		if(!config->dependencyOrder.Contains(di))
+		{
+			config->dependencyOrder.Add(di);
+		}
+	}
 	return true;
 }
 
@@ -487,7 +495,22 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
 	
 	// write all
 	
-	// write dependencies and rules
+	// write dependencies
+	FOREACH(DependencyItem, di1, config->dependencyOrder)
+	{
+		vint index=config->dependencies.Keys().IndexOf(di1);
+		if(index==-1) continue;
+		const auto& di2s=config->dependencies.GetByIndex(index);
+		writer.WriteString(L"$("+di1.folder+L"_"+di1.category+L") :");
+		FOREACH(DependencyItem, di2, di2s)
+		{
+			writer.WriteString(L" $("+di2.folder+L"_"+di2.category+L")");
+		}
+		writer.WriteLine(L"");
+	}
+	writer.WriteLine(L"");
+	
+	// write rules
 	
 	// write clean
 	writer.WriteLine(L"clean:");
