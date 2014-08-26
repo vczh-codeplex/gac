@@ -114,6 +114,11 @@ public:
 bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<DependencyItem>& usedDependencies)
 {
 	FileStream fileStream(fileName, FileStream::ReadOnly);
+	if(!fileStream.IsAvailable())
+	{
+		Console::WriteLine(L"Cannot open file \""+fileName+L"\" to read.");
+		return false;
+	}
 	Utf8Decoder decoder;
 	DecoderStream stream(fileStream, decoder);
 	StreamReader reader(stream);
@@ -174,7 +179,7 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 					if(match = regexTargetsBody.MatchHead(line))
 					{
 						auto name=match->Groups()[L"name"][0].Value();
-						auto path=match->Groups()[L"name"][0].Value();
+						auto path=match->Groups()[L"path"][0].Value();
 						if(config->targets.Keys().Contains(name))
 						{
 							Console::WriteLine(L"Found duplicated target \""+name+L"\" in file \""+GetFileName(fileName)+L"\".");
@@ -182,6 +187,10 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 						}
 						else
 						{
+							if(path.Length()>0 && path[path.Length()-1]!=L'/')
+							{
+								path+=L'/';
+							}
 							config->targets.Add(name, path);
 						}
 					}
@@ -212,6 +221,10 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 			auto folderConfig=MakePtr<FolderConfig>();
 			folderConfig->name=name;
 			folderConfig->path=match->Groups()[L"path"][0].Value();
+			if(folderConfig->path.Length()>0 && folderConfig->path[folderConfig->path.Length()-1]!=L'/')
+			{
+				folderConfig->path+=L'/';
+			}
 			config->folders.Add(name, folderConfig);
 
 			while(!reader.IsEnd())
@@ -380,7 +393,87 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName, SortedList<
 			return false;
 		}
 	}while(!reader.IsEnd() || line!=L"");
+	return true;
 }
+
+void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
+{
+	FileStream fileStream(fileName, FileStream::WriteOnly);
+	if(!fileStream.IsAvailable())
+	{
+		Console::WriteLine(L"Cannot open file \""+fileName+L"\" to write.");
+		return;
+	}
+
+	Utf8Encoder encoder;
+	EncoderStream stream(fileStream, encoder);
+	StreamWriter writer(stream);
+
+	// write config
+	writer.WriteLine(L".PHONY all clean");
+	writer.WriteLine(L"");
+
+	// write targets
+	for(vint i=0;i<config->targets.Count();i++)
+	{
+		auto key=config->targets.Keys()[i];
+		auto value=config->targets.Values()[i];
+		writer.WriteLine(key+L"_TARGET = "+value);
+	}
+	writer.WriteLine(L"");
+
+	// write folders
+	FOREACH(Ptr<FolderConfig>, folder, config->folders.Values())
+	{
+		if (folder->path==L"") continue;
+		auto name=folder->name;
+		writer.WriteLine(name+L"_DIR = "+folder->path);
+		FOREACH_INDEXER(WString, category, index, folder->categories.Keys())
+		{
+			WString pattern;
+			FOREACH(WString, path, folder->categories.GetByIndex(index))
+			{
+				pattern+=L"$(wildcard $("+name+L"_DIR)"+path+L") ";
+			}
+			writer.WriteLine(name+L"_"+category+L" = "+pattern);
+		}
+	}
+	writer.WriteLine(L"");
+
+	// write output categories
+	FOREACH(Ptr<BuildingConfig>, building, config->buildings)
+	{
+		if(!building->aggregation)
+		{
+			FOREACH(Ptr<FolderConfig>, folder, config->folders.Values())
+			{
+				FOREACH(WString, inputCategory, building->inputCategories)
+				{
+					auto index=folder->categories.Keys().IndexOf(inputCategory);
+					if(index!=-1)
+					{
+						FOREACH(Ptr<BuildingOutputConfig>, output, building->outputs)
+						{
+							writer.WriteLine(folder->name+L"_"+output->outputCategory+L" = $(patsubst $("+folder->name+L"_DIR)"+building->inputPattern+L", $("+output->target+L"_TARGET)"+output->outputPattern+L", $("+folder->name+L"_"+inputCategory+L"))");
+						}
+					}
+				}
+			}
+		}
+	}
+	writer.WriteLine(L"");
+	
+	// write all
+	
+	// write dependencies and rules
+	
+	// write clean
+	writer.WriteLine(L"clean:");
+	FOREACH(WString, target, config->targets.Keys())
+	{
+		writer.WriteLine(L"\trm $("+target+L"_TARGET)* -rf");
+	}
+}	
 
 int main(int argc, char* argv[])
 {
@@ -400,6 +493,7 @@ int main(int argc, char* argv[])
 	SortedList<DependencyItem> usedDependencies;
 	if (LoadMakeGen(config, input, usedDependencies))
 	{
+		PrintMakeFile(config, output);
 	}
 	return 0;
 }

@@ -25,8 +25,8 @@ dependency
 
 # map each cpp file to o file
 # from or to categories can be multiple
-map cpp : *.cpp
-	> o : obj *.o
+map cpp : %.cpp
+	> o : obj %.o
 	g++ -std=c++11 -g -o $(OUT) -c $(IN)
 
 # aggregate all o files to exe file
