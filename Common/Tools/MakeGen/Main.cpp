@@ -481,7 +481,56 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 	return true;
 }
 
-void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
+void ExpandDependency(Ptr<MakeGenConfig> config, const WString& inputFolder, SortedList<WString>& traversedFolders, SortedList<WString>& outputFolders)
+{
+	if(traversedFolders.Contains(inputFolder)) return;
+	traversedFolders.Add(inputFolder);
+
+	vint index=config->folders.Keys().IndexOf(inputFolder);
+	if(index==-1) return;
+	auto folder=config->folders.Values()[index];
+
+	if(folder->path!=L"")
+	{
+		if(!outputFolders.Contains(folder->name))
+		{
+			outputFolders.Add(folder->name);
+		}
+	}
+	else
+	{
+		FOREACH(WString, subFolder, folder->subFolders)
+		{
+			ExpandDependency(config, subFolder, traversedFolders, outputFolders);
+		}
+	}
+}
+
+void ExpandDependency(Ptr<MakeGenConfig> config, const List<DependencyItem>& inputItems, SortedList<DependencyItem>& outputItems)
+{
+	FOREACH(DependencyItem, di, inputItems)
+	{
+		SortedList<WString> traversedFolders;
+		SortedList<WString> outputFolders;
+		ExpandDependency(config, di.folder, traversedFolders, outputFolders);
+
+		FOREACH(WString, folder, outputFolders)
+		{
+			if(config->categoryFolders.Contains(di.category, folder))
+			{
+				DependencyItem di2;
+				di2.folder=folder;
+				di2.category=di.category;
+				if(!outputItems.Contains(di2))
+				{
+					outputItems.Add(di2);
+				}
+			}
+		}
+	}
+}
+
+void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, const WString& fileName)
 {
 	FileStream fileStream(fileName, FileStream::WriteOnly);
 	if(!fileStream.IsAvailable())
@@ -493,9 +542,11 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
 	Utf8Encoder encoder;
 	EncoderStream stream(fileStream, encoder);
 	StreamWriter writer(stream);
+	writer.WriteLine(L"# This file is generated from \""+intputFileName+L"\" by Vczh Makefile Generator");
+	writer.WriteLine(L"");
 
 	// write config
-	writer.WriteLine(L".PHONY all clean");
+	writer.WriteLine(L".PHONY : all clean");
 	writer.WriteLine(L"");
 
 	// write targets
@@ -644,10 +695,24 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
 		vint index=config->dependencies.Keys().IndexOf(di1);
 		if(index==-1) continue;
 		const auto& di2s=config->dependencies.GetByIndex(index);
-		writer.WriteString(L"$("+di1.folder+L"_"+di1.category+L") :");
-		FOREACH(DependencyItem, di2, di2s)
 		{
-			writer.WriteString(L" $("+di2.folder+L"_"+di2.category+L")");
+			List<DependencyItem> inputItems;
+			SortedList<DependencyItem> outputItems;
+			inputItems.Add(di1);
+			ExpandDependency(config, inputItems, outputItems);
+			FOREACH(DependencyItem, di, outputItems)
+			{
+				writer.WriteString(L"$("+di.folder+L"_"+di.category+L") ");
+			}
+			writer.WriteString(L":");
+		}
+		{
+			SortedList<DependencyItem> outputItems;
+			ExpandDependency(config, di2s, outputItems);
+			FOREACH(DependencyItem, di, outputItems)
+			{
+				writer.WriteString(L" $("+di.folder+L"_"+di.category+L")");
+			}
 		}
 		writer.WriteLine(L"");
 	}
@@ -721,7 +786,7 @@ int main(int argc, char* argv[])
 	SortedList<DependencyItem> usedDependencies;
 	if (LoadMakeGen(config, input))
 	{
-		PrintMakeFile(config, output);
+		PrintMakeFile(config, input, output);
 		Console::WriteLine(L"Makefile \""+output+L"\" is generated.");
 	}
 	return 0;
