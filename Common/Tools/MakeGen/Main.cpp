@@ -29,6 +29,72 @@ WString GetFolderName(const WString& fileName)
 	return index==-1 ? L"" : fileName.Left(index+1);
 }
 
+WString GetFileName(const WString& fileName)
+{
+	int index=fileName.Length()-1;
+	while(index>=0)
+	{
+		if (fileName[index]==L'/') break;
+	}
+	return index==-1 ? fileName : fileName.Right(fileName.Length()-index-1);
+}
+
+class FolderConfig
+{
+public:
+	WString									name;
+	List<WString>							subFolders;
+	Dictionary<WString, WString>			categories;
+};
+
+struct DependencyItem
+{
+	WString									folder;
+	WString									category;
+
+	static vint Compare(const DependencyItem& a, const DependencyItem& b)
+	{
+		vint result = WString::Compare(a.folder, b.folder);
+		if (result!=0) return result;
+		result = WString::Compare(a.category, b.category);
+		return result;
+	}
+
+	bool operator == (const DependencyItem& i)const{return Compare(*this, i) == 0;}
+	bool operator != (const DependencyItem& i)const{return Compare(*this, i) != 0;}
+	bool operator <  (const DependencyItem& i)const{return Compare(*this, i) <  0;}
+	bool operator <= (const DependencyItem& i)const{return Compare(*this, i) <= 0;}
+	bool operator >  (const DependencyItem& i)const{return Compare(*this, i) >  0;}
+	bool operator >= (const DependencyItem& i)const{return Compare(*this, i) >= 0;}
+};
+
+class BuildingOutputConfig
+{
+public:
+	WString										outputCategory;
+	WString										target;
+	WString										outputPattern;
+};
+
+class BuildingConfig
+{
+public:
+	bool										aggregation = false;
+	List<WString>								inputCatregories;
+	WString										inputPattern;
+	List<WString>								commands;
+	List<Ptr<BuildingOutputConfig>>				outputs;
+};
+
+class MakeGenConfig
+{
+public:
+	Dictionary<WString, WString>				targets;
+	Dictionary<WString, Ptr<FolderConfig>>		folders;
+	Dictionary<DependencyItem, DependencyItem>	dependencies;
+	List<Ptr<BuildingConfig>>					buildings;
+};
+
 int main()
 {
 	return 0;
