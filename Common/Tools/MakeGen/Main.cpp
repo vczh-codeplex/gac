@@ -113,6 +113,7 @@ public:
 	List<DependencyItem>						dependencyOrder;
 	List<WString>								mappingOrder;
 	List<WString>								linkingOrder;
+	Group<WString, WString>						categoryFolders;
 };
 
 bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
@@ -388,6 +389,11 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 					{
 						auto command=match->Groups()[L"command"][0].Value();
 						buildingConfig->commands.Add(command);
+						if(!wcsstr(command.Buffer(), L"$(IN)") || !wcsstr(command.Buffer(), L"$(OUT)"))
+						{
+							Console::WriteLine(L"Mapping or linking command \""+command+L"\" does not contains \"$(IN)\" and \"$(OUT)\", which is illegal, in file \""+GetFileName(fileName)+L"\".");
+							return false;
+						}
 					}
 					else
 					{
@@ -421,6 +427,41 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 		if(!config->dependencyOrder.Contains(di))
 		{
 			config->dependencyOrder.Add(di);
+		}
+	}
+
+	FOREACH(Ptr<FolderConfig>, folder, config->folders.Values())
+	{
+		FOREACH(WString, category, folder->categories.Keys())
+		{
+			config->categoryFolders.Add(category, folder->name);
+		}
+	}
+	FOREACH(WString, category, config->mappingOrder)
+	{
+		FOREACH(Ptr<BuildingConfig>, building, config->buildings)
+		{
+			FOREACH(Ptr<BuildingOutputConfig>, output, building->outputs)
+			{
+				if(output->outputCategory==category)
+				{
+					FOREACH(WString, inputCategory, building->inputCategories)
+					{
+						vint index=config->categoryFolders.Keys().IndexOf(inputCategory);
+						if(index!=-1)
+						{
+							const auto& folders=config->categoryFolders.GetByIndex(index);
+							FOREACH(WString, folder, folders)
+							{
+								if(!config->categoryFolders.Contains(category, folder))
+								{
+									config->categoryFolders.Add(category, folder);
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return true;
@@ -494,7 +535,88 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& fileName)
 	writer.WriteLine(L"");
 	
 	// write all
-	
+	Group<WString, WString> linkingDependencies;
+	FOREACH(Ptr<BuildingConfig>, building, config->buildings)
+	{
+		if(building->aggregation)
+		{
+			FOREACH(Ptr<BuildingOutputConfig>, output, building->outputs)
+			{
+				FOREACH(WString, category, building->inputCategories)
+				{
+					if(!linkingDependencies.Contains(output->outputCategory, category))
+					{
+						linkingDependencies.Add(output->outputCategory, category);
+					}
+				}
+			}
+		}
+	}
+	FOREACH_INDEXER(WString, category, index, linkingDependencies.Keys())
+	{
+		const auto& dependencies=linkingDependencies.GetByIndex(index);
+		FOREACH(WString, dependency, dependencies)
+		{
+			writer.WriteString(L"ALL_"+dependency+L" =");
+			vint indexCf=config->categoryFolders.Keys().IndexOf(dependency);
+			if(indexCf!=-1)
+			{
+				const auto& folders=config->categoryFolders.GetByIndex(indexCf);
+				FOREACH(WString, folder, folders)
+				{
+					writer.WriteString(L" $("+folder+L"_"+dependency+L")");
+				}
+			}
+		}
+		writer.WriteLine(L"");
+	}
+	writer.WriteString(L"all :");
+	FOREACH_INDEXER(WString, category, index, linkingDependencies.Keys())
+	{
+		const auto& dependencies=linkingDependencies.GetByIndex(index);
+		FOREACH(WString, dependency, dependencies)
+		{
+			writer.WriteString(L" $(ALL_"+dependency+L")");
+		}
+	}
+	writer.WriteLine(L"");
+	FOREACH(Ptr<BuildingConfig>, building, config->buildings)
+	{
+		if(building->aggregation)
+		{
+			FOREACH(Ptr<BuildingOutputConfig>, output, building->outputs)
+			{
+				FOREACH(WString, command, building->commands)
+				{
+					FOREACH(WString, category, building->inputCategories)
+					{
+						auto buffer=command.Buffer();
+						vint ia = wcsstr(buffer, L"$(IN)") - buffer;
+						vint ca = 5;
+						WString ra = L"$(ALL_"+category+L")";
+						vint ib = wcsstr(buffer, L"$(OUT)") - buffer;
+						vint cb = 6;
+						WString rb = L"$("+output->target+L"_TARGET)"+output->outputPattern;
+		
+						if(ia < ib)
+						{
+							{auto t=ia; ia=ib; ib=t;}
+							{auto t=ca; ca=cb; cb=t;}
+							{auto t=ra; ra=rb; rb=t;}
+						}
+						auto replaced=command
+							.Remove(ia, ca)
+							.Insert(ia, ra)
+							.Remove(ib, cb)
+							.Insert(ib, rb);
+						writer.WriteLine(L"\t"+replaced);
+					}
+				}
+			}
+		}
+	}
+	writer.WriteLine(L"");
+
 	// write dependencies
 	FOREACH(DependencyItem, di1, config->dependencyOrder)
 	{
