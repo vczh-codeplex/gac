@@ -530,6 +530,30 @@ void ExpandDependency(Ptr<MakeGenConfig> config, const List<DependencyItem>& inp
 	}
 }
 
+WString BuildCommand(const WString& command, const WString& input, const WString& output)
+{
+	auto buffer=command.Buffer();
+	vint ia = wcsstr(buffer, L"$(IN)") - buffer;
+	vint ca = 5;
+	WString ra = input;
+	vint ib = wcsstr(buffer, L"$(OUT)") - buffer;
+	vint cb = 6;
+	WString rb = output;
+
+	if(ia < ib)
+	{
+		{auto t=ia; ia=ib; ib=t;}
+		{auto t=ca; ca=cb; cb=t;}
+		{auto t=ra; ra=rb; rb=t;}
+	}
+	auto replaced=command
+		.Remove(ia, ca)
+		.Insert(ia, ra)
+		.Remove(ib, cb)
+		.Insert(ib, rb);
+	return replaced;
+}
+
 void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, const WString& fileName)
 {
 	FileStream fileStream(fileName, FileStream::WriteOnly);
@@ -662,26 +686,9 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 				{
 					FOREACH(WString, category, building->inputCategories)
 					{
-						auto buffer=command.Buffer();
-						vint ia = wcsstr(buffer, L"$(IN)") - buffer;
-						vint ca = 5;
 						WString ra = L"$(ALL_"+category+L")";
-						vint ib = wcsstr(buffer, L"$(OUT)") - buffer;
-						vint cb = 6;
 						WString rb = L"$("+output->target+L"_TARGET)"+output->outputPattern;
-		
-						if(ia < ib)
-						{
-							{auto t=ia; ia=ib; ib=t;}
-							{auto t=ca; ca=cb; cb=t;}
-							{auto t=ra; ra=rb; rb=t;}
-						}
-						auto replaced=command
-							.Remove(ia, ca)
-							.Insert(ia, ra)
-							.Remove(ib, cb)
-							.Insert(ib, rb);
-						writer.WriteLine(L"\t"+replaced);
+						writer.WriteLine(L"\t"+BuildCommand(command, ra, rb));
 					}
 				}
 			}
@@ -744,7 +751,7 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 										writer.WriteLine(L"$("+folder+L"_"+outputCategory+L") : $("+output->target+L"_TARGET)"+output->outputPattern+L" : "+L"$("+folder+L"_DIR)"+building->inputPattern);
 										FOREACH(WString, command, building->commands)
 										{
-											writer.WriteLine(L"\t"+command);
+											writer.WriteLine(L"\t"+BuildCommand(command, L"$<", L"$@"));
 										}
 									}
 								}
