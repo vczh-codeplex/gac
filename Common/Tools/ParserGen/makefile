@@ -1,4 +1,4 @@
-# This file is generated from "./makefile.debug.makegen" by Vczh Makefile Generator
+# This file is generated from "./makefile.release.makegen" by Vczh Makefile Generator
 
 .PHONY : all clean
 
@@ -17,16 +17,16 @@ VLPP_o = $(patsubst $(VLPP_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_cpp))
 
 ALL_o = $(PARSERGEN_o) $(VLPP_o)
 all : $(ALL_o)
-	g++ -std=c++11 -g -o $(bin_TARGET)ParserGen $(ALL_o)
+	g++ -std=c++11 -o2 -o $(bin_TARGET)ParserGen $(ALL_o)
 
 $(PARSERGEN_h) : $(VLPP_h)
 $(PARSERGEN_cpp) : $(PARSERGEN_h)
 $(VLPP_cpp) : $(VLPP_h)
 
 $(PARSERGEN_o) : $(obj_TARGET)%.o : $(PARSERGEN_DIR)%.cpp
-	g++ -std=c++11 -g -o $@ -c $<
+	g++ -std=c++11 -o2 -o $@ -c $<
 $(VLPP_o) : $(obj_TARGET)%.o : $(VLPP_DIR)%.cpp
-	g++ -std=c++11 -g -o $@ -c $<
+	g++ -std=c++11 -o2 -o $@ -c $<
 
 clean:
 	rm $(bin_TARGET)* -rf
