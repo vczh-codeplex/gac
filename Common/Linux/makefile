@@ -9,7 +9,8 @@ HOST_DIR = ././
 HOST_cpp = $(HOST_DIR)Main.cpp
 UNITTEST_DIR = ./../UnitTest/UnitTest/
 UNITTEST_cpp = $(UNITTEST_DIR)TestBasic.cpp $(UNITTEST_DIR)TestString.cpp $(UNITTEST_DIR)TestList.cpp $(UNITTEST_DIR)TestFunction.cpp $(UNITTEST_DIR)TestGlobalStorage.cpp $(UNITTEST_DIR)TestRegex.cpp $(UNITTEST_DIR)TestReflection.cpp $(UNITTEST_DIR)TestParsing.cpp
-UNITTEST_cppbom = $(UNITTEST_DIR)TestStream.cpp
+UNITTEST_BOM_DIR = ./../UnitTest/UnitTest/
+UNITTEST_BOM_cppbom = $(UNITTEST_BOM_DIR)TestStream.cpp
 UNITTEST_CALCULATOR_DIR = ./../UnitTest/UnitTest/Parser.Calculator/
 UNITTEST_CALCULATOR_cpp = $(wildcard $(UNITTEST_CALCULATOR_DIR)*.cpp)
 UNITTEST_CALCULATOR_h = $(wildcard $(UNITTEST_CALCULATOR_DIR)*.h)
@@ -53,8 +54,9 @@ VLPP_REGEX_o = $(patsubst $(VLPP_REGEX_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_REGEX
 VLPP_STREAM_o = $(patsubst $(VLPP_STREAM_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_STREAM_cpp))
 VLPP_UNITTEST_o = $(patsubst $(VLPP_UNITTEST_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_UNITTEST_cpp))
 VLPP_XML_o = $(patsubst $(VLPP_XML_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_XML_cpp))
+UNITTEST_BOM_o = $(patsubst $(UNITTEST_BOM_DIR)%.cpp, $(obj_TARGET)%.o, $(UNITTEST_BOM_cppbom))
 
-ALL_o = $(VLPP_BASIC_o) $(VLPP_COLLECTIONS_o) $(VLPP_JSON_o) $(VLPP_PARSING_o) $(VLPP_REFLECTION_o) $(VLPP_REGEX_o) $(VLPP_STREAM_o) $(VLPP_UNITTEST_o) $(VLPP_XML_o) $(HOST_o) $(UNITTEST_o) $(UNITTEST_CALCULATOR_o)
+ALL_o = $(VLPP_BASIC_o) $(VLPP_COLLECTIONS_o) $(VLPP_JSON_o) $(VLPP_PARSING_o) $(VLPP_REFLECTION_o) $(VLPP_REGEX_o) $(VLPP_STREAM_o) $(VLPP_UNITTEST_o) $(VLPP_XML_o) $(HOST_o) $(UNITTEST_o) $(UNITTEST_CALCULATOR_o) $(UNITTEST_BOM_o)
 all : $(ALL_o)
 	g++ -std=c++11 -g -o $(bin_TARGET)UnitTest  $(ALL_o)
 
@@ -74,9 +76,10 @@ $(VLPP_REGEX_cpp) : $(VLPP_REGEX_h)
 $(VLPP_STREAM_cpp) : $(VLPP_STREAM_h)
 $(VLPP_UNITTEST_cpp) : $(VLPP_UNITTEST_h)
 $(VLPP_XML_cpp) : $(VLPP_XML_h)
-$(UNITTEST_CALCULATOR_h) : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
+$(UNITTEST_CALCULATOR_h) : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_UNITTEST_h) $(VLPP_XML_h)
 : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
 $(UNITTEST_cpp) : $(UNITTEST_CALCULATOR_h)
+$(UNITTEST_BOM_cppbom) : $(UNITTEST_CALCULATOR_h)
 
 $(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp
 	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
@@ -102,6 +105,8 @@ $(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp
 	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
 $(UNITTEST_CALCULATOR_o) : $(obj_TARGET)%.o : $(UNITTEST_CALCULATOR_DIR)%.cpp
 	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(UNITTEST_BOM_o) : $(obj_TARGET)%.o : $(UNITTEST_BOM_DIR)%.cpp
+	g++ -std=c++11 -g -o $@ -c $<
 
 clean:
 	rm $(bin_TARGET)* -rf
