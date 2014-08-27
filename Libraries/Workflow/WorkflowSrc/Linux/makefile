@@ -1,99 +1,121 @@
-CPP = g++ -std=c++11 -finput-charset=gbk
-CPPBOM = g++ -std=c++11
+# This file is generated from "./makefile.debug.makegen" by Vczh Makefile Generator
 
-OBJ = ./obj/
-BIN = ./exe/
-VLPP = ../../../../Common/Source/
-WORKFLOW = ../../Source/
-UNITTEST = ../WorkflowSrc/
+.PHONY : all clean
 
-VLPP_STREAM_OBJS = $(OBJ)Accessor.o $(OBJ)BroadcastStream.o $(OBJ)CacheStream.o $(OBJ)CharFormat.o $(OBJ)FileStream.o $(OBJ)MemoryStream.o $(OBJ)MemoryWrapperStream.o $(OBJ)RecorderStream.o $(OBJ)CompressionStream.o
+bin_TARGET = ././Bin/
+obj_TARGET = ././Obj/
 
-VLPP_REGEX_OBJS = $(OBJ)Regex.o $(OBJ)RegexAutomaton.o $(OBJ)RegexData.o $(OBJ)RegexExpression.o $(OBJ)RegexParser.o $(OBJ)RegexPure.o $(OBJ)RegexRich.o $(OBJ)RegexWriter.o
+UNITTEST_DIR = ./../WorkflowSrc/
+UNITTEST_cpp = $(wildcard $(UNITTEST_DIR)*.cpp)
+VLPP_BASIC_DIR = ./../../Source/../../../Common/Source/./
+VLPP_BASIC_cpp = $(wildcard $(VLPP_BASIC_DIR)*.cpp)
+VLPP_BASIC_h = $(wildcard $(VLPP_BASIC_DIR)*.h)
+VLPP_COLLECTIONS_DIR = ./../../Source/../../../Common/Source/./Collections/
+VLPP_COLLECTIONS_cpp = $(wildcard $(VLPP_COLLECTIONS_DIR)*.cpp)
+VLPP_COLLECTIONS_h = $(wildcard $(VLPP_COLLECTIONS_DIR)*.h)
+VLPP_JSON_DIR = ./../../Source/../../../Common/Source/./Parsing/Json/
+VLPP_JSON_cpp = $(wildcard $(VLPP_JSON_DIR)*.cpp)
+VLPP_JSON_h = $(wildcard $(VLPP_JSON_DIR)*.h)
+VLPP_PARSING_DIR = ./../../Source/../../../Common/Source/./Parsing/
+VLPP_PARSING_cpp = $(wildcard $(VLPP_PARSING_DIR)*.cpp)
+VLPP_PARSING_h = $(wildcard $(VLPP_PARSING_DIR)*.h)
+VLPP_REFLECTION_DIR = ./../../Source/../../../Common/Source/./Reflection/
+VLPP_REFLECTION_cpp = $(wildcard $(VLPP_REFLECTION_DIR)*.cpp)
+VLPP_REFLECTION_h = $(wildcard $(VLPP_REFLECTION_DIR)*.h)
+VLPP_REGEX_DIR = ./../../Source/../../../Common/Source/./Regex/
+VLPP_REGEX_cpp = $(wildcard $(VLPP_REGEX_DIR)*.cpp)
+VLPP_REGEX_h = $(wildcard $(VLPP_REGEX_DIR)*.h)
+VLPP_STREAM_DIR = ./../../Source/../../../Common/Source/./Stream/
+VLPP_STREAM_cpp = $(wildcard $(VLPP_STREAM_DIR)*.cpp)
+VLPP_STREAM_h = $(wildcard $(VLPP_STREAM_DIR)*.h)
+VLPP_UNITTEST_DIR = ./../../Source/../../../Common/Source/./UnitTest/
+VLPP_UNITTEST_cpp = $(wildcard $(VLPP_UNITTEST_DIR)*.cpp)
+VLPP_UNITTEST_h = $(wildcard $(VLPP_UNITTEST_DIR)*.h)
+VLPP_XML_DIR = ./../../Source/../../../Common/Source/./Parsing/Xml/
+VLPP_XML_cpp = $(wildcard $(VLPP_XML_DIR)*.cpp)
+VLPP_XML_h = $(wildcard $(VLPP_XML_DIR)*.h)
+WORKFLOW_ANALYZER_DIR = ./../../Source/./Analyzer/
+WORKFLOW_ANALYZER_cpp = $(wildcard $(WORKFLOW_ANALYZER_DIR)*.cpp)
+WORKFLOW_ANALYZER_h = $(wildcard $(WORKFLOW_ANALYZER_DIR)*.h)
+WORKFLOW_BASIC_DIR = ./../../Source/./
+WORKFLOW_BASIC_h = $(wildcard $(WORKFLOW_BASIC_DIR)*.h)
+WORKFLOW_EXPRESSION_DIR = ./../../Source/./Expression/
+WORKFLOW_EXPRESSION_cpp = $(wildcard $(WORKFLOW_EXPRESSION_DIR)*.cpp)
+WORKFLOW_EXPRESSION_h = $(wildcard $(WORKFLOW_EXPRESSION_DIR)*.h)
+WORKFLOW_RUNTIME_DIR = ./../../Source/./Runtime/
+WORKFLOW_RUNTIME_cpp = $(wildcard $(WORKFLOW_RUNTIME_DIR)*.cpp)
+WORKFLOW_RUNTIME_h = $(wildcard $(WORKFLOW_RUNTIME_DIR)*.h)
 
-VLPP_REFLECTION_OBJS = $(OBJ)GuiTypeDescriptor.o $(OBJ)GuiTypeDescriptorBuilder.o $(OBJ)GuiTypeDescriptorPredefined.o
+UNITTEST_o = $(patsubst $(UNITTEST_DIR)%.cpp, $(obj_TARGET)%.o, $(UNITTEST_cpp))
+VLPP_BASIC_o = $(patsubst $(VLPP_BASIC_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_BASIC_cpp))
+VLPP_COLLECTIONS_o = $(patsubst $(VLPP_COLLECTIONS_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_COLLECTIONS_cpp))
+VLPP_JSON_o = $(patsubst $(VLPP_JSON_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_JSON_cpp))
+VLPP_PARSING_o = $(patsubst $(VLPP_PARSING_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_PARSING_cpp))
+VLPP_REFLECTION_o = $(patsubst $(VLPP_REFLECTION_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_REFLECTION_cpp))
+VLPP_REGEX_o = $(patsubst $(VLPP_REGEX_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_REGEX_cpp))
+VLPP_STREAM_o = $(patsubst $(VLPP_STREAM_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_STREAM_cpp))
+VLPP_UNITTEST_o = $(patsubst $(VLPP_UNITTEST_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_UNITTEST_cpp))
+VLPP_XML_o = $(patsubst $(VLPP_XML_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_XML_cpp))
+WORKFLOW_ANALYZER_o = $(patsubst $(WORKFLOW_ANALYZER_DIR)%.cpp, $(obj_TARGET)%.o, $(WORKFLOW_ANALYZER_cpp))
+WORKFLOW_EXPRESSION_o = $(patsubst $(WORKFLOW_EXPRESSION_DIR)%.cpp, $(obj_TARGET)%.o, $(WORKFLOW_EXPRESSION_cpp))
+WORKFLOW_RUNTIME_o = $(patsubst $(WORKFLOW_RUNTIME_DIR)%.cpp, $(obj_TARGET)%.o, $(WORKFLOW_RUNTIME_cpp))
 
-VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomaton.o $(OBJ)ParsingAutomaton_Closure.o $(OBJ)ParsingAutomaton_EPDA.o $(OBJ)ParsingAutomaton_GenerateTable.o $(OBJ)ParsingAutomaton_JPDA.o $(OBJ)ParsingAutomaton_MergeStates.o $(OBJ)ParsingAutomaton_NPDA.o $(OBJ)ParsingDefinitions.o $(OBJ)ParsingDefinitions_CreateParserDefinition.o $(OBJ)ParsingLogging.o $(OBJ)ParsingState.o $(OBJ)ParsingTable.o $(OBJ)ParsingTree.o $(OBJ)ParsingJson.o $(OBJ)ParsingJson_Parser.o $(OBJ)ParsingXml.o $(OBJ)ParsingXml_Parser.o
+ALL_o = $(VLPP_BASIC_o) $(VLPP_COLLECTIONS_o) $(VLPP_JSON_o) $(VLPP_PARSING_o) $(VLPP_REFLECTION_o) $(VLPP_REGEX_o) $(VLPP_STREAM_o) $(VLPP_UNITTEST_o) $(VLPP_XML_o) $(WORKFLOW_ANALYZER_o) $(WORKFLOW_EXPRESSION_o) $(WORKFLOW_RUNTIME_o) $(UNITTEST_o)
+all : $(ALL_o)
+	g++ -std=c++11 -g -o $(bin_TARGET)UnitTest $(ALL_o)
 
-VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
+$(VLPP_COLLECTIONS_h) : $(VLPP_BASIC_h)
+$(VLPP_STREAM_h) : $(VLPP_COLLECTIONS_h)
+$(VLPP_PARSING_h) : $(VLPP_STREAM_h)
+$(VLPP_REFLECTION_h) : $(VLPP_STREAM_h)
+$(VLPP_XML_h) : $(VLPP_PARSING_h)
+$(VLPP_UNITTEST_h) : $(VLPP_BASIC_h)
+$(VLPP_JSON_h) : $(VLPP_PARSING_h)
+$(VLPP_BASIC_cpp) : $(VLPP_BASIC_h)
+$(VLPP_COLLECTIONS_cpp) : $(VLPP_COLLECTIONS_h)
+$(VLPP_JSON_cpp) : $(VLPP_JSON_h)
+$(VLPP_PARSING_cpp) : $(VLPP_PARSING_h)
+$(VLPP_REFLECTION_cpp) : $(VLPP_REFLECTION_h)
+$(VLPP_REGEX_cpp) : $(VLPP_REGEX_h)
+$(VLPP_STREAM_cpp) : $(VLPP_STREAM_h)
+$(VLPP_UNITTEST_cpp) : $(VLPP_UNITTEST_h)
+$(VLPP_XML_cpp) : $(VLPP_XML_h)
+$(WORKFLOW_BASIC_h) : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
+$(WORKFLOW_EXPRESSION_h) : $(WORKFLOW_BASIC_h)
+$(WORKFLOW_RUNTIME_h) : $(WORKFLOW_BASIC_h)
+$(WORKFLOW_ANALYZER_h) : $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
+$(WORKFLOW_ANALYZER_cpp) : $(WORKFLOW_ANALYZER_h)
+$(WORKFLOW_EXPRESSION_cpp) : $(WORKFLOW_EXPRESSION_h)
+$(WORKFLOW_RUNTIME_cpp) : $(WORKFLOW_RUNTIME_h)
+$(UNITTEST_cpp) : $(WORKFLOW_ANALYZER_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
 
-WORKFLOW_OBJS = $(OBJ)WfExpression.o $(OBJ)WfExpressionParser.o $(OBJ)WfRuntime.o $(OBJ)WfRuntime_Execution.o $(OBJ)WfAnalyzer.o $(OBJ)WfAnalyzer_BuildScope.o $(OBJ)WfAnalyzer_Errors.o $(OBJ)WfAnalyzer_GenerateAssembly.o $(OBJ)WfAnalyzer_GenerateDeclaration.o $(OBJ)WfAnalyzer_GenerateStatement.o $(OBJ)WfAnalyzer_GenerateExpression.o $(OBJ)WfAnalyzer_Misc.o $(OBJ)WfAnalyzer_SearchOrderedName.o $(OBJ)WfAnalyzer_TypeInfo.o $(OBJ)WfAnalyzer_ValidateSemantic.o $(OBJ)WfAnalyzer_ValidateStructure.o $(OBJ)WfAnalyzer_GenerateBind.o
-
-UNITTEST_OBJS = $(OBJ)TestSamples.o $(OBJ)TestAnalyzer.o $(OBJ)TestCodegen.o $(OBJ)Main.o
-
-all:
-	echo =====================================
-	echo =====================================
-	echo =====================================
-	echo =====================================
-	$(CPP)		-o $(OBJ)Basic.o			-c $(VLPP)Basic.cpp
-	$(CPP)		-o $(OBJ)String.o			-c $(VLPP)String.cpp
-	$(CPP)		-o $(OBJ)Console.o			-c $(VLPP)Console.cpp
-	$(CPP)		-o $(OBJ)GlobalStorage.o		-c $(VLPP)GlobalStorage.cpp
-	$(CPP)		-o $(OBJ)Exception.o			-c $(VLPP)Exception.cpp
-	$(CPP)		-o $(OBJ)Locale.o			-c $(VLPP)Locale.cpp
-	$(CPP)		-o $(OBJ)UnitTest.o			-c $(VLPP)UnitTest/UnitTest.cpp
-	$(CPP)		-o $(OBJ)Accessor.o			-c $(VLPP)Stream/Accessor.cpp
-	$(CPP)		-o $(OBJ)BroadcastStream.o		-c $(VLPP)Stream/BroadcastStream.cpp
-	$(CPP)		-o $(OBJ)CacheStream.o			-c $(VLPP)Stream/CacheStream.cpp
-	$(CPP)		-o $(OBJ)CharFormat.o			-c $(VLPP)Stream/CharFormat.cpp
-	$(CPP)		-o $(OBJ)FileStream.o			-c $(VLPP)Stream/FileStream.cpp
-	$(CPP)		-o $(OBJ)MemoryStream.o			-c $(VLPP)Stream/MemoryStream.cpp
-	$(CPP)		-o $(OBJ)MemoryWrapperStream.o		-c $(VLPP)Stream/MemoryWrapperStream.cpp
-	$(CPP)		-o $(OBJ)RecorderStream.o		-c $(VLPP)Stream/RecorderStream.cpp
-	$(CPP)		-o $(OBJ)CompressionStream.o		-c $(VLPP)Stream/CompressionStream.cpp
-	$(CPP)		-o $(OBJ)Regex.o			-c $(VLPP)Regex/Regex.cpp
-	$(CPP)		-o $(OBJ)RegexAutomaton.o		-c $(VLPP)Regex/RegexAutomaton.cpp
-	$(CPP)		-o $(OBJ)RegexData.o			-c $(VLPP)Regex/RegexData.cpp
-	$(CPP)		-o $(OBJ)RegexExpression.o		-c $(VLPP)Regex/RegexExpression.cpp
-	$(CPP)		-o $(OBJ)RegexParser.o			-c $(VLPP)Regex/RegexParser.cpp
-	$(CPP)		-o $(OBJ)RegexPure.o			-c $(VLPP)Regex/RegexPure.cpp
-	$(CPP)		-o $(OBJ)RegexRich.o			-c $(VLPP)Regex/RegexRich.cpp
-	$(CPP)		-o $(OBJ)RegexWriter.o			-c $(VLPP)Regex/RegexWriter.cpp
-	$(CPP)		-o $(OBJ)GuiTypeDescriptor.o		-c $(VLPP)Reflection/GuiTypeDescriptor.cpp
-	$(CPP)		-o $(OBJ)GuiTypeDescriptorBuilder.o	-c $(VLPP)Reflection/GuiTypeDescriptorBuilder.cpp
-	$(CPP)		-o $(OBJ)GuiTypeDescriptorPredefined.o	-c $(VLPP)Reflection/GuiTypeDescriptorPredefined.cpp
-	$(CPP)		-o $(OBJ)Parsing.o			-c $(VLPP)Parsing/Parsing.cpp
-	$(CPP)		-o $(OBJ)ParsingAnalyzer.o		-c $(VLPP)Parsing/ParsingAnalyzer.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton.o		-c $(VLPP)Parsing/ParsingAutomaton.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_Closure.o		-c $(VLPP)Parsing/ParsingAutomaton_Closure.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_EPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_EPDA.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_GenerateTable.o	-c $(VLPP)Parsing/ParsingAutomaton_GenerateTable.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_JPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_JPDA.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_MergeStates.o		-c $(VLPP)Parsing/ParsingAutomaton_MergeStates.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_NPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_NPDA.cpp
-	$(CPP)		-o $(OBJ)ParsingDefinitions.o		-c $(VLPP)Parsing/ParsingDefinitions.cpp
-	$(CPP)		-o $(OBJ)ParsingDefinitions_CreateParserDefinition.o		-c $(VLPP)Parsing/ParsingDefinitions_CreateParserDefinition.cpp
-	$(CPP)		-o $(OBJ)ParsingLogging.o		-c $(VLPP)Parsing/ParsingLogging.cpp
-	$(CPP)		-o $(OBJ)ParsingState.o			-c $(VLPP)Parsing/ParsingState.cpp
-	$(CPP)		-o $(OBJ)ParsingTable.o			-c $(VLPP)Parsing/ParsingTable.cpp
-	$(CPP)		-o $(OBJ)ParsingTree.o			-c $(VLPP)Parsing/ParsingTree.cpp
-	$(CPP)		-o $(OBJ)ParsingJson.o			-c $(VLPP)Parsing/Json/ParsingJson.cpp
-	$(CPP)		-o $(OBJ)ParsingJson_Parser.o		-c $(VLPP)Parsing/Json/ParsingJson_Parser.cpp
-	$(CPP)		-o $(OBJ)ParsingXml.o			-c $(VLPP)Parsing/Xml/ParsingXml.cpp
-	$(CPP)		-o $(OBJ)ParsingXml_Parser.o		-c $(VLPP)Parsing/Xml/ParsingXml_Parser.cpp
-	$(CPP)		-o $(OBJ)WfExpression.o			-c $(WORKFLOW)Expression/WfExpression.cpp
-	$(CPP)		-o $(OBJ)WfExpressionParser.o		-c $(WORKFLOW)Expression/WfExpressionParser.cpp
-	$(CPP)		-o $(OBJ)WfRuntime.o			-c $(WORKFLOW)Runtime/WfRuntime.cpp
-	$(CPP)		-o $(OBJ)WfRuntime_Execution.o		-c $(WORKFLOW)Runtime/WfRuntime_Execution.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer.o			-c $(WORKFLOW)Analyzer/WfAnalyzer.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_BuildScope.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_BuildScope.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_Errors.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_Errors.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateAssembly.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateAssembly.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateDeclaration.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateDeclaration.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateStatement.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateStatement.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateExpression.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateExpression.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_Misc.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_Misc.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_SearchOrderedName.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_SearchOrderedName.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_TypeInfo.o		-c $(WORKFLOW)Analyzer/WfAnalyzer_TypeInfo.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_ValidateSemantic.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_ValidateSemantic.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_ValidateStructure.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_ValidateStructure.cpp
-	$(CPP)		-o $(OBJ)WfAnalyzer_GenerateBind.o	-c $(WORKFLOW)Analyzer/WfAnalyzer_GenerateBind.cpp
-	$(CPP)		-o $(OBJ)Main.o				-c $(UNITTEST)Main.cpp
-	$(CPP)		-o $(OBJ)TestSamples.o			-c $(UNITTEST)TestSamples.cpp
-	$(CPP)		-o $(OBJ)TestAnalyzer.o			-c $(UNITTEST)TestAnalyzer.cpp
-	$(CPP)		-o $(OBJ)TestCodegen.o			-c $(UNITTEST)TestCodegen.cpp
-	$(CPP)		-o $(BIN)UnitTest $(VLPP_OBJS) $(WORKFLOW_OBJS) $(UNITTEST_OBJS)
+$(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_COLLECTIONS_o) : $(obj_TARGET)%.o : $(VLPP_COLLECTIONS_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_JSON_o) : $(obj_TARGET)%.o : $(VLPP_JSON_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_PARSING_o) : $(obj_TARGET)%.o : $(VLPP_PARSING_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_REFLECTION_o) : $(obj_TARGET)%.o : $(VLPP_REFLECTION_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_REGEX_o) : $(obj_TARGET)%.o : $(VLPP_REGEX_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_STREAM_o) : $(obj_TARGET)%.o : $(VLPP_STREAM_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_UNITTEST_o) : $(obj_TARGET)%.o : $(VLPP_UNITTEST_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(VLPP_XML_o) : $(obj_TARGET)%.o : $(VLPP_XML_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(WORKFLOW_ANALYZER_o) : $(obj_TARGET)%.o : $(WORKFLOW_ANALYZER_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(WORKFLOW_EXPRESSION_o) : $(obj_TARGET)%.o : $(WORKFLOW_EXPRESSION_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(WORKFLOW_RUNTIME_o) : $(obj_TARGET)%.o : $(WORKFLOW_RUNTIME_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
+$(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp
+	g++ -std=c++11 -finput-charset=gbk -g -o $@ -c $<
 
 clean:
-	rm $(BIN)* $(OBJ)*
+	rm $(bin_TARGET)* -rf
+	rm $(obj_TARGET)* -rf
