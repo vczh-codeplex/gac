@@ -11,7 +11,7 @@ Regex regexIncludeBody(LR"r(^\t(<path>/.*)$)r");
 Regex regexTargets(LR"r(^targets$)r");
 Regex regexTargetsBody(LR"r(^\t(<name>/w+)/s*=/s*(<path>/.*)$)r");
 Regex regexFolder(LR"r(^folder/s+(<name>/w+)/s*=/s*(<path>/.*)$)r");
-Regex regexFolderBody(LR"r(^\t(<category>/w+)/s*=/s*(<pattern>/.*)$)r");
+Regex regexFolderBody(LR"r(^\t(<category>/w+)/s*=(/s*(<pattern>[^ ]+))+$)r");
 Regex regexGroup(LR"r(^group/s+(<name>/w+)/s*=(/s*(<folder>[^ ]+))+$)r");
 Regex regexDependency(LR"r(^dependency$)r");
 Regex regexDependencyBody(LR"r(^\t(<folder1>/w+):(<category1>/w+)/s*/<(/s*(<folder2>/w+):(<category2>/w+))+$)r");
@@ -241,7 +241,6 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 					if(match = regexFolderBody.MatchHead(line))
 					{
 						auto category=match->Groups()[L"category"][0].Value();
-						auto pattern=match->Groups()[L"pattern"][0].Value();
 						if(folderConfig->categories.Keys().Contains(category))
 						{
 							Console::WriteLine(L"Found duplicated category \""+category+L"\" in folder \""+name+L"\" in file \""+GetFileName(fileName)+L"\".");
@@ -249,7 +248,10 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 						}
 						else
 						{
-							folderConfig->categories.Add(category, pattern);
+							FOREACH(RegexString, pattern, match->Groups()[L"pattern"])
+							{
+								folderConfig->categories.Add(category, pattern.Value());
+							}
 						}
 						if(!config->mappingOrder.Contains(category))
 						{
