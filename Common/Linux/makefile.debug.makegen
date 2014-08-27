@@ -7,6 +7,8 @@ folder UNITTEST_CALCULATOR = ../UnitTest/UnitTest/Parser.Calculator
 
 folder UNITTEST = ../UnitTest/UnitTest
 	cpp = TestBasic.cpp TestString.cpp TestList.cpp TestFunction.cpp TestGlobalStorage.cpp TestRegex.cpp TestReflection.cpp TestParsing.cpp
+
+folder UNITTEST_BOM = ../UnitTest/UnitTest
 	cppbom = TestStream.cpp
 
 folder HOST = .
@@ -15,7 +17,7 @@ folder HOST = .
 dependency
 	UNITTEST_CALCULATOR:h < VLPP:h VLPP_UNITTEST:h
 	UNITTEST:cpp < UNITTEST_CALCULATOR:h
-	UNITTEST:cppbom < UNITTEST_CALCULATOR:h
+	UNITTEST_BOM:cppbom < UNITTEST_CALCULATOR:h
 	MAIN:cpp < VLPP:h
 
 targets
