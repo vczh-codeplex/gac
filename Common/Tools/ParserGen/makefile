@@ -2,13 +2,13 @@
 
 .PHONY : all clean
 
-bin_TARGET = ./Bin/
-obj_TARGET = ./Obj/
+bin_TARGET = makefile.sources.makegen./Bin/
+obj_TARGET = makefile.sources.makegen./Obj/
 
-PARSERGEN_DIR = ./ParserGen/
+PARSERGEN_DIR = ././ParserGen/
 PARSERGEN_cpp = $(wildcard $(PARSERGEN_DIR)ParserGen*.cpp) $(PARSERGEN_DIR)Main.cpp
 PARSERGEN_h = $(PARSERGEN_DIR)ParserGen.h
-VLPP_DIR = ../../../Libraries/GacUI/Public/Source/
+VLPP_DIR = ./../../../Libraries/GacUI/Public/Source/
 VLPP_cpp = $(VLPP_DIR)Vlpp.cpp
 VLPP_h = $(VLPP_DIR)Vlpp.h
 
