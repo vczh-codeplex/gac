@@ -2,8 +2,8 @@
 
 .PHONY : all clean
 
-bin_TARGET = makefile.sources.makegen./Bin/
-obj_TARGET = makefile.sources.makegen./Obj/
+bin_TARGET = ././Bin/
+obj_TARGET = ././Obj/
 
 PARSERGEN_DIR = ././ParserGen/
 PARSERGEN_cpp = $(wildcard $(PARSERGEN_DIR)ParserGen*.cpp) $(PARSERGEN_DIR)Main.cpp
