@@ -1,88 +1,108 @@
-CPP = g++ -std=c++11 -finput-charset=gbk -g
-CPPBOM = g++ -std=c++11 -g
+# This file is generated from "./makefile.debug.makegen" by Vczh Makefile Generator
 
-OBJ = ./obj/
-BIN = ./exe/
-VLPP = ../Source/
-UNITTEST = ../UnitTest/UnitTest/
+.PHONY : all clean
 
-VLPP_STREAM_OBJS = $(OBJ)Accessor.o $(OBJ)BroadcastStream.o $(OBJ)CacheStream.o $(OBJ)CharFormat.o $(OBJ)FileStream.o $(OBJ)MemoryStream.o $(OBJ)MemoryWrapperStream.o $(OBJ)RecorderStream.o $(OBJ)CompressionStream.o
+bin_TARGET = ././Bin/
+obj_TARGET = ././Obj/
 
-VLPP_REGEX_OBJS = $(OBJ)Regex.o $(OBJ)RegexAutomaton.o $(OBJ)RegexData.o $(OBJ)RegexExpression.o $(OBJ)RegexParser.o $(OBJ)RegexPure.o $(OBJ)RegexRich.o $(OBJ)RegexWriter.o
+HOST_DIR = ././
+HOST_cpp = $(HOST_DIR)Main.cpp
+UNITTEST_DIR = ./../UnitTest/UnitTest/
+UNITTEST_cpp = $(UNITTEST_DIR)TestBasic.cpp $(UNITTEST_DIR)TestString.cpp $(UNITTEST_DIR)TestList.cpp $(UNITTEST_DIR)TestFunction.cpp $(UNITTEST_DIR)TestGlobalStorage.cpp $(UNITTEST_DIR)TestRegex.cpp $(UNITTEST_DIR)TestReflection.cpp $(UNITTEST_DIR)TestParsing.cpp
+UNITTEST_cppbom = $(UNITTEST_DIR)TestStream.cpp
+UNITTEST_CALCULATOR_DIR = ./../UnitTest/UnitTest/Parser.Calculator/
+UNITTEST_CALCULATOR_cpp = $(wildcard $(UNITTEST_CALCULATOR_DIR)*.cpp)
+UNITTEST_CALCULATOR_h = $(wildcard $(UNITTEST_CALCULATOR_DIR)*.h)
+VLPP_BASIC_DIR = ./../Source/./
+VLPP_BASIC_cpp = $(wildcard $(VLPP_BASIC_DIR)*.cpp)
+VLPP_BASIC_h = $(wildcard $(VLPP_BASIC_DIR)*.h)
+VLPP_COLLECTIONS_DIR = ./../Source/./Collections/
+VLPP_COLLECTIONS_cpp = $(wildcard $(VLPP_COLLECTIONS_DIR)*.cpp)
+VLPP_COLLECTIONS_h = $(wildcard $(VLPP_COLLECTIONS_DIR)*.h)
+VLPP_JSON_DIR = ./../Source/./Parsing/Json/
+VLPP_JSON_cpp = $(wildcard $(VLPP_JSON_DIR)*.cpp)
+VLPP_JSON_h = $(wildcard $(VLPP_JSON_DIR)*.h)
+VLPP_PARSING_DIR = ./../Source/./Parsing/
+VLPP_PARSING_cpp = $(wildcard $(VLPP_PARSING_DIR)*.cpp)
+VLPP_PARSING_h = $(wildcard $(VLPP_PARSING_DIR)*.h)
+VLPP_REFLECTION_DIR = ./../Source/./Reflection/
+VLPP_REFLECTION_cpp = $(wildcard $(VLPP_REFLECTION_DIR)*.cpp)
+VLPP_REFLECTION_h = $(wildcard $(VLPP_REFLECTION_DIR)*.h)
+VLPP_REGEX_DIR = ./../Source/./Regex/
+VLPP_REGEX_cpp = $(wildcard $(VLPP_REGEX_DIR)*.cpp)
+VLPP_REGEX_h = $(wildcard $(VLPP_REGEX_DIR)*.h)
+VLPP_STREAM_DIR = ./../Source/./Stream/
+VLPP_STREAM_cpp = $(wildcard $(VLPP_STREAM_DIR)*.cpp)
+VLPP_STREAM_h = $(wildcard $(VLPP_STREAM_DIR)*.h)
+VLPP_UNITTEST_DIR = ./../Source/./UnitTest/
+VLPP_UNITTEST_cpp = $(wildcard $(VLPP_UNITTEST_DIR)*.cpp)
+VLPP_UNITTEST_h = $(wildcard $(VLPP_UNITTEST_DIR)*.h)
+VLPP_XML_DIR = ./../Source/./Parsing/Xml/
+VLPP_XML_cpp = $(wildcard $(VLPP_XML_DIR)*.cpp)
+VLPP_XML_h = $(wildcard $(VLPP_XML_DIR)*.h)
 
-VLPP_REFLECTION_OBJS = $(OBJ)GuiTypeDescriptor.o $(OBJ)GuiTypeDescriptorBuilder.o $(OBJ)GuiTypeDescriptorPredefined.o
+HOST_o = $(patsubst $(HOST_DIR)%.cpp, $(obj_TARGET)%.o, $(HOST_cpp))
+UNITTEST_o = $(patsubst $(UNITTEST_DIR)%.cpp, $(obj_TARGET)%.o, $(UNITTEST_cpp))
+UNITTEST_CALCULATOR_o = $(patsubst $(UNITTEST_CALCULATOR_DIR)%.cpp, $(obj_TARGET)%.o, $(UNITTEST_CALCULATOR_cpp))
+VLPP_BASIC_o = $(patsubst $(VLPP_BASIC_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_BASIC_cpp))
+VLPP_COLLECTIONS_o = $(patsubst $(VLPP_COLLECTIONS_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_COLLECTIONS_cpp))
+VLPP_JSON_o = $(patsubst $(VLPP_JSON_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_JSON_cpp))
+VLPP_PARSING_o = $(patsubst $(VLPP_PARSING_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_PARSING_cpp))
+VLPP_REFLECTION_o = $(patsubst $(VLPP_REFLECTION_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_REFLECTION_cpp))
+VLPP_REGEX_o = $(patsubst $(VLPP_REGEX_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_REGEX_cpp))
+VLPP_STREAM_o = $(patsubst $(VLPP_STREAM_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_STREAM_cpp))
+VLPP_UNITTEST_o = $(patsubst $(VLPP_UNITTEST_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_UNITTEST_cpp))
+VLPP_XML_o = $(patsubst $(VLPP_XML_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_XML_cpp))
 
-VLPP_PARSING_OBJS = $(OBJ)Parsing.o $(OBJ)ParsingAnalyzer.o $(OBJ)ParsingAutomaton.o $(OBJ)ParsingAutomaton_Closure.o $(OBJ)ParsingAutomaton_EPDA.o $(OBJ)ParsingAutomaton_GenerateTable.o $(OBJ)ParsingAutomaton_JPDA.o $(OBJ)ParsingAutomaton_MergeStates.o $(OBJ)ParsingAutomaton_NPDA.o $(OBJ)ParsingDefinitions.o $(OBJ)ParsingDefinitions_CreateParserDefinition.o $(OBJ)ParsingLogging.o $(OBJ)ParsingState.o $(OBJ)ParsingTable.o $(OBJ)ParsingTree.o $(OBJ)ParsingJson.o $(OBJ)ParsingJson_Parser.o $(OBJ)ParsingXml.o $(OBJ)ParsingXml_Parser.o
+ALL_o = $(VLPP_BASIC_o) $(VLPP_COLLECTIONS_o) $(VLPP_JSON_o) $(VLPP_PARSING_o) $(VLPP_REFLECTION_o) $(VLPP_REGEX_o) $(VLPP_STREAM_o) $(VLPP_UNITTEST_o) $(VLPP_XML_o) $(HOST_o) $(UNITTEST_o) $(UNITTEST_CALCULATOR_o)
+all : $(ALL_o)
+	g++ -std=c++11 -g -o $(bin_TARGET)UnitTest  $(ALL_o)
 
-VLPP_OBJS = $(OBJ)Basic.o $(OBJ)String.o $(OBJ)Console.o $(OBJ)GlobalStorage.o $(OBJ)Exception.o $(OBJ)Locale.o $(OBJ)HttpUtility.o $(OBJ)Threading.o $(OBJ)UnitTest.o $(VLPP_STREAM_OBJS) $(VLPP_REGEX_OBJS) $(VLPP_REFLECTION_OBJS) $(VLPP_PARSING_OBJS)
+$(VLPP_COLLECTIONS_h) : $(VLPP_BASIC_h)
+$(VLPP_STREAM_h) : $(VLPP_COLLECTIONS_h)
+$(VLPP_PARSING_h) : $(VLPP_STREAM_h)
+$(VLPP_REFLECTION_h) : $(VLPP_STREAM_h)
+$(VLPP_XML_h) : $(VLPP_PARSING_h)
+$(VLPP_UNITTEST_h) : $(VLPP_BASIC_h)
+$(VLPP_JSON_h) : $(VLPP_PARSING_h)
+$(VLPP_BASIC_cpp) : $(VLPP_BASIC_h)
+$(VLPP_COLLECTIONS_cpp) : $(VLPP_COLLECTIONS_h)
+$(VLPP_JSON_cpp) : $(VLPP_JSON_h)
+$(VLPP_PARSING_cpp) : $(VLPP_PARSING_h)
+$(VLPP_REFLECTION_cpp) : $(VLPP_REFLECTION_h)
+$(VLPP_REGEX_cpp) : $(VLPP_REGEX_h)
+$(VLPP_STREAM_cpp) : $(VLPP_STREAM_h)
+$(VLPP_UNITTEST_cpp) : $(VLPP_UNITTEST_h)
+$(VLPP_XML_cpp) : $(VLPP_XML_h)
+$(UNITTEST_CALCULATOR_h) : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
+: $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
+$(UNITTEST_cpp) : $(UNITTEST_CALCULATOR_h)
 
-UNITTEST_OBJS = $(OBJ)TestBasic.o $(OBJ)TestString.o $(OBJ)TestList.o $(OBJ)TestFunction.o $(OBJ)TestGlobalStorage.o $(OBJ)TestStream.o $(OBJ)TestRegex.o $(OBJ)TestReflection.o $(OBJ)TestParsing.o $(OBJ)Parser.Calculator.o
-
-all:
-	echo =====================================
-	echo =====================================
-	echo =====================================
-	echo =====================================
-	$(CPP)		-o $(OBJ)Basic.o			-c $(VLPP)Basic.cpp
-	$(CPP)		-o $(OBJ)String.o			-c $(VLPP)String.cpp
-	$(CPP)		-o $(OBJ)Console.o			-c $(VLPP)Console.cpp
-	$(CPP)		-o $(OBJ)GlobalStorage.o		-c $(VLPP)GlobalStorage.cpp
-	$(CPP)		-o $(OBJ)Exception.o			-c $(VLPP)Exception.cpp
-	$(CPP)		-o $(OBJ)Locale.o			-c $(VLPP)Locale.cpp
-	$(CPP)		-o $(OBJ)HttpUtility.o			-c $(VLPP)HttpUtility.cpp
-	$(CPP)		-o $(OBJ)Threading.o			-c $(VLPP)Threading.cpp
-	$(CPP)		-o $(OBJ)UnitTest.o			-c $(VLPP)UnitTest/UnitTest.cpp
-	$(CPP)		-o $(OBJ)Accessor.o			-c $(VLPP)Stream/Accessor.cpp
-	$(CPP)		-o $(OBJ)BroadcastStream.o		-c $(VLPP)Stream/BroadcastStream.cpp
-	$(CPP)		-o $(OBJ)CacheStream.o			-c $(VLPP)Stream/CacheStream.cpp
-	$(CPP)		-o $(OBJ)CharFormat.o			-c $(VLPP)Stream/CharFormat.cpp
-	$(CPP)		-o $(OBJ)FileStream.o			-c $(VLPP)Stream/FileStream.cpp
-	$(CPP)		-o $(OBJ)MemoryStream.o			-c $(VLPP)Stream/MemoryStream.cpp
-	$(CPP)		-o $(OBJ)MemoryWrapperStream.o		-c $(VLPP)Stream/MemoryWrapperStream.cpp
-	$(CPP)		-o $(OBJ)RecorderStream.o		-c $(VLPP)Stream/RecorderStream.cpp
-	$(CPP)		-o $(OBJ)CompressionStream.o		-c $(VLPP)Stream/CompressionStream.cpp
-	$(CPP)		-o $(OBJ)Regex.o			-c $(VLPP)Regex/Regex.cpp
-	$(CPP)		-o $(OBJ)RegexAutomaton.o		-c $(VLPP)Regex/RegexAutomaton.cpp
-	$(CPP)		-o $(OBJ)RegexData.o			-c $(VLPP)Regex/RegexData.cpp
-	$(CPP)		-o $(OBJ)RegexExpression.o		-c $(VLPP)Regex/RegexExpression.cpp
-	$(CPP)		-o $(OBJ)RegexParser.o			-c $(VLPP)Regex/RegexParser.cpp
-	$(CPP)		-o $(OBJ)RegexPure.o			-c $(VLPP)Regex/RegexPure.cpp
-	$(CPP)		-o $(OBJ)RegexRich.o			-c $(VLPP)Regex/RegexRich.cpp
-	$(CPP)		-o $(OBJ)RegexWriter.o			-c $(VLPP)Regex/RegexWriter.cpp
-	$(CPP)		-o $(OBJ)GuiTypeDescriptor.o		-c $(VLPP)Reflection/GuiTypeDescriptor.cpp
-	$(CPP)		-o $(OBJ)GuiTypeDescriptorBuilder.o	-c $(VLPP)Reflection/GuiTypeDescriptorBuilder.cpp
-	$(CPP)		-o $(OBJ)GuiTypeDescriptorPredefined.o	-c $(VLPP)Reflection/GuiTypeDescriptorPredefined.cpp
-	$(CPP)		-o $(OBJ)Parsing.o			-c $(VLPP)Parsing/Parsing.cpp
-	$(CPP)		-o $(OBJ)ParsingAnalyzer.o		-c $(VLPP)Parsing/ParsingAnalyzer.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton.o		-c $(VLPP)Parsing/ParsingAutomaton.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_Closure.o		-c $(VLPP)Parsing/ParsingAutomaton_Closure.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_EPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_EPDA.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_GenerateTable.o	-c $(VLPP)Parsing/ParsingAutomaton_GenerateTable.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_JPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_JPDA.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_MergeStates.o		-c $(VLPP)Parsing/ParsingAutomaton_MergeStates.cpp
-	$(CPP)		-o $(OBJ)ParsingAutomaton_NPDA.o		-c $(VLPP)Parsing/ParsingAutomaton_NPDA.cpp
-	$(CPP)		-o $(OBJ)ParsingDefinitions.o		-c $(VLPP)Parsing/ParsingDefinitions.cpp
-	$(CPP)		-o $(OBJ)ParsingDefinitions_CreateParserDefinition.o		-c $(VLPP)Parsing/ParsingDefinitions_CreateParserDefinition.cpp
-	$(CPP)		-o $(OBJ)ParsingLogging.o		-c $(VLPP)Parsing/ParsingLogging.cpp
-	$(CPP)		-o $(OBJ)ParsingState.o			-c $(VLPP)Parsing/ParsingState.cpp
-	$(CPP)		-o $(OBJ)ParsingTable.o			-c $(VLPP)Parsing/ParsingTable.cpp
-	$(CPP)		-o $(OBJ)ParsingTree.o			-c $(VLPP)Parsing/ParsingTree.cpp
-	$(CPP)		-o $(OBJ)ParsingJson.o			-c $(VLPP)Parsing/Json/ParsingJson.cpp
-	$(CPP)		-o $(OBJ)ParsingJson_Parser.o		-c $(VLPP)Parsing/Json/ParsingJson_Parser.cpp
-	$(CPP)		-o $(OBJ)ParsingXml.o			-c $(VLPP)Parsing/Xml/ParsingXml.cpp
-	$(CPP)		-o $(OBJ)ParsingXml_Parser.o		-c $(VLPP)Parsing/Xml/ParsingXml_Parser.cpp
-	$(CPP)		-o $(OBJ)TestBasic.o			-c $(UNITTEST)TestBasic.cpp
-	$(CPP)		-o $(OBJ)TestString.o			-c $(UNITTEST)TestString.cpp
-	$(CPP)		-o $(OBJ)TestList.o			-c $(UNITTEST)TestList.cpp
-	$(CPP)		-o $(OBJ)TestFunction.o			-c $(UNITTEST)TestFunction.cpp
-	$(CPPBOM)	-o $(OBJ)TestGlobalStorage.o		-c $(UNITTEST)TestGlobalStorage.cpp
-	$(CPPBOM)	-o $(OBJ)TestStream.o			-c $(UNITTEST)TestStream.cpp
-	$(CPPBOM)	-o $(OBJ)TestRegex.o			-c $(UNITTEST)TestRegex.cpp
-	$(CPPBOM)	-o $(OBJ)TestReflection.o		-c $(UNITTEST)TestReflection.cpp
-	$(CPPBOM)	-o $(OBJ)TestParsing.o			-c $(UNITTEST)TestParsing.cpp
-	$(CPPBOM)	-o $(OBJ)Parser.Calculator.o		-c $(UNITTEST)Parser.Calculator/Parser.Calculator.cpp
-	$(CPP)		-o $(OBJ)Main.o				-c Main.cpp 
-	$(CPP)		-o $(BIN)UnitTest $(OBJ)Main.o $(VLPP_OBJS) $(UNITTEST_OBJS)
+$(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_COLLECTIONS_o) : $(obj_TARGET)%.o : $(VLPP_COLLECTIONS_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_JSON_o) : $(obj_TARGET)%.o : $(VLPP_JSON_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_PARSING_o) : $(obj_TARGET)%.o : $(VLPP_PARSING_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_REFLECTION_o) : $(obj_TARGET)%.o : $(VLPP_REFLECTION_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_REGEX_o) : $(obj_TARGET)%.o : $(VLPP_REGEX_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_STREAM_o) : $(obj_TARGET)%.o : $(VLPP_STREAM_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_UNITTEST_o) : $(obj_TARGET)%.o : $(VLPP_UNITTEST_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(VLPP_XML_o) : $(obj_TARGET)%.o : $(VLPP_XML_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(HOST_o) : $(obj_TARGET)%.o : $(HOST_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+$(UNITTEST_CALCULATOR_o) : $(obj_TARGET)%.o : $(UNITTEST_CALCULATOR_DIR)%.cpp
+	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
 
 clean:
-	rm $(BIN)* $(OBJ)*
+	rm $(bin_TARGET)* -rf
+	rm $(obj_TARGET)* -rf

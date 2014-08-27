@@ -197,7 +197,7 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 							{
 								path+=L'/';
 							}
-							config->targets.Add(name, path);
+							config->targets.Add(name, ConcatFolder(GetFolderName(fileName), path));
 						}
 					}
 					else
@@ -231,6 +231,7 @@ bool LoadMakeGen(Ptr<MakeGenConfig> config, const WString& fileName)
 			{
 				folderConfig->path+=L'/';
 			}
+			folderConfig->path=ConcatFolder(GetFolderName(fileName), folderConfig->path);
 			config->folders.Add(name, folderConfig);
 
 			while(!reader.IsEnd())
@@ -597,14 +598,14 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 			{
 				if(wcschr(path.Buffer(), L'*'))
 				{
-					pattern+=L"$(wildcard $("+name+L"_DIR)"+path+L") ";
+					pattern+=L" $(wildcard $("+name+L"_DIR)"+path+L")";
 				}
 				else
 				{
-					pattern+=L"$("+name+L"_DIR)"+path;
+					pattern+=L" $("+name+L"_DIR)"+path;
 				}
 			}
-			writer.WriteLine(name+L"_"+category+L" = "+pattern);
+			writer.WriteLine(name+L"_"+category+L" ="+pattern);
 		}
 	}
 	writer.WriteLine(L"");
