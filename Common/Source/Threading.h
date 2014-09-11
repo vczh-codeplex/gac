@@ -18,11 +18,9 @@ Classes:
 #include "String.h"
 #include "Function.h"
 
-#ifdef VCZH_MSVC
-
 namespace vl
 {
-
+	
 /***********************************************************************
 内核模式对象
 ***********************************************************************/
@@ -39,7 +37,8 @@ namespace vl
 		struct ReaderWriterLockData;
 		struct ConditionVariableData;
 	}
-
+	
+#ifdef VCZH_MSVC
 	class WaitableObject : public Object, public NotCopyable
 	{
 	private:
@@ -243,7 +242,7 @@ namespace vl
 		void										WakeOnePending();
 		void										WakeAllPendings();
 	};
-
+#endif
 /***********************************************************************
 用户模式对象
 ***********************************************************************/
@@ -358,7 +357,5 @@ RepeatingTaskExecutor
 		}
 	};
 }
-
-#endif
 
 #endif

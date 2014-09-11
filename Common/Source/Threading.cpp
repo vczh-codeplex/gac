@@ -1,15 +1,19 @@
 #include "Threading.h"
 #include "Collections/List.h"
 
-#ifdef VCZH_MSVC
+#if defined VCZH_MSVC
 #include <Windows.h>
 #include <intrin.h>
+#elif defined VCZH_GCC
+#include <x86intrin.h>
+#endif
 
 namespace vl
 {
 	using namespace threading_internal;
 	using namespace collections;
 
+#ifdef VCZH_MSVC
 /***********************************************************************
 WaitableObject
 ***********************************************************************/
@@ -812,7 +816,7 @@ ConditionVariable
 	{
 		WakeAllConditionVariable(&internalData->variable);
 	}
-
+#endif
 /***********************************************************************
 SpinLock
 ***********************************************************************/
@@ -855,4 +859,3 @@ SpinLock
 		_InterlockedExchange(&token, 0);
 	}
 }
-#endif
