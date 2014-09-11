@@ -277,6 +277,7 @@ namespace vl
 #define READER_LOCK(LOCK) SCOPE_VARIABLE(ReaderWriterLock::ReaderScope, scope, LOCK)
 #define WRITER_LOCK(LOCK) SCOPE_VARIABLE(ReaderWriterLock::WriterScope, scope, LOCK)
 
+#ifdef VCZH_MSVC
 /***********************************************************************
 RepeatingTaskExecutor
 ***********************************************************************/
@@ -356,6 +357,6 @@ RepeatingTaskExecutor
 			}
 		}
 	};
+#endif
 }
-
 #endif
