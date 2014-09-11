@@ -372,7 +372,6 @@ TEST_CASE(TestReaderWriterLock)
 	}
 	TEST_ASSERT(data.counter==100);
 }
-#endif
 /***********************************************************************
 SpinLock
 ***********************************************************************/
@@ -423,3 +422,4 @@ TEST_CASE(TestSpinLock)
 	TEST_ASSERT(data.lock.TryEnter());
 	TEST_ASSERT(data.counter==10);
 }
+#endif

@@ -1,11 +1,8 @@
 #include "Threading.h"
 #include "Collections/List.h"
 
-#if defined VCZH_MSVC
+#ifdef VCZH_MSVC
 #include <Windows.h>
-#include <intrin.h>
-#elif defined VCZH_GCC
-#include <x86intrin.h>
 #endif
 
 namespace vl
@@ -843,12 +840,20 @@ SpinLock
 
 	bool SpinLock::TryEnter()
 	{
+#if defined VCZH_MSVC
 		return _InterlockedExchange(&token, 1)==0;
+#elif defined VCZH_GCC
+		return __sync_lock_test_and_set(&token, 1)==0;
+#endif
 	}
 
 	void SpinLock::Enter()
 	{
+#if defined VCZH_MSVC
 		while(_InterlockedCompareExchange(&token, 1, 0)!=0)
+#elif defined VCZH_GCC
+		while(__sync_val_compare_and_swap(&token, 1, 0)!=0)
+#endif
 		{
 			while(token!=0) _mm_pause();
 		}
@@ -856,6 +861,10 @@ SpinLock
 
 	void SpinLock::Leave()
 	{
+#if defined VCZH_MSVC
 		_InterlockedExchange(&token, 0);
+#elif defined VCZH_GCC
+		__sync_lock_test_and_set(&token, 0);
+#endif
 	}
 }
