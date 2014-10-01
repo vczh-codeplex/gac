@@ -1,0 +1,11 @@
+@	滚轮
+	ALT+X
+	TAB
+	D2D设备失效
+@	二进制资源
+@	数字StringKey
+	不同DPI用不同图片
+	Windows消息扩展
+bug:richtext
+[center]<-[delete][ctrl+z]
+    [right] 
