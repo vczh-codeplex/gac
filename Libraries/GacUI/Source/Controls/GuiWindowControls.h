@@ -93,8 +93,6 @@ Control Host
 				void											SetNativeWindow(INativeWindow* window);
 				/// <summary>Force to calculate layout and size immediately</summary>
 				void											ForceCalculateSizeImmediately();
-				/// <summary>Render the window content.</summary>
-				void											Render();
 				
 				/// <summary>Test is the window enabled.</summary>
 				/// <returns>Returns true if the window is enabled.</returns>

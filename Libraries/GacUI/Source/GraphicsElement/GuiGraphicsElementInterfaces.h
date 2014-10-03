@@ -137,7 +137,8 @@ Basic Construction
 				/// <summary>
 				/// Notify the target to stop rendering.
 				/// </summary>
-				virtual void							StopRendering()=0;
+				/// <returns>Returns false to recreate render target.</returns>
+				virtual bool							StopRendering()=0;
 				/// <summary>
 				/// Apply a clipper to the render target.
 				/// The result clipper is combined by all clippers in the clipper stack maintained by the render target.

@@ -455,10 +455,11 @@ WindowsDirect2DRenderTarget
 					d2dRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 				}
 
-				void StopRendering()override
+				bool StopRendering()override
 				{
-					d2dRenderTarget->EndDraw();
+					auto result = d2dRenderTarget->EndDraw();
 					d2dRenderTarget=0;
+					return result == S_OK;
 				}
 
 				void PushClipper(Rect clipper)override
@@ -494,17 +495,14 @@ WindowsDirect2DRenderTarget
 
 				void PopClipper()override
 				{
-					if(clippers.Count()>0)
+					if(clipperCoverWholeTargetCounter>0)
 					{
-						if(clipperCoverWholeTargetCounter>0)
-						{
-							clipperCoverWholeTargetCounter--;
-						}
-						else
-						{
-							clippers.RemoveAt(clippers.Count()-1);
-							d2dRenderTarget->PopAxisAlignedClip();
-						}
+						clipperCoverWholeTargetCounter--;
+					}
+					else if(clippers.Count()>0)
+					{
+						clippers.RemoveAt(clippers.Count()-1);
+						d2dRenderTarget->PopAxisAlignedClip();
 					}
 				}
 
@@ -567,6 +565,11 @@ WindowsGDIResourceManager
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsDirect2DObjectProvider()->GetBindedRenderTarget(window);
+				}
+				
+				void RecreateRenderTarget(INativeWindow* window)override
+				{
+					GetWindowsDirect2DObjectProvider()->RecreateRenderTarget(window);
 				}
 
 				IGuiGraphicsLayoutProvider* GetLayoutProvider()override

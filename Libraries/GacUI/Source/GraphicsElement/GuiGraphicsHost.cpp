@@ -9,6 +9,7 @@ namespace vl
 		{
 			using namespace collections;
 			using namespace controls;
+			using namespace elements;
 
 /***********************************************************************
 GuiGraphicsAnimationManager
@@ -248,8 +249,6 @@ GuiGraphicsHost
 			{
 				Rect oldBounds=nativeWindow->GetBounds();
 				minSize=windowComposition->GetPreferredBounds().GetSize();
-				if(minSize.x<1) minSize.x=1;
-				if(minSize.y<1) minSize.y=1;
 				Size minWindowSize=minSize+(oldBounds.GetSize()-nativeWindow->GetClientSize());
 				if(bounds.Width()<minWindowSize.x)
 				{
@@ -569,8 +568,15 @@ GuiGraphicsHost
 				{
 					windowComposition->GetRenderTarget()->StartRendering();
 					windowComposition->Render(Size());
-					windowComposition->GetRenderTarget()->StopRendering();
+					bool success = windowComposition->GetRenderTarget()->StopRendering();
 					nativeWindow->RedrawContent();
+
+					if (!success)
+					{
+						windowComposition->SetAttachedWindow(0);
+						GetGuiGraphicsResourceManager()->RecreateRenderTarget(nativeWindow);
+						windowComposition->SetAttachedWindow(nativeWindow);
+					}
 				}
 			}
 

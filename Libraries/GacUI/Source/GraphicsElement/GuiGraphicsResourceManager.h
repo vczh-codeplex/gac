@@ -57,20 +57,30 @@ Resource Manager
 				/// <summary>
 				/// Get the instance of a registered <see cref="IGuiGraphicsElementFactory"></see> that is binded to a specified element type.
 				/// </summary>
+				/// <returns>Returns the element factory.</returns>
 				/// <param name="elementTypeName">The element type to get a corresponding graphics element factory.</param>
 				virtual IGuiGraphicsElementFactory*		GetElementFactory(const WString& elementTypeName);
 				/// <summary>
 				/// Get the instance of a registered <see cref="IGuiGraphicsRendererFactory"></see> that is binded to a specified element type.
 				/// </summary>
+				/// <returns>Returns the renderer factory.</returns>
 				/// <param name="elementTypeName">The element type to get a corresponding graphics renderer factory.</param>
 				virtual IGuiGraphicsRendererFactory*	GetRendererFactory(const WString& elementTypeName);
 				/// <summary>
 				/// Get the instance of a <see cref="IGuiGraphicsRenderTarget"></see> that is binded to an <see cref="INativeWindow"></see>.
 				/// </summary>
+				/// <param name="window">The specified window.</param>
+				/// <returns>Returns the render target.</returns>
 				virtual IGuiGraphicsRenderTarget*		GetRenderTarget(INativeWindow* window)=0;
+				/// <summary>
+				/// Recreate the render target for the specified window.
+				/// </summary>
+				/// <param name="window">The specified window.</param>
+				virtual void							RecreateRenderTarget(INativeWindow* window) = 0;
 				/// <summary>
 				/// Get the renderer awared rich text document layout engine provider object.
 				/// </summary>
+				/// <returns>Returns the layout provider.</returns>
 				virtual IGuiGraphicsLayoutProvider*		GetLayoutProvider()=0;
 			};
 

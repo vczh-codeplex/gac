@@ -247,11 +247,6 @@ GuiControlHost
 				SetBounds(GetBounds());
 			}
 
-			void GuiControlHost::Render()
-			{
-				host->Render();
-			}
-
 			bool GuiControlHost::GetEnabled()
 			{
 				if(host->GetNativeWindow())
