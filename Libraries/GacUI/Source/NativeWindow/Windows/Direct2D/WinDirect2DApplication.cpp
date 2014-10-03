@@ -71,6 +71,14 @@ namespace vl
 					if(!d2dRenderTarget) Moved();
 					return d2dRenderTarget.Obj();
 				}
+
+				void RecreateRenderTarget()
+				{
+					if (d2dRenderTarget)
+					{
+						d2dRenderTarget = 0;
+					}
+				}
 			};
 
 			class Direct2DWindowsNativeControllerListener : public Object, public INativeControllerListener
@@ -123,6 +131,15 @@ namespace vl
 				return index==-1?0:direct2DListener->nativeWindowListeners.Values().Get(index)->GetDirect2DRenderTarget();
 			}
 
+			void RecreateNativeWindowDirect2DRenderTarget(INativeWindow* window)
+			{
+				vint index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
+				if (index == -1)
+				{
+					direct2DListener->nativeWindowListeners.Values().Get(index)->RecreateRenderTarget();
+				}
+			}
+
 			ID2D1Factory* GetDirect2DFactory()
 			{
 				return direct2DListener->d2dFactory.Obj();
@@ -145,6 +162,7 @@ OS Supporting
 			public:
 				void RecreateRenderTarget(INativeWindow* window)
 				{
+					vl::presentation::windows::RecreateNativeWindowDirect2DRenderTarget(window);
 				}
 
 				ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
