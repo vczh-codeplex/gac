@@ -74,9 +74,10 @@ WindowsGDIRenderTarget
 					dc=GetWindowsGDIObjectProvider()->GetNativeWindowDC(window);
 				}
 
-				void StopRendering()override
+				bool StopRendering()override
 				{
-					dc=0;
+					dc = 0;
+					return true;
 				}
 
 				void PushClipper(Rect clipper)override
@@ -342,6 +343,10 @@ WindowsGDIResourceManager
 				IGuiGraphicsRenderTarget* GetRenderTarget(INativeWindow* window)override
 				{
 					return GetWindowsGDIObjectProvider()->GetBindedRenderTarget(window);
+				}
+
+				void RecreateRenderTarget(INativeWindow* window)override
+				{
 				}
 
 				IGuiGraphicsLayoutProvider* GetLayoutProvider()override

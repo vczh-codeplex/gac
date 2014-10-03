@@ -22,8 +22,6 @@ namespace vl
 
 				void RebuildCanvas(Size size)
 				{
-					if(size.x==0) size.x=1;
-					if(size.y==0) size.y=1;
 					if(!d2dRenderTarget)
 					{
 						ID2D1HwndRenderTarget* renderTarget=0;
@@ -145,6 +143,10 @@ OS Supporting
 			class WinDirect2DApplicationDirect2DObjectProvider : public IWindowsDirect2DObjectProvider
 			{
 			public:
+				void RecreateRenderTarget(INativeWindow* window)
+				{
+				}
+
 				ID2D1RenderTarget* GetNativeWindowDirect2DRenderTarget(INativeWindow* window)
 				{
 					return vl::presentation::windows::GetNativeWindowDirect2DRenderTarget(window);
