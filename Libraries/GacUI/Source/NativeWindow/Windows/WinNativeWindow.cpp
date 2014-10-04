@@ -34,9 +34,10 @@ WindowsClass
 			class WinClass : public Object
 			{
 			protected:
-				WString					name;
-				WNDCLASSEX				windowClass;
-				ATOM					windowAtom;
+				WString									name;
+				WNDCLASSEX								windowClass;
+				ATOM									windowAtom;
+
 			public:
 				WinClass(WString _name, bool shadow, bool ownDC, WNDPROC procedure, HINSTANCE hInstance)
 				{
@@ -785,11 +786,13 @@ WindowsForm
 				WindowsForm*						parentWindow;
 				bool								alwaysPassFocusToParent;
 				List<INativeWindowListener*>		listeners;
-				vint									mouseLastX;
-				vint									mouseLastY;
-				vint									mouseHoving;
+				vint								mouseLastX;
+				vint								mouseLastY;
+				vint								mouseHoving;
 				Interface*							graphicsHandler;
 				bool								customFrameMode;
+				List<Ptr<INativeMessageHandler>>	messageHandlers;
+
 			public:
 				WindowsForm(HWND parent, WString className, HINSTANCE hInstance)
 					:cursor(0)
@@ -831,22 +834,58 @@ WindowsForm
 
 				bool HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 				{
-					return HandleMessageInternal(hwnd, uMsg, wParam, lParam, result);
+					bool skip = false;
+					{
+						FOREACH(Ptr<INativeMessageHandler>, handler, messageHandlers)
+						{
+							handler->BeforeHandle(hwnd, uMsg, wParam, lParam, skip);
+						}
+						if (skip)
+						{
+							return true;
+						}
+					}
+					skip = HandleMessageInternal(hwnd, uMsg, wParam, lParam, result);
+					{
+						FOREACH(Ptr<INativeMessageHandler>, handler, messageHandlers)
+						{
+							handler->AfterHandle(hwnd, uMsg, wParam, lParam, skip, result);
+						}
+					}
+					return skip;
 				}
 
-				HWND GetWindowHandle()
+				HWND GetWindowHandle()override
 				{
 					return handle;
 				}
 
-				Interface* GetGraphicsHandler()
+				Interface* GetGraphicsHandler()override
 				{
 					return graphicsHandler;
 				}
 
-				void SetGraphicsHandler(Interface* handler)
+				void SetGraphicsHandler(Interface* handler)override
 				{
 					graphicsHandler=handler;
+				}
+
+				bool InstallMessageHandler(Ptr<INativeMessageHandler> handler)override
+				{
+					if (messageHandlers.Contains(handler.Obj()))
+					{
+						return false;
+					}
+					messageHandlers.Add(handler);
+					return true;
+				}
+
+				bool UninstallMessageHandler(Ptr<INativeMessageHandler> handler)override
+				{
+					vint index = messageHandlers.IndexOf(handler.Obj());
+					if (index == -1)return false;
+					messageHandlers.RemoveAt(handler);
+					return true;
 				}
 
 				Rect GetBounds()
