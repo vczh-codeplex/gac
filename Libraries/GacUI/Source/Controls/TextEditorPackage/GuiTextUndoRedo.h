@@ -120,8 +120,8 @@ Undo Redo (Document)
 				{
 					vint									start;
 					vint									end;
-					collections::Array<Alignment>			originalAlignments;
-					collections::Array<Alignment>			inputAlignments;
+					collections::Array<Nullable<Alignment>>	originalAlignments;
+					collections::Array<Nullable<Alignment>>	inputAlignments;
 				};
 
 			protected:
