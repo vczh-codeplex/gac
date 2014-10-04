@@ -569,7 +569,9 @@ WindowsGDIResourceManager
 				
 				void RecreateRenderTarget(INativeWindow* window)override
 				{
+					NativeWindowDestroying(window);
 					GetWindowsDirect2DObjectProvider()->RecreateRenderTarget(window);
+					NativeWindowCreated(window);
 				}
 
 				IGuiGraphicsLayoutProvider* GetLayoutProvider()override
