@@ -50,6 +50,8 @@ extern void UnitTestInGuiMain();
 
 #ifndef PROJECT_CONTROLTEMPLATE
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
 namespace demos
 {
 	template<typename TImpl>
@@ -129,8 +131,11 @@ namespace vl
 	}
 }
 
+#endif
+
 void GuiMain()
 {
+#ifndef VCZH_DEBUG_NO_REFLECTION
 	{
 		List<WString> errors;
 		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml", errors);
@@ -140,6 +145,7 @@ void GuiMain()
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);
+#endif
 }
 
 #else
