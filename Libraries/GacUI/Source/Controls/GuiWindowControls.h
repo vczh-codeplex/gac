@@ -280,6 +280,11 @@ Window
 					/// </summary>
 					/// <param name="visible">True to make the title bar visible.</param>
 					virtual void						SetTitleBar(bool visible)=0;
+					/// <summary>
+					/// Create a control style for tooltip control.
+					/// </summary>
+					/// <returns>Returns the control style. Returns null for default control style.</returns>
+					virtual IStyleController*			CreateTooltipStyle() = 0;
 				};
 				
 				/// <summary>Style controller with default behavior for <see cref="GuiWindow"/>.</summary>
@@ -306,6 +311,7 @@ Window
 					void								SetIconVisible(bool visible)override;
 					bool								GetTitleBar()override;
 					void								SetTitleBar(bool visible)override;
+					IStyleController*					CreateTooltipStyle()override;
 				};
 			protected:
 				IStyleController*						styleController;

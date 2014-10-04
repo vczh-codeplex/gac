@@ -493,6 +493,11 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(SetTitleBar, visible);
 					}
+
+					GuiWindow::IStyleController* CreateTooltipStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTooltipStyle);
+					}
 				};
 
 				class GuiListControl_IItemProviderCallback : public ValueInterfaceRoot, public virtual GuiListControl::IItemProviderCallback

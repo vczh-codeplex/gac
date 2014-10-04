@@ -176,6 +176,7 @@ GuiWindowTemplate_StyleProvider
 				{
 					CHECK_FAIL(L"GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider()#An instance of GuiWindowTemplate is expected.");
 				}
+				INITIALIZE_FACTORY_FROM_TEMPLATE(tooltipTemplateFactory, TooltipTemplate);
 			}
 
 			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
@@ -277,6 +278,11 @@ GuiWindowTemplate_StyleProvider
 			void GuiWindowTemplate_StyleProvider::SetTitleBar(bool visible)
 			{
 				WINDOW_TEMPLATE_SET(TitleBar);
+			}
+
+			controls::GuiWindow::IStyleController* GuiWindowTemplate_StyleProvider::CreateTooltipStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE_OPT(GuiWindowTemplate, tooltipTemplateFactory, TooltipTemplate);
 			}
 
 #undef WINDOW_TEMPLATE_GET
