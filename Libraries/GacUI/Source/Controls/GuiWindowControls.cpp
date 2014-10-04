@@ -704,6 +704,11 @@ GuiWindow::DefaultBehaviorStyleController
 				}
 			}
 
+			GuiWindow::IStyleController* GuiWindow::DefaultBehaviorStyleController::CreateTooltipStyle()
+			{
+				return 0;
+			}
+
 /***********************************************************************
 GuiWindow
 ***********************************************************************/

@@ -97,6 +97,7 @@ Control Template
 			protected:
 				GuiWindowTemplate*												controlTemplate;
 				controls::GuiWindow*											window;
+				Ptr<GuiTemplate::IFactory>										tooltipTemplateFactory;
 
 			public:
 				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
@@ -117,6 +118,7 @@ Control Template
 				void															SetIconVisible(bool visible)override;
 				bool															GetTitleBar()override;
 				void															SetTitleBar(bool visible)override;
+				controls::GuiWindow::IStyleController*							CreateTooltipStyle()override;
 			};
 
 			class GuiButtonTemplate_StyleProvider

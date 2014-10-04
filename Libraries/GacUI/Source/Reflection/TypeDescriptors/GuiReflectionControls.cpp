@@ -362,6 +362,8 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(SizeBox)
 				CLASS_MEMBER_PROPERTY_FAST(IconVisible)
 				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
+
+				CLASS_MEMBER_METHOD(CreateTooltipStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiWindow::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiPopup)
