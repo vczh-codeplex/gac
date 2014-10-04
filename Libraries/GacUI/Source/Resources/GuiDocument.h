@@ -204,9 +204,9 @@ Rich Content Document (run)
 		{
 		public:
 			/// <summary>Paragraph alignment.</summary>
-			Alignment						alignment;
+			Nullable<Alignment>				alignment;
 
-			DocumentParagraphRun():alignment(Alignment::Left){}
+			DocumentParagraphRun(){}
 
 			void							Accept(IVisitor* visitor)override{visitor->Visit(this);}
 

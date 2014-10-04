@@ -216,7 +216,7 @@ GuiDocumentUndoRedoProcessor::RenameStyleStep
 			}
 
 /***********************************************************************
-GuiDocumentUndoRedoProcessor::RenameStyleStep
+GuiDocumentUndoRedoProcessor::SetAlignmentStep
 ***********************************************************************/
 
 			void GuiDocumentUndoRedoProcessor::SetAlignmentStep::Undo()

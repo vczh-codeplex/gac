@@ -202,7 +202,7 @@ GuiDocumentElement::GuiDocumentElementRenderer
 					if(!cache->graphicsParagraph)
 					{
 						cache->graphicsParagraph=layoutProvider->CreateParagraph(cache->fullText, renderTarget);
-						cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment);
+						cache->graphicsParagraph->SetParagraphAlignment(paragraph->alignment ? paragraph->alignment.Value() : Alignment::Left);
 						SetPropertiesVisitor::SetProperty(element->document.Obj(), cache->graphicsParagraph.Obj(), paragraph, cache->selectionBegin, cache->selectionEnd);
 					}
 					if(cache->graphicsParagraph->GetMaxWidth()!=lastMaxWidth)
@@ -972,7 +972,7 @@ GuiDocumentElement
 				return 0;
 			}
 
-			void GuiDocumentElement::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Alignment>& alignments)
+			void GuiDocumentElement::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Nullable<Alignment>>& alignments)
 			{
 				Ptr<GuiDocumentElementRenderer> elementRenderer=renderer.Cast<GuiDocumentElementRenderer>();
 				if(elementRenderer)

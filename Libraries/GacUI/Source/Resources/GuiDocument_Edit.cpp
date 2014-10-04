@@ -1740,6 +1740,10 @@ DocumentModel::EditRun
 				CopyFrom(beginParagraph->runs, newBeginRuns->runs, true);
 				
 				Ptr<DocumentParagraphRun> newEndRuns=runs[runs.Count()-1];
+				if (newEndRuns->alignment)
+				{
+					endParagraph->alignment = newEndRuns->alignment;
+				}
 				for(vint i=0;i<newEndRuns->runs.Count();i++)
 				{
 					endParagraph->runs.Insert(i, newEndRuns->runs[i]);

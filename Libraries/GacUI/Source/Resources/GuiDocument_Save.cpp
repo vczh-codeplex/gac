@@ -194,17 +194,20 @@ document_operation_visitors::SerializeRunVisitor
 					element->name.value=L"p";
 
 					XmlElementWriter writer(element);
-					switch(run->alignment)
+					if (run->alignment)
 					{
-					case Alignment::Left:
-						writer.Attribute(L"align", L"Left");
-						break;
-					case Alignment::Center:
-						writer.Attribute(L"align", L"Center");
-						break;
-					case Alignment::Right:
-						writer.Attribute(L"align", L"Right");
-						break;
+						switch(run->alignment.Value())
+						{
+						case Alignment::Left:
+							writer.Attribute(L"align", L"Left");
+							break;
+						case Alignment::Center:
+							writer.Attribute(L"align", L"Center");
+							break;
+						case Alignment::Right:
+							writer.Attribute(L"align", L"Right");
+							break;
+						}
 					}
 					VisitContainer(element, run);
 				}

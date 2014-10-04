@@ -646,7 +646,7 @@ GuiDocumentViewer
 				return documentElement->SummarizeStyle(begin, end);
 			}
 
-			void GuiDocumentCommonInterface::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Alignment>& alignments)
+			void GuiDocumentCommonInterface::SetParagraphAlignment(TextPos begin, TextPos end, const collections::Array<Nullable<Alignment>>& alignments)
 			{
 				vint first=begin.row;
 				vint last=end.row;
