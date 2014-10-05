@@ -236,6 +236,11 @@ public:
 		}
 	}
 
+	GuiWindow::IStyleController* CreateTooltipStyle()override
+	{
+		return 0;
+	}
+
 	GuiBoundsComposition* GetBoundsComposition()override
 	{
 		return boundsComposition;

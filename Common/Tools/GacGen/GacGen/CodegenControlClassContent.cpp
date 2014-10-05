@@ -7,10 +7,17 @@ Codegen::ControlClassContent
 void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
 	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
-	writer.WriteLine(prefix + L"class " + instance->typeName + L" : public " + instance->typeName + L"_<" + instance->typeName + L">");
+	WString instanceClassName;
+	FOREACH(WString, ns, instance->namespaces)
+	{
+		instanceClassName += ns + L"::";
+	}
+	instanceClassName += instance->typeName;
+
+	writer.WriteLine(prefix + L"class " + instance->typeName + L" : public " + instanceClassName + L"_<" + instanceClassName + L">");
 	writer.WriteLine(prefix + L"{");
-	writer.WriteLine(prefix + L"\tfriend class " + instance->typeName + L"_<" + instance->typeName + L">;");
-	writer.WriteLine(prefix + L"\tfriend struct vl::reflection::description::CustomTypeDescriptorSelector<" + instance->typeName + L">;");
+	writer.WriteLine(prefix + L"\tfriend class " + instanceClassName + L"_<" + instanceClassName + L">;");
+	writer.WriteLine(prefix + L"\tfriend struct vl::reflection::description::CustomTypeDescriptorSelector<" + instanceClassName + L">;");
 	writer.WriteLine(prefix + L"protected:");
 	writer.WriteLine(L"");
 	WriteControlClassHeaderFileEventHandlers(config, instance, prefix, writer);
