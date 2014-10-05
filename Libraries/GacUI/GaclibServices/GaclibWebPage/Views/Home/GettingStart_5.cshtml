@@ -1,7 +1,7 @@
 ﻿@model GaclibWebPage.Models.GettingStartPageModel
 
 @{
-    ViewBag.Title = "GacLib - Getting Started - Step 4";
+    ViewBag.Title = "GacLib - Getting Started - Step 5";
 }
 <script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shCore.js")"></script>
 <script type="text/javascript" src="@Url.Content("~/Content/SyntaxHighlighter/scripts/shBrushCpp.js")"></script>
@@ -265,7 +265,7 @@ public:
             <pre class="brush: cpp; gutter: false;">
 void GuiMain()
 {
-	List<wstring> errors;
+	List&lt;WString&gt; errors;
 	GetInstanceLoaderManager()->SetResource(L"Resource", GuiResource::LoadFromXml(L"..\\Resources\\HelloWorldViewModel.xml", errors));
 	SignUpWindow window(new ViewModel);
 	window.ForceCalculateSizeImmediately();

@@ -17,6 +17,7 @@ namespace GaclibWebPage.Models
                 "Write your second GacUI program using XML.",
                 "Build and run!",
                 "Applying MVVM (Model-View-ViewModel) pattern.",
+                "Precompile your XML resource to enhance the performance.",
             };
         }
     }

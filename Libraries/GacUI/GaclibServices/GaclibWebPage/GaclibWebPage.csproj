@@ -453,6 +453,9 @@
   <ItemGroup>
     <Content Include="Content\Demos\Persistant.LoadFromXml.ControlTemplate\Codegen.bat" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Home\GettingStart_6.cshtml" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
