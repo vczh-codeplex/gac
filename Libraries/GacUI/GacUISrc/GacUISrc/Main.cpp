@@ -46,7 +46,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 extern void UnitTestInGuiMain();
 
-//#define PROJECT_CONTROLTEMPLATE
+#define PROJECT_CONTROLTEMPLATE
 
 #ifndef PROJECT_CONTROLTEMPLATE
 
@@ -596,8 +596,8 @@ WString XmlToString(Ptr<XmlDocument> xml)
 }
 
 //#define RUN_GENERATE_METADATA
-//#define RUN_GENERATE_PRECOMPILED_RESOURCE
-//#define RUN_SHOW_WINDOW
+#define RUN_GENERATE_PRECOMPILED_RESOURCE
+#define RUN_SHOW_WINDOW
 
 void GuiMain()
 {
