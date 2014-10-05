@@ -58,6 +58,8 @@ Ptr<CodegenConfig> CodegenConfig::LoadConfig(Ptr<GuiResource> resource)
 	if (!LoadConfigString(resource, L"Name", config->name)) return false;
 	if (!LoadConfigString(resource, L"Prefix", config->prefix)) return false;
 	LoadConfigString(resource, L"PrecompiledOutput", config->precompiledOutput, true);
+	LoadConfigString(resource, L"PrecompiledBinary", config->precompiledBinary, true);
+	LoadConfigString(resource, L"PrecompiledCompressed", config->precompiledCompressed, true);
 	return config;
 }
 

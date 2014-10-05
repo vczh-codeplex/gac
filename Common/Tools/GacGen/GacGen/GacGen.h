@@ -55,6 +55,8 @@ public:
 	WString										name;
 	WString										prefix;
 	WString										precompiledOutput;
+	WString										precompiledBinary;
+	WString										precompiledCompressed;
 
 	Ptr<ParsingTable>							workflowTable;
 	Ptr<WfLexicalScopeManager>					workflowManager;

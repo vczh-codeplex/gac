@@ -519,6 +519,7 @@ GuiResourceFolder
 								if (auto resource = indirectLoad->Serialize(item->GetContent(), serializePrecompiledResource))
 								{
 									xmlElement = directLoad->Serialize(resource, serializePrecompiledResource);
+									xmlElement->name.value = resolver->GetType();
 								}
 							}
 						}
