@@ -38,8 +38,9 @@ Application
 				void											ClipboardUpdated()override;
 			protected:
 				GuiWindow*										mainWindow;
+				GuiWindow*										sharedTooltipOwnerWindow;
 				GuiControl*										sharedTooltipOwner;
-				GuiTooltip*										sharedTooltipWindow;
+				GuiTooltip*										sharedTooltipControl;
 				bool											sharedTooltipHovering;
 				bool											sharedTooltipClosing;
 				collections::List<GuiWindow*>					windows;

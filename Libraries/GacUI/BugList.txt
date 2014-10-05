@@ -6,6 +6,7 @@
 @	数字StringKey
 	不同DPI用不同图片
 @	Windows消息扩展
+@	自定义Tooltip皮肤
 @	bug:richtext
 	[center]<-[delete][ctrl+z]
 	    [right] 
