@@ -79,4 +79,16 @@ void GuiMain()
 		OPEN_FILE(L"Precompiled Resource Xml");
 		XmlPrint(xml, writer);
 	}
+	if (config->precompiledBinary != L"")
+	{
+		FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledBinary, FileStream::WriteOnly);
+		resource->SavePrecompiledBinary(fileStream);
+	}
+	if (config->precompiledCompressed != L"")
+	{
+		FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledCompressed, FileStream::WriteOnly);
+		LzwEncoder encoder;
+		EncoderStream encoderStream(fileStream, encoder);
+		resource->SavePrecompiledBinary(encoderStream);
+	}
 }
