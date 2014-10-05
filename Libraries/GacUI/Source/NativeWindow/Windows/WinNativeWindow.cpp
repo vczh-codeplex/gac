@@ -846,6 +846,7 @@ WindowsForm
 						}
 					}
 					skip = HandleMessageInternal(hwnd, uMsg, wParam, lParam, result);
+					if (GetWindowsFormFromHandle(hwnd))
 					{
 						FOREACH(Ptr<INativeMessageHandler>, handler, messageHandlers)
 						{
@@ -1318,6 +1319,13 @@ WindowsController
 					DestroyWindow(godWindow);
 				}
 
+				WindowsForm* GetWindowsFormFromHandle(HWND hwnd)
+				{
+					vint index = windows.Keys().IndexOf(hwnd);
+					if (index == -1)return 0;
+					return windows.Values()[index];
+				}
+
 				bool HandleMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT& result)
 				{
 					bool skipDefaultProcedure=false;
@@ -1641,6 +1649,16 @@ Windows Platform Native Controller
 			INativeController* CreateWindowsNativeController(HINSTANCE hInstance)
 			{
 				return new WindowsController(hInstance);
+			}
+
+			IWindowsForm* GetWindowsFormFromHandle(HWND hwnd)
+			{
+				auto controller = dynamic_cast<WindowsController*>(GetCurrentController());
+				if (controller)
+				{
+					return controller->GetWindowsFormFromHandle(hwnd);
+				}
+				return 0;
 			}
 
 			IWindowsForm* GetWindowsForm(INativeWindow* window)
