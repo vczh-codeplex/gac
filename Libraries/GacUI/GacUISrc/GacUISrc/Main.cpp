@@ -185,6 +185,7 @@ namespace demos
 
 #define DEMO_TEMPLATES(F)\
 	F(WindowTemplate, GuiWindowTemplate)\
+	F(TooltipTemplate, GuiWindowTemplate)\
 	F(TabHeaderTemplate, GuiSelectableButtonTemplate)\
 	F(TabDropdownTemplate, GuiButtonTemplate)\
 	F(TabTemplate, GuiTabTemplate)\
@@ -473,6 +474,7 @@ namespace vl
 #define DEMO_TYPES(F)\
 			F(demos::MainWindow)\
 			F(demos::WindowTemplate)\
+			F(demos::TooltipTemplate)\
 			F(demos::TabHeaderTemplate)\
 			F(demos::TabDropdownTemplate)\
 			F(demos::TabTemplate)\
@@ -596,7 +598,7 @@ WString XmlToString(Ptr<XmlDocument> xml)
 }
 
 //#define RUN_GENERATE_METADATA
-#define RUN_GENERATE_PRECOMPILED_RESOURCE
+//#define RUN_GENERATE_PRECOMPILED_RESOURCE
 #define RUN_SHOW_WINDOW
 
 void GuiMain()
