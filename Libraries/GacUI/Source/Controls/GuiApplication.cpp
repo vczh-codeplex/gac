@@ -61,8 +61,9 @@ GuiApplication
 
 			GuiApplication::GuiApplication()
 				:mainWindow(0)
+				,sharedTooltipOwnerWindow(0)
 				,sharedTooltipOwner(0)
-				,sharedTooltipWindow(0)
+				,sharedTooltipControl(0)
 				,sharedTooltipHovering(false)
 				,sharedTooltipClosing(false)
 			{
@@ -71,10 +72,10 @@ GuiApplication
 
 			GuiApplication::~GuiApplication()
 			{
-				if(sharedTooltipWindow)
+				if(sharedTooltipControl)
 				{
-					delete sharedTooltipWindow;
-					sharedTooltipWindow=0;
+					delete sharedTooltipControl;
+					sharedTooltipControl=0;
 				}
 				GetCurrentController()->CallbackService()->UninstallListener(this);
 			}
@@ -178,24 +179,43 @@ GuiApplication
 
 			void GuiApplication::ShowTooltip(GuiControl* owner, GuiControl* tooltip, vint preferredContentWidth, Point location)
 			{
-				if(!sharedTooltipWindow)
+				GuiWindow* ownerWindow = dynamic_cast<GuiWindow*>(owner->GetRelatedControlHost());
+				if (sharedTooltipOwnerWindow != ownerWindow)
 				{
-					sharedTooltipWindow=new GuiTooltip(GetCurrentTheme()->CreateTooltipStyle());
-					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiApplication::TooltipMouseEnter);
-					sharedTooltipWindow->GetBoundsComposition()->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiApplication::TooltipMouseLeave);
+					delete sharedTooltipControl;
+					sharedTooltipControl = 0;
 				}
+
+				if(!sharedTooltipControl)
+				{
+					GuiWindow::IStyleController* tooltipStyle = 0;
+					if (ownerWindow)
+					{
+						tooltipStyle = dynamic_cast<GuiWindow::IStyleController*>(ownerWindow->GetStyleController())->CreateTooltipStyle();
+					}
+					if (!tooltipStyle)
+					{
+						tooltipStyle = GetCurrentTheme()->CreateTooltipStyle();
+					}
+
+					sharedTooltipControl=new GuiTooltip(tooltipStyle);
+					sharedTooltipControl->GetBoundsComposition()->GetEventReceiver()->mouseEnter.AttachMethod(this, &GuiApplication::TooltipMouseEnter);
+					sharedTooltipControl->GetBoundsComposition()->GetEventReceiver()->mouseLeave.AttachMethod(this, &GuiApplication::TooltipMouseLeave);
+				}
+
 				sharedTooltipHovering=false;
 				sharedTooltipClosing=false;
+				sharedTooltipOwnerWindow = ownerWindow;
 				sharedTooltipOwner=owner;
-				sharedTooltipWindow->SetTemporaryContentControl(tooltip);
-				sharedTooltipWindow->SetPreferredContentWidth(preferredContentWidth);
-				sharedTooltipWindow->SetClientSize(Size(10, 10));
-				sharedTooltipWindow->ShowPopup(owner, location);
+				sharedTooltipControl->SetTemporaryContentControl(tooltip);
+				sharedTooltipControl->SetPreferredContentWidth(preferredContentWidth);
+				sharedTooltipControl->SetClientSize(Size(10, 10));
+				sharedTooltipControl->ShowPopup(owner, location);
 			}
 
 			void GuiApplication::CloseTooltip()
 			{
-				if(sharedTooltipWindow)
+				if(sharedTooltipControl)
 				{
 					if(sharedTooltipHovering)
 					{
@@ -204,15 +224,15 @@ GuiApplication
 					else
 					{
 						sharedTooltipClosing=false;
-						sharedTooltipWindow->Close();
+						sharedTooltipControl->Close();
 					}
 				}
 			}
 
 			GuiControl* GuiApplication::GetTooltipOwner()
 			{
-				if(!sharedTooltipWindow) return 0;
-				if(!sharedTooltipWindow->GetTemporaryContentControl()) return 0;
+				if(!sharedTooltipControl) return 0;
+				if(!sharedTooltipControl->GetTemporaryContentControl()) return 0;
 				return sharedTooltipOwner;
 			}
 
