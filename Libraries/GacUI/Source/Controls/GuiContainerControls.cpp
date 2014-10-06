@@ -48,7 +48,8 @@ GuiTabPage
 			{
 				containerComposition = new GuiBoundsComposition;
 				containerComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
-
+				
+				AltChanged.SetAssociatedComposition(containerComposition);
 				TextChanged.SetAssociatedComposition(containerComposition);
 				PageInstalled.SetAssociatedComposition(containerComposition);
 				PageUninstalled.SetAssociatedComposition(containerComposition);
@@ -70,6 +71,23 @@ GuiTabPage
 			GuiTab* GuiTabPage::GetOwnerTab()
 			{
 				return owner;
+			}
+
+			const WString& GuiTabPage::GetAlt()
+			{
+				return alt;
+			}
+
+			bool GuiTabPage::SetAlt(const WString& value)
+			{
+				if (value.Length() > 1) return false;
+				if (alt != value)
+				{
+					alt = value;
+					GuiEventArgs arguments(containerComposition);
+					AltChanged.Execute(arguments);
+				}
+				return true;
 			}
 
 			const WString& GuiTabPage::GetText()

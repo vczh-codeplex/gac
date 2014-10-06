@@ -31,6 +31,7 @@ Tab Control
 			protected:
 				compositions::GuiBoundsComposition*				containerComposition;
 				GuiTab*											owner;
+				WString											alt;
 				WString											text;
 
 				bool											AssociateTab(GuiTab* _owner);
@@ -39,7 +40,9 @@ Tab Control
 				/// <summary>Create a tab page.</summary>
 				GuiTabPage();
 				~GuiTabPage();
-
+				
+				/// <summary>Alt changed event.</summary>
+				compositions::GuiNotifyEvent					AltChanged;
 				/// <summary>Text changed event.</summary>
 				compositions::GuiNotifyEvent					TextChanged;
 				/// <summary>Page installed event.</summary>
@@ -53,6 +56,12 @@ Tab Control
 				/// <summary>Get the owner <see cref="GuiTab"/>.</summary>
 				/// <returns>The owner <see cref="GuiTab"/>.</returns>
 				GuiTab*											GetOwnerTab();
+				/// <summary>Get the Alt-combined shortcut key associated with this control.</summary>
+				/// <returns>The Alt-combined shortcut key associated with this control.</returns>
+				const WString&									GetAlt();
+				/// <summary>Associate a Alt-combined shortcut key with this control.</summary>
+				/// <param name="value">The Alt-combined shortcut key to associate. Only empty string and one-character strings are legal.</param>
+				bool											SetAlt(const WString& value);
 				/// <summary>Get the text rendered as the name for this page.</summary>
 				/// <returns>The text rendered as the name for this page.</returns>
 				const WString&									GetText();

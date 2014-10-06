@@ -109,6 +109,7 @@ Basic Construction
 				bool									isEnabled;
 				bool									isVisuallyEnabled;
 				bool									isVisible;
+				WString									alt;
 				WString									text;
 				FontProperties							font;
 
@@ -143,6 +144,8 @@ Basic Construction
 				/// A control is rendered as disabled, not only when the control itself is disabled, but also when the parent control is rendered as disabled.
 				/// </summary>
 				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
+				/// <summary>Alt changed event. This event will be raised when the associated Alt-combined shortcut key of the control is changed.</summary>
+				compositions::GuiNotifyEvent			AltChanged;
 				/// <summary>Text changed event. This event will be raised when the text of the control is changed.</summary>
 				compositions::GuiNotifyEvent			TextChanged;
 				/// <summary>Font changed event. This event will be raised when the font of the control is changed.</summary>
@@ -203,6 +206,12 @@ Basic Construction
 				/// <summary>Make the control visible or invisible.</summary>
 				/// <param name="value">Set to true to make the visible enabled.</param>
 				virtual void							SetVisible(bool value);
+				/// <summary>Get the Alt-combined shortcut key associated with this control.</summary>
+				/// <returns>The Alt-combined shortcut key associated with this control.</returns>
+				virtual const WString&					GetAlt();
+				/// <summary>Associate a Alt-combined shortcut key with this control.</summary>
+				/// <param name="value">The Alt-combined shortcut key to associate. Only empty string and one-character strings are legal.</param>
+				virtual bool							SetAlt(const WString& value);
 				/// <summary>Get the text to display on the control.</summary>
 				/// <returns>The text to display on the control.</returns>
 				virtual const WString&					GetText();

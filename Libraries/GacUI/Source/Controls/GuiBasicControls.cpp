@@ -149,6 +149,7 @@ GuiControl
 				VisibleChanged.SetAssociatedComposition(boundsComposition);
 				EnabledChanged.SetAssociatedComposition(boundsComposition);
 				VisuallyEnabledChanged.SetAssociatedComposition(boundsComposition);
+				AltChanged.SetAssociatedComposition(boundsComposition);
 				TextChanged.SetAssociatedComposition(boundsComposition);
 				FontChanged.SetAssociatedComposition(boundsComposition);
 
@@ -283,6 +284,22 @@ GuiControl
 					isVisible=value;
 					VisibleChanged.Execute(GetNotifyEventArguments());
 				}
+			}
+
+			const WString& GuiControl::GetAlt()
+			{
+				return alt;
+			}
+
+			bool GuiControl::SetAlt(const WString& value)
+			{
+				if (value.Length() > 1) return false;
+				if (alt != value)
+				{
+					alt = value;
+					AltChanged.Execute(GetNotifyEventArguments());
+				}
+				return true;
 			}
 
 			const WString& GuiControl::GetText()
