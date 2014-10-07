@@ -28,7 +28,7 @@ Basic Construction
 			/// If you want to manually destroy a control, you should first remove it from its parent.
 			/// The only way to remove a control from a parent control, is to remove the bounds composition from its parent composition. The same to inserting a control.
 			/// </summary>
-			class GuiControl : public Object, public Description<GuiControl>
+			class GuiControl : public Object, protected compositions::IGuiAltAction, public Description<GuiControl>
 			{
 				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
@@ -128,7 +128,14 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 
+				bool									IsAltEnabled()override;
+				bool									IsAltAvailable()override;
+				compositions::GuiGraphicsComposition*	GetAltComposition()override;
+				compositions::IGuiAltActionHost*		GetActivatingAltHost()override;
+				void									OnActiveAlt()override;
+
 				static bool								SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing);
+
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>

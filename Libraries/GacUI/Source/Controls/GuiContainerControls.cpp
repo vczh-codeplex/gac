@@ -80,7 +80,7 @@ GuiTabPage
 
 			bool GuiTabPage::SetAlt(const WString& value)
 			{
-				if (value.Length() > 1) return false;
+				if (!IGuiAltAction::IsLegalAlt(value)) return false;
 				if (alt != value)
 				{
 					alt = value;

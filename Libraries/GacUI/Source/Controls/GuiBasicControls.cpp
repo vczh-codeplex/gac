@@ -122,6 +122,41 @@ GuiControl
 				}
 			}
 
+			bool GuiControl::IsAltEnabled()
+			{
+				GuiControl* control = this;
+				while (control)
+				{
+					if (!control->GetVisible() || !control->GetEnabled())
+					{
+						return false;
+					}
+					control = control->GetParent();
+				}
+
+				return true;
+			}
+
+			bool GuiControl::IsAltAvailable()
+			{
+				return focusableComposition != 0 && alt != L"";
+			}
+
+			compositions::GuiGraphicsComposition* GuiControl::GetAltComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::IGuiAltActionHost* GuiControl::GetActivatingAltHost()
+			{
+				return 0;
+			}
+
+			void GuiControl::OnActiveAlt()
+			{
+				SetFocus();
+			}
+
 			bool GuiControl::SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing)
 			{
 				GuiControl* value=dynamic_cast<GuiControl*>(obj);
@@ -293,7 +328,7 @@ GuiControl
 
 			bool GuiControl::SetAlt(const WString& value)
 			{
-				if (value.Length() > 1) return false;
+				if (!IGuiAltAction::IsLegalAlt(value)) return false;
 				if (alt != value)
 				{
 					alt = value;
@@ -393,7 +428,15 @@ GuiControl
 
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
 			{
-				if(parent)
+				if (identifier == IGuiAltAction::Identifier)
+				{
+					return (IGuiAltAction*)this;
+				}
+				else if (identifier == IGuiAltActionContainer::Identifier)
+				{
+					return 0;
+				}
+				else if(parent)
 				{
 					return parent->QueryService(identifier);
 				}

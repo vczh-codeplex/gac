@@ -734,9 +734,65 @@ GuiWindow
 			{
 			}
 
+			compositions::IGuiAltActionHost* GuiWindow::GetPreviousAltHost()
+			{
+				return previousAltHost;
+			}
+
+			void GuiWindow::OnActivatedAltHost(IGuiAltActionHost* previousHost)
+			{
+				previousAltHost = previousHost;
+			}
+
+			void GuiWindow::OnDeactivatedAltHost()
+			{
+				previousAltHost = 0;
+			}
+
+			void GuiWindow::CollectAltActions(collections::Group<WString, IGuiAltAction*>& actions)
+			{
+				List<GuiControl*> controls;
+				controls.Add(this);
+				vint current = 0;
+
+				while (current < controls.Count())
+				{
+					GuiControl* control = controls[current++];
+
+					if (auto container = control->QueryService<IGuiAltActionContainer>())
+					{
+						vint count = container->GetAltActionCount();
+						for (vint i = 0; i < count; i++)
+						{
+							auto action = container->GetAltAction(i);
+							actions.Add(action->GetAlt(), action);
+							continue;
+						}
+					}
+					else if (auto action = control->QueryService<IGuiAltAction>())
+					{
+						if (action->IsAltAvailable())
+						{
+							if (action->IsAltEnabled())
+							{
+								actions.Add(action->GetAlt(), action);
+								continue;
+							}
+						}
+					}
+
+					vint count = control->GetChildrenCount();
+					for (vint i = 0; i < count; i++)
+					{
+						controls.Add(control->GetChild(i));
+					}
+				}
+			}
+
 			GuiWindow::GuiWindow(IStyleController* _styleController)
 				:GuiControlHost(_styleController)
 				,styleController(_styleController)
+				,previousAltHost(0)
 			{
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				styleController->AttachWindow(this);
@@ -753,6 +809,18 @@ GuiWindow
 				{
 					SetNativeWindow(0);
 					GetCurrentController()->WindowService()->DestroyNativeWindow(window);
+				}
+			}
+
+			IDescriptable* GuiWindow::QueryService(const WString& identifier)
+			{
+				if (identifier == IGuiAltActionHost::Identifier)
+				{
+					return (IGuiAltActionHost*)this;
+				}
+				else
+				{
+					return GuiControlHost::QueryService(identifier);
 				}
 			}
 
