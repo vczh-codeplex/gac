@@ -60,7 +60,7 @@ Tab Control
 				/// <returns>The Alt-combined shortcut key associated with this control.</returns>
 				const WString&									GetAlt();
 				/// <summary>Associate a Alt-combined shortcut key with this control.</summary>
-				/// <param name="value">The Alt-combined shortcut key to associate. Only empty string and one-character strings are legal.</param>
+				/// <param name="value">The Alt-combined shortcut key to associate.</param>
 				bool											SetAlt(const WString& value);
 				/// <summary>Get the text rendered as the name for this page.</summary>
 				/// <returns>The text rendered as the name for this page.</returns>
