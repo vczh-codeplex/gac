@@ -210,7 +210,7 @@ Basic Construction
 				/// <returns>The Alt-combined shortcut key associated with this control.</returns>
 				virtual const WString&					GetAlt();
 				/// <summary>Associate a Alt-combined shortcut key with this control.</summary>
-				/// <param name="value">The Alt-combined shortcut key to associate. Only empty string and one-character strings are legal.</param>
+				/// <param name="value">The Alt-combined shortcut key to associate.</param>
 				virtual bool							SetAlt(const WString& value);
 				/// <summary>Get the text to display on the control.</summary>
 				/// <returns>The text to display on the control.</returns>
