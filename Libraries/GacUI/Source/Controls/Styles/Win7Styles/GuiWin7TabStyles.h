@@ -91,6 +91,8 @@ Tab
 				void														RemoveTab(vint index)override;
 				void														MoveTab(vint oldIndex, vint newIndex)override;
 				void														SetSelectedTab(vint index)override;
+				void														SetTabAlt(vint index, const WString& value)override;
+				compositions::IGuiAltAction*								GetTabAltAction(vint index)override;
 			};
 		}
 	}

@@ -42,6 +42,9 @@ Type List
 			F(presentation::compositions::IGuiShortcutKeyItem)\
 			F(presentation::compositions::IGuiShortcutKeyManager)\
 			F(presentation::compositions::GuiShortcutKeyManager)\
+			F(presentation::compositions::IGuiAltAction)\
+			F(presentation::compositions::IGuiAltActionContainer)\
+			F(presentation::compositions::IGuiAltActionHost)\
 
 			GUIREFLECTIONCOMPOSITION_TYPELIST(DECL_TYPE_INFO)
 

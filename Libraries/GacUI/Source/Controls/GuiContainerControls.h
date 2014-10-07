@@ -74,7 +74,7 @@ Tab Control
 			};
 
 			/// <summary>Represents a container with multiple named tabs.</summary>
-			class GuiTab : public GuiControl, public Description<GuiTab>
+			class GuiTab : public GuiControl, protected compositions::IGuiAltActionContainer, public Description<GuiTab>
 			{
 				friend class GuiTabPage;
 			public:
@@ -94,23 +94,31 @@ Tab Control
 					/// <summary>Called when the command executor is changed.</summary>
 					/// <param name="value">The command executor.</param>
 					virtual void								SetCommandExecutor(ICommandExecutor* value)=0;
-					/// <summary>Insert a tag header at the specified position.</summary>
+					/// <summary>Insert a tab header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
 					virtual void								InsertTab(vint index)=0;
-					/// <summary>Set the text of a tag header at the specified position.</summary>
+					/// <summary>Set the text of a tab header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
 					/// <param name="value">The text.</param>
 					virtual void								SetTabText(vint index, const WString& value)=0;
-					/// <summary>Remove the tag header at the specified position.</summary>
+					/// <summary>Remove the tab header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
 					virtual void								RemoveTab(vint index)=0;
-					/// <summary>Move a tag header from a position to another.</summary>
+					/// <summary>Move a tab header from a position to another.</summary>
 					/// <param name="oldIndex">The old position.</param>
 					/// <param name="newIndex">The new position.</param>
 					virtual void								MoveTab(vint oldIndex, vint newIndex)=0;
-					/// <summary>Render a tag header at the specified position as selected.</summary>
+					/// <summary>Render a tab header at the specified position as selected.</summary>
 					/// <param name="index">The specified position.</param>
 					virtual void								SetSelectedTab(vint index)=0;
+					/// <summary>Set the Alt-combined shortcut key of a tab header at the specified position.</summary>
+					/// <param name="index">The specified position.</param>
+					/// <param name="value">The Alt-combined shortcut key.</param>
+					virtual void								SetTabAlt(vint index, const WString& value)=0;
+					/// <summary>Get the associated <see cref="compositions::IGuiAltAction"/> object of a tab header at the specified position.</summary>
+					/// <returns>The associated <see cref="compositions::IGuiAltAction"/> object.</returns>
+					/// <param name="index">The specified position.</param>
+					virtual compositions::IGuiAltAction*		GetTabAltAction(vint index) = 0;
 				};
 			protected:
 				class CommandExecutor : public Object, public ICommandExecutor
@@ -128,11 +136,16 @@ Tab Control
 				IStyleController*								styleController;
 				collections::List<GuiTabPage*>					tabPages;
 				GuiTabPage*										selectedPage;
+
+				vint											GetAltActionCount()override;
+				compositions::IGuiAltAction*					GetAltAction(vint index)override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
 				GuiTab(IStyleController* _styleController);
 				~GuiTab();
+
+				IDescriptable*									QueryService(const WString& identifier)override;
 
 				/// <summary>Selected page changed event.</summary>
 				compositions::GuiNotifyEvent					SelectedPageChanged;

@@ -81,6 +81,10 @@ GuiTabPage
 			bool GuiTabPage::SetAlt(const WString& value)
 			{
 				if (!IGuiAltAction::IsLegalAlt(value)) return false;
+				if(owner)
+				{
+					owner->styleController->SetTabAlt(owner->tabPages.IndexOf(this), text);
+				}
 				if (alt != value)
 				{
 					alt = value;
@@ -132,6 +136,16 @@ GuiTab
 				tab->SetSelectedPage(tab->GetPages().Get(index));
 			}
 
+			vint GuiTab::GetAltActionCount()
+			{
+				return tabPages.Count();
+			}
+
+			compositions::IGuiAltAction* GuiTab::GetAltAction(vint index)
+			{
+				return styleController->GetTabAltAction(index);
+			}
+
 			GuiTab::GuiTab(IStyleController* _styleController)
 				:GuiControl(_styleController)
 				,styleController(_styleController)
@@ -146,6 +160,18 @@ GuiTab
 				for(vint i=0;i<tabPages.Count();i++)
 				{
 					delete tabPages[i];
+				}
+			}
+
+			IDescriptable* GuiTab::QueryService(const WString& identifier)
+			{
+				if (identifier == IGuiAltActionContainer::Identifier)
+				{
+					return (IGuiAltActionContainer*)this;
+				}
+				else
+				{
+					return GuiControl::QueryService(identifier);
 				}
 			}
 
@@ -180,6 +206,7 @@ GuiTab
 					GetContainerComposition()->AddChild(page->GetContainerComposition());
 					styleController->InsertTab(index);
 					styleController->SetTabText(index, page->GetText());
+					styleController->SetTabAlt(index, page->GetAlt());
 				
 					if(!selectedPage)
 					{

@@ -1007,6 +1007,16 @@ GuiTabTemplate_StyleProvider
 				UpdateHeaderLayout();
 			}
 
+			void GuiTabTemplate_StyleProvider::SetTabAlt(vint index, const WString& value)
+			{
+				headerButtons[index]->SetAlt(value);
+			}
+
+			compositions::IGuiAltAction* GuiTabTemplate_StyleProvider::GetTabAltAction(vint index)
+			{
+				return headerButtons[index]->QueryService<IGuiAltAction>();
+			}
+
 /***********************************************************************
 GuiListItemTemplate_ItemStyleProvider
 ***********************************************************************/

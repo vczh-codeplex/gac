@@ -370,6 +370,16 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
 					}
+
+					void SetTabAlt(vint index, const WString& value)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTabAlt, index, value);
+					}
+
+					compositions::IGuiAltAction* GetTabAltAction(vint index)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetTabAltAction, index);
+					}
 				};
 
 				class GuiScrollView_IStyleProvider : public virtual GuiControl_IStyleProvider, public virtual GuiScrollView::IStyleProvider

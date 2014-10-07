@@ -380,6 +380,16 @@ Win7TabStyle
 				
 				UpdateHeaderLayout();
 			}
+
+			void Win7TabStyle::SetTabAlt(vint index, const WString& value)
+			{
+				headerButtons[index]->SetAlt(value);
+			}
+
+			compositions::IGuiAltAction* Win7TabStyle::GetTabAltAction(vint index)
+			{
+				return headerButtons[index]->QueryService<IGuiAltAction>();
+			}
 		}
 	}
 }
