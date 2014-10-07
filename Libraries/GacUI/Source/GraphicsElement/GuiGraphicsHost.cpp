@@ -50,6 +50,26 @@ GuiGraphicsAnimationManager
 			}
 
 /***********************************************************************
+IGuiAltAction
+***********************************************************************/
+
+			const wchar_t* const IGuiAltAction::Identifier = L"vl::presentation::compositions::IGuiAltAction";
+			const wchar_t* const IGuiAltActionContainer::Identifier = L"vl::presentation::compositions::IGuiAltAction";
+			const wchar_t* const IGuiAltActionHost::Identifier = L"vl::presentation::compositions::IGuiAltAction";
+
+			bool IGuiAltAction::IsLegalAlt(const WString& alt)
+			{
+				for (vint i = 0; i < alt.Length(); i++)
+				{
+					if (alt[i] < L'A' || L'Z' < alt[i])
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+
+/***********************************************************************
 GuiGraphicsHost
 ***********************************************************************/
 

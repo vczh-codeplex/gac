@@ -202,7 +202,7 @@ Window
 			/// <summary>
 			/// Represents a normal window.
 			/// </summary>
-			class GuiWindow : public GuiControlHost, public Description<GuiWindow>
+			class GuiWindow : public GuiControlHost, protected compositions::IGuiAltActionHost, public Description<GuiWindow>
 			{
 				friend class GuiApplication;
 			public:
@@ -315,16 +315,24 @@ Window
 				};
 			protected:
 				IStyleController*						styleController;
+				compositions::IGuiAltActionHost*		previousAltHost;
 				
 				void									Moved()override;
 				void									OnNativeWindowChanged()override;
 				void									OnVisualStatusChanged()override;
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
+
+				compositions::IGuiAltActionHost*		GetPreviousAltHost()override;
+				void									OnActivatedAltHost(IGuiAltActionHost* previousHost)override;
+				void									OnDeactivatedAltHost()override;
+				void									CollectAltActions(collections::Group<WString, IGuiAltAction*>& actions)override;
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="_styleController">The style controller.</param>
 				GuiWindow(IStyleController* _styleController);
 				~GuiWindow();
+
+				IDescriptable*							QueryService(const WString& identifier)override;
 
 				/// <summary>Clipboard updated event.</summary>
 				compositions::GuiNotifyEvent			ClipboardUpdated;

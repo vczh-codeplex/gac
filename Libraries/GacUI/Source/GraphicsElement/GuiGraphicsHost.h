@@ -103,6 +103,53 @@ Shortcut Key Manager
 			};
 
 /***********************************************************************
+Alt-Combined Shortcut Key Interfaces
+***********************************************************************/
+
+			class IGuiAltActionHost;
+			
+			/// <summary>IGuiAltAction is the handler when an alt-combined shortcut key is activated.</summary>
+			class IGuiAltAction : public virtual IDescriptable
+			{
+			public:
+				/// <summary>The identifier for this service.</summary>
+				static const wchar_t* const				Identifier;
+
+				static bool								IsLegalAlt(const WString& alt);
+
+				virtual const WString&					GetAlt() = 0;
+				virtual bool							IsAltEnabled() = 0;
+				virtual bool							IsAltAvailable() = 0;
+				virtual GuiGraphicsComposition*			GetAltComposition() = 0;
+				virtual IGuiAltActionHost*				GetActivatingAltHost() = 0;
+				virtual void							OnActiveAlt() = 0;
+			};
+			
+			/// <summary>IGuiAltActionContainer enumerates multiple <see cref="IGuiAltAction"/>.</summary>
+			class IGuiAltActionContainer : public virtual IDescriptable
+			{
+			public:
+				/// <summary>The identifier for this service.</summary>
+				static const wchar_t* const				Identifier;
+
+				virtual vint							GetAltActionCount() = 0;
+				virtual IGuiAltAction*					GetAltAction(vint index) = 0;
+			};
+			
+			/// <summary>IGuiAltActionHost is an alt-combined shortcut key host. A host can also be entered or leaved, with multiple sub actions enabled or disabled.</summary>
+			class IGuiAltActionHost : public virtual IDescriptable
+			{
+			public:
+				/// <summary>The identifier for this service.</summary>
+				static const wchar_t* const				Identifier;
+
+				virtual IGuiAltActionHost*				GetPreviousAltHost() = 0;
+				virtual void							OnActivatedAltHost(IGuiAltActionHost* previousHost) = 0;
+				virtual void							OnDeactivatedAltHost() = 0;
+				virtual void							CollectAltActions(collections::Group<WString, IGuiAltAction*>& actions) = 0;
+			};
+
+/***********************************************************************
 Host
 ***********************************************************************/
 
