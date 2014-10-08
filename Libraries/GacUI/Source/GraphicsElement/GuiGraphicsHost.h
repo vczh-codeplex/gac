@@ -158,7 +158,9 @@ Host
 			/// </summary>
 			class GuiGraphicsHost : public Object, private INativeWindowListener, private INativeControllerListener, public Description<GuiGraphicsHost>
 			{
-				typedef collections::List<GuiGraphicsComposition*>		CompositionList;
+				typedef collections::List<GuiGraphicsComposition*>					CompositionList;
+				typedef collections::Dictionary<WString, IGuiAltAction*>			AltActionMap;
+				typedef collections::Dictionary<WString, GuiGraphicsComposition*>	AltCompositionMap;
 			public:
 				static const unsigned __int64	CaretInterval=500;
 			protected:
@@ -174,6 +176,16 @@ Host
 				GuiGraphicsAnimationManager				animationManager;
 				GuiGraphicsComposition*					mouseCaptureComposition;
 				CompositionList							mouseEnterCompositions;
+
+				IGuiAltActionHost*						currentAltHost;
+				AltActionMap							currentActiveAltActions;
+				AltCompositionMap						currentActiveAltTitles;
+				WString									currentAltPrefix;
+
+				void									EnterAltHost(IGuiAltActionHost* host);
+				void									LeaveAltHost();
+				void									EnterAltKey(wchar_t key);
+				void									LeaveAltKey();
 
 				void									DisconnectCompositionInternal(GuiGraphicsComposition* composition);
 				void									MouseCapture(const NativeWindowMouseInfo& info);

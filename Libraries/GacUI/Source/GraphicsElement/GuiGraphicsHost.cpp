@@ -1,4 +1,5 @@
 #include "GuiGraphicsHost.h"
+#include "..\Controls\GuiWindowControls.h"
 #include "..\..\..\..\Common\Source\Collections\OperationCopyFrom.h"
 
 namespace vl
@@ -72,6 +73,22 @@ IGuiAltAction
 /***********************************************************************
 GuiGraphicsHost
 ***********************************************************************/
+
+			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host)
+			{
+			}
+
+			void GuiGraphicsHost::LeaveAltHost()
+			{
+			}
+
+			void GuiGraphicsHost::EnterAltKey(wchar_t key)
+			{
+			}
+
+			void GuiGraphicsHost::LeaveAltKey()
+			{
+			}
 
 			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
 			{
@@ -465,6 +482,48 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::KeyDown(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift)
+				{
+					if (info.code == VKEY_LMENU || info.code == VKEY_RMENU)
+					{
+						if (!currentAltHost)
+						{
+							if (auto controlHost = windowComposition->GetRelatedControlHost())
+							{
+								if (auto altHost = controlHost->QueryTypedService<IGuiAltActionHost>())
+								{
+									EnterAltHost(altHost);
+								}
+							}
+						}
+					}
+					else if (currentAltHost)
+					{
+						if (info.code == VKEY_ESCAPE)
+						{
+							LeaveAltHost();
+							return;
+						}
+						else if (info.code == VKEY_BACK)
+						{
+							LeaveAltKey();
+						}
+						else if (VKEY_NUMPAD0 <= info.code && info.code <= VKEY_NUMPAD9)
+						{
+							EnterAltKey('0' + (info.code - VKEY_NUMPAD0));
+						}
+						else if (('0' <= info.code && info.code <= '9') || ('A' <= info.code && info.code <= 'Z'))
+						{
+							EnterAltKey((wchar_t)info.code);
+						}
+					}
+				}
+
+				if (currentAltHost)
+				{
+					return;
+				}
+				
 				if(shortcutKeyManager && shortcutKeyManager->Execute(info))
 				{
 					return;
@@ -534,6 +593,7 @@ GuiGraphicsHost
 				,focusedComposition(0)
 				,mouseCaptureComposition(0)
 				,lastCaretTime(0)
+				,currentAltHost(0)
 			{
 				windowComposition=new GuiWindowComposition;
 				windowComposition->SetAssociatedHost(this);
