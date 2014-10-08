@@ -164,6 +164,8 @@ MenuButton
 				GuiButton*								GetSubMenuHost();
 				void									OpenSubMenuInternal();
 				void									OnParentLineChanged()override;
+				compositions::IGuiAltActionHost*		GetActivatingAltHost()override;
+
 				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);

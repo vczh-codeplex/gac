@@ -6,6 +6,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace compositions;
 
 /***********************************************************************
 IGuiMenuService
@@ -131,7 +132,7 @@ GuiMenu
 			{
 				if(owner)
 				{
-					parentMenuService=owner->QueryService<IGuiMenuService>();
+					parentMenuService=owner->QueryTypedService<IGuiMenuService>();
 				}
 			}
 
@@ -221,7 +222,7 @@ GuiMenuButton
 			void GuiMenuButton::OnParentLineChanged()
 			{
 				GuiButton::OnParentLineChanged();
-				ownerMenuService=QueryService<IGuiMenuService>();
+				ownerMenuService=QueryTypedService<IGuiMenuService>();
 				if(ownerMenuService)
 				{
 					SetClickOnMouseUp(!ownerMenuService->IsSubMenuActivatedByMouseDown());
@@ -230,6 +231,15 @@ GuiMenuButton
 				{
 					subMenu->UpdateMenuService();
 				}
+			}
+
+			compositions::IGuiAltActionHost* GuiMenuButton::GetActivatingAltHost()
+			{
+				if (subMenu)
+				{
+					return subMenu->QueryTypedService<IGuiAltActionHost>();
+				}
+				return 0;
 			}
 
 			void GuiMenuButton::OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
