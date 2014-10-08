@@ -709,6 +709,11 @@ GuiWindow::DefaultBehaviorStyleController
 				return 0;
 			}
 
+			GuiLabel::IStyleController* GuiWindow::DefaultBehaviorStyleController::CreateShortcutKeyStyle()
+			{
+				return 0;
+			}
+
 /***********************************************************************
 GuiWindow
 ***********************************************************************/

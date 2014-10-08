@@ -50,7 +50,12 @@ Win7Theme
 
 			controls::GuiLabel::IStyleController* Win7Theme::CreateLabelStyle()
 			{
-				return new Win7LabelStyle;
+				return new Win7LabelStyle(false);
+			}
+
+			controls::GuiLabel::IStyleController* Win7Theme::CreateShortcutKeyStyle()
+			{
+				return new Win7LabelStyle(true);
 			}
 
 			controls::GuiScrollContainer::IStyleProvider* Win7Theme::CreateScrollContainerStyle()

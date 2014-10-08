@@ -15,6 +15,11 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace controls
+		{
+			class GuiWindow;
+		}
+
 		namespace compositions
 		{
 
@@ -158,9 +163,9 @@ Host
 			/// </summary>
 			class GuiGraphicsHost : public Object, private INativeWindowListener, private INativeControllerListener, public Description<GuiGraphicsHost>
 			{
-				typedef collections::List<GuiGraphicsComposition*>					CompositionList;
-				typedef collections::Dictionary<WString, IGuiAltAction*>			AltActionMap;
-				typedef collections::Dictionary<WString, GuiGraphicsComposition*>	AltCompositionMap;
+				typedef collections::List<GuiGraphicsComposition*>							CompositionList;
+				typedef collections::Dictionary<WString, IGuiAltAction*>					AltActionMap;
+				typedef collections::Dictionary<WString, controls::GuiControl*>				AltControlMap;
 			public:
 				static const unsigned __int64	CaretInterval=500;
 			protected:
@@ -179,13 +184,14 @@ Host
 
 				IGuiAltActionHost*						currentAltHost;
 				AltActionMap							currentActiveAltActions;
-				AltCompositionMap						currentActiveAltTitles;
+				AltControlMap							currentActiveAltTitles;
 				WString									currentAltPrefix;
 
-				void									EnterAltHost(IGuiAltActionHost* host);
+				void									EnterAltHost(IGuiAltActionHost* host, controls::GuiWindow* window);
 				void									LeaveAltHost();
 				void									EnterAltKey(wchar_t key);
 				void									LeaveAltKey();
+				void									ClearAltHost();
 				void									CloseAltHost();
 
 				void									DisconnectCompositionInternal(GuiGraphicsComposition* composition);

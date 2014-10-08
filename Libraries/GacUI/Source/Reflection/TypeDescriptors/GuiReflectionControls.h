@@ -508,6 +508,11 @@ Interface Proxy
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTooltipStyle);
 					}
+
+					GuiLabel::IStyleController* CreateShortcutKeyStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateShortcutKeyStyle);
+					}
 				};
 
 				class GuiListControl_IItemProviderCallback : public ValueInterfaceRoot, public virtual GuiListControl::IItemProviderCallback

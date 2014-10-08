@@ -149,7 +149,8 @@ Control Template
 				F(GuiWindowTemplate, bool, TitleBar)\
 				F(GuiWindowTemplate, bool, CustomizedBorder)\
 				F(GuiWindowTemplate, bool, Maximized)\
-				F(GuiWindowTemplate, WString, TooltipTemplate)
+				F(GuiWindowTemplate, WString, TooltipTemplate)\
+				F(GuiWindowTemplate, WString, ShortcutKeyTemplate)
 
 				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};

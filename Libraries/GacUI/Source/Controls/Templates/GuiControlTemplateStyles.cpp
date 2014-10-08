@@ -177,6 +177,7 @@ GuiWindowTemplate_StyleProvider
 					CHECK_FAIL(L"GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider()#An instance of GuiWindowTemplate is expected.");
 				}
 				INITIALIZE_FACTORY_FROM_TEMPLATE(tooltipTemplateFactory, TooltipTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(shortcutKeyTemplateFactory, ShortcutKeyTemplate);
 			}
 
 			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
@@ -283,6 +284,11 @@ GuiWindowTemplate_StyleProvider
 			controls::GuiWindow::IStyleController* GuiWindowTemplate_StyleProvider::CreateTooltipStyle()
 			{
 				GET_FACTORY_FROM_TEMPLATE_OPT(GuiWindowTemplate, tooltipTemplateFactory, TooltipTemplate);
+			}
+
+			controls::GuiLabel::IStyleController* GuiWindowTemplate_StyleProvider::CreateShortcutKeyStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE_OPT(GuiLabelTemplate, shortcutKeyTemplateFactory, ShortcutKeyTemplate);
 			}
 
 #undef WINDOW_TEMPLATE_GET

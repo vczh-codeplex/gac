@@ -158,14 +158,41 @@ Win8TooltipStyle
 Win8LabelStyle
 ***********************************************************************/
 
-			Win8LabelStyle::Win8LabelStyle()
+			Win8LabelStyle::Win8LabelStyle(bool forShortcutKey)
 			{
 				textElement=GuiSolidLabelElement::Create();
 				textElement->SetColor(GetDefaultTextColor());
 				
 				boundsComposition=new GuiBoundsComposition;
-				boundsComposition->SetOwnedElement(textElement);
-				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElementAndChildren);
+				if (forShortcutKey)
+				{
+					{
+						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+						element->SetColor(Color(100, 100, 100));
+						boundsComposition->SetOwnedElement(element);
+					}
+
+					auto containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(containerComposition);
+					{
+						GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+						element->SetColor(Color(255, 255, 225));
+						containerComposition->SetOwnedElement(element);
+					}
+
+					auto labelComposition = new GuiBoundsComposition;
+					labelComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+					labelComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+					labelComposition->SetOwnedElement(textElement);
+					containerComposition->AddChild(labelComposition);
+				}
+				else
+				{
+					boundsComposition->SetOwnedElement(textElement);
+				}
 			}
 
 			Win8LabelStyle::~Win8LabelStyle()

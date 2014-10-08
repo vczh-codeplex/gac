@@ -49,7 +49,12 @@ Win8Theme
 
 			controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
 			{
-				return new Win8LabelStyle;
+				return new Win8LabelStyle(false);
+			}
+
+			controls::GuiLabel::IStyleController* Win8Theme::CreateShortcutKeyStyle()
+			{
+				return new Win8LabelStyle(true);
 			}
 
 			controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()

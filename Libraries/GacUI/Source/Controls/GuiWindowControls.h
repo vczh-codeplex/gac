@@ -285,6 +285,11 @@ Window
 					/// </summary>
 					/// <returns>Returns the control style. Returns null for default control style.</returns>
 					virtual IStyleController*			CreateTooltipStyle() = 0;
+					/// <summary>
+					/// Create a control style for shortcut key label control.
+					/// </summary>
+					/// <returns>Returns the control style. Returns null for default control style.</returns>
+					virtual GuiLabel::IStyleController*	CreateShortcutKeyStyle() = 0;
 				};
 				
 				/// <summary>Style controller with default behavior for <see cref="GuiWindow"/>.</summary>
@@ -312,6 +317,7 @@ Window
 					bool								GetTitleBar()override;
 					void								SetTitleBar(bool visible)override;
 					IStyleController*					CreateTooltipStyle()override;
+					GuiLabel::IStyleController*			CreateShortcutKeyStyle()override;
 				};
 			protected:
 				IStyleController*						styleController;

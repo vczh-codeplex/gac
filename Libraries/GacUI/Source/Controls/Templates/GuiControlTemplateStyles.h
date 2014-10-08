@@ -98,6 +98,7 @@ Control Template
 				GuiWindowTemplate*												controlTemplate;
 				controls::GuiWindow*											window;
 				Ptr<GuiTemplate::IFactory>										tooltipTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										shortcutKeyTemplateFactory;
 
 			public:
 				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
@@ -119,6 +120,7 @@ Control Template
 				bool															GetTitleBar()override;
 				void															SetTitleBar(bool visible)override;
 				controls::GuiWindow::IStyleController*							CreateTooltipStyle()override;
+				controls::GuiLabel::IStyleController*							CreateShortcutKeyStyle()override;
 			};
 
 			class GuiButtonTemplate_StyleProvider
