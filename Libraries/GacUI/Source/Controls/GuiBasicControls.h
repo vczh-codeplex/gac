@@ -264,7 +264,7 @@ Basic Construction
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
 				template<typename T>
-				T* QueryService()
+				T* QueryTypedService()
 				{
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}

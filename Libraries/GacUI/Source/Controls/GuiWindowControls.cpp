@@ -759,7 +759,7 @@ GuiWindow
 				{
 					GuiControl* control = controls[current++];
 
-					if (auto container = control->QueryService<IGuiAltActionContainer>())
+					if (auto container = control->QueryTypedService<IGuiAltActionContainer>())
 					{
 						vint count = container->GetAltActionCount();
 						for (vint i = 0; i < count; i++)
@@ -769,7 +769,7 @@ GuiWindow
 							continue;
 						}
 					}
-					else if (auto action = control->QueryService<IGuiAltAction>())
+					else if (auto action = control->QueryTypedService<IGuiAltAction>())
 					{
 						if (action->IsAltAvailable())
 						{

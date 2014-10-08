@@ -1014,7 +1014,7 @@ GuiTabTemplate_StyleProvider
 
 			compositions::IGuiAltAction* GuiTabTemplate_StyleProvider::GetTabAltAction(vint index)
 			{
-				return headerButtons[index]->QueryService<IGuiAltAction>();
+				return headerButtons[index]->QueryTypedService<IGuiAltAction>();
 			}
 
 /***********************************************************************

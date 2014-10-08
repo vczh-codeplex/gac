@@ -388,7 +388,7 @@ Win7TabStyle
 
 			compositions::IGuiAltAction* Win7TabStyle::GetTabAltAction(vint index)
 			{
-				return headerButtons[index]->QueryService<IGuiAltAction>();
+				return headerButtons[index]->QueryTypedService<IGuiAltAction>();
 			}
 		}
 	}
