@@ -76,6 +76,82 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host)
 			{
+				FOREACH(GuiGraphicsComposition*, title, currentActiveAltTitles.Values())
+				{
+					SafeDeleteComposition(title);
+				}
+				currentActiveAltActions.Clear();
+				currentActiveAltTitles.Clear();
+				currentAltPrefix = L"";
+
+				Group<WString, IGuiAltAction*> actions;
+				host->CollectAltActions(actions);
+				if (actions.Count() == 0)
+				{
+					CloseAltHost();
+					return;
+				}
+
+				host->OnActivatedAltHost(currentAltHost);
+				currentAltHost = host;
+
+				vint count = actions.Count();
+				for (vint i = 0; i < count; i++)
+				{
+					const auto& values = actions.GetByIndex(i);
+					vint numberLength = 0;
+					if (values.Count() == 1)
+					{
+						numberLength = 0;
+					}
+					else if (values.Count() <= 10)
+					{
+						numberLength = 1;
+					}
+					else if (values.Count() <= 100)
+					{
+						numberLength = 2;
+					}
+					else if (values.Count() <= 1000)
+					{
+						numberLength = 3;
+					}
+					else
+					{
+						continue;
+					}
+
+					FOREACH_INDEXER(IGuiAltAction*, action, index, values)
+					{
+						WString key = actions.Keys()[i];
+						if (numberLength > 0)
+						{
+							WString number = wtoi(index);
+							while (number.Length() < numberLength)
+							{
+								number = L"0" + number;
+							}
+							key += number;
+						}
+						currentActiveAltActions.Add(key, action);
+					}
+				}
+
+				count = currentActiveAltActions.Count();
+				for (vint i = 0; i < count; i++)
+				{
+					auto key = currentActiveAltActions.Keys()[i];
+					auto container = currentActiveAltActions.Values()[i]->GetAltComposition();
+
+					auto composition = new GuiBoundsComposition();
+					composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+					container->AddChild(composition);
+
+					auto label = GuiSolidLabelElement::Create();
+					label->SetFont(GetCurrentController()->ResourceService()->GetDefaultFont());
+					label->SetText(key);
+					composition->SetOwnedElement(label);
+				}
 			}
 
 			void GuiGraphicsHost::LeaveAltHost()
@@ -88,6 +164,15 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::LeaveAltKey()
 			{
+			}
+
+			void GuiGraphicsHost::CloseAltHost()
+			{
+				while (currentAltHost)
+				{
+					currentAltHost->OnDeactivatedAltHost();
+					currentAltHost = currentAltHost->GetPreviousAltHost();
+				}
 			}
 
 			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
@@ -338,6 +423,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::LeftButtonDown(const NativeWindowMouseInfo& info)
 			{
+				CloseAltHost();
 				MouseCapture(info);
 				OnMouseInput(info, &GuiGraphicsEventReceiver::leftButtonDown);
 			}
@@ -356,6 +442,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::RightButtonDown(const NativeWindowMouseInfo& info)
 			{
+				CloseAltHost();
 				MouseCapture(info);
 				OnMouseInput(info, &GuiGraphicsEventReceiver::rightButtonDown);
 			}
@@ -374,6 +461,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::MiddleButtonDown(const NativeWindowMouseInfo& info)
 			{
+				CloseAltHost();
 				MouseCapture(info);
 				OnMouseInput(info, &GuiGraphicsEventReceiver::middleButtonDown);
 			}
@@ -482,43 +570,24 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::KeyDown(const NativeWindowKeyInfo& info)
 			{
-				if (!info.ctrl && !info.shift)
+				if (!info.ctrl && !info.shift && currentAltHost)
 				{
-					if (info.code == VKEY_LMENU || info.code == VKEY_RMENU)
+					if (info.code == VKEY_ESCAPE)
 					{
-						if (!currentAltHost)
-						{
-							if (auto controlHost = windowComposition->GetRelatedControlHost())
-							{
-								if (auto altHost = controlHost->QueryTypedService<IGuiAltActionHost>())
-								{
-									if (!altHost->GetPreviousAltHost())
-									{
-										EnterAltHost(altHost);
-									}
-								}
-							}
-						}
+						LeaveAltHost();
+						return;
 					}
-					else if (currentAltHost)
+					else if (info.code == VKEY_BACK)
 					{
-						if (info.code == VKEY_ESCAPE)
-						{
-							LeaveAltHost();
-							return;
-						}
-						else if (info.code == VKEY_BACK)
-						{
-							LeaveAltKey();
-						}
-						else if (VKEY_NUMPAD0 <= info.code && info.code <= VKEY_NUMPAD9)
-						{
-							EnterAltKey('0' + (info.code - VKEY_NUMPAD0));
-						}
-						else if (('0' <= info.code && info.code <= '9') || ('A' <= info.code && info.code <= 'Z'))
-						{
-							EnterAltKey((wchar_t)info.code);
-						}
+						LeaveAltKey();
+					}
+					else if (VKEY_NUMPAD0 <= info.code && info.code <= VKEY_NUMPAD9)
+					{
+						EnterAltKey('0' + (info.code - VKEY_NUMPAD0));
+					}
+					else if (('0' <= info.code && info.code <= '9') || ('A' <= info.code && info.code <= 'Z'))
+					{
+						EnterAltKey((wchar_t)info.code);
 					}
 				}
 
@@ -547,6 +616,25 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyDown(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU  && !currentAltHost)
+				{
+					if (auto controlHost = windowComposition->Children()[0]->GetRelatedControlHost())
+					{
+						if (auto altHost = controlHost->QueryTypedService<IGuiAltActionHost>())
+						{
+							if (!altHost->GetPreviousAltHost())
+							{
+								EnterAltHost(altHost);
+							}
+						}
+					}
+				}
+
+				if (currentAltHost)
+				{
+					return;
+				}
+
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::systemKeyDown);

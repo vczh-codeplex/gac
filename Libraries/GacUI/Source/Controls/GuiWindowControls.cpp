@@ -766,8 +766,8 @@ GuiWindow
 						{
 							auto action = container->GetAltAction(i);
 							actions.Add(action->GetAlt(), action);
-							continue;
 						}
+						continue;
 					}
 					else if (auto action = control->QueryTypedService<IGuiAltAction>())
 					{

@@ -186,6 +186,7 @@ Host
 				void									LeaveAltHost();
 				void									EnterAltKey(wchar_t key);
 				void									LeaveAltKey();
+				void									CloseAltHost();
 
 				void									DisconnectCompositionInternal(GuiGraphicsComposition* composition);
 				void									MouseCapture(const NativeWindowMouseInfo& info);

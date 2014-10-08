@@ -233,6 +233,11 @@ GuiMenuButton
 				}
 			}
 
+			bool GuiMenuButton::IsAltAvailable()
+			{
+				return true;
+			}
+
 			compositions::IGuiAltActionHost* GuiMenuButton::GetActivatingAltHost()
 			{
 				if (subMenu)
