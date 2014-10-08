@@ -492,7 +492,10 @@ GuiGraphicsHost
 							{
 								if (auto altHost = controlHost->QueryTypedService<IGuiAltActionHost>())
 								{
-									EnterAltHost(altHost);
+									if (!altHost->GetPreviousAltHost())
+									{
+										EnterAltHost(altHost);
+									}
 								}
 							}
 						}
