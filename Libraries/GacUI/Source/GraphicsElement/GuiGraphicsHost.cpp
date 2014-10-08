@@ -151,6 +151,12 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::LeaveAltHost()
 			{
+				if (currentAltHost)
+				{
+					ClearAltHost();
+					currentAltHost->OnDeactivatedAltHost();
+					currentAltHost = currentAltHost->GetPreviousAltHost();
+				}
 			}
 
 			void GuiGraphicsHost::EnterAltKey(wchar_t key)
@@ -623,15 +629,18 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyDown(const NativeWindowKeyInfo& info)
 			{
-				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && !currentAltHost)
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU)
 				{
-					if (auto window = dynamic_cast<GuiWindow*>(windowComposition->Children()[0]->GetRelatedControlHost()))
+					if (!supressingAlt && !currentAltHost)
 					{
-						if (auto altHost = window->QueryTypedService<IGuiAltActionHost>())
+						if (auto window = dynamic_cast<GuiWindow*>(windowComposition->Children()[0]->GetRelatedControlHost()))
 						{
-							if (!altHost->GetPreviousAltHost())
+							if (auto altHost = window->QueryTypedService<IGuiAltActionHost>())
 							{
-								EnterAltHost(altHost, window);
+								if (!altHost->GetPreviousAltHost())
+								{
+									EnterAltHost(altHost, window);
+								}
 							}
 						}
 					}
@@ -650,9 +659,17 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyUp(const NativeWindowKeyInfo& info)
 			{
-				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && currentAltHost)
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU)
 				{
-					// surpress the system's alt effect
+					if (supressingAlt)
+					{
+						supressingAlt = false;
+					}
+					else if (nativeWindow)
+					{
+						supressingAlt = true;
+						nativeWindow->SupressAlt();
+					}
 				}
 
 				if(focusedComposition && focusedComposition->HasEventReceiver())
@@ -663,9 +680,12 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::Char(const NativeWindowCharInfo& info)
 			{
-				if(focusedComposition && focusedComposition->HasEventReceiver())
+				if (!currentAltHost)
 				{
-					OnCharInput(info, focusedComposition, &GuiGraphicsEventReceiver::charInput);
+					if(focusedComposition && focusedComposition->HasEventReceiver())
+					{
+						OnCharInput(info, focusedComposition, &GuiGraphicsEventReceiver::charInput);
+					}
 				}
 			}
 
