@@ -35,6 +35,7 @@ Theme
 				controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle()override;
 				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				controls::GuiLabel::IStyleController*								CreateShortcutKeyStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;

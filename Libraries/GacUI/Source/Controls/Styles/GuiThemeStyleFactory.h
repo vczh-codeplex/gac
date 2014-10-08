@@ -49,6 +49,9 @@ namespace vl
 				/// <summary>Create a style for label.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
+				/// <summary>Create a style for label displaying Alt-combined shortcut key.</summary>
+				/// <returns>The created style.</returns>
+				virtual controls::GuiLabel::IStyleController*								CreateShortcutKeyStyle()=0;
 				/// <summary>Create a style for scrollable control containers.</summary>
 				/// <returns>The created style.</returns>
 				virtual controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()=0;

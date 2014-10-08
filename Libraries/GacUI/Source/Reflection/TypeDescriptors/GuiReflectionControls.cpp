@@ -102,6 +102,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateWindowStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateTooltipStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateLabelStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateShortcutKeyStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateScrollContainerStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateGroupBoxStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateTabStyle, NO_PARAMETER)
@@ -367,6 +368,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
 
 				CLASS_MEMBER_METHOD(CreateTooltipStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateShortcutKeyStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiWindow::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiPopup)

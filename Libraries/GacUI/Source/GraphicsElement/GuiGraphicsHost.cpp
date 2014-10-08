@@ -1,5 +1,6 @@
 #include "GuiGraphicsHost.h"
 #include "..\Controls\GuiWindowControls.h"
+#include "..\Controls\Styles\GuiThemeStyleFactory.h"
 #include "..\..\..\..\Common\Source\Collections\OperationCopyFrom.h"
 
 namespace vl
@@ -11,6 +12,7 @@ namespace vl
 			using namespace collections;
 			using namespace controls;
 			using namespace elements;
+			using namespace theme;
 
 /***********************************************************************
 GuiGraphicsAnimationManager
@@ -74,15 +76,9 @@ IGuiAltAction
 GuiGraphicsHost
 ***********************************************************************/
 
-			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host)
+			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host, controls::GuiWindow* window)
 			{
-				FOREACH(GuiGraphicsComposition*, title, currentActiveAltTitles.Values())
-				{
-					SafeDeleteComposition(title);
-				}
-				currentActiveAltActions.Clear();
-				currentActiveAltTitles.Clear();
-				currentAltPrefix = L"";
+				ClearAltHost();
 
 				Group<WString, IGuiAltAction*> actions;
 				host->CollectAltActions(actions);
@@ -138,19 +134,18 @@ GuiGraphicsHost
 				}
 
 				count = currentActiveAltActions.Count();
+				auto windowStyle = dynamic_cast<GuiWindow::IStyleController*>(window->GetStyleController());
 				for (vint i = 0; i < count; i++)
 				{
 					auto key = currentActiveAltActions.Keys()[i];
-					auto container = currentActiveAltActions.Values()[i]->GetAltComposition();
+					auto composition = currentActiveAltActions.Values()[i]->GetAltComposition();
 
-					auto composition = new GuiBoundsComposition();
-					composition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
-					container->AddChild(composition);
-
-					auto label = GuiSolidLabelElement::Create();
-					label->SetFont(GetCurrentController()->ResourceService()->GetDefaultFont());
+					auto labelStyle = windowStyle->CreateShortcutKeyStyle();
+					if (!labelStyle)labelStyle = GetCurrentTheme()->CreateShortcutKeyStyle();
+					auto label = new GuiLabel(labelStyle);
 					label->SetText(key);
-					composition->SetOwnedElement(label);
+					composition->AddChild(label->GetBoundsComposition());
+					currentActiveAltTitles.Add(key, label);
 				}
 			}
 
@@ -166,8 +161,20 @@ GuiGraphicsHost
 			{
 			}
 
+			void GuiGraphicsHost::ClearAltHost()
+			{
+				FOREACH(GuiControl*, title, currentActiveAltTitles.Values())
+				{
+					SafeDeleteControl(title);
+				}
+				currentActiveAltActions.Clear();
+				currentActiveAltTitles.Clear();
+				currentAltPrefix = L"";
+			}
+
 			void GuiGraphicsHost::CloseAltHost()
 			{
+				ClearAltHost();
 				while (currentAltHost)
 				{
 					currentAltHost->OnDeactivatedAltHost();
@@ -616,15 +623,15 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyDown(const NativeWindowKeyInfo& info)
 			{
-				if (!info.ctrl && !info.shift && info.code == VKEY_MENU  && !currentAltHost)
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && !currentAltHost)
 				{
-					if (auto controlHost = windowComposition->Children()[0]->GetRelatedControlHost())
+					if (auto window = dynamic_cast<GuiWindow*>(windowComposition->Children()[0]->GetRelatedControlHost()))
 					{
-						if (auto altHost = controlHost->QueryTypedService<IGuiAltActionHost>())
+						if (auto altHost = window->QueryTypedService<IGuiAltActionHost>())
 						{
 							if (!altHost->GetPreviousAltHost())
 							{
-								EnterAltHost(altHost);
+								EnterAltHost(altHost, window);
 							}
 						}
 					}
@@ -643,6 +650,11 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyUp(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && currentAltHost)
+				{
+					// surpress the system's alt effect
+				}
+
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::systemKeyUp);

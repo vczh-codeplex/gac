@@ -86,7 +86,7 @@ Container
 				elements::GuiSolidLabelElement*				textElement;
 			public:
 				/// <summary>Create the style.</summary>
-				Win8LabelStyle();
+				Win8LabelStyle(bool forShortcutKey);
 				~Win8LabelStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
