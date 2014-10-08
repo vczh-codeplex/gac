@@ -594,6 +594,11 @@ Native Window
 			/// </summary>
 			/// <param name="topmost">True to make the window always  on top of the desktop.</param>
 			virtual void				SetTopMost(bool topmost)=0;
+
+			/// <summary>
+			/// Supress the system's Alt+X hot key
+			/// </summary>
+			virtual void				SupressAlt() = 0;
 			
 			/// <summary>
 			/// Install an message listener.
