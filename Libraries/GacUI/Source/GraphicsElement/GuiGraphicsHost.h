@@ -186,7 +186,6 @@ Host
 				AltActionMap							currentActiveAltActions;
 				AltControlMap							currentActiveAltTitles;
 				WString									currentAltPrefix;
-				bool									supressingAlt;
 
 				void									EnterAltHost(IGuiAltActionHost* host, controls::GuiWindow* window);
 				void									LeaveAltHost();

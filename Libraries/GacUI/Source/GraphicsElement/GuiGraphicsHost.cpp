@@ -629,18 +629,15 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyDown(const NativeWindowKeyInfo& info)
 			{
-				if (!info.ctrl && !info.shift && info.code == VKEY_MENU)
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && !currentAltHost)
 				{
-					if (!supressingAlt && !currentAltHost)
+					if (auto window = dynamic_cast<GuiWindow*>(windowComposition->Children()[0]->GetRelatedControlHost()))
 					{
-						if (auto window = dynamic_cast<GuiWindow*>(windowComposition->Children()[0]->GetRelatedControlHost()))
+						if (auto altHost = window->QueryTypedService<IGuiAltActionHost>())
 						{
-							if (auto altHost = window->QueryTypedService<IGuiAltActionHost>())
+							if (!altHost->GetPreviousAltHost())
 							{
-								if (!altHost->GetPreviousAltHost())
-								{
-									EnterAltHost(altHost, window);
-								}
+								EnterAltHost(altHost, window);
 							}
 						}
 					}
@@ -659,15 +656,10 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyUp(const NativeWindowKeyInfo& info)
 			{
-				if (!info.ctrl && !info.shift && info.code == VKEY_MENU)
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && nativeWindow)
 				{
-					if (supressingAlt)
+					if (nativeWindow)
 					{
-						supressingAlt = false;
-					}
-					else if (nativeWindow)
-					{
-						supressingAlt = true;
 						nativeWindow->SupressAlt();
 					}
 				}

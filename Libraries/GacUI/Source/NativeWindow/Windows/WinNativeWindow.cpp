@@ -563,9 +563,10 @@ WindowsForm
 					case WM_SYSKEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							if (!lparamAltUp && !info.ctrl && !info.shift && info.code == VK_MENU)
+							if (supressingAlt && !info.ctrl && !info.shift && info.code == VK_MENU)
 							{
-								lparamAltUp = lParam;
+								supressingAlt = false;
+								break;
 							}
 							for(vint i=0;i<listeners.Count();i++)
 							{
@@ -576,9 +577,9 @@ WindowsForm
 					case WM_SYSKEYDOWN:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
-							if (!lparamAltDown && !info.ctrl && !info.shift && info.code == VK_MENU)
+							if (supressingAlt && !info.ctrl && !info.shift && info.code == VK_MENU)
 							{
-								lparamAltDown = lParam;
+								break;
 							}
 							for(vint i=0;i<listeners.Count();i++)
 							{
@@ -801,8 +802,7 @@ WindowsForm
 				Interface*							graphicsHandler;
 				bool								customFrameMode;
 				List<Ptr<INativeMessageHandler>>	messageHandlers;
-				LPARAM								lparamAltDown;
-				LPARAM								lparamAltUp;
+				bool								supressingAlt;
 
 			public:
 				WindowsForm(HWND parent, WString className, HINSTANCE hInstance)
@@ -814,8 +814,7 @@ WindowsForm
 					,mouseHoving(false)
 					,graphicsHandler(0)
 					,customFrameMode(false)
-					,lparamAltDown(0)
-					,lparamAltUp(0)
+					,supressingAlt(false)
 				{
 					DWORD exStyle=WS_EX_APPWINDOW | WS_EX_CONTROLPARENT;
 					DWORD style=WS_BORDER | WS_CAPTION | WS_SIZEBOX | WS_SYSMENU | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
@@ -1247,8 +1246,12 @@ WindowsForm
 
 				void SupressAlt()
 				{
-					PostMessage(handle, WM_SYSKEYDOWN, VK_MENU, lparamAltDown);
-					PostMessage(handle, WM_SYSKEYUP, VK_MENU, lparamAltUp);
+					if (!supressingAlt)
+					{
+						supressingAlt = true;
+						PostMessage(handle, WM_SYSKEYDOWN, VK_MENU, 0);
+						PostMessage(handle, WM_SYSKEYUP, VK_MENU, 0);
+					}
 				}
 
 				bool InstallListener(INativeWindowListener* listener)
