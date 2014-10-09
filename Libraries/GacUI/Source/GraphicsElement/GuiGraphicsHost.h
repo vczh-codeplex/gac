@@ -147,7 +147,8 @@ Alt-Combined Shortcut Key Interfaces
 			public:
 				/// <summary>The identifier for this service.</summary>
 				static const wchar_t* const				Identifier;
-
+				
+				virtual GuiGraphicsComposition*			GetAltComposition() = 0;
 				virtual IGuiAltActionHost*				GetPreviousAltHost() = 0;
 				virtual void							OnActivatedAltHost(IGuiAltActionHost* previousHost) = 0;
 				virtual void							OnDeactivatedAltHost() = 0;
@@ -187,10 +188,11 @@ Host
 				AltControlMap							currentActiveAltTitles;
 				WString									currentAltPrefix;
 
-				void									EnterAltHost(IGuiAltActionHost* host, controls::GuiWindow* window);
+				void									EnterAltHost(IGuiAltActionHost* host);
 				void									LeaveAltHost();
 				void									EnterAltKey(wchar_t key);
 				void									LeaveAltKey();
+				void									CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions);
 				void									ClearAltHost();
 				void									CloseAltHost();
 

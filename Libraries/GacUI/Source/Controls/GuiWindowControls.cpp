@@ -739,6 +739,11 @@ GuiWindow
 			{
 			}
 
+			compositions::GuiGraphicsComposition* GuiWindow::GetAltComposition()
+			{
+				return boundsComposition;
+			}
+
 			compositions::IGuiAltActionHost* GuiWindow::GetPreviousAltHost()
 			{
 				return previousAltHost;
