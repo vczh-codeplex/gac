@@ -189,10 +189,11 @@ Host
 				AltActionMap							currentActiveAltActions;
 				AltControlMap							currentActiveAltTitles;
 				WString									currentAltPrefix;
+				vint									supressAltKey;
 
 				void									EnterAltHost(IGuiAltActionHost* host);
 				void									LeaveAltHost();
-				void									EnterAltKey(wchar_t key);
+				bool									EnterAltKey(wchar_t key);
 				void									LeaveAltKey();
 				void									CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions);
 				vint									FilterTitles();

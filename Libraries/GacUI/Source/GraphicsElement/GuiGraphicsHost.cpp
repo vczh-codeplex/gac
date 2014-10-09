@@ -151,7 +151,7 @@ GuiGraphicsHost
 				}
 			}
 
-			void GuiGraphicsHost::EnterAltKey(wchar_t key)
+			bool GuiGraphicsHost::EnterAltKey(wchar_t key)
 			{
 				currentAltPrefix += key;
 				vint index = currentActiveAltActions.Keys().IndexOf(currentAltPrefix);
@@ -175,7 +175,9 @@ GuiGraphicsHost
 						CloseAltHost();
 					}
 					action->OnActiveAlt();
+					return true;
 				}
+				return false;
 			}
 
 			void GuiGraphicsHost::LeaveAltKey()
@@ -715,11 +717,19 @@ GuiGraphicsHost
 					}
 					else if (VKEY_NUMPAD0 <= info.code && info.code <= VKEY_NUMPAD9)
 					{
-						EnterAltKey('0' + (info.code - VKEY_NUMPAD0));
+						if (EnterAltKey('0' + (info.code - VKEY_NUMPAD0)))
+						{
+							supressAltKey = info.code;
+							return;
+						}
 					}
 					else if (('0' <= info.code && info.code <= '9') || ('A' <= info.code && info.code <= 'Z'))
 					{
-						EnterAltKey((wchar_t)info.code);
+						if (EnterAltKey((wchar_t)info.code))
+						{
+							supressAltKey = info.code;
+							return;
+						}
 					}
 				}
 
@@ -740,6 +750,12 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::KeyUp(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && info.code == supressAltKey)
+				{
+					supressAltKey = 0;
+					return;
+				}
+
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::keyUp);
@@ -791,7 +807,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::Char(const NativeWindowCharInfo& info)
 			{
-				if (!currentAltHost)
+				if (!currentAltHost && !supressAltKey)
 				{
 					if(focusedComposition && focusedComposition->HasEventReceiver())
 					{
