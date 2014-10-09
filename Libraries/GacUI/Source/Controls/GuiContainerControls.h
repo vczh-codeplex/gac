@@ -24,18 +24,24 @@ Tab Control
 			class GuiTab;
 
 			/// <summary>Represents a page of a <see cref="GuiTab"/>. A tab page is not a control.</summary>
-			class GuiTabPage : public Object, public Description<GuiTabPage>
+			class GuiTabPage : public Object, protected compositions::IGuiAltActionHost, public Description<GuiTabPage>
 			{
 				friend class GuiTab;
 				friend class Ptr<GuiTabPage>;
 			protected:
-				compositions::GuiBoundsComposition*				containerComposition;
+				GuiControl*										containerControl;
 				GuiTab*											owner;
 				WString											alt;
 				WString											text;
+				compositions::IGuiAltActionHost*				previousAltHost;
 
 				bool											AssociateTab(GuiTab* _owner);
 				bool											DeassociateTab(GuiTab* _owner);
+				compositions::GuiGraphicsComposition*			GetAltComposition()override;
+				compositions::IGuiAltActionHost*				GetPreviousAltHost()override;
+				void											OnActivatedAltHost(compositions::IGuiAltActionHost* previousHost)override;
+				void											OnDeactivatedAltHost()override;
+				void											CollectAltActions(collections::Group<WString, compositions::IGuiAltAction*>& actions)override;
 			public:
 				/// <summary>Create a tab page.</summary>
 				GuiTabPage();
@@ -52,7 +58,7 @@ Tab Control
 
 				/// <summary>Get the container control to store all sub controls.</summary>
 				/// <returns>The container control to store all sub controls.</returns>
-				compositions::GuiBoundsComposition*				GetContainerComposition();
+				compositions::GuiGraphicsComposition*			GetContainerComposition();
 				/// <summary>Get the owner <see cref="GuiTab"/>.</summary>
 				/// <returns>The owner <see cref="GuiTab"/>.</returns>
 				GuiTab*											GetOwnerTab();

@@ -72,6 +72,46 @@ IGuiAltAction
 				return true;
 			}
 
+			void IGuiAltActionHost::CollectAltActionsFromControl(controls::GuiControl* control, collections::Group<WString, IGuiAltAction*>& actions)
+			{
+				List<GuiControl*> controls;
+				controls.Add(control);
+				vint current = 0;
+
+				while (current < controls.Count())
+				{
+					GuiControl* control = controls[current++];
+
+					if (auto container = control->QueryTypedService<IGuiAltActionContainer>())
+					{
+						vint count = container->GetAltActionCount();
+						for (vint i = 0; i < count; i++)
+						{
+							auto action = container->GetAltAction(i);
+							actions.Add(action->GetAlt(), action);
+						}
+						continue;
+					}
+					else if (auto action = control->QueryTypedService<IGuiAltAction>())
+					{
+						if (action->IsAltAvailable())
+						{
+							if (action->IsAltEnabled())
+							{
+								actions.Add(action->GetAlt(), action);
+								continue;
+							}
+						}
+					}
+
+					vint count = control->GetChildrenCount();
+					for (vint i = 0; i < count; i++)
+					{
+						controls.Add(control->GetChild(i));
+					}
+				}
+			}
+
 /***********************************************************************
 GuiGraphicsHost
 ***********************************************************************/
