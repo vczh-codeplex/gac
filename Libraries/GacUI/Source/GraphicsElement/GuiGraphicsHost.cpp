@@ -112,10 +112,34 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::EnterAltKey(wchar_t key)
 			{
+				currentAltPrefix += key;
+				vint index = currentActiveAltActions.Keys().IndexOf(currentAltPrefix);
+				if (index == -1)
+				{
+					FilterTitles();
+				}
+				else
+				{
+					auto action = currentActiveAltActions.Values()[index];
+					if (action->GetActivatingAltHost())
+					{
+						EnterAltHost(action->GetActivatingAltHost());
+					}
+					else
+					{
+						CloseAltHost();
+					}
+					action->OnActiveAlt();
+				}
 			}
 
 			void GuiGraphicsHost::LeaveAltKey()
 			{
+				if (currentAltPrefix.Length() > 1)
+				{
+					currentAltPrefix = currentAltPrefix.Left(currentAltPrefix.Length() - 1);
+				}
+				FilterTitles();
 			}
 
 			void GuiGraphicsHost::CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions)
@@ -179,6 +203,17 @@ GuiGraphicsHost
 						composition->AddChild(label->GetBoundsComposition());
 						currentActiveAltTitles.Add(key, label);
 					}
+				}
+			}
+
+			void GuiGraphicsHost::FilterTitles()
+			{
+				vint count = currentActiveAltTitles.Count();
+				for (vint i = 0; i < count; i++)
+				{
+					auto key = currentActiveAltTitles.Keys()[i];
+					auto value = currentActiveAltTitles.Values()[i];
+					value->SetVisible(key.Length() >= currentAltPrefix.Length() && key.Left(currentAltPrefix.Length()) == currentAltPrefix);
 				}
 			}
 
