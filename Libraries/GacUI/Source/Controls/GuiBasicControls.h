@@ -424,6 +424,7 @@ Buttons
 				ControlState							controlState;
 				
 				void									OnParentLineChanged()override;
+				void									OnActiveAlt()override;
 				void									UpdateControlState();
 				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void									OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
