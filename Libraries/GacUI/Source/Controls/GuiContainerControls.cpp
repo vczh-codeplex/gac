@@ -21,8 +21,7 @@ GuiTabPage
 				else
 				{
 					owner=_owner;
-					GuiEventArgs arguments(containerComposition);
-					PageInstalled.Execute(arguments);
+					PageInstalled.Execute(containerControl->GetNotifyEventArguments());
 					return true;
 				}
 			}
@@ -31,8 +30,7 @@ GuiTabPage
 			{
 				if(owner && owner==_owner)
 				{
-					GuiEventArgs arguments(containerComposition);
-					PageUninstalled.Execute(arguments);
+					PageUninstalled.Execute(containerControl->GetNotifyEventArguments());
 					owner=0;
 					return true;
 				}
@@ -42,30 +40,56 @@ GuiTabPage
 				}
 			}
 
-			GuiTabPage::GuiTabPage()
-				:containerComposition(0)
-				,owner(0)
+			compositions::GuiGraphicsComposition* GuiTabPage::GetAltComposition()
 			{
-				containerComposition = new GuiBoundsComposition;
-				containerComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+				return containerControl->GetContainerComposition();
+			}
+
+			compositions::IGuiAltActionHost* GuiTabPage::GetPreviousAltHost()
+			{
+				return previousAltHost;
+			}
+
+			void GuiTabPage::OnActivatedAltHost(compositions::IGuiAltActionHost* previousHost)
+			{
+				previousAltHost = previousHost;
+			}
+
+			void GuiTabPage::OnDeactivatedAltHost()
+			{
+				previousAltHost = 0;
+			}
+
+			void GuiTabPage::CollectAltActions(collections::Group<WString, compositions::IGuiAltAction*>& actions)
+			{
+				IGuiAltActionHost::CollectAltActionsFromControl(containerControl, actions);
+			}
+
+			GuiTabPage::GuiTabPage()
+				:containerControl(0)
+				,owner(0)
+				,previousAltHost(0)
+			{
+				containerControl = new GuiControl(new GuiControl::EmptyStyleController());
+				containerControl->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
 				
-				AltChanged.SetAssociatedComposition(containerComposition);
-				TextChanged.SetAssociatedComposition(containerComposition);
-				PageInstalled.SetAssociatedComposition(containerComposition);
-				PageUninstalled.SetAssociatedComposition(containerComposition);
+				AltChanged.SetAssociatedComposition(containerControl->GetBoundsComposition());
+				TextChanged.SetAssociatedComposition(containerControl->GetBoundsComposition());
+				PageInstalled.SetAssociatedComposition(containerControl->GetBoundsComposition());
+				PageUninstalled.SetAssociatedComposition(containerControl->GetBoundsComposition());
 			}
 
 			GuiTabPage::~GuiTabPage()
 			{
-				if(!containerComposition->GetParent())
+				if (!containerControl->GetParent())
 				{
-					delete containerComposition;
+					delete containerControl;
 				}
 			}
 
-			compositions::GuiBoundsComposition* GuiTabPage::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiTabPage::GetContainerComposition()
 			{
-				return containerComposition;
+				return containerControl->GetContainerComposition();
 			}
 
 			GuiTab* GuiTabPage::GetOwnerTab()
@@ -88,8 +112,7 @@ GuiTabPage
 				if (alt != value)
 				{
 					alt = value;
-					GuiEventArgs arguments(containerComposition);
-					AltChanged.Execute(arguments);
+					AltChanged.Execute(containerControl->GetNotifyEventArguments());
 				}
 				return true;
 			}
@@ -108,8 +131,7 @@ GuiTabPage
 					{
 						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
 					}
-					GuiEventArgs arguments(containerComposition);
-					TextChanged.Execute(arguments);
+					TextChanged.Execute(containerControl->GetNotifyEventArguments());
 				}
 			}
 

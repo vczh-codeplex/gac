@@ -147,6 +147,8 @@ Alt-Combined Shortcut Key Interfaces
 			public:
 				/// <summary>The identifier for this service.</summary>
 				static const wchar_t* const				Identifier;
+
+				static void								CollectAltActionsFromControl(controls::GuiControl* control, collections::Group<WString, IGuiAltAction*>& actions);
 				
 				virtual GuiGraphicsComposition*			GetAltComposition() = 0;
 				virtual IGuiAltActionHost*				GetPreviousAltHost() = 0;
