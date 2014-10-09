@@ -88,6 +88,7 @@ Menu
 			protected:
 				GuiControl*								owner;
 
+				void									OnDeactivatedAltHost()override;
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
 				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);

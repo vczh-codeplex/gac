@@ -91,6 +91,11 @@ GuiMenu
 				}
 			}
 
+			void GuiMenu::OnDeactivatedAltHost()
+			{
+				Hide();
+			}
+
 			void GuiMenu::MouseClickedOnOtherWindow(GuiWindow* window)
 			{
 				GuiMenu* targetMenu=dynamic_cast<GuiMenu*>(window);

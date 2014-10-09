@@ -98,8 +98,9 @@ GuiGraphicsHost
 				if (currentAltHost)
 				{
 					ClearAltHost();
+					auto previousHost = currentAltHost->GetPreviousAltHost();
 					currentAltHost->OnDeactivatedAltHost();
-					currentAltHost = currentAltHost->GetPreviousAltHost();
+					currentAltHost = previousHost;
 
 					if (currentAltHost)
 					{
