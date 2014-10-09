@@ -195,7 +195,7 @@ Host
 				void									EnterAltKey(wchar_t key);
 				void									LeaveAltKey();
 				void									CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions);
-				void									FilterTitles();
+				vint									FilterTitles();
 				void									ClearAltHost();
 				void									CloseAltHost();
 
