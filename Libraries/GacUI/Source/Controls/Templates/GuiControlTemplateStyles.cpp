@@ -1013,9 +1013,11 @@ GuiTabTemplate_StyleProvider
 				UpdateHeaderLayout();
 			}
 
-			void GuiTabTemplate_StyleProvider::SetTabAlt(vint index, const WString& value)
+			void GuiTabTemplate_StyleProvider::SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)
 			{
-				headerButtons[index]->SetAlt(value);
+				auto button = headerButtons[index];
+				button->SetAlt(value);
+				button->SetActivatingAltHost(host);
 			}
 
 			compositions::IGuiAltAction* GuiTabTemplate_StyleProvider::GetTabAltAction(vint index)

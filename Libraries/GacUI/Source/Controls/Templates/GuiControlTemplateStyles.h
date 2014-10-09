@@ -421,7 +421,7 @@ Control Template
 				void															RemoveTab(vint index)override;
 				void															MoveTab(vint oldIndex, vint newIndex)override;
 				void															SetSelectedTab(vint index)override;
-				void															SetTabAlt(vint index, const WString& value)override;
+				void															SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)override;
 				compositions::IGuiAltAction*									GetTabAltAction(vint index)override;
 			};
 

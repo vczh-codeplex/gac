@@ -371,9 +371,9 @@ Interface Proxy
 						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
 					}
 
-					void SetTabAlt(vint index, const WString& value)override
+					void SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)override
 					{
-						INVOKE_INTERFACE_PROXY(SetTabAlt, index, value);
+						INVOKE_INTERFACE_PROXY(SetTabAlt, index, value, host);
 					}
 
 					compositions::IGuiAltAction* GetTabAltAction(vint index)

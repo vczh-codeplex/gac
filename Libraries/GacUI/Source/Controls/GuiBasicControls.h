@@ -112,6 +112,7 @@ Basic Construction
 				WString									alt;
 				WString									text;
 				FontProperties							font;
+				compositions::IGuiAltActionHost*		activatingAltHost;
 
 				GuiControl*								parent;
 				ControlList								children;
@@ -219,6 +220,9 @@ Basic Construction
 				/// <summary>Associate a Alt-combined shortcut key with this control.</summary>
 				/// <param name="value">The Alt-combined shortcut key to associate. Only zero, sigle or multiple upper case letters are legal.</param>
 				virtual bool							SetAlt(const WString& value);
+				/// <summary>Make the control as the parent of multiple Alt-combined shortcut key activatable controls.</summary>
+				/// <param name="value">The alt action host object.</param>
+				void									SetActivatingAltHost(compositions::IGuiAltActionHost* host);
 				/// <summary>Get the text to display on the control.</summary>
 				/// <returns>The text to display on the control.</returns>
 				virtual const WString&					GetText();
