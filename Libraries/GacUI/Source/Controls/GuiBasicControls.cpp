@@ -149,7 +149,7 @@ GuiControl
 
 			compositions::IGuiAltActionHost* GuiControl::GetActivatingAltHost()
 			{
-				return 0;
+				return activatingAltHost;
 			}
 
 			void GuiControl::OnActiveAlt()
@@ -176,6 +176,7 @@ GuiControl
 				,isEnabled(true)
 				,isVisuallyEnabled(true)
 				,isVisible(true)
+				,activatingAltHost(0)
 				,parent(0)
 				,tooltipControl(0)
 				,tooltipWidth(50)
@@ -335,6 +336,11 @@ GuiControl
 					AltChanged.Execute(GetNotifyEventArguments());
 				}
 				return true;
+			}
+
+			void GuiControl::SetActivatingAltHost(compositions::IGuiAltActionHost* host)
+			{
+				activatingAltHost = host;
 			}
 
 			const WString& GuiControl::GetText()

@@ -107,7 +107,7 @@ GuiTabPage
 				if (!IGuiAltAction::IsLegalAlt(value)) return false;
 				if(owner)
 				{
-					owner->styleController->SetTabAlt(owner->tabPages.IndexOf(this), text);
+					owner->styleController->SetTabAlt(owner->tabPages.IndexOf(this), text, this);
 				}
 				if (alt != value)
 				{
@@ -228,7 +228,7 @@ GuiTab
 					GetContainerComposition()->AddChild(page->GetContainerComposition());
 					styleController->InsertTab(index);
 					styleController->SetTabText(index, page->GetText());
-					styleController->SetTabAlt(index, page->GetAlt());
+					styleController->SetTabAlt(index, page->GetAlt(), page);
 				
 					if(!selectedPage)
 					{

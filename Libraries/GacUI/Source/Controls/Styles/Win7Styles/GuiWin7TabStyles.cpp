@@ -381,9 +381,11 @@ Win7TabStyle
 				UpdateHeaderLayout();
 			}
 
-			void Win7TabStyle::SetTabAlt(vint index, const WString& value)
+			void Win7TabStyle::SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)
 			{
-				headerButtons[index]->SetAlt(value);
+				auto button = headerButtons[index];
+				button->SetAlt(value);
+				button->SetActivatingAltHost(host);
 			}
 
 			compositions::IGuiAltAction* Win7TabStyle::GetTabAltAction(vint index)

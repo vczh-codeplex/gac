@@ -302,7 +302,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveTab, {L"index"})
 				CLASS_MEMBER_METHOD(MoveTab, {L"oldIndex" _ L"newIndex"})
 				CLASS_MEMBER_METHOD(SetSelectedTab, {L"index"})
-				CLASS_MEMBER_METHOD(SetTabAlt, {L"index" _ L"value"})
+				CLASS_MEMBER_METHOD(SetTabAlt, {L"index" _ L"value" _ L"host"})
 				CLASS_MEMBER_METHOD(GetTabAltAction, {L"index"})
 			END_CLASS_MEMBER(GuiTab::IStyleController)
 

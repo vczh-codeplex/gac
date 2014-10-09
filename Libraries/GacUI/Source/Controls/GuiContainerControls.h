@@ -120,7 +120,8 @@ Tab Control
 					/// <summary>Set the Alt-combined shortcut key of a tab header at the specified position.</summary>
 					/// <param name="index">The specified position.</param>
 					/// <param name="value">The Alt-combined shortcut key.</param>
-					virtual void								SetTabAlt(vint index, const WString& value)=0;
+					/// <param name="host">The alt action host object.</param>
+					virtual void								SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)=0;
 					/// <summary>Get the associated <see cref="compositions::IGuiAltAction"/> object of a tab header at the specified position.</summary>
 					/// <returns>The associated <see cref="compositions::IGuiAltAction"/> object.</returns>
 					/// <param name="index">The specified position.</param>
