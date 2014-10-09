@@ -620,6 +620,11 @@ GuiButton
 				}
 			}
 
+			void GuiButton::OnActiveAlt()
+			{
+				Clicked.Execute(GetNotifyEventArguments());
+			}
+
 			void GuiButton::UpdateControlState()
 			{
 				ControlState newControlState=Normal;
