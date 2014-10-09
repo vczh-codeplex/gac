@@ -76,7 +76,7 @@ IGuiAltAction
 GuiGraphicsHost
 ***********************************************************************/
 
-			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host, controls::GuiWindow* window)
+			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host)
 			{
 				ClearAltHost();
 
@@ -90,63 +90,7 @@ GuiGraphicsHost
 
 				host->OnActivatedAltHost(currentAltHost);
 				currentAltHost = host;
-
-				vint count = actions.Count();
-				for (vint i = 0; i < count; i++)
-				{
-					const auto& values = actions.GetByIndex(i);
-					vint numberLength = 0;
-					if (values.Count() == 1)
-					{
-						numberLength = 0;
-					}
-					else if (values.Count() <= 10)
-					{
-						numberLength = 1;
-					}
-					else if (values.Count() <= 100)
-					{
-						numberLength = 2;
-					}
-					else if (values.Count() <= 1000)
-					{
-						numberLength = 3;
-					}
-					else
-					{
-						continue;
-					}
-
-					FOREACH_INDEXER(IGuiAltAction*, action, index, values)
-					{
-						WString key = actions.Keys()[i];
-						if (numberLength > 0)
-						{
-							WString number = wtoi(index);
-							while (number.Length() < numberLength)
-							{
-								number = L"0" + number;
-							}
-							key += number;
-						}
-						currentActiveAltActions.Add(key, action);
-					}
-				}
-
-				count = currentActiveAltActions.Count();
-				auto windowStyle = dynamic_cast<GuiWindow::IStyleController*>(window->GetStyleController());
-				for (vint i = 0; i < count; i++)
-				{
-					auto key = currentActiveAltActions.Keys()[i];
-					auto composition = currentActiveAltActions.Values()[i]->GetAltComposition();
-
-					auto labelStyle = windowStyle->CreateShortcutKeyStyle();
-					if (!labelStyle)labelStyle = GetCurrentTheme()->CreateShortcutKeyStyle();
-					auto label = new GuiLabel(labelStyle);
-					label->SetText(key);
-					composition->AddChild(label->GetBoundsComposition());
-					currentActiveAltTitles.Add(key, label);
-				}
+				CreateAltTitles(actions);
 			}
 
 			void GuiGraphicsHost::LeaveAltHost()
@@ -156,6 +100,13 @@ GuiGraphicsHost
 					ClearAltHost();
 					currentAltHost->OnDeactivatedAltHost();
 					currentAltHost = currentAltHost->GetPreviousAltHost();
+
+					if (currentAltHost)
+					{
+						Group<WString, IGuiAltAction*> actions;
+						currentAltHost->CollectAltActions(actions);
+						CreateAltTitles(actions);
+					}
 				}
 			}
 
@@ -165,6 +116,70 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::LeaveAltKey()
 			{
+			}
+
+			void GuiGraphicsHost::CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions)
+			{
+				if (currentAltHost)
+				{
+					vint count = actions.Count();
+					for (vint i = 0; i < count; i++)
+					{
+						const auto& values = actions.GetByIndex(i);
+						vint numberLength = 0;
+						if (values.Count() == 1)
+						{
+							numberLength = 0;
+						}
+						else if (values.Count() <= 10)
+						{
+							numberLength = 1;
+						}
+						else if (values.Count() <= 100)
+						{
+							numberLength = 2;
+						}
+						else if (values.Count() <= 1000)
+						{
+							numberLength = 3;
+						}
+						else
+						{
+							continue;
+						}
+
+						FOREACH_INDEXER(IGuiAltAction*, action, index, values)
+						{
+							WString key = actions.Keys()[i];
+							if (numberLength > 0)
+							{
+								WString number = wtoi(index);
+								while (number.Length() < numberLength)
+								{
+									number = L"0" + number;
+								}
+								key += number;
+							}
+							currentActiveAltActions.Add(key, action);
+						}
+					}
+
+					count = currentActiveAltActions.Count();
+					auto window = dynamic_cast<GuiWindow*>(currentAltHost->GetAltComposition()->GetRelatedControlHost());
+					auto windowStyle = dynamic_cast<GuiWindow::IStyleController*>(window->GetStyleController());
+					for (vint i = 0; i < count; i++)
+					{
+						auto key = currentActiveAltActions.Keys()[i];
+						auto composition = currentActiveAltActions.Values()[i]->GetAltComposition();
+
+						auto labelStyle = windowStyle->CreateShortcutKeyStyle();
+						if (!labelStyle)labelStyle = GetCurrentTheme()->CreateShortcutKeyStyle();
+						auto label = new GuiLabel(labelStyle);
+						label->SetText(key);
+						composition->AddChild(label->GetBoundsComposition());
+						currentActiveAltTitles.Add(key, label);
+					}
+				}
 			}
 
 			void GuiGraphicsHost::ClearAltHost()
@@ -637,7 +652,7 @@ GuiGraphicsHost
 						{
 							if (!altHost->GetPreviousAltHost())
 							{
-								EnterAltHost(altHost, window);
+								EnterAltHost(altHost);
 							}
 						}
 					}

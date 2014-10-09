@@ -328,6 +328,7 @@ Window
 				void									OnVisualStatusChanged()override;
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
 
+				compositions::GuiGraphicsComposition*	GetAltComposition()override;
 				compositions::IGuiAltActionHost*		GetPreviousAltHost()override;
 				void									OnActivatedAltHost(IGuiAltActionHost* previousHost)override;
 				void									OnDeactivatedAltHost()override;
