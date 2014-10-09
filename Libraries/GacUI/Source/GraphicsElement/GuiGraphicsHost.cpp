@@ -157,7 +157,11 @@ GuiGraphicsHost
 				vint index = currentActiveAltActions.Keys().IndexOf(currentAltPrefix);
 				if (index == -1)
 				{
-					FilterTitles();
+					if (FilterTitles() == 0)
+					{
+						currentAltPrefix = currentAltPrefix.Left(currentAltPrefix.Length() - 1);
+						FilterTitles();
+					}
 				}
 				else
 				{
@@ -176,7 +180,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::LeaveAltKey()
 			{
-				if (currentAltPrefix.Length() > 1)
+				if (currentAltPrefix.Length() >= 1)
 				{
 					currentAltPrefix = currentAltPrefix.Left(currentAltPrefix.Length() - 1);
 				}
@@ -218,7 +222,7 @@ GuiGraphicsHost
 							WString key = actions.Keys()[i];
 							if (numberLength > 0)
 							{
-								WString number = wtoi(index);
+								WString number = itow(index);
 								while (number.Length() < numberLength)
 								{
 									number = L"0" + number;
@@ -244,18 +248,42 @@ GuiGraphicsHost
 						composition->AddChild(label->GetBoundsComposition());
 						currentActiveAltTitles.Add(key, label);
 					}
+
+					FilterTitles();
 				}
 			}
 
-			void GuiGraphicsHost::FilterTitles()
+			vint GuiGraphicsHost::FilterTitles()
 			{
 				vint count = currentActiveAltTitles.Count();
+				vint visibles = 0;
 				for (vint i = 0; i < count; i++)
 				{
 					auto key = currentActiveAltTitles.Keys()[i];
 					auto value = currentActiveAltTitles.Values()[i];
-					value->SetVisible(key.Length() >= currentAltPrefix.Length() && key.Left(currentAltPrefix.Length()) == currentAltPrefix);
+					if (key.Length() >= currentAltPrefix.Length() && key.Left(currentAltPrefix.Length()) == currentAltPrefix)
+					{
+						value->SetVisible(true);
+						if (currentAltPrefix.Length() <= key.Length())
+						{
+							value->SetText(
+								key
+								.Insert(currentAltPrefix.Length(), L"[")
+								.Insert(currentAltPrefix.Length() + 2, L"]")
+								);
+						}
+						else
+						{
+							value->SetText(key);
+						}
+						visibles++;
+					}
+					else
+					{
+						value->SetVisible(false);
+					}
 				}
+				return visibles;
 			}
 
 			void GuiGraphicsHost::ClearAltHost()
