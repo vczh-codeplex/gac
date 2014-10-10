@@ -9408,12 +9408,14 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_GUIEVENT_READONLY_FAST(VisuallyEnabled)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Enabled)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Visible)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Alt)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Text)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Font)
 				CLASS_MEMBER_PROPERTY_FAST(Tag)
 				CLASS_MEMBER_PROPERTY_FAST(TooltipControl)
 				CLASS_MEMBER_PROPERTY_FAST(TooltipWidth)
 
+				CLASS_MEMBER_METHOD(SetActivatingAltHost, { L"host" })
 				CLASS_MEMBER_METHOD(GetChild, {L"index"})
 				CLASS_MEMBER_METHOD(AddChild, {L"control"})
 				CLASS_MEMBER_METHOD(HasChild, {L"control"})
@@ -9562,6 +9564,16 @@ External Functions
 				thisObject->SetRowsAndColumns(row, value);
 			}
 
+			void IGuiAltActionHost_CollectAltActions(IGuiAltActionHost* host, List<IGuiAltAction*>& actions)
+			{
+				Group<WString, IGuiAltAction*> group;
+				host->CollectAltActions(group);
+				for (vint i = 0; i < group.Count(); i++)
+				{
+					CopyFrom(actions, group.GetByIndex(i), true);
+				}
+			}
+
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -9570,6 +9582,9 @@ Type Declaration
 
 #define INTERFACE_EXTERNALCTOR(CONTROL, INTERFACE)\
 	CLASS_MEMBER_EXTERNALCTOR(decltype(interface_proxy::CONTROL##_##INTERFACE::Create(0))(Ptr<IValueInterfaceProxy>), {L"proxy"}, &interface_proxy::CONTROL##_##INTERFACE::Create)
+
+#define INTERFACE_IDENTIFIER(INTERFACE)\
+	CLASS_MEMBER_STATIC_EXTERNALMETHOD(GetIdentifier, NO_PARAMETER, WString(*)(), []()->WString{return INTERFACE::Identifier;})
 
 			BEGIN_CLASS_MEMBER(GuiStackComposition)
 				CLASS_MEMBER_BASE(GuiBoundsComposition)
@@ -9731,6 +9746,36 @@ Type Declaration
 				CLASS_MEMBER_METHOD(TryGetShortcut, {L"ctrl" _ L"shift" _ L"alt" _ L"ket"})
 			END_CLASS_MEMBER(GuiShortcutKeyManager)
 
+			BEGIN_CLASS_MEMBER(IGuiAltAction)
+				INTERFACE_IDENTIFIER(IGuiAltAction)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Alt)
+
+				CLASS_MEMBER_METHOD(IsAltEnabled, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(IsAltAvailable, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetAltComposition, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetActivatingAltHost, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(OnActiveAlt, NO_PARAMETER)
+			END_CLASS_MEMBER(IGuiAltAction)
+
+			BEGIN_CLASS_MEMBER(IGuiAltActionContainer)
+				INTERFACE_IDENTIFIER(IGuiAltActionContainer)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(AltActionCount)
+				
+				CLASS_MEMBER_METHOD(GetAltAction, { L"index" })
+			END_CLASS_MEMBER(IGuiAltActionContainer)
+
+			BEGIN_CLASS_MEMBER(IGuiAltActionHost)
+				INTERFACE_IDENTIFIER(IGuiAltActionHost)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(PreviousAltHost)
+
+				CLASS_MEMBER_METHOD(OnActivatedAltHost, { L"previousHost" })
+				CLASS_MEMBER_METHOD(OnDeactivatedAltHost, NO_PARAMETER)
+				CLASS_MEMBER_EXTERNALMETHOD(CollectAltActions, {L"actions"}, void(IGuiAltActionHost::*)(List<IGuiAltAction*>&), &IGuiAltActionHost_CollectAltActions)
+			END_CLASS_MEMBER(IGuiAltActionHost)
+
 #undef INTERFACE_EXTERNALCTOR
 #undef _
 
@@ -9875,6 +9920,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(CreateWindowStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateTooltipStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateLabelStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateShortcutKeyStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateScrollContainerStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateGroupBoxStyle, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(CreateTabStyle, NO_PARAMETER)
@@ -10040,6 +10086,7 @@ Type Declaration
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContainerComposition)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerTab)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Alt)
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(Text)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Selected)
 			END_CLASS_MEMBER(GuiTabPage)
@@ -10073,6 +10120,8 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveTab, {L"index"})
 				CLASS_MEMBER_METHOD(MoveTab, {L"oldIndex" _ L"newIndex"})
 				CLASS_MEMBER_METHOD(SetSelectedTab, {L"index"})
+				CLASS_MEMBER_METHOD(SetTabAlt, {L"index" _ L"value" _ L"host"})
+				CLASS_MEMBER_METHOD(GetTabAltAction, {L"index"})
 			END_CLASS_MEMBER(GuiTab::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiScrollView)
@@ -10137,6 +10186,7 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(TitleBar)
 
 				CLASS_MEMBER_METHOD(CreateTooltipStyle, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(CreateShortcutKeyStyle, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiWindow::IStyleController)
 
 			BEGIN_CLASS_MEMBER(GuiPopup)

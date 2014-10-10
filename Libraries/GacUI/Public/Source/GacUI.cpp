@@ -565,6 +565,41 @@ GuiControl
 				}
 			}
 
+			bool GuiControl::IsAltEnabled()
+			{
+				GuiControl* control = this;
+				while (control)
+				{
+					if (!control->GetVisible() || !control->GetEnabled())
+					{
+						return false;
+					}
+					control = control->GetParent();
+				}
+
+				return true;
+			}
+
+			bool GuiControl::IsAltAvailable()
+			{
+				return focusableComposition != 0 && alt != L"";
+			}
+
+			compositions::GuiGraphicsComposition* GuiControl::GetAltComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::IGuiAltActionHost* GuiControl::GetActivatingAltHost()
+			{
+				return activatingAltHost;
+			}
+
+			void GuiControl::OnActiveAlt()
+			{
+				SetFocus();
+			}
+
 			bool GuiControl::SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing)
 			{
 				GuiControl* value=dynamic_cast<GuiControl*>(obj);
@@ -584,6 +619,7 @@ GuiControl
 				,isEnabled(true)
 				,isVisuallyEnabled(true)
 				,isVisible(true)
+				,activatingAltHost(0)
 				,parent(0)
 				,tooltipControl(0)
 				,tooltipWidth(50)
@@ -592,6 +628,7 @@ GuiControl
 				VisibleChanged.SetAssociatedComposition(boundsComposition);
 				EnabledChanged.SetAssociatedComposition(boundsComposition);
 				VisuallyEnabledChanged.SetAssociatedComposition(boundsComposition);
+				AltChanged.SetAssociatedComposition(boundsComposition);
 				TextChanged.SetAssociatedComposition(boundsComposition);
 				FontChanged.SetAssociatedComposition(boundsComposition);
 
@@ -728,6 +765,27 @@ GuiControl
 				}
 			}
 
+			const WString& GuiControl::GetAlt()
+			{
+				return alt;
+			}
+
+			bool GuiControl::SetAlt(const WString& value)
+			{
+				if (!IGuiAltAction::IsLegalAlt(value)) return false;
+				if (alt != value)
+				{
+					alt = value;
+					AltChanged.Execute(GetNotifyEventArguments());
+				}
+				return true;
+			}
+
+			void GuiControl::SetActivatingAltHost(compositions::IGuiAltActionHost* host)
+			{
+				activatingAltHost = host;
+			}
+
 			const WString& GuiControl::GetText()
 			{
 				return text;
@@ -819,7 +877,15 @@ GuiControl
 
 			IDescriptable* GuiControl::QueryService(const WString& identifier)
 			{
-				if(parent)
+				if (identifier == IGuiAltAction::Identifier)
+				{
+					return (IGuiAltAction*)this;
+				}
+				else if (identifier == IGuiAltActionContainer::Identifier)
+				{
+					return 0;
+				}
+				else if(parent)
 				{
 					return parent->QueryService(identifier);
 				}
@@ -1001,6 +1067,11 @@ GuiButton
 					mouseHoving=false;
 					UpdateControlState();
 				}
+			}
+
+			void GuiButton::OnActiveAlt()
+			{
+				Clicked.Execute(GetNotifyEventArguments());
 			}
 
 			void GuiButton::UpdateControlState()
@@ -1464,8 +1535,7 @@ GuiTabPage
 				else
 				{
 					owner=_owner;
-					GuiEventArgs arguments(containerComposition);
-					PageInstalled.Execute(arguments);
+					PageInstalled.Execute(containerControl->GetNotifyEventArguments());
 					return true;
 				}
 			}
@@ -1474,8 +1544,7 @@ GuiTabPage
 			{
 				if(owner && owner==_owner)
 				{
-					GuiEventArgs arguments(containerComposition);
-					PageUninstalled.Execute(arguments);
+					PageUninstalled.Execute(containerControl->GetNotifyEventArguments());
 					owner=0;
 					return true;
 				}
@@ -1485,34 +1554,81 @@ GuiTabPage
 				}
 			}
 
-			GuiTabPage::GuiTabPage()
-				:containerComposition(0)
-				,owner(0)
+			compositions::GuiGraphicsComposition* GuiTabPage::GetAltComposition()
 			{
-				containerComposition = new GuiBoundsComposition;
-				containerComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+				return containerControl->GetContainerComposition();
+			}
 
-				TextChanged.SetAssociatedComposition(containerComposition);
-				PageInstalled.SetAssociatedComposition(containerComposition);
-				PageUninstalled.SetAssociatedComposition(containerComposition);
+			compositions::IGuiAltActionHost* GuiTabPage::GetPreviousAltHost()
+			{
+				return previousAltHost;
+			}
+
+			void GuiTabPage::OnActivatedAltHost(compositions::IGuiAltActionHost* previousHost)
+			{
+				previousAltHost = previousHost;
+			}
+
+			void GuiTabPage::OnDeactivatedAltHost()
+			{
+				previousAltHost = 0;
+			}
+
+			void GuiTabPage::CollectAltActions(collections::Group<WString, compositions::IGuiAltAction*>& actions)
+			{
+				IGuiAltActionHost::CollectAltActionsFromControl(containerControl, actions);
+			}
+
+			GuiTabPage::GuiTabPage()
+				:containerControl(0)
+				,owner(0)
+				,previousAltHost(0)
+			{
+				containerControl = new GuiControl(new GuiControl::EmptyStyleController());
+				containerControl->GetBoundsComposition()->SetAlignmentToParent(Margin(2, 2, 2, 2));
+				
+				AltChanged.SetAssociatedComposition(containerControl->GetBoundsComposition());
+				TextChanged.SetAssociatedComposition(containerControl->GetBoundsComposition());
+				PageInstalled.SetAssociatedComposition(containerControl->GetBoundsComposition());
+				PageUninstalled.SetAssociatedComposition(containerControl->GetBoundsComposition());
 			}
 
 			GuiTabPage::~GuiTabPage()
 			{
-				if(!containerComposition->GetParent())
+				if (!containerControl->GetParent())
 				{
-					delete containerComposition;
+					delete containerControl;
 				}
 			}
 
-			compositions::GuiBoundsComposition* GuiTabPage::GetContainerComposition()
+			compositions::GuiGraphicsComposition* GuiTabPage::GetContainerComposition()
 			{
-				return containerComposition;
+				return containerControl->GetContainerComposition();
 			}
 
 			GuiTab* GuiTabPage::GetOwnerTab()
 			{
 				return owner;
+			}
+
+			const WString& GuiTabPage::GetAlt()
+			{
+				return alt;
+			}
+
+			bool GuiTabPage::SetAlt(const WString& value)
+			{
+				if (!IGuiAltAction::IsLegalAlt(value)) return false;
+				if(owner)
+				{
+					owner->styleController->SetTabAlt(owner->tabPages.IndexOf(this), text, this);
+				}
+				if (alt != value)
+				{
+					alt = value;
+					AltChanged.Execute(containerControl->GetNotifyEventArguments());
+				}
+				return true;
 			}
 
 			const WString& GuiTabPage::GetText()
@@ -1529,8 +1645,7 @@ GuiTabPage
 					{
 						owner->styleController->SetTabText(owner->tabPages.IndexOf(this), text);
 					}
-					GuiEventArgs arguments(containerComposition);
-					TextChanged.Execute(arguments);
+					TextChanged.Execute(containerControl->GetNotifyEventArguments());
 				}
 			}
 
@@ -1557,6 +1672,16 @@ GuiTab
 				tab->SetSelectedPage(tab->GetPages().Get(index));
 			}
 
+			vint GuiTab::GetAltActionCount()
+			{
+				return tabPages.Count();
+			}
+
+			compositions::IGuiAltAction* GuiTab::GetAltAction(vint index)
+			{
+				return styleController->GetTabAltAction(index);
+			}
+
 			GuiTab::GuiTab(IStyleController* _styleController)
 				:GuiControl(_styleController)
 				,styleController(_styleController)
@@ -1571,6 +1696,18 @@ GuiTab
 				for(vint i=0;i<tabPages.Count();i++)
 				{
 					delete tabPages[i];
+				}
+			}
+
+			IDescriptable* GuiTab::QueryService(const WString& identifier)
+			{
+				if (identifier == IGuiAltActionContainer::Identifier)
+				{
+					return (IGuiAltActionContainer*)this;
+				}
+				else
+				{
+					return GuiControl::QueryService(identifier);
 				}
 			}
 
@@ -1605,6 +1742,7 @@ GuiTab
 					GetContainerComposition()->AddChild(page->GetContainerComposition());
 					styleController->InsertTab(index);
 					styleController->SetTabText(index, page->GetText());
+					styleController->SetTabAlt(index, page->GetAlt(), page);
 				
 					if(!selectedPage)
 					{
@@ -3412,6 +3550,11 @@ GuiWindow::DefaultBehaviorStyleController
 				return 0;
 			}
 
+			GuiLabel::IStyleController* GuiWindow::DefaultBehaviorStyleController::CreateShortcutKeyStyle()
+			{
+				return 0;
+			}
+
 /***********************************************************************
 GuiWindow
 ***********************************************************************/
@@ -3437,9 +3580,35 @@ GuiWindow
 			{
 			}
 
+			compositions::GuiGraphicsComposition* GuiWindow::GetAltComposition()
+			{
+				return boundsComposition;
+			}
+
+			compositions::IGuiAltActionHost* GuiWindow::GetPreviousAltHost()
+			{
+				return previousAltHost;
+			}
+
+			void GuiWindow::OnActivatedAltHost(IGuiAltActionHost* previousHost)
+			{
+				previousAltHost = previousHost;
+			}
+
+			void GuiWindow::OnDeactivatedAltHost()
+			{
+				previousAltHost = 0;
+			}
+
+			void GuiWindow::CollectAltActions(collections::Group<WString, IGuiAltAction*>& actions)
+			{
+				IGuiAltActionHost::CollectAltActionsFromControl(this, actions);
+			}
+
 			GuiWindow::GuiWindow(IStyleController* _styleController)
 				:GuiControlHost(_styleController)
 				,styleController(_styleController)
+				,previousAltHost(0)
 			{
 				INativeWindow* window=GetCurrentController()->WindowService()->CreateNativeWindow();
 				styleController->AttachWindow(this);
@@ -3456,6 +3625,18 @@ GuiWindow
 				{
 					SetNativeWindow(0);
 					GetCurrentController()->WindowService()->DestroyNativeWindow(window);
+				}
+			}
+
+			IDescriptable* GuiWindow::QueryService(const WString& identifier)
+			{
+				if (identifier == IGuiAltActionHost::Identifier)
+				{
+					return (IGuiAltActionHost*)this;
+				}
+				else
+				{
+					return GuiControlHost::QueryService(identifier);
 				}
 			}
 
@@ -14267,7 +14448,12 @@ Win7Theme
 
 			controls::GuiLabel::IStyleController* Win7Theme::CreateLabelStyle()
 			{
-				return new Win7LabelStyle;
+				return new Win7LabelStyle(false);
+			}
+
+			controls::GuiLabel::IStyleController* Win7Theme::CreateShortcutKeyStyle()
+			{
+				return new Win7LabelStyle(true);
 			}
 
 			controls::GuiScrollContainer::IStyleProvider* Win7Theme::CreateScrollContainerStyle()
@@ -14502,7 +14688,12 @@ Win8Theme
 
 			controls::GuiLabel::IStyleController* Win8Theme::CreateLabelStyle()
 			{
-				return new Win8LabelStyle;
+				return new Win8LabelStyle(false);
+			}
+
+			controls::GuiLabel::IStyleController* Win8Theme::CreateShortcutKeyStyle()
+			{
+				return new Win8LabelStyle(true);
 			}
 
 			controls::GuiScrollContainer::IStyleProvider* Win8Theme::CreateScrollContainerStyle()
@@ -15140,14 +15331,41 @@ Win7TooltipStyle
 Win7LabelStyle
 ***********************************************************************/
 
-			Win7LabelStyle::Win7LabelStyle()
+			Win7LabelStyle::Win7LabelStyle(bool forShortcutKey)
 			{
 				textElement=GuiSolidLabelElement::Create();
 				textElement->SetColor(GetDefaultTextColor());
 				
 				boundsComposition=new GuiBoundsComposition;
-				boundsComposition->SetOwnedElement(textElement);
-				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElementAndChildren);
+				if (forShortcutKey)
+				{
+					{
+						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+						element->SetColor(Color(100, 100, 100));
+						boundsComposition->SetOwnedElement(element);
+					}
+
+					auto containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(containerComposition);
+					{
+						GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+						element->SetColor(Color(255, 255, 225));
+						containerComposition->SetOwnedElement(element);
+					}
+
+					auto labelComposition = new GuiBoundsComposition;
+					labelComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+					labelComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+					labelComposition->SetOwnedElement(textElement);
+					containerComposition->AddChild(labelComposition);
+				}
+				else
+				{
+					boundsComposition->SetOwnedElement(textElement);
+				}
 			}
 
 			Win7LabelStyle::~Win7LabelStyle()
@@ -18783,6 +19001,18 @@ Win7TabStyle
 				
 				UpdateHeaderLayout();
 			}
+
+			void Win7TabStyle::SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)
+			{
+				auto button = headerButtons[index];
+				button->SetAlt(value);
+				button->SetActivatingAltHost(host);
+			}
+
+			compositions::IGuiAltAction* Win7TabStyle::GetTabAltAction(vint index)
+			{
+				return headerButtons[index]->QueryTypedService<IGuiAltAction>();
+			}
 		}
 	}
 }
@@ -19606,14 +19836,41 @@ Win8TooltipStyle
 Win8LabelStyle
 ***********************************************************************/
 
-			Win8LabelStyle::Win8LabelStyle()
+			Win8LabelStyle::Win8LabelStyle(bool forShortcutKey)
 			{
 				textElement=GuiSolidLabelElement::Create();
 				textElement->SetColor(GetDefaultTextColor());
 				
 				boundsComposition=new GuiBoundsComposition;
-				boundsComposition->SetOwnedElement(textElement);
-				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElement);
+				boundsComposition->SetMinSizeLimitation(GuiBoundsComposition::LimitToElementAndChildren);
+				if (forShortcutKey)
+				{
+					{
+						GuiSolidBorderElement* element=GuiSolidBorderElement::Create();
+						element->SetColor(Color(100, 100, 100));
+						boundsComposition->SetOwnedElement(element);
+					}
+
+					auto containerComposition=new GuiBoundsComposition;
+					containerComposition->SetAlignmentToParent(Margin(1, 1, 1, 1));
+					containerComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
+					boundsComposition->AddChild(containerComposition);
+					{
+						GuiSolidBackgroundElement* element=GuiSolidBackgroundElement::Create();
+						element->SetColor(Color(255, 255, 225));
+						containerComposition->SetOwnedElement(element);
+					}
+
+					auto labelComposition = new GuiBoundsComposition;
+					labelComposition->SetAlignmentToParent(Margin(2, 2, 2, 2));
+					labelComposition->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElement);
+					labelComposition->SetOwnedElement(textElement);
+					containerComposition->AddChild(labelComposition);
+				}
+				else
+				{
+					boundsComposition->SetOwnedElement(textElement);
+				}
 			}
 
 			Win8LabelStyle::~Win8LabelStyle()
@@ -23380,6 +23637,7 @@ GuiWindowTemplate_StyleProvider
 					CHECK_FAIL(L"GuiWindowTemplate_StyleProvider::GuiWindowTemplate_StyleProvider()#An instance of GuiWindowTemplate is expected.");
 				}
 				INITIALIZE_FACTORY_FROM_TEMPLATE(tooltipTemplateFactory, TooltipTemplate);
+				INITIALIZE_FACTORY_FROM_TEMPLATE(shortcutKeyTemplateFactory, ShortcutKeyTemplate);
 			}
 
 			GuiWindowTemplate_StyleProvider::~GuiWindowTemplate_StyleProvider()
@@ -23486,6 +23744,11 @@ GuiWindowTemplate_StyleProvider
 			controls::GuiWindow::IStyleController* GuiWindowTemplate_StyleProvider::CreateTooltipStyle()
 			{
 				GET_FACTORY_FROM_TEMPLATE_OPT(GuiWindowTemplate, tooltipTemplateFactory, TooltipTemplate);
+			}
+
+			controls::GuiLabel::IStyleController* GuiWindowTemplate_StyleProvider::CreateShortcutKeyStyle()
+			{
+				GET_FACTORY_FROM_TEMPLATE_OPT(GuiLabelTemplate, shortcutKeyTemplateFactory, ShortcutKeyTemplate);
 			}
 
 #undef WINDOW_TEMPLATE_GET
@@ -24208,6 +24471,18 @@ GuiTabTemplate_StyleProvider
 				headerButtons[index]->SetSelected(true);
 				
 				UpdateHeaderLayout();
+			}
+
+			void GuiTabTemplate_StyleProvider::SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)
+			{
+				auto button = headerButtons[index];
+				button->SetAlt(value);
+				button->SetActivatingAltHost(host);
+			}
+
+			compositions::IGuiAltAction* GuiTabTemplate_StyleProvider::GetTabAltAction(vint index)
+			{
+				return headerButtons[index]->QueryTypedService<IGuiAltAction>();
 			}
 
 /***********************************************************************
@@ -29636,6 +29911,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace compositions;
 
 /***********************************************************************
 IGuiMenuService
@@ -29720,6 +29996,11 @@ GuiMenu
 				}
 			}
 
+			void GuiMenu::OnDeactivatedAltHost()
+			{
+				Hide();
+			}
+
 			void GuiMenu::MouseClickedOnOtherWindow(GuiWindow* window)
 			{
 				GuiMenu* targetMenu=dynamic_cast<GuiMenu*>(window);
@@ -29761,7 +30042,7 @@ GuiMenu
 			{
 				if(owner)
 				{
-					parentMenuService=owner->QueryService<IGuiMenuService>();
+					parentMenuService=owner->QueryTypedService<IGuiMenuService>();
 				}
 			}
 
@@ -29851,7 +30132,7 @@ GuiMenuButton
 			void GuiMenuButton::OnParentLineChanged()
 			{
 				GuiButton::OnParentLineChanged();
-				ownerMenuService=QueryService<IGuiMenuService>();
+				ownerMenuService=QueryTypedService<IGuiMenuService>();
 				if(ownerMenuService)
 				{
 					SetClickOnMouseUp(!ownerMenuService->IsSubMenuActivatedByMouseDown());
@@ -29860,6 +30141,20 @@ GuiMenuButton
 				{
 					subMenu->UpdateMenuService();
 				}
+			}
+
+			bool GuiMenuButton::IsAltAvailable()
+			{
+				return true;
+			}
+
+			compositions::IGuiAltActionHost* GuiMenuButton::GetActivatingAltHost()
+			{
+				if (subMenu)
+				{
+					return subMenu->QueryTypedService<IGuiAltActionHost>();
+				}
+				return 0;
 			}
 
 			void GuiMenuButton::OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
@@ -34933,6 +35228,7 @@ namespace vl
 			using namespace collections;
 			using namespace controls;
 			using namespace elements;
+			using namespace theme;
 
 /***********************************************************************
 GuiGraphicsAnimationManager
@@ -34973,8 +35269,261 @@ GuiGraphicsAnimationManager
 			}
 
 /***********************************************************************
+IGuiAltAction
+***********************************************************************/
+
+			const wchar_t* const IGuiAltAction::Identifier = L"vl::presentation::compositions::IGuiAltAction";
+			const wchar_t* const IGuiAltActionContainer::Identifier = L"vl::presentation::compositions::IGuiAltAction";
+			const wchar_t* const IGuiAltActionHost::Identifier = L"vl::presentation::compositions::IGuiAltAction";
+
+			bool IGuiAltAction::IsLegalAlt(const WString& alt)
+			{
+				for (vint i = 0; i < alt.Length(); i++)
+				{
+					if (alt[i] < L'A' || L'Z' < alt[i])
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+
+			void IGuiAltActionHost::CollectAltActionsFromControl(controls::GuiControl* control, collections::Group<WString, IGuiAltAction*>& actions)
+			{
+				List<GuiControl*> controls;
+				controls.Add(control);
+				vint current = 0;
+
+				while (current < controls.Count())
+				{
+					GuiControl* control = controls[current++];
+
+					if (auto container = control->QueryTypedService<IGuiAltActionContainer>())
+					{
+						vint count = container->GetAltActionCount();
+						for (vint i = 0; i < count; i++)
+						{
+							auto action = container->GetAltAction(i);
+							actions.Add(action->GetAlt(), action);
+						}
+						continue;
+					}
+					else if (auto action = control->QueryTypedService<IGuiAltAction>())
+					{
+						if (action->IsAltAvailable())
+						{
+							if (action->IsAltEnabled())
+							{
+								actions.Add(action->GetAlt(), action);
+								continue;
+							}
+						}
+					}
+
+					vint count = control->GetChildrenCount();
+					for (vint i = 0; i < count; i++)
+					{
+						controls.Add(control->GetChild(i));
+					}
+				}
+			}
+
+/***********************************************************************
 GuiGraphicsHost
 ***********************************************************************/
+
+			void GuiGraphicsHost::EnterAltHost(IGuiAltActionHost* host)
+			{
+				ClearAltHost();
+
+				Group<WString, IGuiAltAction*> actions;
+				host->CollectAltActions(actions);
+				if (actions.Count() == 0)
+				{
+					CloseAltHost();
+					return;
+				}
+
+				host->OnActivatedAltHost(currentAltHost);
+				currentAltHost = host;
+				CreateAltTitles(actions);
+			}
+
+			void GuiGraphicsHost::LeaveAltHost()
+			{
+				if (currentAltHost)
+				{
+					ClearAltHost();
+					auto previousHost = currentAltHost->GetPreviousAltHost();
+					currentAltHost->OnDeactivatedAltHost();
+					currentAltHost = previousHost;
+
+					if (currentAltHost)
+					{
+						Group<WString, IGuiAltAction*> actions;
+						currentAltHost->CollectAltActions(actions);
+						CreateAltTitles(actions);
+					}
+				}
+			}
+
+			bool GuiGraphicsHost::EnterAltKey(wchar_t key)
+			{
+				currentAltPrefix += key;
+				vint index = currentActiveAltActions.Keys().IndexOf(currentAltPrefix);
+				if (index == -1)
+				{
+					if (FilterTitles() == 0)
+					{
+						currentAltPrefix = currentAltPrefix.Left(currentAltPrefix.Length() - 1);
+						FilterTitles();
+					}
+				}
+				else
+				{
+					auto action = currentActiveAltActions.Values()[index];
+					if (action->GetActivatingAltHost())
+					{
+						EnterAltHost(action->GetActivatingAltHost());
+					}
+					else
+					{
+						CloseAltHost();
+					}
+					action->OnActiveAlt();
+					return true;
+				}
+				return false;
+			}
+
+			void GuiGraphicsHost::LeaveAltKey()
+			{
+				if (currentAltPrefix.Length() >= 1)
+				{
+					currentAltPrefix = currentAltPrefix.Left(currentAltPrefix.Length() - 1);
+				}
+				FilterTitles();
+			}
+
+			void GuiGraphicsHost::CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions)
+			{
+				if (currentAltHost)
+				{
+					vint count = actions.Count();
+					for (vint i = 0; i < count; i++)
+					{
+						const auto& values = actions.GetByIndex(i);
+						vint numberLength = 0;
+						if (values.Count() == 1)
+						{
+							numberLength = 0;
+						}
+						else if (values.Count() <= 10)
+						{
+							numberLength = 1;
+						}
+						else if (values.Count() <= 100)
+						{
+							numberLength = 2;
+						}
+						else if (values.Count() <= 1000)
+						{
+							numberLength = 3;
+						}
+						else
+						{
+							continue;
+						}
+
+						FOREACH_INDEXER(IGuiAltAction*, action, index, values)
+						{
+							WString key = actions.Keys()[i];
+							if (numberLength > 0)
+							{
+								WString number = itow(index);
+								while (number.Length() < numberLength)
+								{
+									number = L"0" + number;
+								}
+								key += number;
+							}
+							currentActiveAltActions.Add(key, action);
+						}
+					}
+
+					count = currentActiveAltActions.Count();
+					auto window = dynamic_cast<GuiWindow*>(currentAltHost->GetAltComposition()->GetRelatedControlHost());
+					auto windowStyle = dynamic_cast<GuiWindow::IStyleController*>(window->GetStyleController());
+					for (vint i = 0; i < count; i++)
+					{
+						auto key = currentActiveAltActions.Keys()[i];
+						auto composition = currentActiveAltActions.Values()[i]->GetAltComposition();
+
+						auto labelStyle = windowStyle->CreateShortcutKeyStyle();
+						if (!labelStyle)labelStyle = GetCurrentTheme()->CreateShortcutKeyStyle();
+						auto label = new GuiLabel(labelStyle);
+						label->SetText(key);
+						composition->AddChild(label->GetBoundsComposition());
+						currentActiveAltTitles.Add(key, label);
+					}
+
+					FilterTitles();
+				}
+			}
+
+			vint GuiGraphicsHost::FilterTitles()
+			{
+				vint count = currentActiveAltTitles.Count();
+				vint visibles = 0;
+				for (vint i = 0; i < count; i++)
+				{
+					auto key = currentActiveAltTitles.Keys()[i];
+					auto value = currentActiveAltTitles.Values()[i];
+					if (key.Length() >= currentAltPrefix.Length() && key.Left(currentAltPrefix.Length()) == currentAltPrefix)
+					{
+						value->SetVisible(true);
+						if (currentAltPrefix.Length() <= key.Length())
+						{
+							value->SetText(
+								key
+								.Insert(currentAltPrefix.Length(), L"[")
+								.Insert(currentAltPrefix.Length() + 2, L"]")
+								);
+						}
+						else
+						{
+							value->SetText(key);
+						}
+						visibles++;
+					}
+					else
+					{
+						value->SetVisible(false);
+					}
+				}
+				return visibles;
+			}
+
+			void GuiGraphicsHost::ClearAltHost()
+			{
+				FOREACH(GuiControl*, title, currentActiveAltTitles.Values())
+				{
+					SafeDeleteControl(title);
+				}
+				currentActiveAltActions.Clear();
+				currentActiveAltTitles.Clear();
+				currentAltPrefix = L"";
+			}
+
+			void GuiGraphicsHost::CloseAltHost()
+			{
+				ClearAltHost();
+				while (currentAltHost)
+				{
+					currentAltHost->OnDeactivatedAltHost();
+					currentAltHost = currentAltHost->GetPreviousAltHost();
+				}
+			}
 
 			void GuiGraphicsHost::DisconnectCompositionInternal(GuiGraphicsComposition* composition)
 			{
@@ -35224,6 +35773,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::LeftButtonDown(const NativeWindowMouseInfo& info)
 			{
+				CloseAltHost();
 				MouseCapture(info);
 				OnMouseInput(info, &GuiGraphicsEventReceiver::leftButtonDown);
 			}
@@ -35242,6 +35792,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::RightButtonDown(const NativeWindowMouseInfo& info)
 			{
+				CloseAltHost();
 				MouseCapture(info);
 				OnMouseInput(info, &GuiGraphicsEventReceiver::rightButtonDown);
 			}
@@ -35260,6 +35811,7 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::MiddleButtonDown(const NativeWindowMouseInfo& info)
 			{
+				CloseAltHost();
 				MouseCapture(info);
 				OnMouseInput(info, &GuiGraphicsEventReceiver::middleButtonDown);
 			}
@@ -35368,6 +35920,40 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::KeyDown(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && currentAltHost)
+				{
+					if (info.code == VKEY_ESCAPE)
+					{
+						LeaveAltHost();
+						return;
+					}
+					else if (info.code == VKEY_BACK)
+					{
+						LeaveAltKey();
+					}
+					else if (VKEY_NUMPAD0 <= info.code && info.code <= VKEY_NUMPAD9)
+					{
+						if (EnterAltKey('0' + (info.code - VKEY_NUMPAD0)))
+						{
+							supressAltKey = info.code;
+							return;
+						}
+					}
+					else if (('0' <= info.code && info.code <= '9') || ('A' <= info.code && info.code <= 'Z'))
+					{
+						if (EnterAltKey((wchar_t)info.code))
+						{
+							supressAltKey = info.code;
+							return;
+						}
+					}
+				}
+
+				if (currentAltHost)
+				{
+					return;
+				}
+				
 				if(shortcutKeyManager && shortcutKeyManager->Execute(info))
 				{
 					return;
@@ -35380,6 +35966,12 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::KeyUp(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && info.code == supressAltKey)
+				{
+					supressAltKey = 0;
+					return;
+				}
+
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::keyUp);
@@ -35388,6 +35980,25 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyDown(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && !currentAltHost)
+				{
+					if (auto window = dynamic_cast<GuiWindow*>(windowComposition->Children()[0]->GetRelatedControlHost()))
+					{
+						if (auto altHost = window->QueryTypedService<IGuiAltActionHost>())
+						{
+							if (!altHost->GetPreviousAltHost())
+							{
+								EnterAltHost(altHost);
+							}
+						}
+					}
+				}
+
+				if (currentAltHost)
+				{
+					return;
+				}
+
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::systemKeyDown);
@@ -35396,6 +36007,14 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::SysKeyUp(const NativeWindowKeyInfo& info)
 			{
+				if (!info.ctrl && !info.shift && info.code == VKEY_MENU && nativeWindow)
+				{
+					if (nativeWindow)
+					{
+						nativeWindow->SupressAlt();
+					}
+				}
+
 				if(focusedComposition && focusedComposition->HasEventReceiver())
 				{
 					OnKeyInput(info, focusedComposition, &GuiGraphicsEventReceiver::systemKeyUp);
@@ -35404,9 +36023,12 @@ GuiGraphicsHost
 
 			void GuiGraphicsHost::Char(const NativeWindowCharInfo& info)
 			{
-				if(focusedComposition && focusedComposition->HasEventReceiver())
+				if (!currentAltHost && !supressAltKey)
 				{
-					OnCharInput(info, focusedComposition, &GuiGraphicsEventReceiver::charInput);
+					if(focusedComposition && focusedComposition->HasEventReceiver())
+					{
+						OnCharInput(info, focusedComposition, &GuiGraphicsEventReceiver::charInput);
+					}
 				}
 			}
 
@@ -35437,6 +36059,7 @@ GuiGraphicsHost
 				,focusedComposition(0)
 				,mouseCaptureComposition(0)
 				,lastCaretTime(0)
+				,currentAltHost(0)
 			{
 				windowComposition=new GuiWindowComposition;
 				windowComposition->SetAssociatedHost(this);
