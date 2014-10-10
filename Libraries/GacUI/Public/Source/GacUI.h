@@ -971,6 +971,8 @@ Native Window
 			virtual void				SetTitleBar(bool visible)=0;
 			virtual bool				GetTopMost()=0;
 			virtual void				SetTopMost(bool topmost)=0;
+
+			virtual void				SupressAlt() = 0;
 			
 			virtual bool				InstallListener(INativeWindowListener* listener)=0;
 			virtual bool				UninstallListener(INativeWindowListener* listener)=0;
@@ -4092,6 +4094,11 @@ namespace vl
 {
 	namespace presentation
 	{
+		namespace controls
+		{
+			class GuiWindow;
+		}
+
 		namespace compositions
 		{
 
@@ -4146,12 +4153,58 @@ Shortcut Key Manager
 			};
 
 /***********************************************************************
+Alt-Combined Shortcut Key Interfaces
+***********************************************************************/
+
+			class IGuiAltActionHost;
+			
+			class IGuiAltAction : public virtual IDescriptable
+			{
+			public:
+				static const wchar_t* const				Identifier;
+
+				static bool								IsLegalAlt(const WString& alt);
+
+				virtual const WString&					GetAlt() = 0;
+				virtual bool							IsAltEnabled() = 0;
+				virtual bool							IsAltAvailable() = 0;
+				virtual GuiGraphicsComposition*			GetAltComposition() = 0;
+				virtual IGuiAltActionHost*				GetActivatingAltHost() = 0;
+				virtual void							OnActiveAlt() = 0;
+			};
+			
+			class IGuiAltActionContainer : public virtual IDescriptable
+			{
+			public:
+				static const wchar_t* const				Identifier;
+
+				virtual vint							GetAltActionCount() = 0;
+				virtual IGuiAltAction*					GetAltAction(vint index) = 0;
+			};
+			
+			class IGuiAltActionHost : public virtual IDescriptable
+			{
+			public:
+				static const wchar_t* const				Identifier;
+
+				static void								CollectAltActionsFromControl(controls::GuiControl* control, collections::Group<WString, IGuiAltAction*>& actions);
+				
+				virtual GuiGraphicsComposition*			GetAltComposition() = 0;
+				virtual IGuiAltActionHost*				GetPreviousAltHost() = 0;
+				virtual void							OnActivatedAltHost(IGuiAltActionHost* previousHost) = 0;
+				virtual void							OnDeactivatedAltHost() = 0;
+				virtual void							CollectAltActions(collections::Group<WString, IGuiAltAction*>& actions) = 0;
+			};
+
+/***********************************************************************
 Host
 ***********************************************************************/
 
 			class GuiGraphicsHost : public Object, private INativeWindowListener, private INativeControllerListener, public Description<GuiGraphicsHost>
 			{
-				typedef collections::List<GuiGraphicsComposition*>		CompositionList;
+				typedef collections::List<GuiGraphicsComposition*>							CompositionList;
+				typedef collections::Dictionary<WString, IGuiAltAction*>					AltActionMap;
+				typedef collections::Dictionary<WString, controls::GuiControl*>				AltControlMap;
 			public:
 				static const unsigned __int64	CaretInterval=500;
 			protected:
@@ -4167,6 +4220,21 @@ Host
 				GuiGraphicsAnimationManager				animationManager;
 				GuiGraphicsComposition*					mouseCaptureComposition;
 				CompositionList							mouseEnterCompositions;
+
+				IGuiAltActionHost*						currentAltHost;
+				AltActionMap							currentActiveAltActions;
+				AltControlMap							currentActiveAltTitles;
+				WString									currentAltPrefix;
+				vint									supressAltKey;
+
+				void									EnterAltHost(IGuiAltActionHost* host);
+				void									LeaveAltHost();
+				bool									EnterAltKey(wchar_t key);
+				void									LeaveAltKey();
+				void									CreateAltTitles(const collections::Group<WString, IGuiAltAction*>& actions);
+				vint									FilterTitles();
+				void									ClearAltHost();
+				void									CloseAltHost();
 
 				void									DisconnectCompositionInternal(GuiGraphicsComposition* composition);
 				void									MouseCapture(const NativeWindowMouseInfo& info);
@@ -4319,7 +4387,7 @@ namespace vl
 Basic Construction
 ***********************************************************************/
 
-			class GuiControl : public Object, public Description<GuiControl>
+			class GuiControl : public Object, protected compositions::IGuiAltAction, public Description<GuiControl>
 			{
 				friend class compositions::GuiGraphicsComposition;
 				typedef collections::List<GuiControl*>		ControlList;
@@ -4369,8 +4437,10 @@ Basic Construction
 				bool									isEnabled;
 				bool									isVisuallyEnabled;
 				bool									isVisible;
+				WString									alt;
 				WString									text;
 				FontProperties							font;
+				compositions::IGuiAltActionHost*		activatingAltHost;
 
 				GuiControl*								parent;
 				ControlList								children;
@@ -4387,7 +4457,14 @@ Basic Construction
 				virtual void							UpdateVisuallyEnabled();
 				void									SetFocusableComposition(compositions::GuiGraphicsComposition* value);
 
+				bool									IsAltEnabled()override;
+				bool									IsAltAvailable()override;
+				compositions::GuiGraphicsComposition*	GetAltComposition()override;
+				compositions::IGuiAltActionHost*		GetActivatingAltHost()override;
+				void									OnActiveAlt()override;
+
 				static bool								SharedPtrDestructorProc(DescriptableObject* obj, bool forceDisposing);
+
 			public:
 				GuiControl(IStyleController* _styleController);
 				~GuiControl();
@@ -4395,6 +4472,7 @@ Basic Construction
 				compositions::GuiNotifyEvent			VisibleChanged;
 				compositions::GuiNotifyEvent			EnabledChanged;
 				compositions::GuiNotifyEvent			VisuallyEnabledChanged;
+				compositions::GuiNotifyEvent			AltChanged;
 				compositions::GuiNotifyEvent			TextChanged;
 				compositions::GuiNotifyEvent			FontChanged;
 
@@ -4416,6 +4494,9 @@ Basic Construction
 				virtual void							SetEnabled(bool value);
 				virtual bool							GetVisible();
 				virtual void							SetVisible(bool value);
+				virtual const WString&					GetAlt();
+				virtual bool							SetAlt(const WString& value);
+				void									SetActivatingAltHost(compositions::IGuiAltActionHost* host);
 				virtual const WString&					GetText();
 				virtual void							SetText(const WString& value);
 				virtual const FontProperties&			GetFont();
@@ -4434,7 +4515,7 @@ Basic Construction
 				virtual IDescriptable*					QueryService(const WString& identifier);
 
 				template<typename T>
-				T* QueryService()
+				T* QueryTypedService()
 				{
 					return dynamic_cast<T*>(QueryService(T::Identifier));
 				}
@@ -4549,6 +4630,7 @@ Buttons
 				ControlState							controlState;
 				
 				void									OnParentLineChanged()override;
+				void									OnActiveAlt()override;
 				void									UpdateControlState();
 				void									OnLeftButtonDown(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
 				void									OnLeftButtonUp(compositions::GuiGraphicsComposition* sender, compositions::GuiMouseEventArgs& arguments);
@@ -5062,7 +5144,7 @@ Control Host
 Window
 ***********************************************************************/
 
-			class GuiWindow : public GuiControlHost, public Description<GuiWindow>
+			class GuiWindow : public GuiControlHost, protected compositions::IGuiAltActionHost, public Description<GuiWindow>
 			{
 				friend class GuiApplication;
 			public:
@@ -5085,6 +5167,7 @@ Window
 					virtual bool						GetTitleBar()=0;
 					virtual void						SetTitleBar(bool visible)=0;
 					virtual IStyleController*			CreateTooltipStyle() = 0;
+					virtual GuiLabel::IStyleController*	CreateShortcutKeyStyle() = 0;
 				};
 				
 				class DefaultBehaviorStyleController : virtual public IStyleController
@@ -5111,17 +5194,27 @@ Window
 					bool								GetTitleBar()override;
 					void								SetTitleBar(bool visible)override;
 					IStyleController*					CreateTooltipStyle()override;
+					GuiLabel::IStyleController*			CreateShortcutKeyStyle()override;
 				};
 			protected:
 				IStyleController*						styleController;
+				compositions::IGuiAltActionHost*		previousAltHost;
 				
 				void									Moved()override;
 				void									OnNativeWindowChanged()override;
 				void									OnVisualStatusChanged()override;
 				virtual void							MouseClickedOnOtherWindow(GuiWindow* window);
+
+				compositions::GuiGraphicsComposition*	GetAltComposition()override;
+				compositions::IGuiAltActionHost*		GetPreviousAltHost()override;
+				void									OnActivatedAltHost(IGuiAltActionHost* previousHost)override;
+				void									OnDeactivatedAltHost()override;
+				void									CollectAltActions(collections::Group<WString, IGuiAltAction*>& actions)override;
 			public:
 				GuiWindow(IStyleController* _styleController);
 				~GuiWindow();
+
+				IDescriptable*							QueryService(const WString& identifier)override;
 
 				compositions::GuiNotifyEvent			ClipboardUpdated;
 
@@ -5365,33 +5458,43 @@ Tab Control
 
 			class GuiTab;
 
-			class GuiTabPage : public Object, public Description<GuiTabPage>
+			class GuiTabPage : public Object, protected compositions::IGuiAltActionHost, public Description<GuiTabPage>
 			{
 				friend class GuiTab;
 				friend class Ptr<GuiTabPage>;
 			protected:
-				compositions::GuiBoundsComposition*				containerComposition;
+				GuiControl*										containerControl;
 				GuiTab*											owner;
+				WString											alt;
 				WString											text;
+				compositions::IGuiAltActionHost*				previousAltHost;
 
 				bool											AssociateTab(GuiTab* _owner);
 				bool											DeassociateTab(GuiTab* _owner);
+				compositions::GuiGraphicsComposition*			GetAltComposition()override;
+				compositions::IGuiAltActionHost*				GetPreviousAltHost()override;
+				void											OnActivatedAltHost(compositions::IGuiAltActionHost* previousHost)override;
+				void											OnDeactivatedAltHost()override;
+				void											CollectAltActions(collections::Group<WString, compositions::IGuiAltAction*>& actions)override;
 			public:
 				GuiTabPage();
 				~GuiTabPage();
-
+				
+				compositions::GuiNotifyEvent					AltChanged;
 				compositions::GuiNotifyEvent					TextChanged;
 				compositions::GuiNotifyEvent					PageInstalled;
 				compositions::GuiNotifyEvent					PageUninstalled;
 
-				compositions::GuiBoundsComposition*				GetContainerComposition();
+				compositions::GuiGraphicsComposition*			GetContainerComposition();
 				GuiTab*											GetOwnerTab();
+				const WString&									GetAlt();
+				bool											SetAlt(const WString& value);
 				const WString&									GetText();
 				void											SetText(const WString& param);
 				bool											GetSelected();
 			};
 
-			class GuiTab : public GuiControl, public Description<GuiTab>
+			class GuiTab : public GuiControl, protected compositions::IGuiAltActionContainer, public Description<GuiTab>
 			{
 				friend class GuiTabPage;
 			public:
@@ -5410,6 +5513,8 @@ Tab Control
 					virtual void								RemoveTab(vint index)=0;
 					virtual void								MoveTab(vint oldIndex, vint newIndex)=0;
 					virtual void								SetSelectedTab(vint index)=0;
+					virtual void								SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)=0;
+					virtual compositions::IGuiAltAction*		GetTabAltAction(vint index) = 0;
 				};
 			protected:
 				class CommandExecutor : public Object, public ICommandExecutor
@@ -5427,9 +5532,14 @@ Tab Control
 				IStyleController*								styleController;
 				collections::List<GuiTabPage*>					tabPages;
 				GuiTabPage*										selectedPage;
+
+				vint											GetAltActionCount()override;
+				compositions::IGuiAltAction*					GetAltAction(vint index)override;
 			public:
 				GuiTab(IStyleController* _styleController);
 				~GuiTab();
+
+				IDescriptable*									QueryService(const WString& identifier)override;
 
 				compositions::GuiNotifyEvent					SelectedPageChanged;
 
@@ -6383,6 +6493,7 @@ Menu
 			protected:
 				GuiControl*								owner;
 
+				void									OnDeactivatedAltHost()override;
 				void									MouseClickedOnOtherWindow(GuiWindow* window)override;
 				void									OnWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -6438,6 +6549,9 @@ MenuButton
 				GuiButton*								GetSubMenuHost();
 				void									OpenSubMenuInternal();
 				void									OnParentLineChanged()override;
+				bool									IsAltAvailable()override;
+				compositions::IGuiAltActionHost*		GetActivatingAltHost()override;
+
 				void									OnSubMenuWindowOpened(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnSubMenuWindowClosed(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
 				void									OnMouseEnter(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
@@ -11078,6 +11192,7 @@ namespace vl
 				virtual controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle() = 0;
 				virtual controls::GuiTooltip::IStyleController*								CreateTooltipStyle()=0;
 				virtual controls::GuiLabel::IStyleController*								CreateLabelStyle()=0;
+				virtual controls::GuiLabel::IStyleController*								CreateShortcutKeyStyle()=0;
 				virtual controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()=0;
 				virtual controls::GuiControl::IStyleController*								CreateGroupBoxStyle()=0;
 				virtual controls::GuiTab::IStyleController*									CreateTabStyle()=0;
@@ -11215,6 +11330,7 @@ Theme
 				controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle()override;
 				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				controls::GuiLabel::IStyleController*								CreateShortcutKeyStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
@@ -11299,6 +11415,7 @@ Theme
 				controls::GuiCustomControl::IStyleController*						CreateCustomControlStyle()override;
 				controls::GuiTooltip::IStyleController*								CreateTooltipStyle()override;
 				controls::GuiLabel::IStyleController*								CreateLabelStyle()override;
+				controls::GuiLabel::IStyleController*								CreateShortcutKeyStyle()override;
 				controls::GuiScrollContainer::IStyleProvider*						CreateScrollContainerStyle()override;
 				controls::GuiControl::IStyleController*								CreateGroupBoxStyle()override;
 				controls::GuiTab::IStyleController*									CreateTabStyle()override;
@@ -11895,7 +12012,7 @@ Container
 				compositions::GuiBoundsComposition*			boundsComposition;
 				elements::GuiSolidLabelElement*				textElement;
 			public:
-				Win7LabelStyle();
+				Win7LabelStyle(bool forShortcutKey);
 				~Win7LabelStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
@@ -12301,6 +12418,8 @@ Tab
 				void														RemoveTab(vint index)override;
 				void														MoveTab(vint oldIndex, vint newIndex)override;
 				void														SetSelectedTab(vint index)override;
+				void														SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)override;
+				compositions::IGuiAltAction*								GetTabAltAction(vint index)override;
 			};
 		}
 	}
@@ -13135,7 +13254,7 @@ Container
 				compositions::GuiBoundsComposition*			boundsComposition;
 				elements::GuiSolidLabelElement*				textElement;
 			public:
-				Win8LabelStyle();
+				Win8LabelStyle(bool forShortcutKey);
 				~Win8LabelStyle();
 
 				compositions::GuiBoundsComposition*			GetBoundsComposition()override;
@@ -14123,7 +14242,8 @@ Control Template
 				F(GuiWindowTemplate, bool, TitleBar)\
 				F(GuiWindowTemplate, bool, CustomizedBorder)\
 				F(GuiWindowTemplate, bool, Maximized)\
-				F(GuiWindowTemplate, WString, TooltipTemplate)
+				F(GuiWindowTemplate, WString, TooltipTemplate)\
+				F(GuiWindowTemplate, WString, ShortcutKeyTemplate)
 
 				GuiWindowTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
@@ -14461,6 +14581,7 @@ Control Template
 				GuiWindowTemplate*												controlTemplate;
 				controls::GuiWindow*											window;
 				Ptr<GuiTemplate::IFactory>										tooltipTemplateFactory;
+				Ptr<GuiTemplate::IFactory>										shortcutKeyTemplateFactory;
 
 			public:
 				GuiWindowTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
@@ -14482,6 +14603,7 @@ Control Template
 				bool															GetTitleBar()override;
 				void															SetTitleBar(bool visible)override;
 				controls::GuiWindow::IStyleController*							CreateTooltipStyle()override;
+				controls::GuiLabel::IStyleController*							CreateShortcutKeyStyle()override;
 			};
 
 			class GuiButtonTemplate_StyleProvider
@@ -14782,6 +14904,8 @@ Control Template
 				void															RemoveTab(vint index)override;
 				void															MoveTab(vint oldIndex, vint newIndex)override;
 				void															SetSelectedTab(vint index)override;
+				void															SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)override;
+				compositions::IGuiAltAction*									GetTabAltAction(vint index)override;
 			};
 
 /***********************************************************************

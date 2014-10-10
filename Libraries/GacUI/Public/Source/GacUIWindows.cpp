@@ -4464,6 +4464,11 @@ WindowsForm
 					case WM_SYSKEYUP:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
+							if (supressingAlt && !info.ctrl && !info.shift && info.code == VK_MENU)
+							{
+								supressingAlt = false;
+								break;
+							}
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->SysKeyUp(info);
@@ -4473,6 +4478,10 @@ WindowsForm
 					case WM_SYSKEYDOWN:
 						{
 							NativeWindowKeyInfo info=ConvertKey(wParam, lParam);
+							if (supressingAlt && !info.ctrl && !info.shift && info.code == VK_MENU)
+							{
+								break;
+							}
 							for(vint i=0;i<listeners.Count();i++)
 							{
 								listeners[i]->SysKeyDown(info);
@@ -4498,6 +4507,7 @@ WindowsForm
 						}
 						break;
 					case WM_ERASEBKGND:
+						result = 0;
 						return true;
 					case WM_NCPAINT:
 					case WM_SYNCPAINT:
@@ -4693,6 +4703,7 @@ WindowsForm
 				Interface*							graphicsHandler;
 				bool								customFrameMode;
 				List<Ptr<INativeMessageHandler>>	messageHandlers;
+				bool								supressingAlt;
 
 			public:
 				WindowsForm(HWND parent, WString className, HINSTANCE hInstance)
@@ -4704,6 +4715,7 @@ WindowsForm
 					,mouseHoving(false)
 					,graphicsHandler(0)
 					,customFrameMode(false)
+					,supressingAlt(false)
 				{
 					DWORD exStyle=WS_EX_APPWINDOW | WS_EX_CONTROLPARENT;
 					DWORD style=WS_BORDER | WS_CAPTION | WS_SIZEBOX | WS_SYSMENU | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
@@ -5130,7 +5142,17 @@ WindowsForm
 
 				void SetTopMost(bool topmost)
 				{
-					SetWindowPos(handle,(topmost?HWND_TOPMOST:HWND_NOTOPMOST),0,0,0,0,SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
+					SetWindowPos(handle, (topmost ? HWND_TOPMOST : HWND_NOTOPMOST), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_FRAMECHANGED);
+				}
+
+				void SupressAlt()
+				{
+					if (!supressingAlt)
+					{
+						supressingAlt = true;
+						PostMessage(handle, WM_SYSKEYDOWN, VK_MENU, 0);
+						PostMessage(handle, WM_SYSKEYUP, VK_MENU, 0);
+					}
 				}
 
 				bool InstallListener(INativeWindowListener* listener)

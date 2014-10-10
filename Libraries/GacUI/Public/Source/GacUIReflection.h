@@ -1212,6 +1212,9 @@ Type List
 			F(presentation::compositions::IGuiShortcutKeyItem)\
 			F(presentation::compositions::IGuiShortcutKeyManager)\
 			F(presentation::compositions::GuiShortcutKeyManager)\
+			F(presentation::compositions::IGuiAltAction)\
+			F(presentation::compositions::IGuiAltActionContainer)\
+			F(presentation::compositions::IGuiAltActionHost)\
 
 			GUIREFLECTIONCOMPOSITION_TYPELIST(DECL_TYPE_INFO)
 
@@ -1645,6 +1648,16 @@ Interface Proxy
 					{
 						INVOKE_INTERFACE_PROXY(SetSelectedTab, index);
 					}
+
+					void SetTabAlt(vint index, const WString& value, compositions::IGuiAltActionHost* host)override
+					{
+						INVOKE_INTERFACE_PROXY(SetTabAlt, index, value, host);
+					}
+
+					compositions::IGuiAltAction* GetTabAltAction(vint index)
+					{
+						return INVOKEGET_INTERFACE_PROXY(GetTabAltAction, index);
+					}
 				};
 
 				class GuiScrollView_IStyleProvider : public virtual GuiControl_IStyleProvider, public virtual GuiScrollView::IStyleProvider
@@ -1772,6 +1785,11 @@ Interface Proxy
 					GuiWindow::IStyleController* CreateTooltipStyle()override
 					{
 						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateTooltipStyle);
+					}
+
+					GuiLabel::IStyleController* CreateShortcutKeyStyle()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(CreateShortcutKeyStyle);
 					}
 				};
 
