@@ -26,7 +26,7 @@ targets
 
 map cpp : %.cpp
 	> o : obj %.o
-	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $(OUT) -c $(IN)
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $(OUT) -c $(IN)
 
 map cppbom : %.cpp
 	> o : obj %.o

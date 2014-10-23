@@ -90,31 +90,31 @@ $(WORKFLOW_RUNTIME_cpp) : $(WORKFLOW_RUNTIME_h)
 $(UNITTEST_cpp) : $(WORKFLOW_ANALYZER_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
 
 $(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_COLLECTIONS_o) : $(obj_TARGET)%.o : $(VLPP_COLLECTIONS_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_JSON_o) : $(obj_TARGET)%.o : $(VLPP_JSON_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_PARSING_o) : $(obj_TARGET)%.o : $(VLPP_PARSING_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_REFLECTION_o) : $(obj_TARGET)%.o : $(VLPP_REFLECTION_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_REGEX_o) : $(obj_TARGET)%.o : $(VLPP_REGEX_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_STREAM_o) : $(obj_TARGET)%.o : $(VLPP_STREAM_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_UNITTEST_o) : $(obj_TARGET)%.o : $(VLPP_UNITTEST_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_XML_o) : $(obj_TARGET)%.o : $(VLPP_XML_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(WORKFLOW_ANALYZER_o) : $(obj_TARGET)%.o : $(WORKFLOW_ANALYZER_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(WORKFLOW_EXPRESSION_o) : $(obj_TARGET)%.o : $(WORKFLOW_EXPRESSION_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(WORKFLOW_RUNTIME_o) : $(obj_TARGET)%.o : $(WORKFLOW_RUNTIME_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp
-	g++ -std=c++11 -finput-charset=gbk -g -fprofile-arcs -ftest-coverage -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 
 clean:
 	rm $(bin_TARGET)* -rf
