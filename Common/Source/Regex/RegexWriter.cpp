@@ -79,7 +79,7 @@ RegexNode
 		RegexNode RegexNode::operator!()const
 		{
 			CharSetExpression* source=dynamic_cast<CharSetExpression*>(expression.Obj());
-			CHECK_ERROR(source, L"RegexNode::operator!()#!操作符只能使用在字符集合表达式上。");
+			CHECK_ERROR(source, L"RegexNode::operator!()#operator ! can only applies on charset expressions.");
 			Ptr<CharSetExpression> target=new CharSetExpression;
 			CopyFrom(target->ranges, source->ranges);
 			target->reverse=!source->reverse;
@@ -90,7 +90,7 @@ RegexNode
 		{
 			CharSetExpression* left=dynamic_cast<CharSetExpression*>(expression.Obj());
 			CharSetExpression* right=dynamic_cast<CharSetExpression*>(node.expression.Obj());
-			CHECK_ERROR(left && right && !left->reverse && !right->reverse, L"RegexNode::operator%(const RegexNode&)#非凡转字符集合表达式才能使用%操作符连接。");
+			CHECK_ERROR(left && right && !left->reverse && !right->reverse, L"RegexNode::operator%(const RegexNode&)#operator % only connects non-reverse charset expressions.");
 			Ptr<CharSetExpression> target=new CharSetExpression;
 			target->reverse=false;
 			CopyFrom(target->ranges, left->ranges);
@@ -98,7 +98,7 @@ RegexNode
 			{
 				if(!target->AddRangeWithConflict(right->ranges[i]))
 				{
-					CHECK_ERROR(false, L"RegexNode::operator%(const RegexNode&)#融合字符集和失败。");
+					CHECK_ERROR(false, L"RegexNode::operator%(const RegexNode&)#Failed to create charset expression from operator %.");
 				}
 			}
 			return RegexNode(target);
