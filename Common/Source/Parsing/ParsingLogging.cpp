@@ -250,13 +250,13 @@ Logger (ParsingDefinitionGrammar)
 				{
 					if(grammar==stateNode && beforeNode)
 					{
-						writer.WriteString(L"¡ñ");
+						writer.WriteString(L"@");
 					}
 					ParsingDefinitionGrammarLogger visitor(writer, parentPriority, stateNode, beforeNode);
 					grammar->Accept(&visitor);
 					if(grammar==stateNode && !beforeNode)
 					{
-						writer.WriteString(L"¡ñ");
+						writer.WriteString(L"@");
 					}
 				}
 
@@ -1003,9 +1003,9 @@ Logger (ParsingTreeNode)
 						vint length=range.end.index-start+1;
 						if(length>0)
 						{
-							writer.WriteString(L" // ¡¾");
+							writer.WriteString(L" // [");
 							writer.WriteString(originalInput.Sub(start, length));
-							writer.WriteString(L"¡¿");
+							writer.WriteString(L"]");
 						}
 					}
 				}
