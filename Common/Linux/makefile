@@ -58,7 +58,7 @@ UNITTEST_BOM_o = $(patsubst $(UNITTEST_BOM_DIR)%.cpp, $(obj_TARGET)%.o, $(UNITTE
 
 ALL_o = $(VLPP_BASIC_o) $(VLPP_COLLECTIONS_o) $(VLPP_JSON_o) $(VLPP_PARSING_o) $(VLPP_REFLECTION_o) $(VLPP_REGEX_o) $(VLPP_STREAM_o) $(VLPP_UNITTEST_o) $(VLPP_XML_o) $(HOST_o) $(UNITTEST_o) $(UNITTEST_CALCULATOR_o) $(UNITTEST_BOM_o)
 all : $(ALL_o)
-	g++ -std=c++11 -g -o $(bin_TARGET)UnitTest  $(ALL_o)
+	g++ -std=c++11 -g -fprofile-arcs -o $(bin_TARGET)UnitTest  $(ALL_o)
 
 $(VLPP_COLLECTIONS_h) : $(VLPP_BASIC_h)
 $(VLPP_STREAM_h) : $(VLPP_COLLECTIONS_h)
@@ -82,31 +82,31 @@ $(UNITTEST_cpp) : $(UNITTEST_CALCULATOR_h)
 $(UNITTEST_BOM_cppbom) : $(UNITTEST_CALCULATOR_h)
 
 $(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_COLLECTIONS_o) : $(obj_TARGET)%.o : $(VLPP_COLLECTIONS_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_JSON_o) : $(obj_TARGET)%.o : $(VLPP_JSON_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_PARSING_o) : $(obj_TARGET)%.o : $(VLPP_PARSING_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_REFLECTION_o) : $(obj_TARGET)%.o : $(VLPP_REFLECTION_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_REGEX_o) : $(obj_TARGET)%.o : $(VLPP_REGEX_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_STREAM_o) : $(obj_TARGET)%.o : $(VLPP_STREAM_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_UNITTEST_o) : $(obj_TARGET)%.o : $(VLPP_UNITTEST_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(VLPP_XML_o) : $(obj_TARGET)%.o : $(VLPP_XML_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(HOST_o) : $(obj_TARGET)%.o : $(HOST_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(UNITTEST_CALCULATOR_o) : $(obj_TARGET)%.o : $(UNITTEST_CALCULATOR_DIR)%.cpp
-	g++ -std=c++11 -g -finput-charset=gbk -o $@ -c $<
+	g++ -std=c++11 -g -finput-charset=gbk -fprofile-arcs -ftest-coverage -o $@ -c $<
 $(UNITTEST_BOM_o) : $(obj_TARGET)%.o : $(UNITTEST_BOM_DIR)%.cpp
-	g++ -std=c++11 -g -o $@ -c $<
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 
 clean:
 	rm $(bin_TARGET)* -rf
