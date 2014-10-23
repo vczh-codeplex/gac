@@ -53,13 +53,13 @@ PureInterpretor
 							vint index=subsets.IndexOf(dfaTransition->range);
 							if(index==-1)
 							{
-								CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#指定的字符集转换没有出现在正规化的字符集结果上。");
+								CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#Specified chars don't appear in the normalized char ranges.");
 							}
 							transition[i][index]=dfa->states.IndexOf(dfaTransition->target);
 						}
 						break;
 					default:
-						CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#PureInterpretor只接受Transition::Chars转换。");
+						CHECK_ERROR(false, L"PureInterpretor::PureInterpretor(Automaton::Ref, CharRange::List&)#PureInterpretor only accepts Transition::Chars transitions.");
 					}
 				}
 			}
