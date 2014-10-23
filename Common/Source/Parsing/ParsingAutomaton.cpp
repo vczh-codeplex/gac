@@ -131,7 +131,7 @@ Automaton
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateName=ownerRule->name+L".Start";
-				state->stateExpression=L"¡¤ <"+ownerRule->name+L">";
+				state->stateExpression=L"@ <"+ownerRule->name+L">";
 				return state;
 			}
 
@@ -143,7 +143,7 @@ Automaton
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateName=ownerRule->name+L".RootStart";
-				state->stateExpression=L"¡ñ $<"+ownerRule->name+L">";
+				state->stateExpression=L"@ $<"+ownerRule->name+L">";
 				return state;
 			}
 
@@ -155,7 +155,7 @@ Automaton
 				state->ownerRule=ownerRule;
 				state->ownerRuleSymbol=symbolManager->GetGlobal()->GetSubSymbolByName(ownerRule->name);
 				state->stateName=ownerRule->name+L".RootEnd";
-				state->stateExpression=L"$<"+ownerRule->name+L"> ¡ñ";
+				state->stateExpression=L"$<"+ownerRule->name+L"> @";
 				return state;
 			}
 
