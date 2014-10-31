@@ -310,7 +310,7 @@
       <description>This demo shows how to apply a customized item template (skin) to a list control using XML.</description>
     </demo>
     <demo name="LoadFromXml.ControlTemplate">
-      <date>2014/7/24</date>
+      <date>2014/10/30</date>
       <image src="DXGUI_96.jpg"/>
       <image src="DXGUI_97.jpg"/>
       <cpp src="Main.cpp" />
