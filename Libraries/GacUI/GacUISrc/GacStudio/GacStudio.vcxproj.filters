@@ -191,5 +191,8 @@
     <Image Include="UI\FileImages\Class.png">
       <Filter>Resource Files\FileImages</Filter>
     </Image>
+    <Image Include="UI\FileImages\Template.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>

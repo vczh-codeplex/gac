@@ -225,6 +225,7 @@
     <Image Include="UI\FileImages\Image.png" />
     <Image Include="UI\FileImages\Parser.png" />
     <Image Include="UI\FileImages\RichDocument.png" />
+    <Image Include="UI\FileImages\Template.png" />
     <Image Include="UI\FileImages\XmlDocument.png" />
     <Image Include="UI\ProjectImages\AllSmall.png" />
     <Image Include="UI\ProjectImages\Dialog.png" />

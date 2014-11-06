@@ -986,7 +986,13 @@ ExecuteBindingSetters
 					{
 						auto name = GlobalStringKey::Get(L"<temp>" + itow(env->scope->referenceValues.Count()));
 						bindingSetter.bindingTarget->instanceName = name;
-						env->scope->referenceValues.Add(name, bindingSetter.propertyValue.instanceValue);
+					}
+
+					auto name = bindingSetter.bindingTarget->instanceName;
+					auto value = bindingSetter.propertyValue.instanceValue;
+					if (!env->scope->referenceValues.Keys().Contains(bindingSetter.bindingTarget->instanceName))
+					{
+						env->scope->referenceValues.Add(name, value);
 					}
 				}
 
@@ -1046,7 +1052,13 @@ ExecuteBindingSetters
 						{
 							auto name = GlobalStringKey::Get(L"<temp>" + itow(env->scope->referenceValues.Count()));
 							eventSetter.bindingTarget->instanceName = name;
-							env->scope->referenceValues.Add(name, eventSetter.propertyValue.instanceValue);
+						}
+
+						auto name = eventSetter.bindingTarget->instanceName;
+						auto value = eventSetter.propertyValue.instanceValue;
+						if (!env->scope->referenceValues.Keys().Contains(eventSetter.bindingTarget->instanceName))
+						{
+							env->scope->referenceValues.Add(name, value);
 						}
 					}
 
