@@ -53,6 +53,16 @@ namespace ui
 	{
 	}
 
+	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+		auto window = new AboutWindow();
+		window->ForceCalculateSizeImmediately();
+		window->MoveToScreenCenter();
+		window->ShowModalAndDelete(this, []()
+		{
+		});
+	}
+
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
 	MainWindow::MainWindow(Ptr<vm::IStudioModel> ViewModel)

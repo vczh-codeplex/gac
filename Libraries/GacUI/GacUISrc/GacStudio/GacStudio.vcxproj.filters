@@ -69,6 +69,9 @@
     <ClCompile Include="Studio\SolutionModel.cpp">
       <Filter>Studio</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GsAboutWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -104,6 +107,9 @@
     <ClInclude Include="Studio\SolutionModel.h">
       <Filter>Studio</Filter>
     </ClInclude>
+    <ClInclude Include="UI\GsAboutWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\Resources.xml">
@@ -129,6 +135,9 @@
     </Xml>
     <Xml Include="UI\ViewModels\SolutionModel.xml">
       <Filter>Resource Files\ViewModels</Filter>
+    </Xml>
+    <Xml Include="UI\UserInterfaces\AboutWindow.xml">
+      <Filter>Resource Files\UserInterfaces</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +202,9 @@
     </Image>
     <Image Include="UI\FileImages\Template.png">
       <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\Gaclib.png">
+      <Filter>Resource Files\CommandImages</Filter>
     </Image>
   </ItemGroup>
 </Project>

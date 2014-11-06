@@ -180,6 +180,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Studio\SolutionModel.cpp" />
     <ClCompile Include="UI\GacStudioUIPartialClasses.cpp" />
+    <ClCompile Include="UI\GsAboutWindow.cpp" />
     <ClCompile Include="UI\GsMainWindow.cpp" />
     <ClCompile Include="UI\GsNewFileWindow.cpp" />
     <ClCompile Include="UI\GsNewProjectWindow.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="Studio\SolutionModel.h" />
     <ClInclude Include="UI\GacStudioUI.h" />
     <ClInclude Include="UI\GacStudioUIPartialClasses.h" />
+    <ClInclude Include="UI\GsAboutWindow.h" />
     <ClInclude Include="UI\GsMainWindow.h" />
     <ClInclude Include="UI\GsNewFileWindow.h" />
     <ClInclude Include="UI\GsNewProjectWindow.h" />
@@ -204,6 +206,7 @@
     <Xml Include="UI\Resources.xml">
       <SubType>Designer</SubType>
     </Xml>
+    <Xml Include="UI\UserInterfaces\AboutWindow.xml" />
     <Xml Include="UI\UserInterfaces\MainWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewFileWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewProjectWindow.xml" />
@@ -213,6 +216,7 @@
     <None Include="UI\Codegen.bat" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="UI\CommandImages\Gaclib.png" />
     <Image Include="UI\CommandImages\New.png" />
     <Image Include="UI\CommandImages\NewProject.png" />
     <Image Include="UI\CommandImages\Open.png" />
