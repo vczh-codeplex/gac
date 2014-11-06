@@ -19,5 +19,8 @@
     <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
     <Property Name="FileCategory" Type="string"/>
+    <Method Name="OpenBrowser" Type="void">
+      <Argument Name="url" Type="string"/>
+    </Method>
   </Interface>
 </Schemas>

@@ -1,4 +1,5 @@
 #include "SolutionModel.h"
+#include <Windows.h>
 
 using namespace vl::reflection::description;
 
@@ -394,5 +395,10 @@ StudioModel
 				});
 		}
 		CopyFrom(filteredFileFactories, source);
+	}
+
+	void StudioModel::OpenBrowser(WString url)
+	{
+		ShellExecute(NULL, NULL, url.Buffer(), NULL, NULL, SHOW_FULLSCREEN);
 	}
 }

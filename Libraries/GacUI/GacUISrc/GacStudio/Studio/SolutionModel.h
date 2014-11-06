@@ -70,6 +70,8 @@ namespace vm
 
 		WString									GetFileCategory()override;
 		void									SetFileCategory(WString value)override;
+
+		void									OpenBrowser(WString url)override;
 	};
 }
 

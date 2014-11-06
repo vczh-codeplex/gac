@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Instance ref.Class="ui::AboutWindow">
+  <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
   <Window ref.Name="self" Text="About GacStudio 1.0" ClientSize="x:640 y:480" MinimizedBox="false" MaximizedBox="false" SizeBox="false">
     <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
       <att.Rows>
@@ -20,7 +21,7 @@
       </Cell>
 
       <Cell Site="row:1 column:1">
-        <DocumentViewer ref.Name="documentViewer" EditMode="ViewOnly" Document-uri="res://Documents/AboutDocument" ev.ActiveHyperlinkExecuted="documentViewer_ActiveHyperlinkExecuted">
+        <DocumentViewer ref.Name="documentViewer" EditMode="ViewOnly" Document-uri="res://Documents/AboutDocument" ev.ActiveHyperlinkExecuted-eval="ViewModel.OpenBrowser(documentViewer.ActiveHyperlinkReference);">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </DocumentViewer>
       </Cell>

@@ -59,6 +59,8 @@ namespace vm
 
 		virtual WString GetFileCategory() = 0;
 		virtual void SetFileCategory(WString value) = 0;
+
+		virtual void OpenBrowser(WString url) = 0;
 	};
 }
 
@@ -68,12 +70,14 @@ namespace ui
 	class AboutWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 	{
 	private:
+		Ptr<vm::IStudioModel> ViewModel_;
 	protected:
 		vl::presentation::controls::GuiDocumentViewer* documentViewer;
 		vl::presentation::controls::GuiWindow* self;
 
-		void InitializeComponents()
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(documentViewer);
@@ -81,6 +85,7 @@ namespace ui
 			}
 			else
 			{
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -90,6 +95,11 @@ namespace ui
 			,documentViewer(0)
 			,self(0)
 		{
+		}
+
+		Ptr<vm::IStudioModel> GetViewModel()
+		{
+			return ViewModel_;
 		}
 	};
 
@@ -291,17 +301,16 @@ namespace vl
 GsAboutWindow.h :
 namespace ui
 {
-	class AboutWindow : public AboutWindow_<AboutWindow>
+	class AboutWindow : public ui::AboutWindow_<ui::AboutWindow>
 	{
-		friend class AboutWindow_<AboutWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<AboutWindow>;
+		friend class ui::AboutWindow_<ui::AboutWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::AboutWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-		void documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		AboutWindow();
+		AboutWindow(Ptr<vm::IStudioModel> ViewModel);
 	};
 }
 
@@ -311,15 +320,11 @@ namespace ui
 {
 	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 
-	void AboutWindow::documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-	{
-	}
-
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	AboutWindow::AboutWindow()
+	AboutWindow::AboutWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
 
@@ -327,10 +332,10 @@ namespace ui
 GsMainWindow.h :
 namespace ui
 {
-	class MainWindow : public MainWindow_<MainWindow>
+	class MainWindow : public ui::MainWindow_<ui::MainWindow>
 	{
-		friend class MainWindow_<MainWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
+		friend class ui::MainWindow_<ui::MainWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::MainWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
@@ -398,10 +403,10 @@ namespace ui
 GsNewFileWindow.h :
 namespace ui
 {
-	class NewFileWindow : public NewFileWindow_<NewFileWindow>
+	class NewFileWindow : public ui::NewFileWindow_<ui::NewFileWindow>
 	{
-		friend class NewFileWindow_<NewFileWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewFileWindow>;
+		friend class ui::NewFileWindow_<ui::NewFileWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::NewFileWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
@@ -439,10 +444,10 @@ namespace ui
 GsNewProjectWindow.h :
 namespace ui
 {
-	class NewProjectWindow : public NewProjectWindow_<NewProjectWindow>
+	class NewProjectWindow : public ui::NewProjectWindow_<ui::NewProjectWindow>
 	{
-		friend class NewProjectWindow_<NewProjectWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewProjectWindow>;
+		friend class ui::NewProjectWindow_<ui::NewProjectWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::NewProjectWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)

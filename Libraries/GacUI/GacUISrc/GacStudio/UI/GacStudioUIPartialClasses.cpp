@@ -47,13 +47,14 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectModels)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileModels)
 				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
+				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
 			BEGIN_CLASS_MEMBER(ui::AboutWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(ui::AboutWindow*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(ui::AboutWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
 
-				CLASS_MEMBER_GUIEVENT_HANDLER(documentViewer_ActiveHyperlinkExecuted, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(ui::AboutWindow)
 
 			BEGIN_CLASS_MEMBER(ui::MainWindow)
