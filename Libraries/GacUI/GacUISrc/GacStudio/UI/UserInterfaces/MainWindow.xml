@@ -33,11 +33,10 @@
       <att.Rows>
         <CellOption>composeType:MinSize</CellOption>
         <CellOption>composeType:MinSize</CellOption>
-        <CellOption>composeType:MinSize</CellOption>
         <CellOption>composeType:Percentage percentage:1.0</CellOption>
       </att.Rows>
       <att.Columns>
-        <CellOption>composeType:Absolute absolute:240</CellOption>
+        <CellOption>composeType:Absolute absolute:300</CellOption>
         <CellOption>composeType:Absolute absolute:5</CellOption>
         <CellOption>composeType:Percentage percentage:1.0</CellOption>
       </att.Columns>
@@ -93,26 +92,34 @@
         </ToolstripToolBar>
       </Cell>
 
-      <Cell Site="row:2 column:0">
-        <Label Text="Solution Explorer">
-          <att.BoundsComposition-set AlignmentToParent="left:6 top:6 right:6 bottom:6"/>
-        </Label>
-      </Cell>
-
-      <Cell Site="row:3 column:0" InternalMargin="left:5 top:0 right:0 bottom:5">
-        <BindableTreeView VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.OpeningSolution" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
+      <Cell Site="row:2 column:0" InternalMargin="left:5 top:0 right:0 bottom:5">
+        <Tab>
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-          <att.Enabled-bind>ViewModel.OpeningSolution.Children.Count &gt; 0</att.Enabled-bind>
-        </BindableTreeView>
+          <TabPage Text="Solution Explorer">
+            <BindableTreeView VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.OpeningSolution" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
+              <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+              <att.Enabled-bind>ViewModel.OpeningSolution.Children.Count &gt; 0</att.Enabled-bind>
+            </BindableTreeView>
+          </TabPage>
+
+          <TabPage Text="Toolbox">
+          </TabPage>
+
+          <TabPage Text="Properties">
+          </TabPage>
+
+          <TabPage Text="Document Layout">
+          </TabPage>
+        </Tab>
       </Cell>
 
-      <Cell ref.Name="cellSplitter" Site="row:2 column:1 rowSpan:2">
+      <Cell ref.Name="cellSplitter" Site="row:2 column:1">
         <ev.leftButtonDown>cellSplitter_leftButtonDown</ev.leftButtonDown>
         <ev.leftButtonUp>cellSplitter_leftButtonUp</ev.leftButtonUp>
         <ev.mouseMove>cellSplitter_mouseMove</ev.mouseMove>
       </Cell>
 
-      <Cell Site="row:2 column:2 rowSpan:2" InternalMargin="left:0 top:0 right:5 bottom:5">
+      <Cell Site="row:2 column:2" InternalMargin="left:0 top:0 right:5 bottom:5">
         <Tab>
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
           <TabPage Text="Start Page"/>
