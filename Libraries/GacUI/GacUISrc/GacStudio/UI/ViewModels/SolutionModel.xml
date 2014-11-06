@@ -15,7 +15,14 @@
     <Property Name="Id" Type="string" Readonly="true"/>
   </Interface>
 
-  <Interface ref.Class="vm::ISolutionItem">
+  <Interface ref.Class="vm::IFileFactoryFilterModel">
+    <Property Name="FilterImage" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+    <Property Name="Children" Type="vm::IFileFactoryFilterModel^{}" Readonly="true"/>
+  </Interface>
+
+  <Interface ref.Class="vm::ISolutionItemModel">
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true" Observable="true"/>
     <Property Name="Name" Type="string" Readonly="true" Observable="true"/>
     <Property Name="Children" Type="description::IValueObservableList^" Readonly="true"/>
@@ -25,6 +32,7 @@
     <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
     <Property Name="FileCategory" Type="string"/>
+    <Property Name="FileFilters" Type="vm::IFileFactoryFilterModel^{}" Readonly="true"/>
     
     <Property Name="OpeningSolution" Type="description::IValueObservableList^" Readonly="true"/>
     

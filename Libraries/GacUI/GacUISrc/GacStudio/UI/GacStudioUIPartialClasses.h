@@ -49,7 +49,23 @@ namespace vm
 
 namespace vm
 {
-	class ISolutionItem : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItem>
+	class IFileFactoryFilterModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryFilterModel>
+	{
+	public:
+
+		virtual Ptr<presentation::GuiImageData> GetFilterImage() = 0;
+
+		virtual WString GetName() = 0;
+
+		virtual WString GetId() = 0;
+
+		virtual collections::LazyList<Ptr<vm::IFileFactoryFilterModel>> GetChildren() = 0;
+	};
+}
+
+namespace vm
+{
+	class ISolutionItemModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItemModel>
 	{
 	public:
 
@@ -75,6 +91,8 @@ namespace vm
 
 		virtual WString GetFileCategory() = 0;
 		virtual void SetFileCategory(WString value) = 0;
+
+		virtual collections::LazyList<Ptr<vm::IFileFactoryFilterModel>> GetFileFilters() = 0;
 
 		virtual Ptr<description::IValueObservableList> GetOpeningSolution() = 0;
 
@@ -310,9 +328,10 @@ namespace vl
 	{
 		namespace description
 		{
+			DECL_TYPE_INFO(vm::IFileFactoryFilterModel)
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
-			DECL_TYPE_INFO(vm::ISolutionItem)
+			DECL_TYPE_INFO(vm::ISolutionItemModel)
 			DECL_TYPE_INFO(vm::IStudioModel)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::MainWindow)
