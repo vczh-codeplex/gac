@@ -35,7 +35,7 @@ namespace vm
 		WString											GetId()override;
 	};
 
-	class ProjectFactoryModelBase : public Object, public virtual IProjectFactoryModel, public virtual IFileFactoryFilterModel
+	class ProjectFactoryModelBase : public Object, public virtual IProjectFactoryModel
 	{
 	protected:
 		Ptr<GuiImageData>								image;
@@ -49,42 +49,24 @@ namespace vm
 		~ProjectFactoryModelBase();
 
 		Ptr<GuiImageData>								GetImage()override;
-		Ptr<GuiImageData>								GetFilterImage()override;
+		Ptr<GuiImageData>								GetSmallImage()override;
 		WString											GetName()override;
 		WString											GetDescription()override;
 		WString											GetId()override;
-		LazyList<Ptr<IFileFactoryFilterModel>>			GetChildren()override;
+		LazyList<Ptr<IProjectFactoryModel>>				GetChildren()override;
 	};
 
-	class AllFileFactoryFilterModel : public Object, public virtual IFileFactoryFilterModel
+	class FileFactoryFilterModel : public ProjectFactoryModelBase
 	{
 	protected:
-		Ptr<GuiImageData>								smallImage;
-		List<Ptr<ProjectFactoryModelBase>>				projectFactories;
+		List<Ptr<ProjectFactoryModelBase>>				children;
 
 	public:
-		AllFileFactoryFilterModel();
-		~AllFileFactoryFilterModel();
+		FileFactoryFilterModel();
+		~FileFactoryFilterModel();
 
-		Ptr<GuiImageData>								GetFilterImage()override;
-		WString											GetName()override;
-		WString											GetId()override;
-		LazyList<Ptr<IFileFactoryFilterModel>>			GetChildren()override;
-	};
-
-	class RootFileFactoryFilterModel : public Object, public virtual IFileFactoryFilterModel
-	{
-	protected:
-		List<Ptr<IFileFactoryFilterModel>>				projectFactories;
-
-	public:
-		RootFileFactoryFilterModel(Ptr<IFileFactoryFilterModel> all);
-		~RootFileFactoryFilterModel();
-
-		Ptr<GuiImageData>								GetFilterImage()override;
-		WString											GetName()override;
-		WString											GetId()override;
-		LazyList<Ptr<IFileFactoryFilterModel>>			GetChildren()override;
+		void											AddChild(Ptr<ProjectFactoryModelBase> child);
+		LazyList<Ptr<IProjectFactoryModel>>				GetChildren()override;
 	};
 
 	class RootSolutionItemModel : public Object, public virtual ISolutionItemModel
@@ -101,8 +83,7 @@ namespace vm
 	class StudioModel : public Object, public virtual IStudioModel
 	{
 	protected:
-		Ptr<AllFileFactoryFilterModel>					allProjects;
-		Ptr<RootFileFactoryFilterModel>					fileFilters;
+		Ptr<FileFactoryFilterModel>						fileFilters;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		WString											fileCategory;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
@@ -114,11 +95,11 @@ namespace vm
 
 		LazyList<Ptr<IProjectFactoryModel>>				GetProjectModels()override;
 		Ptr<description::IValueObservableList>			GetFileModels()override;
+		Ptr<IProjectFactoryModel>						GetFileFilters()override;
 
 		WString											GetFileCategory()override;
 		void											SetFileCategory(WString value)override;
 
-		Ptr<IFileFactoryFilterModel>					GetFileFilters()override;
 		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
 
 		void											OpenBrowser(WString url)override;

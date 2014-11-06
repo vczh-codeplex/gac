@@ -10,16 +10,11 @@
 
   <Interface ref.Class="vm::IProjectFactoryModel">
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="SmallImage" Type="presentation::GuiImageData^" Readonly="true"/>
     <Property Name="Name" Type="string" Readonly="true"/>
     <Property Name="Description" Type="string" Readonly="true"/>
     <Property Name="Id" Type="string" Readonly="true"/>
-  </Interface>
-
-  <Interface ref.Class="vm::IFileFactoryFilterModel">
-    <Property Name="FilterImage" Type="presentation::GuiImageData^" Readonly="true"/>
-    <Property Name="Name" Type="string" Readonly="true"/>
-    <Property Name="Id" Type="string" Readonly="true"/>
-    <Property Name="Children" Type="vm::IFileFactoryFilterModel^{}" Readonly="true"/>
+    <Property Name="Children" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
   </Interface>
 
   <Interface ref.Class="vm::ISolutionItemModel">
@@ -31,9 +26,9 @@
   <Interface ref.Class="vm::IStudioModel">
     <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
-    <Property Name="FileCategory" Type="string"/>
-    <Property Name="FileFilters" Type="vm::IFileFactoryFilterModel^" Readonly="true"/>
+    <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
     
+    <Property Name="FileCategory" Type="string"/>
     <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
     
     <Method Name="OpenBrowser" Type="void">

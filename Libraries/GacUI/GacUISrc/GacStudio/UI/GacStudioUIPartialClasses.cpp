@@ -17,7 +17,6 @@ namespace vl
 		namespace description
 		{
 			#define _ ,
-			IMPL_TYPE_INFO(vm::IFileFactoryFilterModel)
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_TYPE_INFO(vm::IProjectFactoryModel)
 			IMPL_TYPE_INFO(vm::ISolutionItemModel)
@@ -26,14 +25,6 @@ namespace vl
 			IMPL_TYPE_INFO(ui::MainWindow)
 			IMPL_TYPE_INFO(ui::NewFileWindow)
 			IMPL_TYPE_INFO(ui::NewProjectWindow)
-
-			BEGIN_CLASS_MEMBER(vm::IFileFactoryFilterModel)
-				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(FilterImage)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Children)
-			END_CLASS_MEMBER(vm::IFileFactoryFilterModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFileFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -47,9 +38,11 @@ namespace vl
 			BEGIN_CLASS_MEMBER(vm::IProjectFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Image)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SmallImage)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Description)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Children)
 			END_CLASS_MEMBER(vm::IProjectFactoryModel)
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
@@ -65,8 +58,8 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectModels)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileModels)
-				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFilters)
+				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolution)
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 			END_CLASS_MEMBER(vm::IStudioModel)
@@ -125,7 +118,6 @@ namespace vl
 			public:
 				void Load(ITypeManager* manager)
 				{
-					ADD_TYPE_INFO(vm::IFileFactoryFilterModel)
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IProjectFactoryModel)
 					ADD_TYPE_INFO(vm::ISolutionItemModel)

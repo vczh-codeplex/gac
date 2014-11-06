@@ -254,8 +254,14 @@ ProjectFactoryModelBase
 		, description(_description)
 		, id(_id)
 	{
-		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_imageUrl);
-		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_smallImageUrl);
+		if (_imageUrl != L"")
+		{
+			image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_imageUrl);
+		}
+		if (_smallImageUrl != L"")
+		{
+			smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_smallImageUrl);
+		}
 	}
 
 	ProjectFactoryModelBase::~ProjectFactoryModelBase()
@@ -267,7 +273,7 @@ ProjectFactoryModelBase
 		return image;
 	}
 
-	Ptr<GuiImageData> ProjectFactoryModelBase::GetFilterImage()
+	Ptr<GuiImageData> ProjectFactoryModelBase::GetSmallImage()
 	{
 		return smallImage;
 	}
@@ -287,9 +293,9 @@ ProjectFactoryModelBase
 		return id;
 	}
 
-	LazyList<Ptr<IFileFactoryFilterModel>> ProjectFactoryModelBase::GetChildren()
+	LazyList<Ptr<IProjectFactoryModel>> ProjectFactoryModelBase::GetChildren()
 	{
-		return MakePtr<List<Ptr<IFileFactoryFilterModel>>>();
+		return MakePtr<List<Ptr<IProjectFactoryModel>>>();
 	}
 
 /***********************************************************************
@@ -305,7 +311,7 @@ ResourceProjectFactory
 				L"ProjectImages/DialogSmall.png",
 				L"GacUI Resource",
 				L"Create an embedded resource for your GacUI program.",
-				L"RESOURCE_PROJECT")
+				L"GACUI_RESOURCE_PROJECT")
 		{
 		}
 	};
@@ -350,69 +356,23 @@ DatabaseProjectFactory
 AllFileFactoryFilterModel
 ***********************************************************************/
 	
-	AllFileFactoryFilterModel::AllFileFactoryFilterModel()
-	{
-		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(L"ProjectImages/AllSmall.png");
-		projectFactories.Add(new ResourceProjectFactory);
-		projectFactories.Add(new ParserProjectFactory);
-		projectFactories.Add(new DatabaseProjectFactory);
-	}
-
-	AllFileFactoryFilterModel::~AllFileFactoryFilterModel()
+	FileFactoryFilterModel::FileFactoryFilterModel()
+		:ProjectFactoryModelBase(L"", L"ProjectImages/AllSmall.png", L"All", L"", L"")
 	{
 	}
 
-	Ptr<GuiImageData> AllFileFactoryFilterModel::GetFilterImage()
-	{
-		return smallImage;
-	}
-
-	WString AllFileFactoryFilterModel::GetName()
-	{
-		return L"All";
-	}
-
-	WString AllFileFactoryFilterModel::GetId()
-	{
-		return L"";
-	}
-
-	LazyList<Ptr<IFileFactoryFilterModel>> AllFileFactoryFilterModel::GetChildren()
-	{
-		return From(projectFactories).Cast<IFileFactoryFilterModel>();
-	}
-
-/***********************************************************************
-RootFileFactoryFilterModel
-***********************************************************************/
-	
-	RootFileFactoryFilterModel::RootFileFactoryFilterModel(Ptr<IFileFactoryFilterModel> all)
-	{
-		projectFactories.Add(all);
-	}
-
-	RootFileFactoryFilterModel::~RootFileFactoryFilterModel()
+	FileFactoryFilterModel::~FileFactoryFilterModel()
 	{
 	}
 
-	Ptr<GuiImageData> RootFileFactoryFilterModel::GetFilterImage()
+	void FileFactoryFilterModel::AddChild(Ptr<ProjectFactoryModelBase> child)
 	{
-		return 0;
+		children.Add(child);
 	}
 
-	WString RootFileFactoryFilterModel::GetName()
+	LazyList<Ptr<IProjectFactoryModel>> FileFactoryFilterModel::GetChildren()
 	{
-		return L"";
-	}
-
-	WString RootFileFactoryFilterModel::GetId()
-	{
-		return L"";
-	}
-
-	LazyList<Ptr<IFileFactoryFilterModel>> RootFileFactoryFilterModel::GetChildren()
-	{
-		return From(projectFactories);
+		return From(children).Cast<IProjectFactoryModel>();
 	}
 
 /***********************************************************************
@@ -440,8 +400,14 @@ StudioModel
 
 	StudioModel::StudioModel()
 	{
-		allProjects = new AllFileFactoryFilterModel;
-		fileFilters = new RootFileFactoryFilterModel(allProjects);
+		auto allProjects = new FileFactoryFilterModel;
+		allProjects->AddChild(new ResourceProjectFactory);
+		allProjects->AddChild(new ParserProjectFactory);
+		allProjects->AddChild(new DatabaseProjectFactory);
+
+		fileFilters = new FileFactoryFilterModel;
+		fileFilters->AddChild(allProjects);
+
 		openingSolution = new RootSolutionItemModel;
 
 		fileFactories.Add(new WindowResourceFileFactory);
@@ -465,12 +431,17 @@ StudioModel
 
 	LazyList<Ptr<IProjectFactoryModel>> StudioModel::GetProjectModels()
 	{
-		return allProjects->GetChildren().Cast<IProjectFactoryModel>();
+		return fileFilters->GetChildren().First()->GetChildren();
 	}
 
 	Ptr<IValueObservableList> StudioModel::GetFileModels()
 	{
 		return filteredFileFactories.GetWrapper();
+	}
+
+	Ptr<IProjectFactoryModel> StudioModel::GetFileFilters()
+	{
+		return fileFilters;
 	}
 
 	WString StudioModel::GetFileCategory()
@@ -495,11 +466,6 @@ StudioModel
 				});
 		}
 		CopyFrom(filteredFileFactories, source);
-	}
-
-	Ptr<IFileFactoryFilterModel> StudioModel::GetFileFilters()
-	{
-		return fileFilters;
 	}
 
 	Ptr<ISolutionItemModel> StudioModel::GetOpeningSolution()
