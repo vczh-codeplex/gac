@@ -397,6 +397,11 @@ StudioModel
 		CopyFrom(filteredFileFactories, source);
 	}
 
+	Ptr<description::IValueObservableList> StudioModel::GetOpeningSolution()
+	{
+		return openingSolution.GetWrapper();
+	}
+
 	void StudioModel::OpenBrowser(WString url)
 	{
 		ShellExecute(NULL, NULL, url.Buffer(), NULL, NULL, SHOW_FULLSCREEN);

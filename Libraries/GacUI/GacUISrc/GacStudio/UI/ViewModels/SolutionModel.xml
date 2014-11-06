@@ -15,10 +15,19 @@
     <Property Name="Id" Type="string" Readonly="true"/>
   </Interface>
 
+  <Interface ref.Class="vm::ISolutionItem">
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true" Observable="true"/>
+    <Property Name="Name" Type="string" Readonly="true" Observable="true"/>
+    <Property Name="Children" Type="description::IValueObservableList^" Readonly="true"/>
+  </Interface>
+
   <Interface ref.Class="vm::IStudioModel">
     <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
     <Property Name="FileCategory" Type="string"/>
+    
+    <Property Name="OpeningSolution" Type="description::IValueObservableList^" Readonly="true"/>
+    
     <Method Name="OpenBrowser" Type="void">
       <Argument Name="url" Type="string"/>
     </Method>
