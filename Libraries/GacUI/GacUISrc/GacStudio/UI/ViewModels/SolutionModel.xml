@@ -32,9 +32,9 @@
     <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
     <Property Name="FileCategory" Type="string"/>
-    <Property Name="FileFilters" Type="vm::IFileFactoryFilterModel^{}" Readonly="true"/>
+    <Property Name="FileFilters" Type="vm::IFileFactoryFilterModel^" Readonly="true"/>
     
-    <Property Name="OpeningSolution" Type="description::IValueObservableList^" Readonly="true"/>
+    <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
     
     <Method Name="OpenBrowser" Type="void">
       <Argument Name="url" Type="string"/>

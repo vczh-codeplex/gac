@@ -383,12 +383,66 @@ AllFileFactoryFilterModel
 	}
 
 /***********************************************************************
+RootFileFactoryFilterModel
+***********************************************************************/
+	
+	RootFileFactoryFilterModel::RootFileFactoryFilterModel(Ptr<IFileFactoryFilterModel> all)
+	{
+		projectFactories.Add(all);
+	}
+
+	RootFileFactoryFilterModel::~RootFileFactoryFilterModel()
+	{
+	}
+
+	Ptr<GuiImageData> RootFileFactoryFilterModel::GetFilterImage()
+	{
+		return 0;
+	}
+
+	WString RootFileFactoryFilterModel::GetName()
+	{
+		return L"";
+	}
+
+	WString RootFileFactoryFilterModel::GetId()
+	{
+		return L"";
+	}
+
+	LazyList<Ptr<IFileFactoryFilterModel>> RootFileFactoryFilterModel::GetChildren()
+	{
+		return From(projectFactories);
+	}
+
+/***********************************************************************
+RootSolutionItemModel
+***********************************************************************/
+
+	Ptr<GuiImageData> RootSolutionItemModel::GetImage()
+	{
+		return 0;
+	}
+
+	WString RootSolutionItemModel::GetName()
+	{
+		return L"";
+	}
+
+	Ptr<description::IValueObservableList> RootSolutionItemModel::GetChildren()
+	{
+		return projects.GetWrapper();
+	}
+
+/***********************************************************************
 StudioModel
 ***********************************************************************/
 
 	StudioModel::StudioModel()
 	{
 		allProjects = new AllFileFactoryFilterModel;
+		fileFilters = new RootFileFactoryFilterModel(allProjects);
+		openingSolution = new RootSolutionItemModel;
 
 		fileFactories.Add(new WindowResourceFileFactory);
 		fileFactories.Add(new ControlResourceFileFactory);
@@ -443,16 +497,14 @@ StudioModel
 		CopyFrom(filteredFileFactories, source);
 	}
 
-	LazyList<Ptr<IFileFactoryFilterModel>> StudioModel::GetFileFilters()
+	Ptr<IFileFactoryFilterModel> StudioModel::GetFileFilters()
 	{
-		auto list = MakePtr<List<Ptr<IFileFactoryFilterModel>>>();
-		list->Add(allProjects);
-		return list;
+		return fileFilters;
 	}
 
-	Ptr<description::IValueObservableList> StudioModel::GetOpeningSolution()
+	Ptr<ISolutionItemModel> StudioModel::GetOpeningSolution()
 	{
-		return openingSolution.GetWrapper();
+		return openingSolution;
 	}
 
 	void StudioModel::OpenBrowser(WString url)
