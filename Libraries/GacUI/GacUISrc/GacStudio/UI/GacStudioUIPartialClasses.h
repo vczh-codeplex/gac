@@ -114,6 +114,7 @@ namespace ui
 	private:
 		Ptr<vm::IStudioModel> ViewModel_;
 	protected:
+		vl::presentation::compositions::GuiCellComposition* cellSplitter;
 		vl::presentation::controls::GuiToolstripCommand* commandFileExit;
 		vl::presentation::controls::GuiToolstripCommand* commandFileNewFile;
 		vl::presentation::controls::GuiToolstripCommand* commandFileNewProject;
@@ -122,12 +123,14 @@ namespace ui
 		vl::presentation::controls::GuiToolstripCommand* commandFileSave;
 		vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
 		vl::presentation::controls::GuiToolstripCommand* commandHelpAbout;
+		vl::presentation::compositions::GuiTableComposition* tableMain;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
 			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
+				GUI_INSTANCE_REFERENCE(cellSplitter);
 				GUI_INSTANCE_REFERENCE(commandFileExit);
 				GUI_INSTANCE_REFERENCE(commandFileNewFile);
 				GUI_INSTANCE_REFERENCE(commandFileNewProject);
@@ -136,6 +139,7 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(commandFileSave);
 				GUI_INSTANCE_REFERENCE(commandFileSaveAll);
 				GUI_INSTANCE_REFERENCE(commandHelpAbout);
+				GUI_INSTANCE_REFERENCE(tableMain);
 			}
 			else
 			{
@@ -146,6 +150,7 @@ namespace ui
 		MainWindow_()
 			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"ui::MainWindow")
 			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+			,cellSplitter(0)
 			,commandFileExit(0)
 			,commandFileNewFile(0)
 			,commandFileNewProject(0)
@@ -154,6 +159,7 @@ namespace ui
 			,commandFileSave(0)
 			,commandFileSaveAll(0)
 			,commandHelpAbout(0)
+			,tableMain(0)
 		{
 		}
 
@@ -339,6 +345,9 @@ namespace ui
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void cellSplitter_leftButtonDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
+		void cellSplitter_leftButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
+		void cellSplitter_mouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
 		void commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
@@ -358,6 +367,18 @@ GsMainWindow.cpp :
 namespace ui
 {
 	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void MainWindow::cellSplitter_leftButtonDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::cellSplitter_leftButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::cellSplitter_mouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+	}
 
 	void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{

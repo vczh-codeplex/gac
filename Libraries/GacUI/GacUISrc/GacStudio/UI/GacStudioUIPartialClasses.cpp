@@ -61,6 +61,9 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(ui::MainWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
 
+				CLASS_MEMBER_GUIEVENT_HANDLER(cellSplitter_leftButtonDown, vl::presentation::compositions::GuiMouseEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(cellSplitter_leftButtonUp, vl::presentation::compositions::GuiMouseEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(cellSplitter_mouseMove, vl::presentation::compositions::GuiMouseEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileExit_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileNewFile_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileNewProject_Executed, vl::presentation::compositions::GuiEventArgs)
