@@ -102,7 +102,7 @@
       <Cell Site="row:3 column:0" InternalMargin="left:5 top:0 right:0 bottom:5">
         <BindableTreeView VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.OpeningSolution" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-          <att.Enabled-bind>ViewModel.OpeningSolution.Count &gt; 0</att.Enabled-bind>
+          <att.Enabled-bind>ViewModel.OpeningSolution.Children.Count &gt; 0</att.Enabled-bind>
         </BindableTreeView>
       </Cell>
 

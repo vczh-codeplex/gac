@@ -92,9 +92,9 @@ namespace vm
 		virtual WString GetFileCategory() = 0;
 		virtual void SetFileCategory(WString value) = 0;
 
-		virtual collections::LazyList<Ptr<vm::IFileFactoryFilterModel>> GetFileFilters() = 0;
+		virtual Ptr<vm::IFileFactoryFilterModel> GetFileFilters() = 0;
 
-		virtual Ptr<description::IValueObservableList> GetOpeningSolution() = 0;
+		virtual Ptr<ISolutionItemModel> GetOpeningSolution() = 0;
 
 		virtual void OpenBrowser(WString url) = 0;
 	};
@@ -221,7 +221,7 @@ namespace ui
 		vl::presentation::controls::GuiBindableListView* listViewFileTemplate;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
-		vl::presentation::controls::GuiTreeView* treeViewProjectTemplate;
+		vl::presentation::controls::GuiBindableTreeView* treeViewProjectTemplate;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{

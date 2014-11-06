@@ -72,14 +72,41 @@ namespace vm
 		LazyList<Ptr<IFileFactoryFilterModel>>			GetChildren()override;
 	};
 
+	class RootFileFactoryFilterModel : public Object, public virtual IFileFactoryFilterModel
+	{
+	protected:
+		List<Ptr<IFileFactoryFilterModel>>				projectFactories;
+
+	public:
+		RootFileFactoryFilterModel(Ptr<IFileFactoryFilterModel> all);
+		~RootFileFactoryFilterModel();
+
+		Ptr<GuiImageData>								GetFilterImage()override;
+		WString											GetName()override;
+		WString											GetId()override;
+		LazyList<Ptr<IFileFactoryFilterModel>>			GetChildren()override;
+	};
+
+	class RootSolutionItemModel : public Object, public virtual ISolutionItemModel
+	{
+	protected:
+		list::ObservableList<Ptr<ISolutionItemModel>>	projects;
+
+	public:
+		Ptr<GuiImageData>								GetImage()override;
+		WString											GetName()override;
+		Ptr<description::IValueObservableList>			GetChildren()override;
+	};
+
 	class StudioModel : public Object, public virtual IStudioModel
 	{
 	protected:
 		Ptr<AllFileFactoryFilterModel>					allProjects;
+		Ptr<RootFileFactoryFilterModel>					fileFilters;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		WString											fileCategory;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
-		list::ObservableList<Ptr<ISolutionItemModel>>	openingSolution;
+		Ptr<RootSolutionItemModel>						openingSolution;
 
 	public:
 		StudioModel();
@@ -91,8 +118,8 @@ namespace vm
 		WString											GetFileCategory()override;
 		void											SetFileCategory(WString value)override;
 
-		LazyList<Ptr<IFileFactoryFilterModel>>			GetFileFilters()override;
-		Ptr<description::IValueObservableList>			GetOpeningSolution()override;
+		Ptr<IFileFactoryFilterModel>					GetFileFilters()override;
+		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
 
 		void											OpenBrowser(WString url)override;
 	};
