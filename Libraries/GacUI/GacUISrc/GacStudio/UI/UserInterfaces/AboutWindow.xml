@@ -27,7 +27,7 @@
       </Cell>
 
       <Cell Site="row:2 column:0 columnSpan:3">
-        <Button Text="Close" ev.Clicked-eval="self.Close();">
+        <Button Text="Close" Alt="X" ev.Clicked-eval="self.Close();">
           <att.BoundsComposition-set PreferredMinSize="x:100 y:30" AlignmentToParent="left:-1 top:0 right:0 bottom:0"/>
         </Button>
       </Cell>

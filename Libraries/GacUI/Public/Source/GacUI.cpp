@@ -1164,7 +1164,7 @@ GuiButton
 			{
 				Clicked.SetAssociatedComposition(boundsComposition);
 				styleController->Transfer(Normal);
-				styleController->SetFocusableComposition(boundsComposition);
+				SetFocusableComposition(boundsComposition);
 
 				GetEventReceiver()->leftButtonDown.AttachMethod(this, &GuiButton::OnLeftButtonDown);
 				GetEventReceiver()->leftButtonUp.AttachMethod(this, &GuiButton::OnLeftButtonUp);
