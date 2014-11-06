@@ -49,6 +49,22 @@ namespace vm
 
 namespace vm
 {
+	class ISolutionItem : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItem>
+	{
+	public:
+
+		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+		vl::Event<void()> ImageChanged;
+
+		virtual WString GetName() = 0;
+		vl::Event<void()> NameChanged;
+
+		virtual Ptr<description::IValueObservableList> GetChildren() = 0;
+	};
+}
+
+namespace vm
+{
 	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
 	{
 	public:
@@ -59,6 +75,8 @@ namespace vm
 
 		virtual WString GetFileCategory() = 0;
 		virtual void SetFileCategory(WString value) = 0;
+
+		virtual Ptr<description::IValueObservableList> GetOpeningSolution() = 0;
 
 		virtual void OpenBrowser(WString url) = 0;
 	};
@@ -294,6 +312,7 @@ namespace vl
 		{
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
+			DECL_TYPE_INFO(vm::ISolutionItem)
 			DECL_TYPE_INFO(vm::IStudioModel)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::MainWindow)

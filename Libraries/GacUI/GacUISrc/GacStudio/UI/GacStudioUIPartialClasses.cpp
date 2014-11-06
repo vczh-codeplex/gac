@@ -19,6 +19,7 @@ namespace vl
 			#define _ ,
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_TYPE_INFO(vm::IProjectFactoryModel)
+			IMPL_TYPE_INFO(vm::ISolutionItem)
 			IMPL_TYPE_INFO(vm::IStudioModel)
 			IMPL_TYPE_INFO(ui::AboutWindow)
 			IMPL_TYPE_INFO(ui::MainWindow)
@@ -42,11 +43,21 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
 			END_CLASS_MEMBER(vm::IProjectFactoryModel)
 
+			BEGIN_CLASS_MEMBER(vm::ISolutionItem)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EVENT(ImageChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Image, ImageChanged)
+				CLASS_MEMBER_EVENT(NameChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Name, NameChanged)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Children)
+			END_CLASS_MEMBER(vm::ISolutionItem)
+
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectModels)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileModels)
 				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolution)
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
@@ -106,6 +117,7 @@ namespace vl
 				{
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IProjectFactoryModel)
+					ADD_TYPE_INFO(vm::ISolutionItem)
 					ADD_TYPE_INFO(vm::IStudioModel)
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::MainWindow)

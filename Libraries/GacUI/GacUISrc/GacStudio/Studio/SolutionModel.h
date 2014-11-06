@@ -60,6 +60,7 @@ namespace vm
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		WString											fileCategory;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
+		list::ObservableList<Ptr<ISolutionItem>>		openingSolution;
 
 	public:
 		StudioModel();
@@ -70,6 +71,8 @@ namespace vm
 
 		WString									GetFileCategory()override;
 		void									SetFileCategory(WString value)override;
+
+		Ptr<description::IValueObservableList>	GetOpeningSolution()override;
 
 		void									OpenBrowser(WString url)override;
 	};
