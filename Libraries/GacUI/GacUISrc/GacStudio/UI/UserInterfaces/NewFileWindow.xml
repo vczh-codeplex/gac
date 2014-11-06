@@ -3,7 +3,7 @@
   <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
   <Window Text="New File" ClientSize="x:640 y:480">
     <att.ViewModel-set>
-      <att.FileCategory-bind>(cast (vm::IFileFactoryFilterModel^) treeViewProjectTemplate.SelectedItem).Id ?? ''</att.FileCategory-bind>
+      <att.FileCategory-bind>(cast (vm::IProjectFactoryModel^) treeViewProjectTemplate.SelectedItem).Id ?? ''</att.FileCategory-bind>
     </att.ViewModel-set>
     <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
 
@@ -27,7 +27,7 @@
       </Cell>
 
       <Cell Site="row:1 column:0">
-        <BindableTreeView ref.Name="treeViewProjectTemplate" Alt="P" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.FileFilters" ImageProperty="FilterImage" TextProperty="Name" ChildrenProperty="Children">
+        <BindableTreeView ref.Name="treeViewProjectTemplate" Alt="P" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.FileFilters" ImageProperty="SmallImage" TextProperty="Name" ChildrenProperty="Children">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </BindableTreeView>
       </Cell>

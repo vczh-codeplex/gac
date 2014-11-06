@@ -39,27 +39,15 @@ namespace vm
 
 		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
 
+		virtual Ptr<presentation::GuiImageData> GetSmallImage() = 0;
+
 		virtual WString GetName() = 0;
 
 		virtual WString GetDescription() = 0;
 
 		virtual WString GetId() = 0;
-	};
-}
 
-namespace vm
-{
-	class IFileFactoryFilterModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryFilterModel>
-	{
-	public:
-
-		virtual Ptr<presentation::GuiImageData> GetFilterImage() = 0;
-
-		virtual WString GetName() = 0;
-
-		virtual WString GetId() = 0;
-
-		virtual collections::LazyList<Ptr<vm::IFileFactoryFilterModel>> GetChildren() = 0;
+		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
 	};
 }
 
@@ -89,10 +77,10 @@ namespace vm
 
 		virtual Ptr<presentation::description::IValueObservableList> GetFileModels() = 0;
 
+		virtual Ptr<vm::IProjectFactoryModel> GetFileFilters() = 0;
+
 		virtual WString GetFileCategory() = 0;
 		virtual void SetFileCategory(WString value) = 0;
-
-		virtual Ptr<vm::IFileFactoryFilterModel> GetFileFilters() = 0;
 
 		virtual Ptr<ISolutionItemModel> GetOpeningSolution() = 0;
 
@@ -328,7 +316,6 @@ namespace vl
 	{
 		namespace description
 		{
-			DECL_TYPE_INFO(vm::IFileFactoryFilterModel)
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
 			DECL_TYPE_INFO(vm::ISolutionItemModel)
@@ -345,10 +332,10 @@ namespace vl
 GsAboutWindow.h :
 namespace ui
 {
-	class AboutWindow : public ui::AboutWindow_<ui::AboutWindow>
+	class AboutWindow : public AboutWindow_<AboutWindow>
 	{
-		friend class ui::AboutWindow_<ui::AboutWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::AboutWindow>;
+		friend class AboutWindow_<AboutWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<AboutWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
@@ -376,10 +363,10 @@ namespace ui
 GsMainWindow.h :
 namespace ui
 {
-	class MainWindow : public ui::MainWindow_<ui::MainWindow>
+	class MainWindow : public MainWindow_<MainWindow>
 	{
-		friend class ui::MainWindow_<ui::MainWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::MainWindow>;
+		friend class MainWindow_<MainWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
@@ -462,10 +449,10 @@ namespace ui
 GsNewFileWindow.h :
 namespace ui
 {
-	class NewFileWindow : public ui::NewFileWindow_<ui::NewFileWindow>
+	class NewFileWindow : public NewFileWindow_<NewFileWindow>
 	{
-		friend class ui::NewFileWindow_<ui::NewFileWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::NewFileWindow>;
+		friend class NewFileWindow_<NewFileWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewFileWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
@@ -503,10 +490,10 @@ namespace ui
 GsNewProjectWindow.h :
 namespace ui
 {
-	class NewProjectWindow : public ui::NewProjectWindow_<ui::NewProjectWindow>
+	class NewProjectWindow : public NewProjectWindow_<NewProjectWindow>
 	{
-		friend class ui::NewProjectWindow_<ui::NewProjectWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::NewProjectWindow>;
+		friend class NewProjectWindow_<NewProjectWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<NewProjectWindow>;
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
