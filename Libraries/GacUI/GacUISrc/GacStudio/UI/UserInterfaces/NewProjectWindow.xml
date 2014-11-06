@@ -26,7 +26,7 @@
       </Cell>
 
       <Cell Site="row:1 column:0 rowSpan:1 columnSpan:2">
-        <BindableListView ref.Name="listViewProjectTemplate" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+        <BindableListView ref.Name="listViewProjectTemplate" Alt="T" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
           <att.ItemSource-eval>ViewModel.GetProjectModels()</att.ItemSource-eval>
           <att.LargeImageProperty>Image</att.LargeImageProperty>
@@ -46,7 +46,7 @@
         <Label Text="Project Name:"/>
       </Cell>
       <Cell Site="row:2 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textBoxProjectName" Text="MyProject">
+        <SinglelineTextBox ref.Name="textBoxProjectName" Alt="P" Text="MyProject">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
@@ -55,12 +55,12 @@
         <Label Text="Location:"/>
       </Cell>
       <Cell Site="row:3 column:1 rowSpan:1 columnSpan:2">
-        <SinglelineTextBox ref.Name="textBoxLocation">
+        <SinglelineTextBox ref.Name="textBoxLocation" Alt="L">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
       <Cell Site="row:3 column:3">
-        <Button ref.Name="buttonBrowse" Text="Browse..." ev.Clicked="buttonBrowse_Clicked">
+        <Button ref.Name="buttonBrowse" Alt="B" Text="Browse..." ev.Clicked="buttonBrowse_Clicked">
           <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
         </Button>
       </Cell>
@@ -69,7 +69,7 @@
         <Label Text="Solution:"/>
       </Cell>
       <Cell Site="row:4 column:1 rowSpan:1 columnSpan:3">
-        <ComboBox ref.Name="comboSolution" SelectedIndex="1">
+        <ComboBox ref.Name="comboSolution" Alt="S" SelectedIndex="1">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
           <att.ListControl>
             <TextList HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
@@ -86,18 +86,18 @@
         <Label Text="Solution Name:"/>
       </Cell>
       <Cell Site="row:5 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textBoxSolutionName" Text="MySolution">
+        <SinglelineTextBox ref.Name="textBoxSolutionName" Alt="N" Text="MySolution">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
 
       <Cell Site="row:6 column:2">
-        <Button ref.Name="buttonCreate" Text="Create" Enabled="false" ev.Clicked="buttonCreate_Clicked">
+        <Button ref.Name="buttonCreate" Text="Create" Alt="C" Enabled="false" ev.Clicked="buttonCreate_Clicked">
           <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
         </Button>
       </Cell>
       <Cell Site="row:6 column:3">
-        <Button ref.Name="buttonCancel" Text="Cancel" ev.Clicked="buttonCancel_Clicked">
+        <Button ref.Name="buttonCancel" Text="Cancel" Alt="X" ev.Clicked="buttonCancel_Clicked">
           <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
         </Button>
       </Cell>
