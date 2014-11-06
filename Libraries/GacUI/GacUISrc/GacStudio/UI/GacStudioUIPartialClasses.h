@@ -69,11 +69,15 @@ namespace ui
 	{
 	private:
 	protected:
+		vl::presentation::controls::GuiDocumentViewer* documentViewer;
+		vl::presentation::controls::GuiWindow* self;
 
 		void InitializeComponents()
 		{
 			if (InitializeFromResource())
 			{
+				GUI_INSTANCE_REFERENCE(documentViewer);
+				GUI_INSTANCE_REFERENCE(self);
 			}
 			else
 			{
@@ -83,6 +87,8 @@ namespace ui
 		AboutWindow_()
 			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"ui::AboutWindow")
 			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+			,documentViewer(0)
+			,self(0)
 		{
 		}
 	};
@@ -292,6 +298,7 @@ namespace ui
 	protected:
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		AboutWindow();
@@ -303,6 +310,10 @@ GsAboutWindow.cpp :
 namespace ui
 {
 	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void AboutWindow::documentViewer_ActiveHyperlinkExecuted(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 

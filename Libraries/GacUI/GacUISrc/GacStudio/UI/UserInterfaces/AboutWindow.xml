@@ -20,7 +20,7 @@
       </Cell>
 
       <Cell Site="row:1 column:1">
-        <DocumentViewer EditMode="ViewOnly" Document-uri="res://Documents/AboutDocument">
+        <DocumentViewer ref.Name="documentViewer" EditMode="ViewOnly" Document-uri="res://Documents/AboutDocument" ev.ActiveHyperlinkExecuted="documentViewer_ActiveHyperlinkExecuted">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </DocumentViewer>
       </Cell>
