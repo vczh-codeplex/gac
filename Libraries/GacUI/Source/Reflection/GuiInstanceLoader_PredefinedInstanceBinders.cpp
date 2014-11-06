@@ -80,7 +80,18 @@ GuiResourceInstanceBinder
 							}
 							else if(Ptr<DescriptableObject> obj=resource.Cast<DescriptableObject>())
 							{
-								value=Value::From(obj);
+								if (auto image = obj.Cast<GuiImageData>())
+								{
+									auto td = propertyValue.typeInfo.typeDescriptor;
+									if (auto prop = td->GetPropertyByName(propertyValue.propertyName.ToString(), true))
+									{
+										if (prop->GetReturn() && prop->GetReturn()->GetTypeDescriptor()->GetTypeName() == L"presentation::INativeImage")
+										{
+											obj = image->GetImage();
+										}
+									}
+								}
+								value = Value::From(obj);
 							}
 
 							if(!value.IsNull())

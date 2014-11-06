@@ -25,6 +25,9 @@
     <ToolstripCommand ref.Name="commandFileExit" Text="Exit">
       <ev.Executed>commandFileExit_Executed</ev.Executed>
     </ToolstripCommand>
+    <ToolstripCommand ref.Name="commandHelpAbout" Text="About GacStudio 1.0...">
+      <ev.Executed>commandHelpAbout_Executed</ev.Executed>
+    </ToolstripCommand>
 
     <Table AlignmentToParent="left:0 top:0 right:0 bottom:0">
       <att.Rows>
@@ -39,24 +42,29 @@
       <Cell Site="row:0 column:0" InternalMargin="left:1 right:1">
         <ToolstripMenuBar>
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-          <MenuBarButton Text="File">
+          <MenuBarButton Text="File" Alt="F">
             <att.SubMenu-set>
-              <MenuItemButton Text="New" Image-uri="res://CommandImages/New.png">
+              <MenuItemButton Text="New" Alt="N" Image-uri="res://CommandImages/New.png">
                 <att.SubMenu-set>
-                  <MenuItemButton Command-ref="commandFileNewProject"/>
-                  <MenuItemButton Command-ref="commandFileNewFile"/>
+                  <MenuItemButton Command-ref="commandFileNewProject" Alt="P"/>
+                  <MenuItemButton Command-ref="commandFileNewFile" Alt="F"/>
                 </att.SubMenu-set>
               </MenuItemButton>
-              <MenuItemButton Text="Open" Image-uri="res://CommandImages/Open.png">
+              <MenuItemButton Text="Open" Alt="O" Image-uri="res://CommandImages/Open.png">
                 <att.SubMenu-set>
-                  <MenuItemButton Command-ref="commandFileOpenProject"/>
-                  <MenuItemButton Command-ref="commandFileOpenFile"/>
+                  <MenuItemButton Command-ref="commandFileOpenProject" Alt="P"/>
+                  <MenuItemButton Command-ref="commandFileOpenFile" Alt="F"/>
                 </att.SubMenu-set>
               </MenuItemButton>
-              <MenuItemButton Command-ref="commandFileSave"/>
-              <MenuItemButton Command-ref="commandFileSaveAll"/>
+              <MenuItemButton Command-ref="commandFileSave" Alt="S"/>
+              <MenuItemButton Command-ref="commandFileSaveAll" Alt="A"/>
               <MenuSplitter/>
-              <MenuItemButton Command-ref="commandFileExit"/>
+              <MenuItemButton Command-ref="commandFileExit" Alt="X"/>
+            </att.SubMenu-set>
+          </MenuBarButton>
+          <MenuBarButton Text="Help" Alt="H">
+            <att.SubMenu-set>
+              <MenuItemButton Command-ref="commandHelpAbout" Alt="A"/>
             </att.SubMenu-set>
           </MenuBarButton>
         </ToolstripMenuBar>

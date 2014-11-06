@@ -65,6 +65,34 @@ namespace vm
 namespace ui
 {
 	template<typename TImpl>
+	class AboutWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
+	{
+	private:
+	protected:
+
+		void InitializeComponents()
+		{
+			if (InitializeFromResource())
+			{
+			}
+			else
+			{
+			}
+		}
+	public:
+		AboutWindow_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"ui::AboutWindow")
+			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+		{
+		}
+	};
+
+	class AboutWindow;
+}
+
+namespace ui
+{
+	template<typename TImpl>
 	class MainWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 	{
 	private:
@@ -77,6 +105,7 @@ namespace ui
 		vl::presentation::controls::GuiToolstripCommand* commandFileOpenProject;
 		vl::presentation::controls::GuiToolstripCommand* commandFileSave;
 		vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
+		vl::presentation::controls::GuiToolstripCommand* commandHelpAbout;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
@@ -90,6 +119,7 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(commandFileOpenProject);
 				GUI_INSTANCE_REFERENCE(commandFileSave);
 				GUI_INSTANCE_REFERENCE(commandFileSaveAll);
+				GUI_INSTANCE_REFERENCE(commandHelpAbout);
 			}
 			else
 			{
@@ -107,6 +137,7 @@ namespace ui
 			,commandFileOpenProject(0)
 			,commandFileSave(0)
 			,commandFileSaveAll(0)
+			,commandHelpAbout(0)
 		{
 		}
 
@@ -242,6 +273,7 @@ namespace vl
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
 			DECL_TYPE_INFO(vm::IStudioModel)
+			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::MainWindow)
 			DECL_TYPE_INFO(ui::NewFileWindow)
 			DECL_TYPE_INFO(ui::NewProjectWindow)
@@ -250,6 +282,37 @@ namespace vl
 }
 
 /*
+GsAboutWindow.h :
+namespace ui
+{
+	class AboutWindow : public AboutWindow_<AboutWindow>
+	{
+		friend class AboutWindow_<AboutWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<AboutWindow>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		AboutWindow();
+	};
+}
+
+
+GsAboutWindow.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	AboutWindow::AboutWindow()
+	{
+		InitializeComponents();
+	}
+}
+
+
 GsMainWindow.h :
 namespace ui
 {
@@ -267,6 +330,7 @@ namespace ui
 		void commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		MainWindow(Ptr<vm::IStudioModel> ViewModel);
@@ -304,6 +368,10 @@ namespace ui
 	}
 
 	void MainWindow::commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 

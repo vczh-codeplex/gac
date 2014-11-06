@@ -20,6 +20,7 @@ namespace vl
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_TYPE_INFO(vm::IProjectFactoryModel)
 			IMPL_TYPE_INFO(vm::IStudioModel)
+			IMPL_TYPE_INFO(ui::AboutWindow)
 			IMPL_TYPE_INFO(ui::MainWindow)
 			IMPL_TYPE_INFO(ui::NewFileWindow)
 			IMPL_TYPE_INFO(ui::NewProjectWindow)
@@ -48,6 +49,11 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
 			END_CLASS_MEMBER(vm::IStudioModel)
 
+			BEGIN_CLASS_MEMBER(ui::AboutWindow)
+				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(ui::AboutWindow*(), NO_PARAMETER)
+			END_CLASS_MEMBER(ui::AboutWindow)
+
 			BEGIN_CLASS_MEMBER(ui::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(ui::MainWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
@@ -59,6 +65,7 @@ namespace vl
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileOpenProject_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSaveAll_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSave_Executed, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(commandHelpAbout_Executed, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(ui::MainWindow)
@@ -94,6 +101,7 @@ namespace vl
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IProjectFactoryModel)
 					ADD_TYPE_INFO(vm::IStudioModel)
+					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::MainWindow)
 					ADD_TYPE_INFO(ui::NewFileWindow)
 					ADD_TYPE_INFO(ui::NewProjectWindow)
