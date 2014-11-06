@@ -185,7 +185,7 @@ ParserFileFactory
 				L"FileImages/Parser.png",
 				L"Parser",
 				L"PARSER_PROJECT",
-				L"Create a parser for your GacUI program.",
+				L"Create a parser from a grammar.",
 				L"PARSER_FILE")
 		{
 		}
@@ -203,8 +203,44 @@ ParserTestFileFactory
 				L"FileImages/Parser.png",
 				L"Parser Test",
 				L"PARSER_PROJECT",
-				L"Create a parser test for your GacUI program.",
+				L"Create a parser test.",
 				L"PARSER_TEST_FILE")
+		{
+		}
+	};
+
+/***********************************************************************
+SqlDatabaseFileFactory
+***********************************************************************/
+
+	class SqlDatabaseFileFactory : public FileFactoryModelBase
+	{
+	public:
+		SqlDatabaseFileFactory()
+			:FileFactoryModelBase(
+				L"FileImages/SQLDatabase.png",
+				L"SQL Database",
+				L"HERODB_PROJECT",
+				L"Create a SQL Database in a HeroDB database instance.",
+				L"HERODB_SQL_DATABASE")
+		{
+		}
+	};
+
+/***********************************************************************
+GraphDatabaseFileFactory
+***********************************************************************/
+
+	class GraphDatabaseFileFactory : public FileFactoryModelBase
+	{
+	public:
+		GraphDatabaseFileFactory()
+			:FileFactoryModelBase(
+				L"FileImages/GraphDatabase.png",
+				L"Graph Database",
+				L"HERODB_PROJECT",
+				L"Create a Graph Database in a HeroDB database instance.",
+				L"HERODB_GRAPH DATABASE")
 		{
 		}
 	};
@@ -274,8 +310,25 @@ ParserProjectFactory
 			:ProjectFactoryModelBase(
 				L"ProjectImages/Parser.png",
 				L"Parser",
-				L"Create a parser for your GacUI program.",
+				L"Create a parser.",
 				L"PARSER_PROJECT")
+		{
+		}
+	};
+
+/***********************************************************************
+DatabaseProjectFactory
+***********************************************************************/
+
+	class DatabaseProjectFactory : public ProjectFactoryModelBase
+	{
+	public:
+		DatabaseProjectFactory()
+			:ProjectFactoryModelBase(
+				L"ProjectImages/Database.png",
+				L"HeroDB Database",
+				L"Create a HeroDB database instance.",
+				L"HERODB_PROJECT")
 		{
 		}
 	};
@@ -288,6 +341,7 @@ StudioModel
 	{
 		projectFactories.Add(new ResourceProjectFactory);
 		projectFactories.Add(new ParserProjectFactory);
+		projectFactories.Add(new DatabaseProjectFactory);
 
 		fileFactories.Add(new WindowResourceFileFactory);
 		fileFactories.Add(new ControlResourceFileFactory);
@@ -298,6 +352,8 @@ StudioModel
 		fileFactories.Add(new XmlFileFactory);
 		fileFactories.Add(new ParserFileFactory);
 		fileFactories.Add(new ParserTestFileFactory);
+		fileFactories.Add(new SqlDatabaseFileFactory);
+		fileFactories.Add(new GraphDatabaseFileFactory);
 
 		CopyFrom(filteredFileFactories, fileFactories);
 	}

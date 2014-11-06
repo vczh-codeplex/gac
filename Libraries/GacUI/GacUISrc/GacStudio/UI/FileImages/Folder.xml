@@ -9,4 +9,6 @@
   <Image content="File">RichDocument.png</Image>
   <Image content="File">XmlDocument.png</Image>
   <Image content="File">Parser.png</Image>
+  <Image content="File">SQLDatabase.png</Image>
+  <Image content="File">GraphDatabase.png</Image>
 </Folder>
