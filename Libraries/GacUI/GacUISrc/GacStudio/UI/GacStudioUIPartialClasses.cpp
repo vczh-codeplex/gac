@@ -52,6 +52,8 @@ namespace vl
 			BEGIN_CLASS_MEMBER(ui::AboutWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(ui::AboutWindow*(), NO_PARAMETER)
+
+				CLASS_MEMBER_GUIEVENT_HANDLER(documentViewer_ActiveHyperlinkExecuted, vl::presentation::compositions::GuiEventArgs)
 			END_CLASS_MEMBER(ui::AboutWindow)
 
 			BEGIN_CLASS_MEMBER(ui::MainWindow)
