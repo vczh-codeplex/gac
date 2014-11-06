@@ -55,7 +55,7 @@ namespace ui
 
 	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto window = new AboutWindow();
+		auto window = new AboutWindow(GetViewModel());
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, []()
