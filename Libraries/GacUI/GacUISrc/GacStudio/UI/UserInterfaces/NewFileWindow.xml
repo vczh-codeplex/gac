@@ -3,7 +3,7 @@
   <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
   <Window Text="New File" ClientSize="x:640 y:480">
     <att.ViewModel-set>
-      <att.FileCategory-bind>cast string treeViewProjectTemplate.SelectedItem.tag ?? ''</att.FileCategory-bind>
+      <att.FileCategory-bind>(cast (vm::IFileFactoryFilterModel^) treeViewProjectTemplate.SelectedItem).Id ?? ''</att.FileCategory-bind>
     </att.ViewModel-set>
     <att.BoundsComposition-set PreferredMinSize="x:640 y:480"/>
 
@@ -27,28 +27,9 @@
       </Cell>
 
       <Cell Site="row:1 column:0">
-        <TreeView ref.Name="treeViewProjectTemplate" Alt="P" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
+        <BindableTreeView ref.Name="treeViewProjectTemplate" Alt="P" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.FileFilters" ImageProperty="FilterImage" TextProperty="Name" ChildrenProperty="Children">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-          <att.Nodes>
-            <TreeNode Text="All" Expanding="true" Image-uri="res://ProjectImages/AllSmall.png">
-              <TreeNode Text="GacUI Resource" Image-uri="res://ProjectImages/DialogSmall.png">
-                <att.Tag>
-                  <String>GACUI_RESOURCE_PROJECT</String>
-                </att.Tag>
-              </TreeNode>
-              <TreeNode Text="Parser" Image-uri="res://ProjectImages/ParserSmall.png">
-                <att.Tag>
-                  <String>PARSER_PROJECT</String>
-                </att.Tag>
-              </TreeNode>
-              <TreeNode Text="HeroDB Database" Image-uri="res://ProjectImages/DatabaseSmall.png">
-                <att.Tag>
-                  <String>HERODB_PROJECT</String>
-                </att.Tag>
-              </TreeNode>
-            </TreeNode>
-          </att.Nodes>
-        </TreeView>
+        </BindableTreeView>
       </Cell>
       <Cell Site="row:1 column:1">
         <BindableListView ref.Name="listViewFileTemplate" Alt="T" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">

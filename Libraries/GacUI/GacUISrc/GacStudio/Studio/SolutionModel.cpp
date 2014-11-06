@@ -20,7 +20,6 @@ FileFactoryModelBase
 
 	FileFactoryModelBase::~FileFactoryModelBase()
 	{
-
 	}
 
 	Ptr<GuiImageData> FileFactoryModelBase::GetImage()
@@ -250,22 +249,27 @@ GraphDatabaseFileFactory
 ProjectFactoryModelBase
 ***********************************************************************/
 	
-	ProjectFactoryModelBase::ProjectFactoryModelBase(WString _imageUrl, WString _name, WString _description, WString _id)
+	ProjectFactoryModelBase::ProjectFactoryModelBase(WString _imageUrl, WString _smallImageUrl, WString _name, WString _description, WString _id)
 		:name(_name)
 		, description(_description)
 		, id(_id)
 	{
 		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_imageUrl);
+		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_smallImageUrl);
 	}
 
 	ProjectFactoryModelBase::~ProjectFactoryModelBase()
 	{
-
 	}
 
 	Ptr<GuiImageData> ProjectFactoryModelBase::GetImage()
 	{
 		return image;
+	}
+
+	Ptr<GuiImageData> ProjectFactoryModelBase::GetFilterImage()
+	{
+		return smallImage;
 	}
 
 	WString ProjectFactoryModelBase::GetName()
@@ -283,6 +287,11 @@ ProjectFactoryModelBase
 		return id;
 	}
 
+	LazyList<Ptr<IFileFactoryFilterModel>> ProjectFactoryModelBase::GetChildren()
+	{
+		return MakePtr<List<Ptr<IFileFactoryFilterModel>>>();
+	}
+
 /***********************************************************************
 ResourceProjectFactory
 ***********************************************************************/
@@ -293,6 +302,7 @@ ResourceProjectFactory
 		ResourceProjectFactory()
 			:ProjectFactoryModelBase(
 				L"ProjectImages/Dialog.png",
+				L"ProjectImages/DialogSmall.png",
 				L"GacUI Resource",
 				L"Create an embedded resource for your GacUI program.",
 				L"RESOURCE_PROJECT")
@@ -310,6 +320,7 @@ ParserProjectFactory
 		ParserProjectFactory()
 			:ProjectFactoryModelBase(
 				L"ProjectImages/Parser.png",
+				L"ProjectImages/ParserSmall.png",
 				L"Parser",
 				L"Create a parser.",
 				L"PARSER_PROJECT")
@@ -327,6 +338,7 @@ DatabaseProjectFactory
 		DatabaseProjectFactory()
 			:ProjectFactoryModelBase(
 				L"ProjectImages/Database.png",
+				L"ProjectImages/DatabaseSmall.png",
 				L"HeroDB Database",
 				L"Create a HeroDB database instance.",
 				L"HERODB_PROJECT")
@@ -335,14 +347,48 @@ DatabaseProjectFactory
 	};
 
 /***********************************************************************
+AllFileFactoryFilterModel
+***********************************************************************/
+	
+	AllFileFactoryFilterModel::AllFileFactoryFilterModel()
+	{
+		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(L"ProjectImages/AllSmall.png");
+		projectFactories.Add(new ResourceProjectFactory);
+		projectFactories.Add(new ParserProjectFactory);
+		projectFactories.Add(new DatabaseProjectFactory);
+	}
+
+	AllFileFactoryFilterModel::~AllFileFactoryFilterModel()
+	{
+	}
+
+	Ptr<GuiImageData> AllFileFactoryFilterModel::GetFilterImage()
+	{
+		return smallImage;
+	}
+
+	WString AllFileFactoryFilterModel::GetName()
+	{
+		return L"All";
+	}
+
+	WString AllFileFactoryFilterModel::GetId()
+	{
+		return L"";
+	}
+
+	LazyList<Ptr<IFileFactoryFilterModel>> AllFileFactoryFilterModel::GetChildren()
+	{
+		return From(projectFactories).Cast<IFileFactoryFilterModel>();
+	}
+
+/***********************************************************************
 StudioModel
 ***********************************************************************/
 
 	StudioModel::StudioModel()
 	{
-		projectFactories.Add(new ResourceProjectFactory);
-		projectFactories.Add(new ParserProjectFactory);
-		projectFactories.Add(new DatabaseProjectFactory);
+		allProjects = new AllFileFactoryFilterModel;
 
 		fileFactories.Add(new WindowResourceFileFactory);
 		fileFactories.Add(new ControlResourceFileFactory);
@@ -365,7 +411,7 @@ StudioModel
 
 	LazyList<Ptr<IProjectFactoryModel>> StudioModel::GetProjectModels()
 	{
-		return projectFactories;
+		return allProjects->GetChildren().Cast<IProjectFactoryModel>();
 	}
 
 	Ptr<IValueObservableList> StudioModel::GetFileModels()
@@ -395,6 +441,13 @@ StudioModel
 				});
 		}
 		CopyFrom(filteredFileFactories, source);
+	}
+
+	LazyList<Ptr<IFileFactoryFilterModel>> StudioModel::GetFileFilters()
+	{
+		auto list = MakePtr<List<Ptr<IFileFactoryFilterModel>>>();
+		list->Add(allProjects);
+		return list;
 	}
 
 	Ptr<description::IValueObservableList> StudioModel::GetOpeningSolution()
