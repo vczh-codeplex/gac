@@ -12,6 +12,31 @@ namespace ui
 {
 	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 
+	void MainWindow::cellSplitter_leftButtonDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+		splitterDragging = true;
+		splitterPosition = cellSplitter->GetGlobalBounds().Left() + arguments.x;
+	}
+
+	void MainWindow::cellSplitter_leftButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+		splitterDragging = false;
+	}
+
+	void MainWindow::cellSplitter_mouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+		if (splitterDragging)
+		{
+			vint delta = cellSplitter->GetGlobalBounds().Left() + arguments.x - splitterPosition;
+			splitterPosition += delta;
+
+			auto option = tableMain->GetColumnOption(0);
+			option.absolute += delta;
+			tableMain->SetColumnOption(0, option);
+			tableMain->ForceCalculateSizeImmediately();
+		}
+	}
+
 	void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		Close();
@@ -68,5 +93,6 @@ namespace ui
 	MainWindow::MainWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
 		InitializeComponents(ViewModel);
+		cellSplitter->SetAssociatedCursor(GetCurrentController()->ResourceService()->GetSystemCursor(INativeCursor::SizeWE));
 	}
 }
