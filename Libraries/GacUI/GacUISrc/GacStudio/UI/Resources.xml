@@ -44,7 +44,7 @@
             <font face="Segoe UI" size="14">
               <nop/>GacStudio is an IDE to create, edit and debug:<nop/>
               <br/>    GacUI resources (<a href="http://www.gaclib.net">http://www.gaclib.net</a>)<nop/>
-              <br/>    Parsing using Vlpp (Vczh Library++ 3.0, <a href="https://gac.codeplex.com">https://gac.codeplex.com</a>)<nop/>
+              <br/>    Parsers using Vlpp (Vczh Library++ 3.0, <a href="https://gac.codeplex.com">https://gac.codeplex.com</a>)<nop/>
               <br/>    HeroDB databases (<a href="https://github.com/vczh/herodb">https://github.com/vczh/herodb</a>)<nop/>
             </font>
           </p>

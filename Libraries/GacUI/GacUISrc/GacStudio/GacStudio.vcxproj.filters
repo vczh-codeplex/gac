@@ -206,5 +206,17 @@
     <Image Include="UI\CommandImages\Gaclib.png">
       <Filter>Resource Files\CommandImages</Filter>
     </Image>
+    <Image Include="UI\ProjectImages\DatabaseSmall.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
+    <Image Include="UI\ProjectImages\Database.png">
+      <Filter>Resource Files\ProjectImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\SQLDatabase.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\GraphDatabase.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>

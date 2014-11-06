@@ -226,12 +226,16 @@
     <Image Include="UI\FileImages\Control.png" />
     <Image Include="UI\FileImages\Dialog.png" />
     <Image Include="UI\FileImages\Document.png" />
+    <Image Include="UI\FileImages\GraphDatabase.png" />
     <Image Include="UI\FileImages\Image.png" />
     <Image Include="UI\FileImages\Parser.png" />
     <Image Include="UI\FileImages\RichDocument.png" />
+    <Image Include="UI\FileImages\SQLDatabase.png" />
     <Image Include="UI\FileImages\Template.png" />
     <Image Include="UI\FileImages\XmlDocument.png" />
     <Image Include="UI\ProjectImages\AllSmall.png" />
+    <Image Include="UI\ProjectImages\Database.png" />
+    <Image Include="UI\ProjectImages\DatabaseSmall.png" />
     <Image Include="UI\ProjectImages\Dialog.png" />
     <Image Include="UI\ProjectImages\DialogSmall.png" />
     <Image Include="UI\ProjectImages\Parser.png" />

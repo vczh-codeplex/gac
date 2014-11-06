@@ -41,6 +41,11 @@
                   <String>PARSER_PROJECT</String>
                 </att.Tag>
               </TreeNode>
+              <TreeNode Text="HeroDB Database" Image-uri="res://ProjectImages/DatabaseSmall.png">
+                <att.Tag>
+                  <String>HERODB_PROJECT</String>
+                </att.Tag>
+              </TreeNode>
             </TreeNode>
           </att.Nodes>
         </TreeView>
