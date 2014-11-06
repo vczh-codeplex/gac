@@ -51,7 +51,7 @@
           <att.ItemSource-eval>ViewModel.FileModels</att.ItemSource-eval>
           <att.LargeImageProperty>Image</att.LargeImageProperty>
           <att.Columns>
-            <ListViewColumn text="Name" textProperty="Name"/>
+            <ListViewColumn Text="Name" TextProperty="Name"/>
           </att.Columns>
         </BindableListView>
       </Cell>

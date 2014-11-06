@@ -84,6 +84,24 @@ ControlResourceFileFactory
 	};
 
 /***********************************************************************
+TemplateResourceFileFactory
+***********************************************************************/
+
+	class TemplateResourceFileFactory : public FileFactoryModelBase
+	{
+	public:
+		TemplateResourceFileFactory()
+			:FileFactoryModelBase(
+				L"FileImages/Template.png",
+				L"Control Template",
+				L"GACUI_RESOURCE_PROJECT",
+				L"Create a control template for your GacUI program.",
+				L"GACUI_TEMPLATE_RESOURCE_FILE")
+		{
+		}
+	};
+
+/***********************************************************************
 ImageFileFactory
 ***********************************************************************/
 
@@ -273,6 +291,7 @@ StudioModel
 
 		fileFactories.Add(new WindowResourceFileFactory);
 		fileFactories.Add(new ControlResourceFileFactory);
+		fileFactories.Add(new TemplateResourceFileFactory);
 		fileFactories.Add(new ImageFileFactory);
 		fileFactories.Add(new TextFileFactory);
 		fileFactories.Add(new RichTextFileFactory);
