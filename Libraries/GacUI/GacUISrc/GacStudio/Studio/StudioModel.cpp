@@ -1,4 +1,4 @@
-#include "SolutionModel.h"
+#include "StudioModel.h"
 #include <Windows.h>
 
 using namespace vl::reflection::description;
