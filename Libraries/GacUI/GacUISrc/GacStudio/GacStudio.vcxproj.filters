@@ -72,6 +72,9 @@
     <ClCompile Include="Studio\StudioModel.cpp">
       <Filter>Studio</Filter>
     </ClCompile>
+    <ClCompile Include="Studio\SolutionModel.cpp">
+      <Filter>Studio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -108,6 +111,9 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="Studio\StudioModel.h">
+      <Filter>Studio</Filter>
+    </ClInclude>
+    <ClInclude Include="Studio\SolutionModel.h">
       <Filter>Studio</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,5 @@
 #include "StudioModel.h"
+#include "SolutionModel.h"
 #include <Windows.h>
 
 using namespace vl::reflection::description;
@@ -391,7 +392,22 @@ RootSolutionItemModel
 
 	Ptr<description::IValueObservableList> RootSolutionItemModel::GetChildren()
 	{
-		return projects.GetWrapper();
+		return children.GetWrapper();
+	}
+
+	Ptr<ISolutionItemModel> RootSolutionItemModel::GetSolution()
+	{
+		if (children.Count() == 0)return 0;
+		return children[0];
+	}
+
+	void RootSolutionItemModel::SetSolution(Ptr<ISolutionItemModel> solution)
+	{
+		children.Clear();
+		if (solution)
+		{
+			children.Add(solution);
+		}
 	}
 
 /***********************************************************************
@@ -475,22 +491,40 @@ StudioModel
 
 	bool StudioModel::GetHasOpeningSolution()
 	{
-		return openingSolution->GetChildren()->GetCount() > 0;
+		return openingSolution->GetSolution();
 	}
 
 	bool StudioModel::OpenSolution(WString filePath)
 	{
-		return false;
+		// EnsureAllOpeningFilesSaved();
+		auto solution = MakePtr<SolutionItem>(fileFilters, filePath);
+		if (!solution->OpenSolution()) return false;
+		openingSolution->SetSolution(solution);
+		return true;
 	}
 
 	bool StudioModel::SaveSolution()
 	{
-		return false;
+		// EnsureAllOpeningFilesSaved();
+		auto solution = openingSolution->GetSolution().Cast<SolutionItem>();
+		if (!solution) return false;
+		return solution->SaveSolution();
 	}
 
 	bool StudioModel::NewSolution(WString filePath)
 	{
-		return false;
+		// EnsureAllOpeningFilesSaved();
+		auto solution = MakePtr<SolutionItem>(fileFilters, filePath);
+		if (!solution->NewSolution()) return false;
+		openingSolution->SetSolution(solution);
+		return true;
+	}
+
+	bool StudioModel::CloseSolution()
+	{
+		// EnsureAllOpeningFilesSaved();
+		openingSolution->SetSolution(0);
+		return true;
 	}
 
 	bool StudioModel::AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName)

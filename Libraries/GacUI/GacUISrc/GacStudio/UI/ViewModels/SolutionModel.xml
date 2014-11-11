@@ -40,6 +40,8 @@
     <Method Name="NewSolution" Type="bool">
       <Argument Name="filePath" Type="string"/>
     </Method>
+    <Method Name="CloseSolution" Type="bool">
+    </Method>
     <Method Name="AddProject" Type="bool">
       <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
       <Argument Name="projectName" Type="string"/>
