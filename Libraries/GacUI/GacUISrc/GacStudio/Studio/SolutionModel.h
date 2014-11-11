@@ -103,6 +103,11 @@ namespace vm
 		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
 		bool											GetHasOpeningSolution()override;
 
+		bool											OpenSolution(WString filePath)override;
+		bool											SaveSolution()override;
+		bool											NewSolution(WString filePath)override;
+		bool											AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName)override;
+
 		void											OpenBrowser(WString url)override;
 	};
 }

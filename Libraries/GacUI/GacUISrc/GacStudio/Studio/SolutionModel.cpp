@@ -478,6 +478,26 @@ StudioModel
 		return openingSolution->GetChildren()->GetCount() > 0;
 	}
 
+	bool StudioModel::OpenSolution(WString filePath)
+	{
+		return false;
+	}
+
+	bool StudioModel::SaveSolution()
+	{
+		return false;
+	}
+
+	bool StudioModel::NewSolution(WString filePath)
+	{
+		return false;
+	}
+
+	bool StudioModel::AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName)
+	{
+		return false;
+	}
+
 	void StudioModel::OpenBrowser(WString url)
 	{
 		ShellExecute(NULL, NULL, url.Buffer(), NULL, NULL, SHOW_FULLSCREEN);

@@ -31,6 +31,19 @@
     <Property Name="FileCategory" Type="string"/>
     <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
     <Property Name="HasOpeningSolution" Type="bool" Readonly="true" Observable="true"/>
+
+    <Method Name="OpenSolution" Type="bool">
+      <Argument Name="filePath" Type="string"/>
+    </Method>
+    <Method Name="SaveSolution" Type="bool">
+    </Method>
+    <Method Name="NewSolution" Type="bool">
+      <Argument Name="filePath" Type="string"/>
+    </Method>
+    <Method Name="AddProject" Type="bool">
+      <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
+      <Argument Name="projectName" Type="string"/>
+    </Method>
     
     <Method Name="OpenBrowser" Type="void">
       <Argument Name="url" Type="string"/>
