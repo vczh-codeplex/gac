@@ -1,7 +1,7 @@
 /***********************************************************************
 Vczh Library++ 3.0
 Developer: ³Âè÷å«(vczh)
-GacStudio::SolutionModel
+GacStudio::StudioModel
 
 Interfaces:
 ***********************************************************************/
@@ -72,12 +72,15 @@ namespace vm
 	class RootSolutionItemModel : public Object, public virtual ISolutionItemModel
 	{
 	protected:
-		list::ObservableList<Ptr<ISolutionItemModel>>	projects;
+		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 
 	public:
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
+		
+		Ptr<ISolutionItemModel>							GetSolution();
+		void											SetSolution(Ptr<ISolutionItemModel> solution);
 	};
 
 	class StudioModel : public Object, public virtual IStudioModel
@@ -106,6 +109,7 @@ namespace vm
 		bool											OpenSolution(WString filePath)override;
 		bool											SaveSolution()override;
 		bool											NewSolution(WString filePath)override;
+		bool											CloseSolution()override;
 		bool											AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName)override;
 
 		void											OpenBrowser(WString url)override;
