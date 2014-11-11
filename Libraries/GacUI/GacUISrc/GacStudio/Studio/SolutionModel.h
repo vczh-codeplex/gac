@@ -101,6 +101,7 @@ namespace vm
 		void											SetFileCategory(WString value)override;
 
 		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
+		bool											GetHasOpeningSolution()override;
 
 		void											OpenBrowser(WString url)override;
 	};
