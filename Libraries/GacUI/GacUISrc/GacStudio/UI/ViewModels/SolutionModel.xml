@@ -30,6 +30,7 @@
     
     <Property Name="FileCategory" Type="string"/>
     <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
+    <Property Name="HasOpeningSolution" Type="bool" Readonly="true" Observable="true"/>
     
     <Method Name="OpenBrowser" Type="void">
       <Argument Name="url" Type="string"/>

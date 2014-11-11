@@ -473,6 +473,11 @@ StudioModel
 		return openingSolution;
 	}
 
+	bool StudioModel::GetHasOpeningSolution()
+	{
+		return openingSolution->GetChildren()->GetCount() > 0;
+	}
+
 	void StudioModel::OpenBrowser(WString url)
 	{
 		ShellExecute(NULL, NULL, url.Buffer(), NULL, NULL, SHOW_FULLSCREEN);
