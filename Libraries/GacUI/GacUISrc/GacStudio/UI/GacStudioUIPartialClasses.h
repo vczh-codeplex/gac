@@ -87,6 +87,10 @@ namespace vm
 		virtual bool GetHasOpeningSolution() = 0;
 		vl::Event<void()> HasOpeningSolutionChanged;
 
+		virtual bool OpenSolution(WString filePath) = 0;
+		virtual bool SaveSolution() = 0;
+		virtual bool NewSolution(WString filePath) = 0;
+		virtual bool AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName) = 0;
 		virtual void OpenBrowser(WString url) = 0;
 	};
 }

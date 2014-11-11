@@ -63,6 +63,10 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolution)
 				CLASS_MEMBER_EVENT(HasOpeningSolutionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(HasOpeningSolution, HasOpeningSolutionChanged)
+				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
+				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
+				CLASS_MEMBER_METHOD(AddProject, { L"projectFactory" _ L"projectName" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
