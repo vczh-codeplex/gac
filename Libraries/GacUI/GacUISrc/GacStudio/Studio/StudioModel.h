@@ -6,8 +6,8 @@ GacStudio::SolutionModel
 Interfaces:
 ***********************************************************************/
 
-#ifndef GACSTUDIO_STUDIO_SOLUTIONMODEL
-#define GACSTUDIO_STUDIO_SOLUTIONMODEL
+#ifndef GACSTUDIO_STUDIO_STUDIOMODEL
+#define GACSTUDIO_STUDIO_STUDIOMODEL
 
 #include "..\UI\GacStudioUI.h"
 
