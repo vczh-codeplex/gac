@@ -122,8 +122,6 @@ Common Operations
 RepeatingParsingExecutor
 ***********************************************************************/
 
-#ifdef VCZH_MSVC
-
 			/// <summary>A data structure storing the parsing input for text box control.</summary>
 			struct RepeatingParsingInput
 			{
@@ -348,7 +346,6 @@ ParsingContext
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 			};
-#endif
 		}
 	}
 }

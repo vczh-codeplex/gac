@@ -15,8 +15,6 @@ namespace vl
 			using namespace collections;
 			using namespace regex_internal;
 
-#ifdef VCZH_MSVC
-
 /***********************************************************************
 RepeatingParsingExecutor::CallbackBase
 ***********************************************************************/
@@ -448,8 +446,6 @@ ParsingContext
 				if(!foundNode) return false;
 				return RetriveContext(output, foundNode, executor);
 			}
-
-#endif
 		}
 	}
 }
