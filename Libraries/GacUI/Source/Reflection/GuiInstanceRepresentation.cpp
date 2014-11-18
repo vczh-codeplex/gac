@@ -598,31 +598,35 @@ GuiInstanceContext
 
 		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
-			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
-			if(auto name=parser->TypedParse(xml->name.value, errors))
-			if(name->IsCtorName())
+			if (auto parser = GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
-				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
-				ctor->typeNamespace = GlobalStringKey::Get(name->namespaceName);
-				ctor->typeName = GlobalStringKey::Get(name->name);
-				// collect attributes as setters
-				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
+				if (auto name = parser->TypedParse(xml->name.value, errors))
 				{
-					if(auto name=parser->TypedParse(att->name.value, errors))
-					if(name->IsReferenceAttributeName())
+					if(name->IsCtorName())
 					{
-						if (name->name == L"Style")
+						Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
+						ctor->typeNamespace = GlobalStringKey::Get(name->namespaceName);
+						ctor->typeName = GlobalStringKey::Get(name->name);
+						// collect attributes as setters
+						FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 						{
-							ctor->styleName = att->value.value;
+							if(auto name=parser->TypedParse(att->name.value, errors))
+							if(name->IsReferenceAttributeName())
+							{
+								if (name->name == L"Style")
+								{
+									ctor->styleName = att->value.value;
+								}
+							}
 						}
+						FillAttSetter(ctor, xml, errors);
+						return ctor;
+					}
+					else
+					{
+						errors.Add(L"Wrong constructor name \"" + xml->name.value + L"\".");
 					}
 				}
-				FillAttSetter(ctor, xml, errors);
-				return ctor;
-			}
-			else
-			{
-				errors.Add(L"Wrong constructor name \"" + xml->name.value + L"\".");
 			}
 			return 0;
 		}
