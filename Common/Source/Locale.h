@@ -37,7 +37,6 @@ namespace vl
 
 		const WString&				GetName()const;
 
-		// <NOT_IMPLEMENTED_USING GCC> -- BEGIN
 		void						GetShortDateFormats(collections::List<WString>& formats)const;
 		void						GetLongDateFormats(collections::List<WString>& formats)const;
 		void						GetYearMonthDateFormats(collections::List<WString>& formats)const;
@@ -46,25 +45,33 @@ namespace vl
 
 		WString						FormatDate(const WString& format, DateTime date)const;
 		WString						FormatTime(const WString& format, DateTime time)const;
+#ifdef VCZH_MSVC
 		WString						FormatNumber(const WString& number)const;
 		WString						FormatCurrency(const WString& currency)const;
+#endif
 
 		WString						GetShortDayOfWeekName(vint dayOfWeek)const;
 		WString						GetLongDayOfWeekName(vint dayOfWeek)const;
 		WString						GetShortMonthName(vint month)const;
 		WString						GetLongMonthName(vint month)const;
-
+		
+#ifdef VCZH_MSVC
 		WString						ToFullWidth(const WString& str)const;
 		WString						ToHalfWidth(const WString& str)const;
 		WString						ToHiragana(const WString& str)const;
 		WString						ToKatagana(const WString& str)const;
+#endif
+
 		WString						ToLower(const WString& str)const;
 		WString						ToUpper(const WString& str)const;
 		WString						ToLinguisticLower(const WString& str)const;
 		WString						ToLinguisticUpper(const WString& str)const;
+
+#ifdef VCZH_MSVC
 		WString						ToSimplifiedChinese(const WString& str)const;
 		WString						ToTraditionalChinese(const WString& str)const;
 		WString						ToTileCase(const WString& str)const;
+#endif
 
 		enum Normalization
 		{
@@ -84,8 +91,7 @@ namespace vl
 		collections::Pair<vint, vint>			FindFirst(const WString& text, const WString& find, Normalization normalization)const;
 		collections::Pair<vint, vint>			FindLast(const WString& text, const WString& find, Normalization normalization)const;
 		bool									StartsWith(const WString& text, const WString& find, Normalization normalization)const;
-		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization)const;
-		// <NOT_IMPLEMENTED_USING GCC> -- END
+		bool									EndsWith(const WString& text, const WString& find, Normalization normalization)const;
 	};
 
 #define INVLOC vl::Locale::Invariant()
