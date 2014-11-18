@@ -185,6 +185,12 @@ Event
 				{
 					ExecuteWithNewSender(argument, 0);
 				}
+
+				void Execute(const T& argument)
+				{
+					auto t = argument;
+					ExecuteWithNewSender(t, 0);
+				}
 			};
 
 			template<typename T>
