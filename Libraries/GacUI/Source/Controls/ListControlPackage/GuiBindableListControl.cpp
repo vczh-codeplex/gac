@@ -167,7 +167,8 @@ GuiBindableTextList::ItemSource
 			{
 				if (0 <= itemIndex && itemIndex < itemSource->GetCount())
 				{
-					WriteProperty(itemSource->Get(itemIndex), checkedProperty, BoxValue(value));
+					auto thisValue = itemSource->Get(itemIndex);
+					WriteProperty(thisValue, checkedProperty, BoxValue(value));
 				}
 			}
 
