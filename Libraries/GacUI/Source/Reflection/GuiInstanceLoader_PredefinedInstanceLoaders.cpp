@@ -1629,7 +1629,7 @@ GuiPredefinedInstanceLoadersPlugin
 #define ADD_TEMPLATE_CONTROL(TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->SetLoader(\
 		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::" L#TYPENAME,\
+			L"presentation::controls::" L ## #TYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
 			)\
@@ -1638,7 +1638,7 @@ GuiPredefinedInstanceLoadersPlugin
 #define ADD_TEMPLATE_CONTROL_2(TYPENAME, CONSTRUCTOR, TEMPLATE)\
 	manager->SetLoader(\
 		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::" L#TYPENAME,\
+			L"presentation::controls::" L ## #TYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory)\
 			{\
@@ -1653,7 +1653,7 @@ GuiPredefinedInstanceLoadersPlugin
 	manager->CreateVirtualType(\
 		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			L"presentation::controls::Gui" L ## #VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory){return Value::From(new TYPENAME(new TEMPLATE##_StyleProvider(factory))); }\
 			)\
@@ -1663,7 +1663,7 @@ GuiPredefinedInstanceLoadersPlugin
 	manager->CreateVirtualType(\
 		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			L"presentation::controls::Gui" L ## #VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory)\
 			{\
@@ -1678,7 +1678,7 @@ GuiPredefinedInstanceLoadersPlugin
 	manager->CreateVirtualType(\
 		GlobalStringKey::Get(description::GetTypeDescriptor<TYPENAME>()->GetTypeName()),\
 		new GuiTemplateControlInstanceLoader(\
-			L"presentation::controls::Gui" L#VIRTUALTYPENAME,\
+			L"presentation::controls::Gui" L ## #VIRTUALTYPENAME,\
 			[](){return Value::From(CONSTRUCTOR());},\
 			[](Ptr<GuiTemplate::IFactory> factory)\
 			{\
