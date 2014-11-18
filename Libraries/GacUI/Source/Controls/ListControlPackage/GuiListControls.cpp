@@ -557,7 +557,7 @@ GuiSelectableListControl
 
 			Ptr<GuiListControl::IItemStyleProvider> GuiSelectableListControl::SetStyleProvider(Ptr<GuiListControl::IItemStyleProvider> value)
 			{
-				selectableStyleProvider=value?value.Cast<IItemStyleProvider>():0;
+				selectableStyleProvider = value ? value.Cast<IItemStyleProvider>() : nullptr;
 				return GuiListControl::SetStyleProvider(value);
 			}
 
