@@ -276,7 +276,7 @@ StringGrid Control
 				class StringGridProvider : private StrongTypedDataProvider<Ptr<StringGridItem>>, public Description<StringGridProvider>
 				{
 					friend class StringGridColumn;
-					friend class GuiStringGrid;
+					friend class vl::presentation::controls::GuiStringGrid;
 				protected:
 					bool												readonly;
 					collections::List<Ptr<StringGridItem>>				items;
