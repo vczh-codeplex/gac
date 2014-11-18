@@ -58,8 +58,13 @@ namespace vl
 		static vint									WaitAny(WaitableObject** objects, vint count, bool* abandoned);
 		static vint									WaitAnyForTime(WaitableObject** objects, vint count, vint ms, bool* abandoned);
 	};
+#endif
 
+#if defined VCZH_MSVC
 	class Thread : public WaitableObject
+#elif defined VCZH_GCC
+	class Thread : public Object
+#endif
 	{
 		friend void InternalThreadProc(Thread* thread);
 	public:
@@ -85,18 +90,25 @@ namespace vl
 
 		static Thread*								CreateAndStart(ThreadProcedure procedure, void* argument=0, bool deleteAfterStopped=true);
 		static Thread*								CreateAndStart(const Func<void()>& procedure, bool deleteAfterStopped=true);
+#ifdef VCZH_MSVC
 		static void									Sleep(vint ms);
+#endif
 		static vint									GetCPUCount();
 		static vint									GetCurrentThreadId();
 
 		bool										Start();
+#ifdef VCZH_MSVC
 		bool										Pause();
 		bool										Resume();
+#endif
 		bool										Stop();
 		ThreadState									GetState();
+#ifdef VCZH_MSVC
 		void										SetCPU(vint index);
+#endif
 	};
 
+#ifdef VCZH_MSVC
 	class Mutex : public WaitableObject
 	{
 	private:
