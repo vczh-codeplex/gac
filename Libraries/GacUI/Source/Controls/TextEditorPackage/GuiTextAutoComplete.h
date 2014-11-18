@@ -81,6 +81,8 @@ GuiTextBoxAutoCompleteBase
 /***********************************************************************
 GuiGrammarAutoComplete
 ***********************************************************************/
+
+#ifdef VCZH_MSVC
 			
 			/// <summary>Grammar based auto complete controller.</summary>
 			class GuiGrammarAutoComplete
@@ -200,6 +202,8 @@ GuiGrammarAutoComplete
 				/// <returns>The parsing executor.</returns>
 				Ptr<RepeatingParsingExecutor>						GetParsingExecutor();
 			};
+
+#endif
 		}
 	}
 }

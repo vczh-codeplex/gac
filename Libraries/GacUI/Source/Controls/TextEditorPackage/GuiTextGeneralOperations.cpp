@@ -15,6 +15,8 @@ namespace vl
 			using namespace collections;
 			using namespace regex_internal;
 
+#ifdef VCZH_MSVC
+
 /***********************************************************************
 RepeatingParsingExecutor::CallbackBase
 ***********************************************************************/
@@ -407,6 +409,8 @@ RepeatingParsingExecutor
 			{
 				return GetAttribute(index, L"AutoComplete", 0);
 			}
+
+#endif
 
 /***********************************************************************
 ParsingContext

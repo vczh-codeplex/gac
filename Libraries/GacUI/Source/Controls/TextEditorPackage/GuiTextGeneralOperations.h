@@ -122,6 +122,8 @@ Common Operations
 RepeatingParsingExecutor
 ***********************************************************************/
 
+#ifdef VCZH_MSVC
+
 			/// <summary>A data structure storing the parsing input for text box control.</summary>
 			struct RepeatingParsingInput
 			{
@@ -318,6 +320,7 @@ RepeatingParsingExecutor
 					token:	when the token is editing, an auto complete list will appear if possible
 				*/
 			};
+#endif
 
 /***********************************************************************
 ParsingContext
