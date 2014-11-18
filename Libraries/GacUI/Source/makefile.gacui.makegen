@@ -60,7 +60,7 @@ folder GACUI_REFLECTION_INSTANCEQUERY = ./Reflection/InstanceQuery
 	h = *.h
 	cpp = *.cpp
 
-folder GACUI_REFLECTION_TYPEDESCRIPTORS = ./Reflection/TypeDescritors
+folder GACUI_REFLECTION_TYPEDESCRIPTORS = ./Reflection/TypeDescriptors
 	h = *.h
 	cpp = *.cpp
 
