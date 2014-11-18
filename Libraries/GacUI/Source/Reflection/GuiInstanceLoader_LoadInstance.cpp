@@ -1086,25 +1086,27 @@ ExecuteBindingSetters
 						auto method = group->GetMethod(i);
 						if (method->GetParameterCount() != 2) goto UNSUPPORTED;
 
-						auto returnType = method->GetReturn();
-						auto senderType = method->GetParameter(0)->GetType();
-						auto argumentType = method->GetParameter(1)->GetType();
+						{
+							auto returnType = method->GetReturn();
+							auto senderType = method->GetParameter(0)->GetType();
+							auto argumentType = method->GetParameter(1)->GetType();
 					
-						if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-						if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
+							if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+							if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
 					
-						if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
-						senderType = senderType->GetElementType();
-						if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-						if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
+							if (senderType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+							senderType = senderType->GetElementType();
+							if (senderType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+							if (senderType->GetTypeDescriptor() != description::GetTypeDescriptor<compositions::GuiGraphicsComposition>()) goto UNSUPPORTED;
 					
-						if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
-						argumentType = argumentType->GetElementType();
-						if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
-						if (argumentType->GetTypeDescriptor() != eventSetter.eventInfo->argumentType) goto UNSUPPORTED;
+							if (argumentType->GetDecorator() != ITypeInfo::RawPtr) goto UNSUPPORTED;
+							argumentType = argumentType->GetElementType();
+							if (argumentType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
+							if (argumentType->GetTypeDescriptor() != eventSetter.eventInfo->argumentType) goto UNSUPPORTED;
 
-						selectedMethod = method;
-						break;
+							selectedMethod = method;
+							break;
+						}
 
 					UNSUPPORTED:
 						continue;
