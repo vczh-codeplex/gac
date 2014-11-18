@@ -812,7 +812,7 @@ GuiGrammarAutoComplete
 											}
 										}
 
-										if(duplicated=same)
+										if((duplicated=same))
 										{
 											break;
 										}
@@ -843,6 +843,7 @@ GuiGrammarAutoComplete
 							}
 						}
 						break;
+					default:;
 					}
 				}
 				return 0;

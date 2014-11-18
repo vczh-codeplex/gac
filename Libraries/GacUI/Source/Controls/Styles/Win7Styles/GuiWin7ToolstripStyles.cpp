@@ -207,6 +207,7 @@ Win7ToolstripButtonStyle
 								cell->AddChild(subMenuHost->GetBoundsComposition());
 							}
 							break;
+						default:;
 						}
 					}
 					GetContainerComposition()->AddChild(table);

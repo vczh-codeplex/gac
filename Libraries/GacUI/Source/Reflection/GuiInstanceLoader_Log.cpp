@@ -164,6 +164,7 @@ LogInstanceLoaderManager_PrintProperties
 				case GuiInstancePropertyInfo::SupportSet:
 					writer.WriteString(L"[set]        ");
 					break;
+				default:;
 				}
 
 				switch (acceptableTypes.Count())

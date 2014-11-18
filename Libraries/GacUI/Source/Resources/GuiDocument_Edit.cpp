@@ -1284,7 +1284,8 @@ document_operation_visitors::SummerizeStyleVisitor
 					,start(_start)
 					,end(_end)
 				{
-					DocumentModel::ResolvedStyle resolvedStyle=model->GetStyle(DocumentModel::DefaultStyleName, resolvedStyle);
+					DocumentModel::ResolvedStyle resolvedStyle;
+					resolvedStyle = model->GetStyle(DocumentModel::DefaultStyleName, resolvedStyle);
 					resolvedStyles.Add(resolvedStyle);
 				}
 

@@ -622,6 +622,7 @@ GuiDefaultInstanceLoader
 				case ITypeInfo::TypeDescriptor:
 					propertyInfo->acceptableTypes.Add(propType->GetTypeDescriptor());
 					return true;
+				default:;
 				}
 				return false;
 			}
@@ -731,6 +732,7 @@ GuiDefaultInstanceLoader
 						propertyValue.instanceValue.SetProperty(propertyValue.propertyName.ToString(), propertyValue.propertyValue);
 						propertyType.f1->SetValue(propertyValue.instanceValue, propertyValue.propertyValue);
 						return true;
+					default:;
 					}
 				}
 				return false;

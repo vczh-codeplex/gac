@@ -460,6 +460,7 @@ GuiDocumentViewer
 							}
 						}
 						break;
+					default:;
 					}
 				}
 			}
