@@ -57,6 +57,7 @@ CreateTypeInfoFromTypeFlag
 				case TypeFlag::F4:		return TypeInfoRetriver<float>::CreateTypeInfo();
 				case TypeFlag::F8:		return TypeInfoRetriver<double>::CreateTypeInfo();
 				case TypeFlag::String:	return TypeInfoRetriver<WString>::CreateTypeInfo();
+				default:;
 				}
 				return 0;
 			}
