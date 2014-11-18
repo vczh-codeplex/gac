@@ -198,6 +198,7 @@ ParsingTable::TransitionItem
 					case ParsingTable::Instruction::LeftRecursiveReduce:
 						hasLrReduce=true;
 						break;
+					default:;
 					}
 				}
 

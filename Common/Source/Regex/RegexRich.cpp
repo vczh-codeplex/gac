@@ -339,9 +339,11 @@ RichInterpretor
 									}
 								}
 								break;
+							default:;
 							}
 						}
 						break;
+					default:;
 					}
 					//寻找成功，在必要的时候保存当前的回溯状态
 					if(found)

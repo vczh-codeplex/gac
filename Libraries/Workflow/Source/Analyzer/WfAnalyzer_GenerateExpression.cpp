@@ -427,6 +427,7 @@ GenerateInstructions(Expression)
 						case WfBinaryOperator::Or:
 							INSTRUCTION(Ins::OpOr(GetInstructionTypeArgument(mergedType)));
 							break;
+						default:;
 						}
 					}
 				}

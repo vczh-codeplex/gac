@@ -521,6 +521,7 @@ ParsingAmbiguousParser
 						case ParsingTable::Instruction::LeftRecursiveReduce:
 							count++;
 							break;
+						default:;
 						}
 					}
 					conflictReduceIndices[i]=index;
@@ -546,6 +547,7 @@ ParsingAmbiguousParser
 							case ParsingTable::Instruction::Shift:
 								count--;
 								break;
+							default:;
 							}
 						}
 						future=future->previous;

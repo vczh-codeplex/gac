@@ -619,6 +619,7 @@ ValidateSemantic(Expression)
 							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
 								break;
+							default:;
 							}
 							break;
 						case WfUnaryOperator::Positive:
@@ -629,6 +630,7 @@ ValidateSemantic(Expression)
 							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
 								break;
+							default:;
 							}
 							break;
 						case WfUnaryOperator::Negative:
@@ -643,6 +645,7 @@ ValidateSemantic(Expression)
 							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
 								break;
+							default:;
 							}
 							break;
 						}
@@ -909,6 +912,7 @@ ValidateSemantic(Expression)
 									selectedTable = conversionTable;
 								}
 								break;
+							default:;
 							}
 
 							TypeFlag resultFlag = selectedTable[(vint)flag];
@@ -1243,6 +1247,7 @@ ValidateSemantic(Expression)
 								manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node->expression.Obj(), type.Obj()));
 							}
 							break;
+						default:;
 						}
 					}
 					results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));

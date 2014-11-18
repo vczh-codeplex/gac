@@ -61,6 +61,7 @@ CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 						closure.Add(ClosureItem(state, path, false));
 					}
 					break;
+				default:;
 				}
 			}
 

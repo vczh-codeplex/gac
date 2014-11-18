@@ -199,6 +199,7 @@ description::Value
 					return rawPtr?rawPtr->GetTypeDescriptor():0;
 				case Text:
 					return typeDescriptor;
+				default:;
 				}
 				return 0;
 			}

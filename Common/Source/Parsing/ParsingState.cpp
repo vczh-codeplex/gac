@@ -454,6 +454,7 @@ ParsingState
 							}
 						}
 						break;
+					default:;
 					}
 				}
 			}
@@ -519,6 +520,7 @@ ParsingState
 							}
 						}
 						break;
+					default:;
 					}
 				}
 

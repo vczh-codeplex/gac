@@ -525,6 +525,7 @@ GenerateTable
 						case Transition::Symbol:
 							tokenIndex=tokenIds[transition->transitionSymbol];
 							break;
+						default:;
 						}
 
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(stateIndex, tokenIndex);

@@ -112,6 +112,7 @@ ValidateStructure(Type)
 					case WfPredefinedTypeName::Interface:
 						manager->errors.Add(WfErrors::WrongInterfaceType(node));
 						break;
+					default:;
 					}
 				}
 
@@ -168,6 +169,7 @@ ValidateStructure(Type)
 						case WfPredefinedTypeName::Interface:
 							manager->errors.Add(WfErrors::NullableToNonReferenceType(node));
 							break;
+						default:;
 						}
 					}
 				}

@@ -133,6 +133,7 @@ GuiTableComposition
 								}
 							}
 							break;
+						default:;
 						}
 					}
 				}
