@@ -424,7 +424,7 @@ GuiVirtualTreeListControl
 ***********************************************************************/
 
 			/// <summary>Tree list control in virtual node.</summary>
-			class GuiVirtualTreeListControl : public GuiSelectableListControl, private virtual tree::INodeProviderCallback, public Description<GuiVirtualTreeListControl>
+			class GuiVirtualTreeListControl : public GuiSelectableListControl, protected virtual tree::INodeProviderCallback, public Description<GuiVirtualTreeListControl>
 			{
 			private:
 				void								OnAttached(tree::INodeRootProvider* provider)override;
