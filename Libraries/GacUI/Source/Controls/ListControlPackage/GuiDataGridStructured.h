@@ -453,8 +453,8 @@ Strong Typed DataSource Extensions
 					{
 						if(AddStrongTypedColumn(text, column))
 						{
-							typedef StrongTypedColumnProvider<TRow, TColumn>::typename Sorter Sorter;
-							column->SetInherentSorter(new Sorter(column.Obj()));
+							typedef StrongTypedColumnProviderBase<TRow, TColumn>::typename Sorter ColumnSorter;
+							column->SetInherentSorter(new ColumnSorter(column.Obj()));
 						}
 						return column;
 					}
