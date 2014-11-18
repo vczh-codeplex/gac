@@ -775,7 +775,7 @@ GuiResourceFolder
 		Ptr<GuiResourceItem> GuiResourceFolder::GetItem(const WString& name)
 		{
 			vint index=items.Keys().IndexOf(name);
-			return index==-1?0:items.Values().Get(index);
+			return index == -1 ? nullptr : items.Values().Get(index);
 		}
 
 		bool GuiResourceFolder::AddItem(const WString& name, Ptr<GuiResourceItem> item)
@@ -808,7 +808,7 @@ GuiResourceFolder
 		Ptr<GuiResourceFolder> GuiResourceFolder::GetFolder(const WString& name)
 		{
 			vint index=folders.Keys().IndexOf(name);
-			return index==-1?0:folders.Values().Get(index);
+			return index == -1 ? nullptr : folders.Values().Get(index);
 		}
 
 		bool GuiResourceFolder::AddFolder(const WString& name, Ptr<GuiResourceFolder> folder)
