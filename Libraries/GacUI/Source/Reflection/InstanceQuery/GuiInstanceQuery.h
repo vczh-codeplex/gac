@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_REFLECTION_INSTANCEQUERY_GUIINSTANCEQUERY
 
 #include "GuiInstanceQuery_Parser.h"
-#include "..\GuiInstanceRepresentation.h"
+#include "../GuiInstanceRepresentation.h"
 
 namespace vl
 {
