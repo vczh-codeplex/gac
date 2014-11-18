@@ -141,10 +141,13 @@ namespace vl
 		bool										Signal();
 		bool										Unsignal();
 	};
+#endif
 
 /***********************************************************************
 线程池
 ***********************************************************************/
+
+	// <NOT_IMPLEMENTED_USING GCC> -- BEGIN
 
 	class ThreadPoolLite : public Object
 	{
@@ -162,6 +165,9 @@ namespace vl
 		}
 	};
 
+	// <NOT_IMPLEMENTED_USING GCC> -- END
+
+#ifdef VCZH_MSVC
 /***********************************************************************
 进程内对象
 ***********************************************************************/
@@ -277,7 +283,6 @@ namespace vl
 #define READER_LOCK(LOCK) SCOPE_VARIABLE(const ReaderWriterLock::ReaderScope&, scope, LOCK)
 #define WRITER_LOCK(LOCK) SCOPE_VARIABLE(const ReaderWriterLock::WriterScope&, scope, LOCK)
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 RepeatingTaskExecutor
 ***********************************************************************/
@@ -357,6 +362,5 @@ RepeatingTaskExecutor
 			}
 		}
 	};
-#endif
 }
 #endif

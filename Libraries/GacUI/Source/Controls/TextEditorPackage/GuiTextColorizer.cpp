@@ -365,8 +365,6 @@ GuiTextBoxRegexColorizer
 				return colors;
 			}
 
-#ifdef VCZH_MSVC
-
 /***********************************************************************
 GuiGrammarColorizer
 ***********************************************************************/
@@ -587,8 +585,6 @@ GuiGrammarColorizer
 			{
 				return parsingExecutor;
 			}
-
-#endif
 		}
 	}
 }
