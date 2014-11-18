@@ -727,6 +727,7 @@ GuiDefaultInstanceLoader
 				case ITypeInfo::TypeDescriptor:
 					propertyInfo->acceptableTypes.Add(propType->GetTypeDescriptor());
 					return true;
+				default:;
 				}
 				return false;
 			}
@@ -836,6 +837,7 @@ GuiDefaultInstanceLoader
 						propertyValue.instanceValue.SetProperty(propertyValue.propertyName.ToString(), propertyValue.propertyValue);
 						propertyType.f1->SetValue(propertyValue.instanceValue, propertyValue.propertyValue);
 						return true;
+					default:;
 					}
 				}
 				return false;
@@ -1989,6 +1991,7 @@ LoadInstancePropertyValue
 							output.Add(Pair<Value, IGuiInstanceLoader*>(Value::From(list), propertyLoader));
 						}
 						break;
+					default:;
 					}
 
 					if (!propertyInfo->tryParent)
@@ -2080,7 +2083,7 @@ FillInstance
 				{
 					while (eventLoader)
 					{
-						if (eventInfo = eventLoader->GetEventType(propertyInfo))
+						if ((eventInfo = eventLoader->GetEventType(propertyInfo)))
 						{
 							if (eventInfo->support == GuiInstanceEventInfo::NotSupport)
 							{
@@ -2939,6 +2942,7 @@ LogInstanceLoaderManager_PrintProperties
 				case GuiInstancePropertyInfo::SupportSet:
 					writer.WriteString(L"[set]        ");
 					break;
+				default:;
 				}
 
 				switch (acceptableTypes.Count())
@@ -7040,42 +7044,44 @@ GuiInstanceContext
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
-					if(auto name=parser->TypedParse(att->name.value, errors))
-					if(name->IsReferenceAttributeName())
+					if (auto name = parser->TypedParse(att->name.value, errors))
 					{
-						// collect reference attributes
-						if (name->name == L"Name")
+						if(name->IsReferenceAttributeName())
 						{
-							setter->instanceName = GlobalStringKey::Get(att->value.value);
+							// collect reference attributes
+							if (name->name == L"Name")
+							{
+								setter->instanceName = GlobalStringKey::Get(att->value.value);
+							}
 						}
-					}
-					else if(name->IsPropertyAttributeName())
-					{
-						// collect attributes setters
-						if (setter->setters.Keys().Contains(GlobalStringKey::Get(name->name)))
+						else if(name->IsPropertyAttributeName())
 						{
-							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
-						}
-						else
-						{
-							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
-							sv->binding=GlobalStringKey::Get(name->binding);
-							setter->setters.Add(GlobalStringKey::Get(name->name), sv);
+							// collect attributes setters
+							if (setter->setters.Keys().Contains(GlobalStringKey::Get(name->name)))
+							{
+								errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
+							}
+							else
+							{
+								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
+								sv->binding=GlobalStringKey::Get(name->binding);
+								setter->setters.Add(GlobalStringKey::Get(name->name), sv);
 
-							Ptr<GuiTextRepr> value=new GuiTextRepr;
-							value->text=att->value.value;
-							sv->values.Add(value);
+								Ptr<GuiTextRepr> value=new GuiTextRepr;
+								value->text=att->value.value;
+								sv->values.Add(value);
+							}
 						}
-					}
-					else if (name->IsEventAttributeName())
-					{
-						// collect event setters
-						if (!setter->eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
+						else if (name->IsEventAttributeName())
 						{
-							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-							value->binding = GlobalStringKey::Get(name->binding);
-							value->value = att->value.value;
-							setter->eventHandlers.Add(GlobalStringKey::Get(name->name), value);
+							// collect event setters
+							if (!setter->eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
+							{
+								auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+								value->binding = GlobalStringKey::Get(name->binding);
+								value->value = att->value.value;
+								setter->eventHandlers.Add(GlobalStringKey::Get(name->name), value);
+							}
 						}
 					}
 				}
@@ -7088,31 +7094,35 @@ GuiInstanceContext
 
 		Ptr<GuiConstructorRepr> GuiInstanceContext::LoadCtor(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors)
 		{
-			if(auto parser=GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
-			if(auto name=parser->TypedParse(xml->name.value, errors))
-			if(name->IsCtorName())
+			if (auto parser = GetParserManager()->GetParser<ElementName>(L"INSTANCE-ELEMENT-NAME"))
 			{
-				Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
-				ctor->typeNamespace = GlobalStringKey::Get(name->namespaceName);
-				ctor->typeName = GlobalStringKey::Get(name->name);
-				// collect attributes as setters
-				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
+				if (auto name = parser->TypedParse(xml->name.value, errors))
 				{
-					if(auto name=parser->TypedParse(att->name.value, errors))
-					if(name->IsReferenceAttributeName())
+					if(name->IsCtorName())
 					{
-						if (name->name == L"Style")
+						Ptr<GuiConstructorRepr> ctor=new GuiConstructorRepr;
+						ctor->typeNamespace = GlobalStringKey::Get(name->namespaceName);
+						ctor->typeName = GlobalStringKey::Get(name->name);
+						// collect attributes as setters
+						FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 						{
-							ctor->styleName = att->value.value;
+							if(auto name=parser->TypedParse(att->name.value, errors))
+							if(name->IsReferenceAttributeName())
+							{
+								if (name->name == L"Style")
+								{
+									ctor->styleName = att->value.value;
+								}
+							}
 						}
+						FillAttSetter(ctor, xml, errors);
+						return ctor;
+					}
+					else
+					{
+						errors.Add(L"Wrong constructor name \"" + xml->name.value + L"\".");
 					}
 				}
-				FillAttSetter(ctor, xml, errors);
-				return ctor;
-			}
-			else
-			{
-				errors.Add(L"Wrong constructor name \"" + xml->name.value + L"\".");
 			}
 			return 0;
 		}

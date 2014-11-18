@@ -2380,6 +2380,7 @@ ParsingAmbiguousParser
 						case ParsingTable::Instruction::LeftRecursiveReduce:
 							count++;
 							break;
+						default:;
 						}
 					}
 					conflictReduceIndices[i]=index;
@@ -2405,6 +2406,7 @@ ParsingAmbiguousParser
 							case ParsingTable::Instruction::Shift:
 								count--;
 								break;
+							default:;
 							}
 						}
 						future=future->previous;
@@ -4707,6 +4709,7 @@ CreateNondeterministicPDAFromEpsilonPDA::closure_searching
 						closure.Add(ClosureItem(state, path, false));
 					}
 					break;
+				default:;
 				}
 			}
 
@@ -5497,6 +5500,7 @@ GenerateTable
 						case Transition::Symbol:
 							tokenIndex=tokenIds[transition->transitionSymbol];
 							break;
+						default:;
 						}
 
 						Ptr<ParsingTable::TransitionBag> bag=table->GetTransitionBag(stateIndex, tokenIndex);
@@ -9097,6 +9101,7 @@ ParsingState
 							}
 						}
 						break;
+					default:;
 					}
 				}
 			}
@@ -9162,6 +9167,7 @@ ParsingState
 							}
 						}
 						break;
+					default:;
 					}
 				}
 
@@ -9954,6 +9960,7 @@ ParsingTable::TransitionItem
 					case ParsingTable::Instruction::LeftRecursiveReduce:
 						hasLrReduce=true;
 						break;
+					default:;
 					}
 				}
 
@@ -12537,6 +12544,7 @@ description::Value
 					return rawPtr?rawPtr->GetTypeDescriptor():0;
 				case Text:
 					return typeDescriptor;
+				default:;
 				}
 				return 0;
 			}
@@ -18330,7 +18338,7 @@ namespace vl
 				return 0;
 			}
 			Ptr<LoopExpression> loop;
-			while(loop=ParseLoop(input))
+			while((loop=ParseLoop(input)))
 			{
 				loop->expression=unit;
 				unit=loop;
@@ -19125,9 +19133,11 @@ RichInterpretor
 									}
 								}
 								break;
+							default:;
 							}
 						}
 						break;
+					default:;
 					}
 					//寻找成功，在必要的时候保存当前的回溯状态
 					if(found)
