@@ -1,6 +1,11 @@
 #include "Locale.h"
 #if defined VCZH_MSVC
 #include <Windows.h>
+#elif defined VCZH_GCC
+#include <stdio.h>
+#include <ctype.h>
+#include <wctype.h>
+#include <wchar.h>
 #endif
 
 namespace vl
@@ -186,82 +191,82 @@ Locale
 		auto ts = L"01,13,02,03,PM";
 		*/
 		WString result;
-		const wchar_t* reading == format.Buffer();
+		const wchar_t* reading = format.Buffer();
 
 		while (*reading)
 		{
 			if (wcsncmp(reading, L"yyyy", 4) == 0)
 			{
-				WString fragment = itow(dt.year);
-				while (fragment.Length() <= 4) fragment = L"0" + fragment;
+				WString fragment = itow(date.year);
+				while (fragment.Length() < 4) fragment = L"0" + fragment;
 				result += fragment;
-				reading += r;
+				reading += 4;
 			}
 			else if (wcsncmp(reading, L"MMMM", 4) == 0)
 			{
-				fragment += GetLongMonthName(dt.month);
-				reading += r;
+				result += GetLongMonthName(date.month);
+				reading += 4;
 			}
 			else if (wcsncmp(reading, L"MMM", 3) == 0)
 			{
-				fragment += GetShortMonthName(dt.month);
+				result += GetShortMonthName(date.month);
 				reading += 3;
 			}
 			else if (wcsncmp(reading, L"MM", 2) == 0)
 			{
-				WString fragment = itow(dt.month);
-				while (fragment.Length() <= 2) fragment = L"0" + fragment;
+				WString fragment = itow(date.month);
+				while (fragment.Length() < 2) fragment = L"0" + fragment;
 				result += fragment;
 				reading += 2;
 			}
 			else if (wcsncmp(reading, L"dddd", 4) == 0)
 			{
-				fragment += GetLongDayOfWeekName(dt.day);
+				result += GetLongDayOfWeekName(date.dayOfWeek);
 				reading += 4;
 			}
 			else if (wcsncmp(reading, L"ddd", 3) == 0)
 			{
-				fragment += GetShortDayOfWeekName(dt.day);
+				result += GetShortDayOfWeekName(date.dayOfWeek);
 				reading += 3;
 			}
 			else if (wcsncmp(reading, L"dd", 2) == 0)
 			{
-				WString fragment = itow(dt.day);
-				while (fragment.Length() <= 2) fragment = L"0" + fragment;
+				WString fragment = itow(date.day);
+				while (fragment.Length() < 2) fragment = L"0" + fragment;
 				result += fragment;
 				reading += 2;
 			}
 			else if (wcsncmp(reading, L"hh", 2) == 0)
 			{
-				WString fragment = itow(dt.hour > 12 ? dt.hour - 12 : dt.hour);
-				while (fragment.Length() <= 2) fragment = L"0" + fragment;
+				WString fragment = itow(date.hour > 12 ? date.hour - 12 : date.hour);
+				while (fragment.Length() < 2) fragment = L"0" + fragment;
 				result += fragment;
 				reading += 2;
 			}
 			else if (wcsncmp(reading, L"HH", 2) == 0)
 			{
-				WString fragment = itow(dt.hour);
-				while (fragment.Length() <= 2) fragment = L"0" + fragment;
+				WString fragment = itow(date.hour);
+				while (fragment.Length() < 2) fragment = L"0" + fragment;
 				result += fragment;
 				reading += 2;
 			}
 			else if (wcsncmp(reading, L"mm", 2) == 0)
 			{
-				WString fragment = itow(dt.minute);
-				while (fragment.Length() <= 2) fragment = L"0" + fragment;
+				WString fragment = itow(date.minute);
+				while (fragment.Length() < 2) fragment = L"0" + fragment;
 				result += fragment;
 				reading += 2;
 			}
 			else if (wcsncmp(reading, L"ss", 2) == 0)
 			{
-				WString fragment = itow(dt.second);
-				while (fragment.Length() <= 2) fragment = L"0" + fragment;
+				WString fragment = itow(date.second);
+				while (fragment.Length() < 2) fragment = L"0" + fragment;
 				result += fragment;
 				reading += 2;
 			}
 			else if (wcsncmp(reading, L"tt", 2) == 0)
 			{
-				fragment += dt.hour > 12 ? L"PM" : L"AM";
+				result += date.hour > 12 ? L"PM" : L"AM";
 				reading += 2;
 			}
 			else
@@ -270,6 +275,7 @@ Locale
 				reading++;
 			}
 		}
+		return result;
 #endif
 	}
 
@@ -283,7 +289,7 @@ Locale
 		GetTimeFormatEx(localeName.Buffer(), 0, &st, format.Buffer(),&buffer[0], (int)buffer.Count());
 		return &buffer[0];
 #elif defined VCZH_GCC
-		return FormatDate(format, date);
+		return FormatDate(format, time);
 #endif
 	}
 
@@ -516,10 +522,10 @@ Locale
 #elif defined VCZH_GCC
 		switch(normalization)
 		{
-			case Normalization::None
+			case Normalization::None:
 				return wcscmp(s1.Buffer(), s2.Buffer());
-			case IgnoreCase::None
-				return wcsicmp(s1.Buffer(), s2.Buffer());
+			case Normalization::IgnoreCase:
+				return wcscasecmp(s1.Buffer(), s2.Buffer());
 			default:
 				throw 0;
 		}
@@ -550,7 +556,7 @@ Locale
 		default: return 0;
 		}
 #elif defined VCZH_GCC
-		return wcsicmp(s1.Buffer(), s2.Buffer());
+		return wcscasecmp(s1.Buffer(), s2.Buffer());
 #endif
 	}
 
@@ -568,7 +574,7 @@ Locale
 		const wchar_t* result = 0;
 		switch(normalization)
 		{
-			case Normalization::None
+			case Normalization::None:
 				{
 					const wchar_t* reading = text.Buffer();
 					while(*reading)
@@ -582,12 +588,12 @@ Locale
 					}
 				}
 				break;
-			case IgnoreCase::None
+			case Normalization::IgnoreCase:
 				{
 					const wchar_t* reading = text.Buffer();
 					while(*reading)
 					{
-						if (wcsnicmp(reading, find.Buffer(), find.Length())==0)
+						if (wcsncasecmp(reading, find.Buffer(), find.Length())==0)
 						{
 							result = reading;
 							break;
@@ -617,7 +623,7 @@ Locale
 		const wchar_t* result = 0;
 		switch(normalization)
 		{
-			case Normalization::None
+			case Normalization::None:
 				{
 					const wchar_t* reading = text.Buffer();
 					while(*reading)
@@ -630,12 +636,12 @@ Locale
 					}
 				}
 				break;
-			case IgnoreCase::None
+			case Normalization::IgnoreCase:
 				{
 					const wchar_t* reading = text.Buffer();
 					while(*reading)
 					{
-						if (wcsnicmp(reading, find.Buffer(), find.Length())==0)
+						if (wcsncasecmp(reading, find.Buffer(), find.Length())==0)
 						{
 							result = reading;
 						}
@@ -662,10 +668,10 @@ Locale
 		}
 		switch(normalization)
 		{
-			case Normalization::None
+			case Normalization::None:
 				return wcsncmp(text.Buffer(), find.Buffer(), find.Length()) == 0;
-			case IgnoreCase::None
-				return wcsnicmp(text.Buffer(), find.Buffer(), find.Length()) == 0;
+			case Normalization::IgnoreCase:
+				return wcsncasecmp(text.Buffer(), find.Buffer(), find.Length()) == 0;
 			default:
 				throw 0;
 		}
@@ -684,10 +690,10 @@ Locale
 		}
 		switch(normalization)
 		{
-			case Normalization::None
+			case Normalization::None:
 				return wcsncmp(text.Buffer() + text.Length() - find.Length(), find.Buffer(), find.Length()) == 0;
-			case IgnoreCase::None
-				return wcsnicmp(text.Buffer() + text.Length() - find.Length(), find.Buffer(), find.Length()) == 0;
+			case Normalization::IgnoreCase:
+				return wcsncasecmp(text.Buffer() + text.Length() - find.Length(), find.Buffer(), find.Length()) == 0;
 			default:
 				throw 0;
 		}
