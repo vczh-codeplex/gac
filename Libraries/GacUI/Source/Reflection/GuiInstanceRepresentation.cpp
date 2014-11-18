@@ -762,7 +762,7 @@ GuiInstanceContext
 				}
 			}
 
-			return context->instance?context:0;
+			return context->instance ? context : nullptr;
 		}
 
 		Ptr<parsing::xml::XmlDocument> GuiInstanceContext::SaveToXml(bool serializePrecompiledResource)
