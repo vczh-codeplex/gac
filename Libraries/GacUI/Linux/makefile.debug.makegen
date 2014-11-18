@@ -1,0 +1,20 @@
+include
+	../Source/makefile.gacui.makegen
+
+folder GACUI_MAIN = .
+	cpp = *.cpp
+
+dependency
+	GACUI_MAIN:cpp < GACUI:h
+
+targets
+	obj = ./Obj/
+	bin = ./Bin/
+
+map cpp : %.cpp
+	> o : obj %.o
+	g++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $(OUT) -c $(IN)
+
+link o :
+	> exe : bin UnitTest
+	g++ -std=c++11 -g -fprofile-arcs -o $(OUT) $(IN)
