@@ -8679,6 +8679,7 @@ AxisAlignedItemCoordinateTransformer
 						return Margin(y2, x2, y1, x1);
 					case UpRight:
 						return Margin(y1, x2, y2, x1);
+					default:;
 					}
 					return margin;
 				}
@@ -8704,6 +8705,7 @@ AxisAlignedItemCoordinateTransformer
 						pageKey=true;
 						key=GuiListControl::Right;
 						break;
+					default:;
 					}
 
 					switch(key)
@@ -8786,6 +8788,7 @@ AxisAlignedItemCoordinateTransformer
 						case UpRight:	key=GuiListControl::Home;	break;
 						}
 						break;
+					default:;
 					}
 
 					if(pageKey)
@@ -8804,6 +8807,7 @@ AxisAlignedItemCoordinateTransformer
 						case GuiListControl::Right:
 							key=GuiListControl::PageRight;
 							break;
+						default:;
 						}
 					}
 					return key;
@@ -19229,6 +19233,7 @@ Win7ToolstripButtonStyle
 								cell->AddChild(subMenuHost->GetBoundsComposition());
 							}
 							break;
+						default:;
 						}
 					}
 					GetContainerComposition()->AddChild(table);
@@ -22855,6 +22860,7 @@ Win8ToolstripButtonStyle
 								cell->AddChild(subMenuHost->GetBoundsComposition());
 							}
 							break;
+						default:;
 						}
 					}
 					GetContainerComposition()->AddChild(table);
@@ -25326,6 +25332,7 @@ GuiDocumentViewer
 							}
 						}
 						break;
+					default:;
 					}
 				}
 			}
@@ -26683,7 +26690,7 @@ GuiGrammarAutoComplete
 											}
 										}
 
-										if(duplicated=same)
+										if((duplicated=same))
 										{
 											break;
 										}
@@ -26714,6 +26721,7 @@ GuiGrammarAutoComplete
 							}
 						}
 						break;
+					default:;
 					}
 				}
 				return 0;
@@ -29381,7 +29389,7 @@ RepeatingParsingExecutor
 					}
 					md.hasContextColor=tokenContextColorAtts.Keys().Contains(tokenIndex);
 					md.hasAutoComplete=tokenAutoCompleteAtts.Keys().Contains(tokenIndex);
-					if(md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex))
+					if((md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex)))
 					{
 						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(md.tableTokenIndex);
 						if(IsRegexEscapedListeralString(tokenInfo.regex))
@@ -30788,6 +30796,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -30810,6 +30819,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -30831,6 +30841,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -30853,6 +30864,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -30877,6 +30889,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					toolstripItems->Add(new GuiControl(theme->CreateToolBarSplitterStyle()));
 					break;
+				default:;
 				}
 				return this;
 			}
@@ -32838,6 +32851,7 @@ GuiTableComposition
 								}
 							}
 							break;
+						default:;
 						}
 					}
 				}
@@ -39059,7 +39073,8 @@ document_operation_visitors::SummerizeStyleVisitor
 					,start(_start)
 					,end(_end)
 				{
-					DocumentModel::ResolvedStyle resolvedStyle=model->GetStyle(DocumentModel::DefaultStyleName, resolvedStyle);
+					DocumentModel::ResolvedStyle resolvedStyle;
+					resolvedStyle = model->GetStyle(DocumentModel::DefaultStyleName, resolvedStyle);
 					resolvedStyles.Add(resolvedStyle);
 				}
 

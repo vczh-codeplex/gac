@@ -830,7 +830,7 @@ Instance Scope Wrapper
 					if (loader->IsInitializable(typeInfo))
 					{
 						auto value = description::Value::From(dynamic_cast<T*>(this));
-						if (scope = loader->InitializeInstance(typeInfo, value))
+						if ((scope = loader->InitializeInstance(typeInfo, value)))
 						{
 #ifdef _DEBUG
 							CHECK_ERROR(scope->errors.Count() == 0, L"vl::presentation::GuiInstancePartialClass<T>::InitializeFromResource()#There is something wrong with the resource.");

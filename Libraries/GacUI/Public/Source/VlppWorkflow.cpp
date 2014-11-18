@@ -4524,6 +4524,7 @@ GenerateInstructions(Expression)
 						case WfBinaryOperator::Or:
 							INSTRUCTION(Ins::OpOr(GetInstructionTypeArgument(mergedType)));
 							break;
+						default:;
 						}
 					}
 				}
@@ -6220,6 +6221,7 @@ CreateTypeInfoFromTypeFlag
 				case TypeFlag::F4:		return TypeInfoRetriver<float>::CreateTypeInfo();
 				case TypeFlag::F8:		return TypeInfoRetriver<double>::CreateTypeInfo();
 				case TypeFlag::String:	return TypeInfoRetriver<WString>::CreateTypeInfo();
+				default:;
 				}
 				return 0;
 			}
@@ -7923,6 +7925,7 @@ ValidateSemantic(Expression)
 							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
 								break;
+							default:;
 							}
 							break;
 						case WfUnaryOperator::Positive:
@@ -7933,6 +7936,7 @@ ValidateSemantic(Expression)
 							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
 								break;
+							default:;
 							}
 							break;
 						case WfUnaryOperator::Negative:
@@ -7947,6 +7951,7 @@ ValidateSemantic(Expression)
 							case TypeFlag::Others:
 								manager->errors.Add(WfErrors::UnaryOperatorOnWrongType(node, typeInfo.Obj()));
 								break;
+							default:;
 							}
 							break;
 						}
@@ -8213,6 +8218,7 @@ ValidateSemantic(Expression)
 									selectedTable = conversionTable;
 								}
 								break;
+							default:;
 							}
 
 							TypeFlag resultFlag = selectedTable[(vint)flag];
@@ -8547,6 +8553,7 @@ ValidateSemantic(Expression)
 								manager->errors.Add(WfErrors::NullCannotImplicitlyConvertToType(node->expression.Obj(), type.Obj()));
 							}
 							break;
+						default:;
 						}
 					}
 					results.Add(ResolveExpressionResult(TypeInfoRetriver<bool>::CreateTypeInfo()));
@@ -9386,6 +9393,7 @@ ValidateStructure(Type)
 					case WfPredefinedTypeName::Interface:
 						manager->errors.Add(WfErrors::WrongInterfaceType(node));
 						break;
+					default:;
 					}
 				}
 
@@ -9442,6 +9450,7 @@ ValidateStructure(Type)
 						case WfPredefinedTypeName::Interface:
 							manager->errors.Add(WfErrors::NullableToNonReferenceType(node));
 							break;
+						default:;
 						}
 					}
 				}
@@ -10557,6 +10566,7 @@ Print (Expression)
 					case WfBinaryOperator::Or:
 						writer.WriteString(L" or ");
 						break;
+					default:;
 					}
 					WfPrint(node->second, indent, writer);
 					writer.WriteString(L")");
@@ -17015,6 +17025,7 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 								break;
+							default:;
 							}
 						}
 						break;
@@ -17036,6 +17047,7 @@ WfRuntimeThreadContext
 							}
 						}
 						break;
+					default:;
 					}
 					return WfRuntimeExecutionAction::Nop;
 				}
