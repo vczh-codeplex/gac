@@ -129,6 +129,8 @@ TextList Style Provider
 TextList Data Source
 ***********************************************************************/
 
+				class TextItemProvider;
+
 				/// <summary>Text item. This is the item data structure for [T:vl.presentation.controls.list.TextItemProvider].</summary>
 				class TextItem : public Object, public Description<TextItem>
 				{

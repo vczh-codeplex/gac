@@ -672,6 +672,8 @@ ListView
 
 			namespace list
 			{
+				class ListViewItem;
+
 				class ListViewSubItems : public ItemsBase<WString>
 				{
 					friend class ListViewItem;
@@ -728,6 +730,8 @@ ListView
 					/// <param name="value">The tag of this item.</param>
 					void											SetTag(const description::Value& value);
 				};
+
+				class ListViewColumns;
 				
 				/// <summary>List view column.</summary>
 				class ListViewColumn : public Object, public Description<ListViewColumn>
@@ -779,6 +783,8 @@ ListView
 					/// <param name="value">The sorting state of this item.</param>
 					void											SetSortingState(GuiListViewColumnHeader::ColumnSortingState value);
 				};
+
+				class ListViewItemProvider;
 
 				/// <summary>List view data column container.</summary>
 				class ListViewDataColumns : public ItemsBase<vint>
