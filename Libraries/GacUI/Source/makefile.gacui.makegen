@@ -40,7 +40,15 @@ folder GACUI_CONTROLS_TEMPLATES = ./Controls/Templates
 	h = *.h
 	cpp = *.cpp
 
-folder GACUI_CONTROLS_STYLES = ./Controls/Styles
+folder GACUI_CONTROLS_STYLES_BASIC = ./Controls/Styles
+	h = *.h
+	cpp = *.cpp
+
+folder GACUI_CONTROLS_STYLES_WIN7STYLES = ./Controls/Styles/Win7Styles
+	h = *.h
+	cpp = *.cpp
+
+folder GACUI_CONTROLS_STYLES_WIN8STYLES = ./Controls/Styles/Win8Styles
 	h = *.h
 	cpp = *.cpp
 
@@ -55,6 +63,8 @@ folder GACUI_REFLECTION_INSTANCEQUERY = ./Reflection/InstanceQuery
 folder GACUI_REFLECTION_TYPEDESCRIPTORS = ./Reflection/TypeDescritors
 	h = *.h
 	cpp = *.cpp
+
+group GACUI_STYLES = GACUI_STYLES_BASIC GACUI_STYLES_WIN7STYLES GACUI_STYLES_WIN8STYLES
 
 group GACUI_CONTROLS = GACUI_CONTROLS_BASIC GACUI_CONTROLS_LISTCONTROLPACKAGE GACUI_CONTROLS_TEXTEDITORPACKAGE GACUI_CONTROLS_TOOLSTRIPPACKAGE
 
