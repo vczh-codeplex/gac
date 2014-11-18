@@ -1967,7 +1967,7 @@ DocumentModel::ClearStyle
 			if(begin==end) goto END_OF_SUMMERIZING;
 
 			// check caret range
-			if(!CheckEditRange(begin, end, runRanges)) return false;
+			if(!CheckEditRange(begin, end, runRanges)) return nullptr;
 
 			// summerize container
 			if(begin.row==end.row)

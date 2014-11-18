@@ -89,7 +89,7 @@ IGuiParserManager
 			Ptr<IGuiGeneralParser> GetParser(const WString& name)override
 			{
 				vint index=parsers.Keys().IndexOf(name);
-				return index==-1?0:parsers.Values()[index];
+				return index == -1 ? nullptr : parsers.Values()[index];
 			}
 
 			bool SetParser(const WString& name, Ptr<IGuiGeneralParser> parser)override
