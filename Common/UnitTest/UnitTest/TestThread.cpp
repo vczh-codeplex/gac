@@ -40,6 +40,7 @@ TEST_CASE(TestSimpleThread)
 	TEST_ASSERT(data.modified==true);
 }
 
+#ifdef VCZH_MSVC
 TEST_CASE(TestPauseAndStopThread)
 {
 	{
@@ -76,8 +77,6 @@ TEST_CASE(TestPauseAndResumeThread)
 	delete thread;
 	TEST_ASSERT(data.modified==true);
 }
-
-#ifdef VCZH_MSVC
 
 /***********************************************************************
 Mutex
@@ -425,6 +424,7 @@ TEST_CASE(TestSpinLock)
 	TEST_ASSERT(data.counter==10);
 }
 
+#ifdef VCZH_MSVC
 TEST_CASE(TestSpinLock2)
 {
 	SL_ThreadData data;
@@ -440,3 +440,4 @@ TEST_CASE(TestSpinLock2)
 	while (data.counter != 10);
 	TEST_ASSERT(data.lock.TryEnter());
 }
+#endif
