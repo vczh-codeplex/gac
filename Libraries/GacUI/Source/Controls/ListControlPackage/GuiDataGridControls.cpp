@@ -987,7 +987,7 @@ StringGridProvider
 						readonly=value;
 						FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
 						{
-							column->SetEditorFactory(readonly?0:editorFactory);
+							column->SetEditorFactory(readonly ? nullptr : editorFactory);
 						}
 					}
 				}
@@ -1082,7 +1082,7 @@ StringGridProvider
 					columnProvider->SetText(text);
 					columnProvider->SetSize(size);
 					columnProvider->SetVisualizerFactory(visualizerFactory);
-					columnProvider->SetEditorFactory(readonly?0:editorFactory);
+					columnProvider->SetEditorFactory(readonly ? nullptr : editorFactory);
 					if(!InsertColumnInternal(column, columnProvider, false)) return false;
 
 					FOREACH(Ptr<StringGridItem>, item, items)
