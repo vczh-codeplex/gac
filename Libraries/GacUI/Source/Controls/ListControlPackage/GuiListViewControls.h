@@ -684,6 +684,8 @@ ListView
 				public:
 				};
 
+				class ListViewItemProvider;
+
 				/// <summary>List view item.</summary>
 				class ListViewItem : public Object, public Description<ListViewItem>
 				{

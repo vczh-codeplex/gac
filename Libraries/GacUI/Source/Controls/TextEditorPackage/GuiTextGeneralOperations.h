@@ -320,7 +320,6 @@ RepeatingParsingExecutor
 					token:	when the token is editing, an auto complete list will appear if possible
 				*/
 			};
-#endif
 
 /***********************************************************************
 ParsingContext
@@ -349,6 +348,7 @@ ParsingContext
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 			};
+#endif
 		}
 	}
 }

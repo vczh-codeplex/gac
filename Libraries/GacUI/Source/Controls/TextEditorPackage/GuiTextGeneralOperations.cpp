@@ -410,8 +410,6 @@ RepeatingParsingExecutor
 				return GetAttribute(index, L"AutoComplete", 0);
 			}
 
-#endif
-
 /***********************************************************************
 ParsingContext
 ***********************************************************************/
@@ -450,6 +448,8 @@ ParsingContext
 				if(!foundNode) return false;
 				return RetriveContext(output, foundNode, executor);
 			}
+
+#endif
 		}
 	}
 }
