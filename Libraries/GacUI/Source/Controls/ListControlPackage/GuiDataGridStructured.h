@@ -407,7 +407,7 @@ Strong Typed DataSource Extensions
 				{
 				public:
 					StrongTypedColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider)
-						:StrongTypedColumnProviderBase(_dataProvider)
+						:StrongTypedColumnProviderBase<TRow, TColumn>(_dataProvider)
 					{
 					}
 
@@ -425,7 +425,7 @@ Strong Typed DataSource Extensions
 
 				public:
 					StrongTypedFieldColumnProvider(StrongTypedDataProvider<TRow>* _dataProvider, TColumn TRow::* _field)
-						:StrongTypedColumnProvider(_dataProvider)
+						:StrongTypedColumnProvider<TRow, TColumn>(_dataProvider)
 						,field(_field)
 					{
 					}
