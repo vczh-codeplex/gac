@@ -1004,7 +1004,7 @@ Interface Proxy
 
 					vint GetColumnCount()override
 					{
-						return INVOKEGET_INTERFACE_PROXY(GetColumnCount);
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetColumnCount);
 					}
 
 					WString GetColumnText(vint index)override
