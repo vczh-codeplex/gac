@@ -548,42 +548,44 @@ GuiInstanceContext
 				// collect attributes as setters
 				FOREACH(Ptr<XmlAttribute>, att, xml->attributes)
 				{
-					if(auto name=parser->TypedParse(att->name.value, errors))
-					if(name->IsReferenceAttributeName())
+					if (auto name = parser->TypedParse(att->name.value, errors))
 					{
-						// collect reference attributes
-						if (name->name == L"Name")
+						if(name->IsReferenceAttributeName())
 						{
-							setter->instanceName = GlobalStringKey::Get(att->value.value);
+							// collect reference attributes
+							if (name->name == L"Name")
+							{
+								setter->instanceName = GlobalStringKey::Get(att->value.value);
+							}
 						}
-					}
-					else if(name->IsPropertyAttributeName())
-					{
-						// collect attributes setters
-						if (setter->setters.Keys().Contains(GlobalStringKey::Get(name->name)))
+						else if(name->IsPropertyAttributeName())
 						{
-							errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
-						}
-						else
-						{
-							Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
-							sv->binding=GlobalStringKey::Get(name->binding);
-							setter->setters.Add(GlobalStringKey::Get(name->name), sv);
+							// collect attributes setters
+							if (setter->setters.Keys().Contains(GlobalStringKey::Get(name->name)))
+							{
+								errors.Add(L"Duplicated attribute name \"" + name->name + L"\".");
+							}
+							else
+							{
+								Ptr<GuiAttSetterRepr::SetterValue> sv=new GuiAttSetterRepr::SetterValue;
+								sv->binding=GlobalStringKey::Get(name->binding);
+								setter->setters.Add(GlobalStringKey::Get(name->name), sv);
 
-							Ptr<GuiTextRepr> value=new GuiTextRepr;
-							value->text=att->value.value;
-							sv->values.Add(value);
+								Ptr<GuiTextRepr> value=new GuiTextRepr;
+								value->text=att->value.value;
+								sv->values.Add(value);
+							}
 						}
-					}
-					else if (name->IsEventAttributeName())
-					{
-						// collect event setters
-						if (!setter->eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
+						else if (name->IsEventAttributeName())
 						{
-							auto value = MakePtr<GuiAttSetterRepr::EventValue>();
-							value->binding = GlobalStringKey::Get(name->binding);
-							value->value = att->value.value;
-							setter->eventHandlers.Add(GlobalStringKey::Get(name->name), value);
+							// collect event setters
+							if (!setter->eventHandlers.Keys().Contains(GlobalStringKey::Get(name->name)))
+							{
+								auto value = MakePtr<GuiAttSetterRepr::EventValue>();
+								value->binding = GlobalStringKey::Get(name->binding);
+								value->value = att->value.value;
+								setter->eventHandlers.Add(GlobalStringKey::Get(name->name), value);
+							}
 						}
 					}
 				}
