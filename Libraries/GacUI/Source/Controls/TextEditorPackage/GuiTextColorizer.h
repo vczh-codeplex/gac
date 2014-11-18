@@ -146,6 +146,8 @@ GuiTextBoxRegexColorizer
 GuiGrammarColorizer
 ***********************************************************************/
 
+#ifdef VCZH_MSVC
+
 			/// <summary>Grammar based colorizer.</summary>
 			class GuiGrammarColorizer : public GuiTextBoxRegexColorizer, private RepeatingParsingExecutor::CallbackBase
 			{
@@ -222,6 +224,8 @@ GuiGrammarColorizer
 				/// <returns>The parsing executor.</returns>
 				Ptr<RepeatingParsingExecutor>								GetParsingExecutor();
 			};
+
+#endif
 		}
 	}
 }
