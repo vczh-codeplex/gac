@@ -1,10 +1,12 @@
-include
-	../Source/makefile.gacui.makegen
+folder GACUI = ../Public/Source
+	h = Vlpp.h VlppWorkflow.h GacUI.h GacUIReflection.h
+	cpp = Vlpp.cpp VlppWorkflow.cpp GacUI.cpp GacUIReflection.cpp
 
 folder GACUI_MAIN = .
-	cpp = Main.cpp
+	cpp = MainCompacted.cpp
 
 dependency
+	GACUI:h < GACUI:cpp
 	GACUI_MAIN:cpp < GACUI:h
 
 targets
