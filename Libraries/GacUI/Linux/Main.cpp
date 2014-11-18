@@ -7,3 +7,8 @@ int main()
 {
 	return 0;
 }
+
+void GuiMain()
+{
+	return 0;
+}
