@@ -32,11 +32,11 @@ Colorized Plain Text (model)
 					/// <summary>
 					/// The distance from the head of the line to the right side of this character in pixel.
 					/// </summary>
-					unsigned __int32				rightOffset;
+					vuint32_t						rightOffset;
 					/// <summary>
 					/// The color index of the character. Use [M:vl.presentation.elements.GuiColorizedTextElement.GetColors] and [M:vl.presentation.elements.GuiColorizedTextElement.SetColors] to access the color table.
 					/// </summary>
-					unsigned __int32				colorIndex;
+					vuint32_t						colorIndex;
 				};
 				
 				/// <summary>

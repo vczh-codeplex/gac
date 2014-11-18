@@ -27,7 +27,7 @@ GuiTextBoxColorizerBase
 				{
 					vint lineIndex=-1;
 					wchar_t* text=0;
-					unsigned __int32* colors=0;
+					vuint32_t* colors=0;
 					vint length=0;
 					vint lexerState=-1;
 					vint contextState=-1;
@@ -44,7 +44,7 @@ GuiTextBoxColorizerBase
 						TextLine& line=colorizer->element->GetLines().GetLine(lineIndex);
 						length=line.dataLength;
 						text=new wchar_t[length+2];
-						colors=new unsigned __int32[length+2];
+						colors=new vuint32_t[length+2];
 						memcpy(text, line.text, sizeof(wchar_t)*length);
 						text[length]=L'\r';
 						text[length+1]=L'\n';
@@ -193,7 +193,7 @@ GuiTextBoxRegexColorizer
 				GuiTextBoxRegexColorizer*		colorizer;
 				vint							lineIndex;
 				const wchar_t*					text;
-				unsigned __int32*				colors;
+				vuint32_t*						colors;
 				vint							contextState;
 			};
 
@@ -335,7 +335,7 @@ GuiTextBoxRegexColorizer
 				return 0;
 			}
 
-			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)
+			void GuiTextBoxRegexColorizer::ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, vuint32_t* colors, vint length, vint& lexerState, vint& contextState)
 			{
 				memset(colors, 0, sizeof(*colors)*length);
 				if(lexer)
