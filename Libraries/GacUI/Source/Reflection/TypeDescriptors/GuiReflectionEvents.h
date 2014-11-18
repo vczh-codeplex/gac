@@ -143,7 +143,7 @@ Macros
 			AddEvent(\
 				new GuiEventInfoImpl<GuiEventArgumentTypeRetriver<decltype(&ClassType::EVENTNAME)>::Type>(\
 					this,\
-					L#EVENTNAME,\
+					L ## #EVENTNAME,\
 					[](DescriptableObject* thisObject, bool addEventHandler){\
 						return &dynamic_cast<ClassType*>(thisObject)->EVENTNAME;\
 					}\
@@ -154,7 +154,7 @@ Macros
 			AddEvent(\
 				new GuiEventInfoImpl<GuiEventArgumentTypeRetriver<decltype(&GuiGraphicsEventReceiver::EVENTNAME)>::Type>(\
 					this,\
-					L#EVENTNAME,\
+					L ## #EVENTNAME,\
 					[](DescriptableObject* thisObject, bool addEventHandler){\
 						GuiGraphicsComposition* composition=dynamic_cast<GuiGraphicsComposition*>(thisObject);\
 						if(!addEventHandler && !composition->HasEventReceiver())\
