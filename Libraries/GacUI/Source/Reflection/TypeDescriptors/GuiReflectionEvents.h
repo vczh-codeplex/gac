@@ -58,7 +58,7 @@ GuiEventInfoImpl
 							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, true);
 							if(eventObject)
 							{
-								Ptr<GuiGraphicsEvent<T>::IHandler> handler=eventObject->AttachLambda(
+								auto handler=eventObject->AttachLambda(
 									[=](GuiGraphicsComposition* sender, T& arguments)
 									{
 										Value senderObject = BoxValue<GuiGraphicsComposition*>(sender, Description<GuiGraphicsComposition>::GetAssociatedTypeDescriptor());
@@ -84,7 +84,7 @@ GuiEventInfoImpl
 							GuiGraphicsEvent<T>* eventObject=eventRetriver(thisObject, false);
 							if(eventObject)
 							{
-								Ptr<GuiGraphicsEvent<T>::IHandler> handler=handlerImpl->GetDescriptableTag().Cast<GuiGraphicsEvent<T>::IHandler>();
+								auto handler=handlerImpl->GetDescriptableTag().Cast<typename GuiGraphicsEvent<T>::IHandler>();
 								if(handler)
 								{
 									eventObject->Detach(handler);

@@ -777,20 +777,27 @@ GuiDefaultInstanceLoader
 					if (IEventInfo* ev = eventInfo.typeInfo.typeDescriptor->GetEventByName(eventInfo.propertyName.ToString(), true))
 					{
 #ifndef VCZH_DEBUG_NO_REFLECTION
-						auto handlerType = ev->GetHandlerType();
+						ITypeInfo	*handlerType = 0,
+									*genericType = 0,
+									*functionType = 0,
+									*returnType = 0,
+									*senderType = 0,
+									*argumentType = 0;
+
+						handlerType = ev->GetHandlerType();
 						if (handlerType->GetDecorator() != ITypeInfo::SharedPtr) goto UNSUPPORTED;
 
-						auto genericType = handlerType->GetElementType();
+						genericType = handlerType->GetElementType();
 						if (genericType->GetDecorator() != ITypeInfo::Generic) goto UNSUPPORTED;
 
-						auto functionType = genericType->GetElementType();
+						functionType = genericType->GetElementType();
 						if (functionType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
 						if (functionType->GetTypeDescriptor() != description::GetTypeDescriptor<IValueFunctionProxy>()) goto UNSUPPORTED;
 
 						if (genericType->GetGenericArgumentCount() != 3) goto UNSUPPORTED;
-						auto returnType = genericType->GetGenericArgument(0);
-						auto senderType = genericType->GetGenericArgument(1);
-						auto argumentType = genericType->GetGenericArgument(2);
+						returnType = genericType->GetGenericArgument(0);
+						senderType = genericType->GetGenericArgument(1);
+						argumentType = genericType->GetGenericArgument(2);
 					
 						if (returnType->GetDecorator() != ITypeInfo::TypeDescriptor) goto UNSUPPORTED;
 						if (returnType->GetTypeDescriptor() != description::GetTypeDescriptor<VoidValue>()) goto UNSUPPORTED;
