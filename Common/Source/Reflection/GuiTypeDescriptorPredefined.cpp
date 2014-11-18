@@ -708,7 +708,7 @@ Interface Implementation Proxy (Implement)
 
 					void Clear()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(Clear);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(Clear);
 					}
 				};
 
@@ -785,7 +785,7 @@ Interface Implementation Proxy (Implement)
 
 					void Clear()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(Clear);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(Clear);
 					}
 				};
 				

@@ -86,7 +86,7 @@ Interface Proxy
 
 					void Stop()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(Stop);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(Stop);
 					}
 				};
 			}
