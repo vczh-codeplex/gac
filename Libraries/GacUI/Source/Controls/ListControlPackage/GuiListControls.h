@@ -803,7 +803,7 @@ Predefined ItemProvider
 				public:
 					vint Count()override
 					{
-						return items.Count();
+						return this->items.Count();
 					}
 				};
 			}
