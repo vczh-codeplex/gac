@@ -136,7 +136,7 @@ LogInstanceLoaderManager_PrintProperties
 					loader = index == loaders.Count() - 1 ? 0 : loaders[index + 1];
 				}
 
-				if (firstInfo->support == GuiInstanceEventInfo::NotSupport)
+				if (firstInfo->support == GuiInstancePropertyInfo::NotSupport)
 				{
 					continue;
 				}
