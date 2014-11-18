@@ -179,7 +179,7 @@ Host
 				Size									previousClientSize;
 				Size									minSize;
 				Point									caretPoint;
-				unsigned __int64						lastCaretTime;
+				vuint64_t								lastCaretTime;
 
 				GuiGraphicsAnimationManager				animationManager;
 				GuiGraphicsComposition*					mouseCaptureComposition;
@@ -291,7 +291,7 @@ Animation Helpers
 			class GuiTimeBasedAnimation : public IGuiGraphicsAnimation, public Description<GuiTimeBasedAnimation>
 			{
 			protected:
-				unsigned __int64				startTime;
+				vuint64_t						startTime;
 				vint							length;
 			public:
 				/// <summary>Create an animation with a specified length in milliseconds.</summary>
