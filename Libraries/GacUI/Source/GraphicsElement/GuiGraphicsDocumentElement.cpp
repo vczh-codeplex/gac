@@ -1,6 +1,6 @@
 #include "GuiGraphicsDocumentElement.h"
-#include "..\..\..\..\Common\Source\Stream\MemoryStream.h"
-#include "..\..\..\..\Common\Source\Stream\Accessor.h"
+#include "../../../../Common/Source/Stream/MemoryStream.h"
+#include "../../../../Common/Source/Stream/Accessor.h"
 
 namespace vl
 {

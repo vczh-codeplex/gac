@@ -1,7 +1,7 @@
 #include "GuiGraphicsHost.h"
-#include "..\Controls\GuiWindowControls.h"
-#include "..\Controls\Styles\GuiThemeStyleFactory.h"
-#include "..\..\..\..\Common\Source\Collections\OperationCopyFrom.h"
+#include "../Controls/GuiWindowControls.h"
+#include "../Controls/Styles/GuiThemeStyleFactory.h"
+#include "../../../../Common/Source/Collections/OperationCopyFrom.h"
 
 namespace vl
 {

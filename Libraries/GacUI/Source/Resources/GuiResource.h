@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_RESOURCES_GUIRESOURCE
 #define VCZH_PRESENTATION_RESOURCES_GUIRESOURCE
 
-#include "..\NativeWindow\GuiNativeWindow.h"
+#include "../NativeWindow/GuiNativeWindow.h"
 
 namespace vl
 {

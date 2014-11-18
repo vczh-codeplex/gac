@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCEHELPERTYPES
 #define VCZH_PRESENTATION_REFLECTION_GUIINSTANCEHELPERTYPES
 
-#include "..\Resources\GuiResource.h"
+#include "../Resources/GuiResource.h"
 
 namespace vl
 {

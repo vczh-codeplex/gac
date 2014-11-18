@@ -1,5 +1,5 @@
 #include "GuiTextColorizer.h"
-#include "..\Styles\GuiThemeStyleFactory.h"
+#include "../Styles/GuiThemeStyleFactory.h"
 #include <math.h>
 
 namespace vl

@@ -1,6 +1,6 @@
 #include "GuiToolstripCommand.h"
-#include "..\GuiApplication.h"
-#include "..\..\Resources\GuiParserManager.h"
+#include "../GuiApplication.h"
+#include "../../Resources/GuiParserManager.h"
 
 namespace vl
 {

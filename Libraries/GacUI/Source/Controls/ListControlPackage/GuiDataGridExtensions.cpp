@@ -1,6 +1,6 @@
 #include "GuiDataGridExtensions.h"
-#include "..\Styles\GuiThemeStyleFactory.h"
-#include "..\GuiApplication.h"
+#include "../Styles/GuiThemeStyleFactory.h"
+#include "../GuiApplication.h"
 
 namespace vl
 {

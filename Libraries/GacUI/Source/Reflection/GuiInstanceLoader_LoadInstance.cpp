@@ -1,6 +1,6 @@
 #include "GuiInstanceLoader.h"
-#include "TypeDescriptors\GuiReflectionEvents.h"
-#include "..\Resources\GuiParserManager.h"
+#include "TypeDescriptors/GuiReflectionEvents.h"
+#include "../Resources/GuiParserManager.h"
 
 namespace vl
 {

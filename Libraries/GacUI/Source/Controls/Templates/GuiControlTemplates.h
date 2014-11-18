@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_TEMPLATES_GUICONTROLTEMPLATES
 #define VCZH_PRESENTATION_CONTROLS_TEMPLATES_GUICONTROLTEMPLATES
 
-#include "..\Styles\GuiThemeStyleFactory.h"
+#include "../Styles/GuiThemeStyleFactory.h"
 
 namespace vl
 {

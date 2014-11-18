@@ -9,7 +9,7 @@ Clases:
 #ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8TABSTYLES
 #define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8TABSTYLES
 
-#include "..\Win7Styles\GuiWin7TabStyles.h"
+#include "../Win7Styles/GuiWin7TabStyles.h"
 #include "GuiWin8ButtonStyles.h"
 #include "GuiWin8MenuStyles.h"
 #include "GuiWin8ControlStyles.h"

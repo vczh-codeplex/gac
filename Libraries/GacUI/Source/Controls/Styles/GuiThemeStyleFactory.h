@@ -9,24 +9,24 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
 #define VCZH_PRESENTATION_CONTROLS_GUITHEMESTYLEFACTORY
 
-#include "..\GuiBasicControls.h"
-#include "..\GuiWindowControls.h"
-#include "..\GuiContainerControls.h"
-#include "..\GuiDateTimeControls.h"
+#include "../GuiBasicControls.h"
+#include "../GuiWindowControls.h"
+#include "../GuiContainerControls.h"
+#include "../GuiDateTimeControls.h"
 
-#include "..\TextEditorPackage\GuiTextControls.h"
-#include "..\TextEditorPackage\GuiDocumentViewer.h"
+#include "../TextEditorPackage/GuiTextControls.h"
+#include "../TextEditorPackage/GuiDocumentViewer.h"
 
-#include "..\ListControlPackage\GuiListControls.h"
-#include "..\ListControlPackage\GuiTextListControls.h"
-#include "..\ListControlPackage\GuiListViewControls.h"
-#include "..\ListControlPackage\GuiTreeViewControls.h"
-#include "..\ListControlPackage\GuiComboControls.h"
-#include "..\ListControlPackage\GuiDataGridControls.h"
-#include "..\ListControlPackage\GuiBindableListControl.h"
+#include "../ListControlPackage/GuiListControls.h"
+#include "../ListControlPackage/GuiTextListControls.h"
+#include "../ListControlPackage/GuiListViewControls.h"
+#include "../ListControlPackage/GuiTreeViewControls.h"
+#include "../ListControlPackage/GuiComboControls.h"
+#include "../ListControlPackage/GuiDataGridControls.h"
+#include "../ListControlPackage/GuiBindableListControl.h"
 
-#include "..\ToolstripPackage\GuiMenuControls.h"
-#include "..\ToolstripPackage\GuiToolstripMenu.h"
+#include "../ToolstripPackage/GuiMenuControls.h"
+#include "../ToolstripPackage/GuiToolstripMenu.h"
 
 namespace vl
 {

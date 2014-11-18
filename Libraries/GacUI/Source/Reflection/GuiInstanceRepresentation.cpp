@@ -1,8 +1,8 @@
 #include "GuiInstanceRepresentation.h"
 #include "GuiInstanceLoader.h"
-#include "InstanceQuery\GuiInstanceQuery.h"
-#include "..\Resources\GuiParserManager.h"
-#include "..\Controls\Templates\GuiControlTemplateStyles.h"
+#include "InstanceQuery/GuiInstanceQuery.h"
+#include "../Resources/GuiParserManager.h"
+#include "../Controls/Templates/GuiControlTemplateStyles.h"
 
 namespace vl
 {

@@ -9,8 +9,8 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCEREPRESENTATION
 #define VCZH_PRESENTATION_REFLECTION_GUIINSTANCEREPRESENTATION
 
-#include "..\Resources\GuiResource.h"
-#include "InstanceQuery\GuiInstanceQuery_Parser.h"
+#include "../Resources/GuiResource.h"
+#include "InstanceQuery/GuiInstanceQuery_Parser.h"
 
 namespace vl
 {
