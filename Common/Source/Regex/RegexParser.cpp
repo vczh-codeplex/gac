@@ -475,7 +475,7 @@ namespace vl
 				return 0;
 			}
 			Ptr<LoopExpression> loop;
-			while(loop=ParseLoop(input))
+			while((loop=ParseLoop(input)))
 			{
 				loop->expression=unit;
 				unit=loop;

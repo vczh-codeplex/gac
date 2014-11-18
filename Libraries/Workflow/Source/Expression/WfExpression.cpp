@@ -415,6 +415,7 @@ Print (Expression)
 					case WfBinaryOperator::Or:
 						writer.WriteString(L" or ");
 						break;
+					default:;
 					}
 					WfPrint(node->second, indent, writer);
 					writer.WriteString(L")");

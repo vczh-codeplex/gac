@@ -1100,6 +1100,7 @@ WfRuntimeThreadContext
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 								break;
+							default:;
 							}
 						}
 						break;
@@ -1121,6 +1122,7 @@ WfRuntimeThreadContext
 							}
 						}
 						break;
+					default:;
 					}
 					return WfRuntimeExecutionAction::Nop;
 				}
