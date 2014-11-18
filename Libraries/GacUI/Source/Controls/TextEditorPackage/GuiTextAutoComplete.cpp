@@ -273,6 +273,8 @@ GuiTextBoxAutoCompleteBase
 				}
 			}
 
+#ifdef VCZH_MSVC
+
 /***********************************************************************
 GuiGrammarAutoComplete
 ***********************************************************************/
@@ -1315,6 +1317,8 @@ GuiGrammarAutoComplete
 			{
 				return parsingExecutor;
 			}
+
+#endif
 		}
 	}
 }
