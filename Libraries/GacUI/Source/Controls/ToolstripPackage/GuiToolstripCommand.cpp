@@ -45,7 +45,7 @@ GuiToolstripCommand
 					}
 					shortcutKeyItem=0;
 					shortcutKeyItemExecutedHandler=0;
-					shortcutBuilder = value ? builder : 0;
+					shortcutBuilder = value ? builder : nullptr;
 					if(value)
 					{
 						shortcutKeyItem=value;
@@ -110,7 +110,7 @@ GuiToolstripCommand
 
 			void GuiToolstripCommand::Detach(GuiInstanceRootObject* rootObject)
 			{
-				ReplaceShortcut(0, false);
+				ReplaceShortcut(0, nullptr);
 				shortcutOwner = 0;
 			}
 
@@ -223,7 +223,7 @@ GuiToolstripCommand::ShortcutBuilder Parser
 					WString name = match->Groups()[L"key"][0].Value();
 					builder->key = GetCurrentController()->InputService()->GetKey(name);
 
-					return builder->key == -1 ? 0 : builder;
+					return builder->key == -1 ? nullptr : builder;
 				}
 			};
 
