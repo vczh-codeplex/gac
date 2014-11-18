@@ -1003,6 +1003,7 @@ AxisAlignedItemCoordinateTransformer
 						pageKey=true;
 						key=GuiListControl::Right;
 						break;
+					default:;
 					}
 
 					switch(key)
