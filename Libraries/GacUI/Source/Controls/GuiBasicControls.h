@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUIBASICCONTROLS
 #define VCZH_PRESENTATION_CONTROLS_GUIBASICCONTROLS
 
-#include "..\GraphicsElement\GuiGraphicsHost.h"
+#include "../GraphicsElement/GuiGraphicsHost.h"
 
 namespace vl
 {

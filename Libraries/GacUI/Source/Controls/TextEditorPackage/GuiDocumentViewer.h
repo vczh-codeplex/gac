@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
 #define VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
 
-#include "..\GuiContainerControls.h"
+#include "../GuiContainerControls.h"
 #include "GuiTextUndoRedo.h"
 
 namespace vl

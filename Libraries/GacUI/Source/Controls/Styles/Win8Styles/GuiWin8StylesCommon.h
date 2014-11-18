@@ -9,7 +9,7 @@ Clases:
 #ifndef VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8STYLESCOMMON
 #define VCZH_PRESENTATION_CONTROLS_WIN8STYLES_GUIWIN8STYLESCOMMON
 
-#include "..\GuiCommonStyles.h"
+#include "../GuiCommonStyles.h"
 
 namespace vl
 {

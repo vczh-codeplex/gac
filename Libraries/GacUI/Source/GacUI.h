@@ -25,10 +25,10 @@ Global Objects:
 #ifndef VCZH_PRESENTATION_GACUI
 #define VCZH_PRESENTATION_GACUI
 
-#include "Controls\GuiApplication.h"
-#include "Controls\Styles\GuiWin7Styles.h"
-#include "Controls\Styles\GuiWin8Styles.h"
-#include "Controls\Templates\GuiControlTemplateStyles.h"
+#include "Controls/GuiApplication.h"
+#include "Controls/Styles/GuiWin7Styles.h"
+#include "Controls/Styles/GuiWin8Styles.h"
+#include "Controls/Templates/GuiControlTemplateStyles.h"
 
 using namespace vl;
 using namespace vl::presentation;

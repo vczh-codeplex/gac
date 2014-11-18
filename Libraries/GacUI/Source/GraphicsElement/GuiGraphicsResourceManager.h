@@ -11,7 +11,7 @@ Interfaces:
 
 #include "GuiGraphicsElementInterfaces.h"
 #include "GuiGraphicsDocumentInterfaces.h"
-#include "..\NativeWindow\GuiNativeWindow.h"
+#include "../NativeWindow/GuiNativeWindow.h"
 
 namespace vl
 {

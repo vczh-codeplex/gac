@@ -1,5 +1,5 @@
 #include "GuiToolstripMenu.h"
-#include "..\Styles\GuiThemeStyleFactory.h"
+#include "../Styles/GuiThemeStyleFactory.h"
 
 namespace vl
 {

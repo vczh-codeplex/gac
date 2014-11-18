@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUICOMBOCONTROLS
 #define VCZH_PRESENTATION_CONTROLS_GUICOMBOCONTROLS
 
-#include "..\GuiWindowControls.h"
+#include "../GuiWindowControls.h"
 #include "GuiTextListControls.h"
 #include "GuiListViewControls.h"
 #include "GuiTreeViewControls.h"

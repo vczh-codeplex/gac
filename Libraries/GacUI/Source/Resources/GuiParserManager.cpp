@@ -1,5 +1,5 @@
 #include "GuiParserManager.h"
-#include "..\Controls\GuiApplication.h"
+#include "../Controls/GuiApplication.h"
 
 namespace vl
 {

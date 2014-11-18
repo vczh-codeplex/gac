@@ -10,8 +10,8 @@ Interfaces:
 #define VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHE_WORKFLOWCOMPILER
 
 #include "GuiInstanceLoader.h"
-#include "..\Resources\GuiParserManager.h"
-#include "..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h"
+#include "../Resources/GuiParserManager.h"
+#include "../../../Workflow/Source/Analyzer/WfAnalyzer.h"
 
 namespace vl
 {

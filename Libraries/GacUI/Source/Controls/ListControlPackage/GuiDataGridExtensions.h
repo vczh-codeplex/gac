@@ -12,8 +12,8 @@ Interfaces:
 #include "GuiDataGridInterfaces.h"
 #include "GuiComboControls.h"
 #include "GuiTextListControls.h"
-#include "..\GuiDateTimeControls.h"
-#include "..\TextEditorPackage\GuiTextControls.h"
+#include "../GuiDateTimeControls.h"
+#include "../TextEditorPackage/GuiTextControls.h"
 
 namespace vl
 {

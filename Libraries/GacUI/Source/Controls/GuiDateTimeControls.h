@@ -9,8 +9,8 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUIDATETIMECONTROLS
 #define VCZH_PRESENTATION_CONTROLS_GUIDATETIMECONTROLS
 
-#include "ListControlPackage\GuiComboControls.h"
-#include "ListControlPackage\GuiTextListControls.h"
+#include "ListControlPackage/GuiComboControls.h"
+#include "ListControlPackage/GuiTextListControls.h"
 
 namespace vl
 {

@@ -1,5 +1,5 @@
 #include "GuiWin8ListStyles.h"
-#include "..\Win7Styles\GuiWin7ListStyles.h"
+#include "../Win7Styles/GuiWin7ListStyles.h"
 
 namespace vl
 {

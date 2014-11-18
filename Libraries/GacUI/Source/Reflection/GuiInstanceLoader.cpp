@@ -1,7 +1,7 @@
 #include "GuiInstanceLoader.h"
-#include "TypeDescriptors\GuiReflectionEvents.h"
-#include "..\Resources\GuiParserManager.h"
-#include "InstanceQuery\GuiInstanceQuery.h"
+#include "TypeDescriptors/GuiReflectionEvents.h"
+#include "../Resources/GuiParserManager.h"
+#include "InstanceQuery/GuiInstanceQuery.h"
 #include "GuiInstanceSchemaRepresentation.h"
 #include "GuiInstanceLoader_WorkflowCompiler.h"
 

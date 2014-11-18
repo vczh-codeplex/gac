@@ -1,7 +1,7 @@
 #include "GuiResource.h"
 #include "GuiDocument.h"
 #include "GuiParserManager.h"
-#include "..\Controls\GuiApplication.h"
+#include "../Controls/GuiApplication.h"
 
 namespace vl
 {

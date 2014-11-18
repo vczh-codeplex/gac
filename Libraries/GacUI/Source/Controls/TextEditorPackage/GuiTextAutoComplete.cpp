@@ -1,6 +1,6 @@
 #include "GuiTextAutoComplete.h"
-#include "..\GuiApplication.h"
-#include "..\Styles\GuiThemeStyleFactory.h"
+#include "../GuiApplication.h"
+#include "../Styles/GuiThemeStyleFactory.h"
 
 namespace vl
 {

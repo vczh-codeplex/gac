@@ -1,6 +1,6 @@
 #include "GuiInstanceLoader.h"
 #include "GuiInstanceLoader_WorkflowCompiler.h"
-#include "..\Controls\GuiApplication.h"
+#include "../Controls/GuiApplication.h"
 
 namespace vl
 {

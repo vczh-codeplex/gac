@@ -9,8 +9,8 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONINSTANCELOADER
 #define VCZH_PRESENTATION_REFLECTION_GUIREFLECTIONINSTANCELOADER
 
-#include "..\Controls\GuiApplication.h"
-#include "..\Controls\Styles\GuiThemeStyleFactory.h"
+#include "../Controls/GuiApplication.h"
+#include "../Controls/Styles/GuiThemeStyleFactory.h"
 #include "GuiInstanceRepresentation.h"
 
 namespace vl

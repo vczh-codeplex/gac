@@ -1,6 +1,6 @@
 #include "GuiInstanceLoader.h"
 #include "GuiInstanceHelperTypes.h"
-#include "TypeDescriptors\GuiReflectionControls.h"
+#include "TypeDescriptors/GuiReflectionControls.h"
 
 namespace vl
 {

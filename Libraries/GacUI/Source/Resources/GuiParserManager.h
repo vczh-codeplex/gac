@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_RESOURCES_GUIPARSERMANAGER
 #define VCZH_PRESENTATION_RESOURCES_GUIPARSERMANAGER
 
-#include "..\NativeWindow\GuiNativeWindow.h"
+#include "../NativeWindow/GuiNativeWindow.h"
 
 namespace vl
 {
