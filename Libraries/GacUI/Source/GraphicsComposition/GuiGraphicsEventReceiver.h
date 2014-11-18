@@ -144,8 +144,8 @@ Event
 					return handler;
 				}
 
-				template<typename T>
-				Ptr<IHandler> AttachLambda(const T& lambda)
+				template<typename TLambda>
+				Ptr<IHandler> AttachLambda(const TLambda& lambda)
 				{
 					Ptr<IHandler> handler=new FunctionHandler(FunctionType(lambda));
 					Attach(handler);
