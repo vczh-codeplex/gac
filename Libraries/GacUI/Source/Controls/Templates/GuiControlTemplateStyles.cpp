@@ -208,7 +208,7 @@ GuiWindowTemplate_StyleProvider
 				{\
 					case BoolOption::AlwaysTrue: return true;\
 					case BoolOption::AlwaysFalse: return false;\
-					default: return controlTemplate->Get##PROPERTY##();\
+					default: return controlTemplate->Get##PROPERTY();\
 				}\
 
 #define WINDOW_TEMPLATE_SET(PROPERTY)\
