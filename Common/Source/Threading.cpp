@@ -1,19 +1,13 @@
 #include "Threading.h"
 #include "Collections/List.h"
-
-#if defined VCZH_MSVC
+#ifdef VCZH_MSVC
 #include <Windows.h>
-#elif defined VCZH_GCC
-#include <pthread.h>
-#include <unistd.h>
-#endif
 
 namespace vl
 {
 	using namespace threading_internal;
 	using namespace collections;
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 WaitableObject
 ***********************************************************************/
@@ -133,7 +127,6 @@ WaitableObject
 			return -1;
 		}
 	}
-#endif
 
 /***********************************************************************
 Thread
@@ -141,7 +134,6 @@ Thread
 
 	namespace threading_internal
 	{
-#if defined VCZH_MSVC
 		struct ThreadData : public WaitableData
 		{
 			DWORD						id;
@@ -152,12 +144,6 @@ Thread
 				id=-1;
 			}
 		};
-#elif defined VCZH_GCC
-		struct ThreadData
-		{
-			pthread_t					id;
-		};
-#endif
 
 		class ProceduredThread : public Thread
 		{
@@ -214,11 +200,7 @@ Thread
 		thread->threadState=Thread::Stopped;
 	}
 
-#if defined VCZH_MSVC
 	DWORD WINAPI InternalThreadProcWrapper(LPVOID lpParameter)
-#elif defined VCZH_GCC
-	void* InternalThreadProcWrapper(void* lpParameter)
-#endif
 	{
 		InternalThreadProc((Thread*)lpParameter);
 		return 0;
@@ -226,15 +208,10 @@ Thread
 
 	Thread::Thread()
 	{
-#if defined VCZH_MSVC
 		internalData=new ThreadData;
 		internalData->handle=CreateThread(NULL, 0, InternalThreadProcWrapper, this, CREATE_SUSPENDED, &internalData->id);
 		threadState=Thread::NotStarted;
 		SetData(internalData);
-#elif defined VCZH_GCC
-		internalData=nullptr;
-		threadState=Thread::NotStarted;
-#endif
 	}
 
 	Thread::~Thread()
@@ -242,11 +219,7 @@ Thread
 		if (internalData)
 		{
 			Stop();
-#if defined VCZH_MSVC
 			CloseHandle(internalData->handle);
-#elif defined VCZH_GCC
-			pthread_detach(internalData->id);
-#endif
 			delete internalData;
 		}
 	}
@@ -281,36 +254,27 @@ Thread
 		}
 		return 0;
 	}
-#ifdef VCZH_MSVC	
+
 	void Thread::Sleep(vint ms)
 	{
 		::Sleep((DWORD)ms);
 	}
-#endif
+
 	
 	vint Thread::GetCPUCount()
 	{
-#if defined VCZH_MSVC
 		SYSTEM_INFO info;
 		GetSystemInfo(&info);
 		return info.dwNumberOfProcessors;
-#elif defined VCZH_GCC
-		return (vint)sysconf(_SC_NPROCESSORS_ONLN);
-#endif
 	}
 
 	vint Thread::GetCurrentThreadId()
 	{
-#if defined VCZH_MSVC
 		return (vint)::GetCurrentThreadId();
-#elif defined VCZH_GCC
-		return (vint)::pthread_self();
-#endif
 	}
 
 	bool Thread::Start()
 	{
-#if defined VCZH_MSVC
 		if(threadState==Thread::NotStarted && internalData->handle!=NULL)
 		{
 			if(ResumeThread(internalData->handle)!=-1)
@@ -319,25 +283,9 @@ Thread
 				return true;
 			}
 		}
-#elif defined VCZH_GCC
-		if(threadState==Thread::NotStarted && internalData==nullptr)
-		{
-			internalData = new ThreadData;
-			if(pthread_create(&internalData->id, nullptr, &InternalThreadProcWrapper, this)==0)
-			{
-				threadState=Thread::Running;
-				return true;
-			}
-			else
-			{
-				delete internalData;
-			}
-		}
-#endif
 		return false;
 	}
 
-#ifdef VCZH_MSVC
 	bool Thread::Pause()
 	{
 		if(threadState==Thread::Running)
@@ -363,27 +311,15 @@ Thread
 		}
 		return false;
 	}
-#endif
 
 	bool Thread::Stop()
 	{
-#if defined VCZH_MSVC
 		if(internalData->handle!=NULL)
 		{
 			Pause();
 			threadState=Thread::Stopped;
 			return true;
 		}
-#elif defined VCZH_GCC
-		if (internalData)
-		{
-			if(pthread_cancel(internalData->id)==0)
-			{
-				threadState=Thread::Stopped;
-				return true;
-			}
-		}
-#endif
 		return false;
 	}
 
@@ -392,14 +328,11 @@ Thread
 		return threadState;
 	}
 
-#ifdef VCZH_MSVC
 	void Thread::SetCPU(vint index)
 	{
 		SetThreadAffinityMask(internalData->handle, (1<<index));
 	}
-#endif
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 Mutex
 ***********************************************************************/
@@ -881,7 +814,7 @@ ConditionVariable
 	{
 		WakeAllConditionVariable(&internalData->variable);
 	}
-#endif
+
 /***********************************************************************
 SpinLock
 ***********************************************************************/
@@ -908,20 +841,12 @@ SpinLock
 
 	bool SpinLock::TryEnter()
 	{
-#if defined VCZH_MSVC
 		return _InterlockedExchange(&token, 1)==0;
-#elif defined VCZH_GCC
-		return __sync_lock_test_and_set(&token, 1)==0;
-#endif
 	}
 
 	void SpinLock::Enter()
 	{
-#if defined VCZH_MSVC
 		while(_InterlockedCompareExchange(&token, 1, 0)!=0)
-#elif defined VCZH_GCC
-		while(__sync_val_compare_and_swap(&token, 1, 0)!=0)
-#endif
 		{
 			while(token!=0) _mm_pause();
 		}
@@ -929,10 +854,7 @@ SpinLock
 
 	void SpinLock::Leave()
 	{
-#if defined VCZH_MSVC
 		_InterlockedExchange(&token, 0);
-#elif defined VCZH_GCC
-		__sync_lock_test_and_set(&token, 0);
-#endif
 	}
 }
+#endif
