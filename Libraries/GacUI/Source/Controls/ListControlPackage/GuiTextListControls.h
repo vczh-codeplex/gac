@@ -175,7 +175,7 @@ TextList Data Source
 					, public Description<TextItemProvider>
 				{
 					friend class TextItem;
-					friend class GuiTextList;
+					friend class vl::presentation::controls::GuiTextList;
 				protected:
 					GuiTextList*								listControl;
 
