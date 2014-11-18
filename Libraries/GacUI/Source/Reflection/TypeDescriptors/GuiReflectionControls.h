@@ -436,7 +436,7 @@ Interface Proxy
 
 					void InitializeNativeWindowProperties()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(InitializeNativeWindowProperties);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(InitializeNativeWindowProperties);
 					}
 
 					void SetSizeState(INativeWindow::WindowSizeState value)
@@ -661,12 +661,12 @@ Interface Proxy
 
 					void OnInstalled()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnInstalled);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(OnInstalled);
 					}
 
 					void OnUninstalled()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnUninstalled);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(OnUninstalled);
 					}
 				};
 
@@ -690,7 +690,7 @@ Interface Proxy
 
 					void DetachListControl()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(DetachListControl);
 					}
 
 					vint GetItemStyleId(vint itemIndex)override
@@ -739,7 +739,7 @@ Interface Proxy
 
 					void DetachListControl()override
 					{
-						INVOKE_INTERFACE_PROXY(DetachListControl);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(DetachListControl);
 					}
 
 					GuiListControl::IItemArrangerCallback* GetCallback()override
@@ -1043,7 +1043,7 @@ Interface Proxy
 
 					void Uninstall()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(Uninstall);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(Uninstall);
 					}
 				};
 
@@ -1082,7 +1082,7 @@ Interface Proxy
 
 					void DetachListControl()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(DetachListControl);
 					}
 				};
 
@@ -1253,12 +1253,12 @@ Interface Proxy
 
 					void Increase()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(Increase);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(Increase);
 					}
 
 					void Release()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(Release);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(Release);
 					}
 				};
 
@@ -1427,7 +1427,7 @@ Interface Proxy
 
 					void DetachListControl()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(DetachListControl);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(DetachListControl);
 					}
 
 					vint GetItemStyleId(tree::INodeProvider* node)override
@@ -1552,7 +1552,7 @@ Interface Proxy
 
 					void OnItemSelected()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(OnItemSelected);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(OnItemSelected);
 					}
 				};
 
@@ -1682,7 +1682,7 @@ Interface Proxy
 
 					void ReinstallEditor()override
 					{
-						INVOKE_INTERFACE_PROXY_NOPARAM(ReinstallEditor);
+						INVOKE_INTERFACE_PROXY_NOPARAMS(ReinstallEditor);
 					}
 				};
 

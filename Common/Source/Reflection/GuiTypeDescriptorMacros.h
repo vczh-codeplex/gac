@@ -46,7 +46,7 @@ Type
 #define INVOKE_INTERFACE_PROXY(METHODNAME, ...)\
 	proxy->Invoke(L ## #METHODNAME, IValueList::Create(collections::From((collections::Array<Value>&)(Value_xs(), __VA_ARGS__))))
 
-#define INVOKE_INTERFACE_PROXY_NOPARAM(METHODNAME)\
+#define INVOKE_INTERFACE_PROXY_NOPARAMS(METHODNAME)\
 	proxy->Invoke(L ## #METHODNAME, IValueList::Create())
 
 #define INVOKEGET_INTERFACE_PROXY(METHODNAME, ...)\
