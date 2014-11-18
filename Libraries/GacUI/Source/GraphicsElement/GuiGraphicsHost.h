@@ -170,7 +170,7 @@ Host
 				typedef collections::Dictionary<WString, IGuiAltAction*>					AltActionMap;
 				typedef collections::Dictionary<WString, controls::GuiControl*>				AltControlMap;
 			public:
-				static const unsigned __int64	CaretInterval=500;
+				static const vuint64_t					CaretInterval=500;
 			protected:
 				INativeWindow*							nativeWindow;
 				IGuiShortcutKeyManager*					shortcutKeyManager;

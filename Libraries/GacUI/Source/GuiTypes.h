@@ -427,7 +427,7 @@ Color
 					unsigned char b;
 					unsigned char a;
 				};
-				unsigned __int32 value;
+				vuint32_t value;
 			};
 
 			Color()

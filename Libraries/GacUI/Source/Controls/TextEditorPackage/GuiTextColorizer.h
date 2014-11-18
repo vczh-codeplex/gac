@@ -65,7 +65,7 @@ GuiTextBoxColorizerBase
 				/// <param name="length">The length of the buffer.</param>
 				/// <param name="lexerState">The lexical analyzer state for this line. After executing this function, the new value of this argument indicates the new state.</param>
 				/// <param name="contextState">The context sensitive state for this line. After executing this function, the new value of this argument indicates the new state.</param>
-				virtual void								ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)=0;
+				virtual void								ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, vuint32_t* colors, vint length, vint& lexerState, vint& contextState)=0;
 				/// <summary>Get the supported colors ordered by their indices.</summary>
 				/// <returns>The supported colors ordered by their indices.</returns>
 				virtual const ColorArray&					GetColors()=0;
@@ -138,7 +138,7 @@ GuiTextBoxRegexColorizer
 
 				vint														GetLexerStartState()override;
 				vint														GetContextStartState()override;
-				void														ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, unsigned __int32* colors, vint length, vint& lexerState, vint& contextState)override;
+				void														ColorizeLineWithCRLF(vint lineIndex, const wchar_t* text, vuint32_t* colors, vint length, vint& lexerState, vint& contextState)override;
 				const ColorArray&											GetColors()override;
 			};
 
