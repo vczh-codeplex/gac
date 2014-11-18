@@ -215,7 +215,7 @@ RepeatingParsingExecutor
 					}
 					md.hasContextColor=tokenContextColorAtts.Keys().Contains(tokenIndex);
 					md.hasAutoComplete=tokenAutoCompleteAtts.Keys().Contains(tokenIndex);
-					if(md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex))
+					if((md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex)))
 					{
 						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(md.tableTokenIndex);
 						if(IsRegexEscapedListeralString(tokenInfo.regex))

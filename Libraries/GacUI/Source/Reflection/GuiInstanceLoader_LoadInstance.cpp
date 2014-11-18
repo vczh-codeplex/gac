@@ -484,6 +484,7 @@ LoadInstancePropertyValue
 							output.Add(Pair<Value, IGuiInstanceLoader*>(Value::From(list), propertyLoader));
 						}
 						break;
+					default:;
 					}
 
 					if (!propertyInfo->tryParent)
@@ -575,7 +576,7 @@ FillInstance
 				{
 					while (eventLoader)
 					{
-						if (eventInfo = eventLoader->GetEventType(propertyInfo))
+						if ((eventInfo = eventLoader->GetEventType(propertyInfo)))
 						{
 							if (eventInfo->support == GuiInstanceEventInfo::NotSupport)
 							{

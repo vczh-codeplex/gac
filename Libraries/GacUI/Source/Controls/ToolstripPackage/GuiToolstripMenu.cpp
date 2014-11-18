@@ -162,6 +162,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -184,6 +185,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarDropdownButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -205,6 +207,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -227,6 +230,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					lastCreatedButton=new GuiToolstripButton(theme->CreateToolBarSplitButtonStyle());
 					break;
+				default:;
 				}
 				if(lastCreatedButton)
 				{
@@ -251,6 +255,7 @@ GuiToolstripBuilder
 				case ToolBar:
 					toolstripItems->Add(new GuiControl(theme->CreateToolBarSplitterStyle()));
 					break;
+				default:;
 				}
 				return this;
 			}

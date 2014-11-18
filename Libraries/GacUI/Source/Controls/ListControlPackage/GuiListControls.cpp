@@ -977,6 +977,7 @@ AxisAlignedItemCoordinateTransformer
 						return Margin(y2, x2, y1, x1);
 					case UpRight:
 						return Margin(y1, x2, y2, x1);
+					default:;
 					}
 					return margin;
 				}
@@ -1084,6 +1085,7 @@ AxisAlignedItemCoordinateTransformer
 						case UpRight:	key=GuiListControl::Home;	break;
 						}
 						break;
+					default:;
 					}
 
 					if(pageKey)
@@ -1102,6 +1104,7 @@ AxisAlignedItemCoordinateTransformer
 						case GuiListControl::Right:
 							key=GuiListControl::PageRight;
 							break;
+						default:;
 						}
 					}
 					return key;
