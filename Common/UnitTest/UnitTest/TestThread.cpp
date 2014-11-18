@@ -5,8 +5,6 @@
 
 using namespace vl;
 using namespace vl::collections;
-
-#ifdef VCZH_MSVC
 /***********************************************************************
 Thread
 ***********************************************************************/
@@ -78,6 +76,8 @@ TEST_CASE(TestPauseAndResumeThread)
 	delete thread;
 	TEST_ASSERT(data.modified==true);
 }
+
+#ifdef VCZH_MSVC
 
 /***********************************************************************
 Mutex
@@ -372,6 +372,8 @@ TEST_CASE(TestReaderWriterLock)
 	}
 	TEST_ASSERT(data.counter==100);
 }
+#endif
+
 /***********************************************************************
 SpinLock
 ***********************************************************************/
@@ -422,4 +424,19 @@ TEST_CASE(TestSpinLock)
 	TEST_ASSERT(data.lock.TryEnter());
 	TEST_ASSERT(data.counter==10);
 }
-#endif
+
+TEST_CASE(TestSpinLock2)
+{
+	SL_ThreadData data;
+	{
+		SpinLock::Scope lock(data.lock);
+		for(vint i=0;i<10;i++)
+		{
+			ThreadPoolLite::QueueLambda([&data](){SL_ThreadProc(nullptr, &data); });
+		}
+		Thread::Sleep(1000);
+		TEST_ASSERT(data.counter==0);
+	}
+	while (data.counter != 10);
+	TEST_ASSERT(data.lock.TryEnter());
+}

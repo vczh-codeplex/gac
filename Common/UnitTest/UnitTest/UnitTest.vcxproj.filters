@@ -243,6 +243,9 @@
     <ClCompile Include="..\..\Source\Stream\CompressionStream.cpp">
       <Filter>Common\Stream</Filter>
     </ClCompile>
+    <ClCompile Include="TestLocaleString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
