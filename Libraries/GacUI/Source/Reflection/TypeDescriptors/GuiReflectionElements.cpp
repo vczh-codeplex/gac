@@ -182,7 +182,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveLines, {L"start" _ L"end"})
 				CLASS_MEMBER_METHOD(IsAvailable, {L"pos"})
 				CLASS_MEMBER_METHOD(Normalize, {L"pos"})
-				CLASS_MEMBER_METHOD_OVERLOAD(Modify, {L"start"_ L"end"_ L"input"}, TextPos(text::TextLines::*)(TextPos _ TextPos _ const WString&))
+				CLASS_MEMBER_METHOD_OVERLOAD(Modify, {L"start" _ L"end" _ L"input"}, TextPos(text::TextLines::*)(TextPos _ TextPos _ const WString&))
 				CLASS_MEMBER_METHOD(Clear, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(ClearMeasurement, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(MeasureRow, {L"row"})
