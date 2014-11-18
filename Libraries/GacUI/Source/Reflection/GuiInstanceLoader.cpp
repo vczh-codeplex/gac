@@ -1391,7 +1391,7 @@ GuiInstanceLoaderManager
 			Ptr<GuiResource> GetResource(const WString& name)override
 			{
 				vint index = resources.Keys().IndexOf(name);
-				return index == -1 ? 0 : resources.Values()[index];
+				return index == -1 ? nullptr : resources.Values()[index];
 			}
 		};
 		GUI_REGISTER_PLUGIN(GuiInstanceLoaderManager)
