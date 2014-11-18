@@ -1393,7 +1393,7 @@ Helper Functions
 				CopyFrom(
 					types,
 					From(typeNames)
-						.Select(&description::GetTypeDescriptor)
+						.Select<ITypeDescriptor*(*)(const WString&)>(&description::GetTypeDescriptor)
 						.Where([](ITypeDescriptor* type){return type != 0; })
 					);
 
