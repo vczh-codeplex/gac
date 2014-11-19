@@ -200,7 +200,6 @@ TEST_CASE(TestSemaphore)
 	}
 }
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 EventObject
 ***********************************************************************/
@@ -253,7 +252,6 @@ TEST_CASE(TestEventObject)
 	}
 	TEST_ASSERT(data.counter==10);
 }
-#endif
 
 /***********************************************************************
 CriticalSection
@@ -306,7 +304,6 @@ TEST_CASE(TestCriticalSection)
 	TEST_ASSERT(data.counter==10);
 }
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 ReaderWriterLock
 ***********************************************************************/
@@ -375,7 +372,6 @@ TEST_CASE(TestReaderWriterLock)
 	}
 	TEST_ASSERT(data.counter==100);
 }
-#endif
 
 /***********************************************************************
 SpinLock

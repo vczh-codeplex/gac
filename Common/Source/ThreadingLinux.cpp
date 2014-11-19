@@ -279,6 +279,7 @@ Semaphore
 			{
 				sem_destroy(&internalData->semUnnamed);
 			}
+			delete internalData;
 		}
 	}
 
@@ -361,6 +362,44 @@ Semaphore
 EventObject
 ***********************************************************************/
 
+	namespace threading_internal
+	{
+		struct EventData
+		{
+
+		};
+	}
+
+	EventObject::EventObject()
+	{
+	}
+
+	EventObject::~EventObject()
+	{
+	}
+
+	bool EventObject::CreateAutoUnsignal(bool signaled, const WString& name)
+	{
+		if (name!=L"") return false;
+	}
+
+	bool EventObject::CreateManualUnsignal(bool signaled, const WString& name)
+	{
+		if (name!=L"") return false;
+	}
+
+	bool EventObject::Signal()
+	{
+	}
+
+	bool EventObject::Unsignal()
+	{
+	}
+
+	bool EventObject::Wait()
+	{
+	}
+
 /***********************************************************************
 ThreadPoolLite
 ***********************************************************************/
@@ -386,6 +425,7 @@ CriticalSection
 	CriticalSection::~CriticalSection()
 	{
 		pthread_mutex_destroy(&internalData->mutex);
+		delete internalData;
 	}
 
 	bool CriticalSection::TryEnter()
@@ -418,9 +458,116 @@ CriticalSection
 ReaderWriterLock
 ***********************************************************************/
 
+	namespace threading_internal
+	{
+		struct ReaderWriterLockData
+		{
+			pthread_rwlock_t			rwlock;
+		};
+	}
+
+	ReaderWriterLock::ReaderWriterLock()
+	{
+		internalData = new ReaderWriterLockData;
+		pthread_rwlock_init(&internalData->rwlock, nullptr);
+	}
+
+	ReaderWriterLock::~ReaderWriterLock()
+	{
+		pthread_rwlock_destroy(&internalData->rwlock);
+		delete internalData;
+	}
+
+	bool ReaderWriterLock::TryEnterReader()
+	{
+		return pthread_rwlock_tryrdlock(&internalData->rwlock) == 0;
+	}
+
+	void ReaderWriterLock::EnterReader()
+	{
+		pthread_rwlock_rdlock(&internalData->rwlock);
+	}
+
+	void ReaderWriterLock::LeaveReader()
+	{
+		pthread_rwlock_unlock(&internalData->rwlock);
+	}
+
+	bool ReaderWriterLock::TryEnterWriter()
+	{
+		return pthread_rwlock_trywrlock(&internalData->rwlock) == 0;
+	}
+
+	void ReaderWriterLock::EnterWriter()
+	{
+		pthread_rwlock_wrlock(&internalData->rwlock);
+	}
+
+	void ReaderWriterLock::LeaveWriter()
+	{
+		pthread_rwlock_unlock(&internalData->rwlock);
+	}
+
+	ReaderWriterLock::ReaderScope::ReaderScope(ReaderWriterLock& _lock)
+		:lock(&_lock)
+	{
+		lock->EnterReader();
+	}
+
+	ReaderWriterLock::ReaderScope::~ReaderScope()
+	{
+		lock->LeaveReader();
+	}
+
+	ReaderWriterLock::WriterScope::WriterScope(ReaderWriterLock& _lock)
+		:lock(&_lock)
+	{
+		lock->EnterWriter();
+	}
+
+	ReaderWriterLock::WriterScope::~WriterScope()
+	{
+		lock->LeaveReader();
+	}
+
 /***********************************************************************
 ConditionVariable
 ***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct ConditionVariableData
+		{
+			pthread_cond_t			cond;
+		};
+	}
+
+	ConditionVariable::ConditionVariable()
+	{
+		internalData = new ConditionVariableData;
+		pthread_cond_init(&internalData->cond, nullptr);
+	}
+
+	ConditionVariable::~ConditionVariable()
+	{
+		pthread_cond_destroy(&internalData->cond);
+		delete internalData;
+	}
+
+	bool ConditionVariable::SleepWith(CriticalSection& cs)
+	{
+		return pthread_cond_wait(&internalData->cond, &cs.internalData->mutex) == 0;
+	}
+
+	void ConditionVariable::WakeOnePending()
+	{
+		pthread_cond_signal(&internalData->cond);
+	}
+
+	void ConditionVariable::WakeAllPendings()
+	{
+		pthread_cond_broadcast(&internalData->cond);
+	}
 
 /***********************************************************************
 SpinLock
