@@ -22,8 +22,7 @@ Thread
 		struct ThreadData
 		{
 			pthread_t					id;
-			pthread_mutex_t				mutex;
-			pthread_cond_t				cond;
+			EventObject					ev;
 		};
 
 		class ProceduredThread : public Thread
@@ -77,11 +76,9 @@ Thread
 
 	void InternalThreadProc(Thread* thread)
 	{
-		pthread_mutex_lock(&thread->internalData->mutex);
 		thread->Run();
 		thread->threadState=Thread::Stopped;
-		pthread_cond_broadcast(&thread->internalData->cond);
-		pthread_mutex_unlock(&thread->internalData->mutex);
+		thread->internalData->ev.Signal();
 	}
 
 	void* InternalThreadProcWrapper(void* lpParameter)
@@ -93,8 +90,7 @@ Thread
 	Thread::Thread()
 	{
 		internalData=new ThreadData;
-		pthread_mutex_init(&internalData->mutex, nullptr);
-		pthread_cond_init(&internalData->cond, nullptr);
+		internalData->ev.CreateManualUnsignal(false);
 		threadState=Thread::NotStarted;
 	}
 
@@ -103,9 +99,6 @@ Thread
 		if (internalData)
 		{
 			Stop();
-			pthread_mutex_destroy(&internalData->mutex);
-			pthread_cond_destroy(&internalData->cond);
-
 			if (threadState!=Thread::NotStarted)
 			{
 				pthread_detach(internalData->id);
@@ -175,17 +168,7 @@ Thread
 
 	bool Thread::Wait()
 	{
-		pthread_mutex_lock(&internalData->mutex);
-		switch(threadState)
-		{
-			case Thread::NotStarted:
-			case Thread::Stopped:
-				break;
-			default:
-				pthread_cond_wait(&internalData->cond, &internalData->mutex);
-		}
-		pthread_mutex_unlock(&internalData->mutex);
-		return true;
+		return internalData->ev.Wait();
 	}
 
 	bool Thread::Stop()
@@ -195,7 +178,7 @@ Thread
 			if(pthread_cancel(internalData->id)==0)
 			{
 				threadState=Thread::Stopped;
-				pthread_cond_broadcast(&internalData->cond);
+				internalData->ev.Signal();
 				return true;
 			}
 		}
@@ -366,46 +349,102 @@ EventObject
 	{
 		struct EventData
 		{
-
+			bool				autoReset;
+			volatile bool		signaled;
+			CriticalSection		mutex;
+			ConditionVariable	cond;
+			volatile vint		counter = 0;
 		};
 	}
 
 	EventObject::EventObject()
 	{
 		internalData = nullptr;
-		throw 0;
 	}
 
 	EventObject::~EventObject()
 	{
-		throw 0;
+		if (internalData)
+		{
+			delete internalData;
+		}
 	}
 
 	bool EventObject::CreateAutoUnsignal(bool signaled, const WString& name)
 	{
 		if (name!=L"") return false;
-		throw 0;
+		if (internalData) return false;
+
+		internalData = new EventData;
+		internalData->autoReset = true;
+		internalData->signaled = signaled;
+		return true;
 	}
 
 	bool EventObject::CreateManualUnsignal(bool signaled, const WString& name)
 	{
 		if (name!=L"") return false;
-		throw 0;
+		if (internalData) return false;
+
+		internalData = new EventData;
+		internalData->autoReset = false;
+		internalData->signaled = signaled;
+		return true;
 	}
 
 	bool EventObject::Signal()
 	{
-		throw 0;
+		if (!internalData) return false;
+
+		internalData->mutex.Enter();
+		internalData->signaled = true;
+		if (internalData->counter)
+		{
+			if (internalData->autoReset)
+			{
+				internalData->cond.WakeOnePending();
+				internalData->signaled = false;
+			}
+			else
+			{
+				internalData->cond.WakeAllPendings();
+			}
+		}
+		internalData->mutex.Leave();
+		return true;
 	}
 
 	bool EventObject::Unsignal()
 	{
-		throw 0;
+		if (!internalData) return false;
+
+		internalData->mutex.Enter();
+		internalData->signaled = false;
+		internalData->mutex.Leave();
+		return true;
 	}
 
 	bool EventObject::Wait()
 	{
-		throw 0;
+		if (!internalData) return false;
+
+		internalData->mutex.Enter();
+		if (internalData->signaled)
+		{
+			if (internalData->autoReset)
+			{
+				internalData->signaled = false;
+			}
+			return true;
+		}
+		else
+		{
+			internalData->counter++;
+			internalData->cond.SleepWith(internalData->mutex);
+			internalData->counter--;
+		}
+		internalData->mutex.Leave();
+		return true;
 	}
 
 /***********************************************************************
