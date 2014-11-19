@@ -372,32 +372,40 @@ EventObject
 
 	EventObject::EventObject()
 	{
+		internalData = nullptr;
+		throw 0;
 	}
 
 	EventObject::~EventObject()
 	{
+		throw 0;
 	}
 
 	bool EventObject::CreateAutoUnsignal(bool signaled, const WString& name)
 	{
 		if (name!=L"") return false;
+		throw 0;
 	}
 
 	bool EventObject::CreateManualUnsignal(bool signaled, const WString& name)
 	{
 		if (name!=L"") return false;
+		throw 0;
 	}
 
 	bool EventObject::Signal()
 	{
+		throw 0;
 	}
 
 	bool EventObject::Unsignal()
 	{
+		throw 0;
 	}
 
 	bool EventObject::Wait()
 	{
+		throw 0;
 	}
 
 /***********************************************************************

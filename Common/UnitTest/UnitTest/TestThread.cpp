@@ -206,22 +206,22 @@ EventObject
 
 namespace mynamespace
 {
-	struct Event_ThreadData
+	struct ManualEvent_ThreadData
 	{
 		CriticalSection		cs;
 		EventObject			eventObject;
 		volatile vint		counter;
 
-		Event_ThreadData()
+		ManualEvent_ThreadData()
 			:counter(0)
 		{
 			TEST_ASSERT(eventObject.CreateManualUnsignal(false));
 		}
 	};
 
-	void Event_ThreadProc(Thread* thread, void* argument)
+	void ManualEvent_ThreadProc(Thread* thread, void* argument)
 	{
-		Event_ThreadData* data=(Event_ThreadData*)argument;
+		ManualEvent_ThreadData* data=(ManualEvent_ThreadData*)argument;
 		TEST_ASSERT(data->eventObject.Wait());
 		{
 			CriticalSection::Scope lock(data->cs);
@@ -231,14 +231,63 @@ namespace mynamespace
 }
 using namespace mynamespace;
 
-TEST_CASE(TestEventObject)
+TEST_CASE(TestManualEventObject)
 {
-	Event_ThreadData data;
+	ManualEvent_ThreadData data;
 	List<Thread*> threads;
 	{
 		for(vint i=0;i<10;i++)
 		{
-			threads.Add(Thread::CreateAndStart(Event_ThreadProc, &data, false));
+			threads.Add(Thread::CreateAndStart(ManualEvent_ThreadProc, &data, false));
+		}
+		Thread::Sleep(1000);
+		TEST_ASSERT(data.counter==0);
+		TEST_ASSERT(data.eventObject.Signal());
+	}
+	FOREACH(Thread*, thread, threads)
+	{
+		thread->Wait();
+		TEST_ASSERT(thread->GetState()==Thread::Stopped);
+		delete thread;
+	}
+	TEST_ASSERT(data.counter==10);
+}
+
+namespace mynamespace
+{
+	struct AutoEvent_ThreadData
+	{
+		CriticalSection		cs;
+		EventObject			eventObject;
+		volatile vint		counter;
+
+		AutoEvent_ThreadData()
+			:counter(0)
+		{
+			TEST_ASSERT(eventObject.CreateAutoUnsignal(false));
+		}
+	};
+
+	void AutoEvent_ThreadProc(Thread* thread, void* argument)
+	{
+		AutoEvent_ThreadData* data=(AutoEvent_ThreadData*)argument;
+		TEST_ASSERT(data->eventObject.Wait());
+		{
+			CriticalSection::Scope lock(data->cs);
+			data->counter++;
+		}
+	}
+}
+using namespace mynamespace;
+
+TEST_CASE(TestAutoEventObject)
+{
+	AutoEvent_ThreadData data;
+	List<Thread*> threads;
+	{
+		for(vint i=0;i<10;i++)
+		{
+			threads.Add(Thread::CreateAndStart(AutoEvent_ThreadProc, &data, false));
 		}
 		Thread::Sleep(1000);
 		TEST_ASSERT(data.counter==0);
