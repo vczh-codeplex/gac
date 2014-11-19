@@ -257,7 +257,6 @@ namespace mynamespace
 {
 	struct AutoEvent_ThreadData
 	{
-		CriticalSection		cs;
 		EventObject			eventObject;
 		volatile vint		counter;
 
@@ -272,10 +271,7 @@ namespace mynamespace
 	{
 		AutoEvent_ThreadData* data=(AutoEvent_ThreadData*)argument;
 		TEST_ASSERT(data->eventObject.Wait());
-		{
-			CriticalSection::Scope lock(data->cs);
-			data->counter++;
-		}
+		data->counter++;
 	}
 }
 using namespace mynamespace;
@@ -291,7 +287,13 @@ TEST_CASE(TestAutoEventObject)
 		}
 		Thread::Sleep(1000);
 		TEST_ASSERT(data.counter==0);
+	}
+	for(vint i=0;i<10;i++)
+	{
+		TEST_ASSERT(data.counter==i);
 		TEST_ASSERT(data.eventObject.Signal());
+		Thread::Sleep(1000);
+		TEST_ASSERT(data.counter==i+1);
 	}
 	FOREACH(Thread*, thread, threads)
 	{
