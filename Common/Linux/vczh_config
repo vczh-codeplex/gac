@@ -5,6 +5,12 @@ export VLPP_LINUX=~/code/gac/Common/Linux;
 export WORKFLOW_LINUX=~/code/gac/Libraries/Workflow/WorkflowSrc/Linux;
 export PS1="\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\$ "
 
+apt-get install
+	htop
+	cgdb
+	manpages-posix-dev
+	git
+
 .vimrc
 set tabstop=4
 set number
