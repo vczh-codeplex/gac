@@ -38,9 +38,9 @@ namespace vl
 		struct ConditionVariableData;
 	}
 	
-#ifdef VCZH_MSVC
 	class WaitableObject : public Object, public NotCopyable
 	{
+#if defined VCZH_MSVC
 	private:
 		threading_internal::WaitableData*			waitableData;
 	protected:
@@ -57,14 +57,12 @@ namespace vl
 		static bool									WaitAllForTime(WaitableObject** objects, vint count, vint ms);
 		static vint									WaitAny(WaitableObject** objects, vint count, bool* abandoned);
 		static vint									WaitAnyForTime(WaitableObject** objects, vint count, vint ms, bool* abandoned);
-	};
-#endif
-
-#if defined VCZH_MSVC
-	class Thread : public WaitableObject
 #elif defined VCZH_GCC
-	class Thread : public Object
 #endif
+		virtual bool								Wait() = 0;
+	};
+
+	class Thread : public WaitableObject
 	{
 		friend void InternalThreadProc(Thread* thread);
 	public:
@@ -90,16 +88,16 @@ namespace vl
 
 		static Thread*								CreateAndStart(ThreadProcedure procedure, void* argument=0, bool deleteAfterStopped=true);
 		static Thread*								CreateAndStart(const Func<void()>& procedure, bool deleteAfterStopped=true);
-#ifdef VCZH_MSVC
 		static void									Sleep(vint ms);
-#endif
 		static vint									GetCPUCount();
 		static vint									GetCurrentThreadId();
 
 		bool										Start();
-#ifdef VCZH_MSVC
+#if defined VCZH_MSVC
 		bool										Pause();
 		bool										Resume();
+#elif defined VCZH_GCC
+		bool										Wait();
 #endif
 		bool										Stop();
 		ThreadState									GetState();

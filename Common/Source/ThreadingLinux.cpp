@@ -19,6 +19,8 @@ Thread
 		struct ThreadData
 		{
 			pthread_t					id;
+			pthread_mutex_t				mutex;
+			pthread_cond_t				cond;
 		};
 
 		class ProceduredThread : public Thread
@@ -72,8 +74,11 @@ Thread
 
 	void InternalThreadProc(Thread* thread)
 	{
+		pthread_mutex_lock(&thread->internalData->mutex);
 		thread->Run();
 		thread->threadState=Thread::Stopped;
+		pthread_cond_broadcast(&thread->internalData->cond);
+		pthread_mutex_unlock(&thread->internalData->mutex);
 	}
 
 	void* InternalThreadProcWrapper(void* lpParameter)
@@ -84,7 +89,9 @@ Thread
 
 	Thread::Thread()
 	{
-		internalData=nullptr;
+		internalData=new ThreadData;
+		pthread_mutex_init(&internalData->mutex, nullptr);
+		pthread_cond_init(&internalData->cond, nullptr);
 		threadState=Thread::NotStarted;
 	}
 
@@ -93,7 +100,13 @@ Thread
 		if (internalData)
 		{
 			Stop();
-			pthread_detach(internalData->id);
+			pthread_mutex_destroy(&internalData->mutex);
+			pthread_cond_destroy(&internalData->cond);
+
+			if (threadState!=Thread::NotStarted)
+			{
+				pthread_detach(internalData->id);
+			}
 			delete internalData;
 		}
 	}
@@ -128,6 +141,11 @@ Thread
 		}
 		return 0;
 	}
+
+	void Thread::Sleep(vint ms)
+	{
+		sleep((ms+999)/1000);
+	}
 	
 	vint Thread::GetCPUCount()
 	{
@@ -141,30 +159,40 @@ Thread
 
 	bool Thread::Start()
 	{
-		if(threadState==Thread::NotStarted && internalData==nullptr)
+		if(threadState==Thread::NotStarted)
 		{
-			internalData = new ThreadData;
 			if(pthread_create(&internalData->id, nullptr, &InternalThreadProcWrapper, this)==0)
 			{
 				threadState=Thread::Running;
 				return true;
 			}
-			else
-			{
-				delete internalData;
-			}
 		}
 		return false;
 	}
 
+	bool Thread::Wait()
+	{
+		pthread_mutex_lock(&internalData->mutex);
+		switch(threadState)
+		{
+			case Thread::NotStarted:
+			case Thread::Stopped:
+				break;
+			default:
+				pthread_cond_wait(&internalData->cond, &internalData->mutex);
+		}
+		pthread_mutex_unlock(&internalData->mutex);
+		return true;
+	}
 
 	bool Thread::Stop()
 	{
-		if (internalData)
+		if (threadState==Thread::Running)
 		{
 			if(pthread_cancel(internalData->id)==0)
 			{
 				threadState=Thread::Stopped;
+				pthread_cond_broadcast(&internalData->cond);
 				return true;
 			}
 		}
@@ -207,7 +235,7 @@ SpinLock
 
 	void SpinLock::Enter()
 	{
-		while(__sync_val_compare_and_swap(&token, 1, 0)!=0)
+		while(__sync_val_compare_and_swap(&token, 0, 1)!=0)
 		{
 			while(token!=0) _mm_pause();
 		}
