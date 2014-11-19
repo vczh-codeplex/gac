@@ -118,7 +118,7 @@ namespace vl
 		bool										Open(bool inheritable, const WString& name);
 
 		// In the implementation for Linux,
-		// calling Release() more than once between to Wait(),
+		// calling Release() more than once between two Wait(),
 		// or calling Wait() more than once between two Release(),
 		// will results in an undefined behavior
 		bool										Release();
@@ -146,7 +146,6 @@ namespace vl
 #endif
 	};
 
-#ifdef VCZH_MSVC
 	class EventObject : public WaitableObject
 	{
 	private:
@@ -155,14 +154,17 @@ namespace vl
 		EventObject();
 		~EventObject();
 
+		// Named event is not supported in the implementation for Linux
 		bool										CreateAutoUnsignal(bool signaled, const WString& name=L"");
 		bool										CreateManualUnsignal(bool signaled, const WString& name=L"");
 		bool										Open(bool inheritable, const WString& name);
 
 		bool										Signal();
 		bool										Unsignal();
-	};
+#ifdef VCZH_GCC
+		bool										Wait();
 #endif
+	};
 
 /***********************************************************************
 线程池
@@ -216,7 +218,6 @@ namespace vl
 		};
 	};
 
-#ifdef VCZH_MSVC
 	class ReaderWriterLock : public Object, public NotCopyable
 	{
 	private:
@@ -261,15 +262,17 @@ namespace vl
 		~ConditionVariable();
 
 		bool										SleepWith(CriticalSection& cs);
+#ifdef VCZH_MSVC
 		bool										SleepWithForTime(CriticalSection& cs, vint ms);
 		bool										SleepWithReader(ReaderWriterLock& lock);
 		bool										SleepWithReaderForTime(ReaderWriterLock& lock, vint ms);
 		bool										SleepWithWriter(ReaderWriterLock& lock);
 		bool										SleepWithWriterForTime(ReaderWriterLock& lock, vint ms);
+#endif
 		void										WakeOnePending();
 		void										WakeAllPendings();
 	};
-#endif
+
 /***********************************************************************
 用户模式对象
 ***********************************************************************/
