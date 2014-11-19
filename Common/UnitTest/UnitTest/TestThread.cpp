@@ -77,6 +77,7 @@ TEST_CASE(TestPauseAndResumeThread)
 	delete thread;
 	TEST_ASSERT(data.modified==true);
 }
+#endif
 
 /***********************************************************************
 Mutex
@@ -199,6 +200,7 @@ TEST_CASE(TestSemaphore)
 	}
 }
 
+#ifdef VCZH_MSVC
 /***********************************************************************
 EventObject
 ***********************************************************************/
@@ -251,6 +253,7 @@ TEST_CASE(TestEventObject)
 	}
 	TEST_ASSERT(data.counter==10);
 }
+#endif
 
 /***********************************************************************
 CriticalSection
@@ -303,6 +306,7 @@ TEST_CASE(TestCriticalSection)
 	TEST_ASSERT(data.counter==10);
 }
 
+#ifdef VCZH_MSVC
 /***********************************************************************
 ReaderWriterLock
 ***********************************************************************/

@@ -3,6 +3,9 @@
 #ifdef VCZH_GCC
 #include <pthread.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <semaphore.h>
 
 namespace vl
 {
@@ -203,6 +206,221 @@ Thread
 	{
 		return threadState;
 	}
+
+/***********************************************************************
+Mutex
+***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct MutexData
+		{
+			Semaphore			sem;
+		};
+	};
+
+	Mutex::Mutex()
+	{
+		internalData = new MutexData;
+	}
+
+	Mutex::~Mutex()
+	{
+		delete internalData;
+	}
+
+	bool Mutex::Create(bool owned, const WString& name)
+	{
+		return internalData->sem.Create(owned ? 0 : 1, 1, name);
+	}
+
+	bool Mutex::Open(bool inheritable, const WString& name)
+	{
+		return internalData->sem.Open(inheritable, name);
+	}
+
+	bool Mutex::Release()
+	{
+		return internalData->sem.Release();
+	}
+
+	bool Mutex::Wait()
+	{
+		return internalData->sem.Wait();
+	}
+
+/***********************************************************************
+Semaphore
+***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct SemaphoreData
+		{
+			sem_t			semUnnamed;
+			sem_t*			semNamed = nullptr;
+		};
+	}
+
+	Semaphore::Semaphore()
+		:internalData(0)
+	{
+	}
+
+	Semaphore::~Semaphore()
+	{
+		if (internalData)
+		{
+			if (internalData->semNamed)
+			{
+				sem_close(internalData->semNamed);
+			}
+			else
+			{
+				sem_destroy(&internalData->semUnnamed);
+			}
+		}
+	}
+
+	bool Semaphore::Create(vint initialCount, vint maxCount, const WString& name)
+	{
+		if (internalData) return false;
+		if (initialCount > maxCount) return false;
+
+		internalData = new SemaphoreData;
+		if (name == L"")
+		{
+			if(sem_init(&internalData->semUnnamed, 0, (int)initialCount) != 0)
+			{
+				delete internalData;
+				return false;
+			}
+		}
+		else
+		{
+			if (!(internalData->semNamed = sem_open(wtoa(name).Buffer(), O_CREAT, 0777, maxCount)))
+			{
+				delete internalData;
+				return false;
+			}
+		}
+
+		Release(initialCount);
+		return true;
+	}
+
+	bool Semaphore::Open(bool inheritable, const WString& name)
+	{
+		if (internalData) return false;
+		if (inheritable) return false;
+
+		internalData = new SemaphoreData;
+		if (!(internalData->semNamed = sem_open(wtoa(name).Buffer(), 0)))
+		{
+			delete internalData;
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Semaphore::Release()
+	{
+		return Release(1);
+	}
+
+	vint Semaphore::Release(vint count)
+	{
+		for (vint i = 0; i < count; i++)
+		{
+			if (internalData->semNamed)
+			{
+				sem_post(internalData->semNamed);
+			}
+			else
+			{
+				sem_post(&internalData->semUnnamed);
+			}
+		}
+		return true;
+	}
+
+	bool Semaphore::Wait()
+	{
+		if (internalData->semNamed)
+		{
+			return sem_wait(internalData->semNamed) == 0;
+		}
+		else
+		{
+			return sem_wait(&internalData->semUnnamed) == 0;
+		}
+	}
+
+/***********************************************************************
+EventObject
+***********************************************************************/
+
+/***********************************************************************
+ThreadPoolLite
+***********************************************************************/
+
+/***********************************************************************
+CriticalSection
+***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct CriticalSectionData
+		{
+			pthread_mutex_t		mutex;
+		};
+	}
+
+	CriticalSection::CriticalSection()
+	{
+		internalData = new CriticalSectionData;
+		pthread_mutex_init(&internalData->mutex, nullptr);
+	}
+
+	CriticalSection::~CriticalSection()
+	{
+		pthread_mutex_destroy(&internalData->mutex);
+	}
+
+	bool CriticalSection::TryEnter()
+	{
+		pthread_mutex_trylock(&internalData->mutex) == 0;
+	}
+
+	void CriticalSection::Enter()
+	{
+		pthread_mutex_lock(&internalData->mutex);
+	}
+
+	void CriticalSection::Leave()
+	{
+		pthread_mutex_unlock(&internalData->mutex);
+	}
+
+	CriticalSection::Scope::Scope(CriticalSection& _criticalSection)
+		:criticalSection(&_criticalSection)
+	{
+		criticalSection->Enter();
+	}
+
+	CriticalSection::Scope::~Scope()
+	{
+		criticalSection->Leave();
+	}
+
+/***********************************************************************
+ReaderWriterLock
+***********************************************************************/
+
+/***********************************************************************
+ConditionVariable
+***********************************************************************/
 
 /***********************************************************************
 SpinLock

@@ -106,7 +106,6 @@ namespace vl
 #endif
 	};
 
-#ifdef VCZH_MSVC
 	class Mutex : public WaitableObject
 	{
 	private:
@@ -118,7 +117,14 @@ namespace vl
 		bool										Create(bool owned=false, const WString& name=L"");
 		bool										Open(bool inheritable, const WString& name);
 
+		// In the implementation for Linux,
+		// calling Release() more than once between to Wait(),
+		// or calling Wait() more than once between two Release(),
+		// will results in an undefined behavior
 		bool										Release();
+#ifdef VCZH_GCC
+		bool										Wait();
+#endif
 	};
 
 	class Semaphore : public WaitableObject
@@ -129,13 +135,18 @@ namespace vl
 		Semaphore();
 		~Semaphore();
 
+		// the maxCount is ignored in the implementation for Linux
 		bool										Create(vint initialCount, vint maxCount, const WString& name=L"");
 		bool										Open(bool inheritable, const WString& name);
 
 		bool										Release();
 		vint										Release(vint count);
+#ifdef VCZH_GCC
+		bool										Wait();
+#endif
 	};
 
+#ifdef VCZH_MSVC
 	class EventObject : public WaitableObject
 	{
 	private:
@@ -177,7 +188,6 @@ namespace vl
 
 	// <NOT_IMPLEMENTED_USING GCC> -- END
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 进程内对象
 ***********************************************************************/
@@ -206,6 +216,7 @@ namespace vl
 		};
 	};
 
+#ifdef VCZH_MSVC
 	class ReaderWriterLock : public Object, public NotCopyable
 	{
 	private:
