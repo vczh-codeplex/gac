@@ -475,7 +475,6 @@ TEST_CASE(TestSpinLock)
 	TEST_ASSERT(data.counter==10);
 }
 
-#ifdef VCZH_MSVC
 TEST_CASE(TestSpinLock2)
 {
 	SL_ThreadData data;
@@ -490,5 +489,7 @@ TEST_CASE(TestSpinLock2)
 	}
 	while (data.counter != 10);
 	TEST_ASSERT(data.lock.TryEnter());
-}
+#ifdef VCZH_GCC
+	TEST_ASSERT(ThreadPoolLite::Stop(true));
 #endif
+}

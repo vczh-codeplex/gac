@@ -186,6 +186,10 @@ namespace vl
 		{
 			Queue(Func<void()>(proc));
 		}
+
+#ifdef VCZH_GCC
+		static bool									Stop(bool discardPendingTasks);
+#endif
 	};
 
 	// <NOT_IMPLEMENTED_USING GCC> -- END
