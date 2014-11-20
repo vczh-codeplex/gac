@@ -11,4 +11,4 @@ map cpp : %.cpp
 
 link o :
 	> exe : bin UnitTest
-	g++ -std=c++11 -g -fprofile-arcs -o $(OUT) $(IN)
+	g++ -std=c++11 -g -pthread -fprofile-arcs -o $(OUT) $(IN)

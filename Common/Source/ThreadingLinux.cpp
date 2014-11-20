@@ -623,7 +623,7 @@ CriticalSection
 
 	bool CriticalSection::TryEnter()
 	{
-		pthread_mutex_trylock(&internalData->mutex) == 0;
+		return pthread_mutex_trylock(&internalData->mutex) == 0;
 	}
 
 	void CriticalSection::Enter()
