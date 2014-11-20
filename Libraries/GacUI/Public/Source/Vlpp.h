@@ -3407,7 +3407,6 @@ namespace vl
 
 		const WString&				GetName()const;
 
-		// <NOT_IMPLEMENTED_USING GCC> -- BEGIN
 		void						GetShortDateFormats(collections::List<WString>& formats)const;
 		void						GetLongDateFormats(collections::List<WString>& formats)const;
 		void						GetYearMonthDateFormats(collections::List<WString>& formats)const;
@@ -3416,25 +3415,33 @@ namespace vl
 
 		WString						FormatDate(const WString& format, DateTime date)const;
 		WString						FormatTime(const WString& format, DateTime time)const;
+#ifdef VCZH_MSVC
 		WString						FormatNumber(const WString& number)const;
 		WString						FormatCurrency(const WString& currency)const;
+#endif
 
 		WString						GetShortDayOfWeekName(vint dayOfWeek)const;
 		WString						GetLongDayOfWeekName(vint dayOfWeek)const;
 		WString						GetShortMonthName(vint month)const;
 		WString						GetLongMonthName(vint month)const;
-
+		
+#ifdef VCZH_MSVC
 		WString						ToFullWidth(const WString& str)const;
 		WString						ToHalfWidth(const WString& str)const;
 		WString						ToHiragana(const WString& str)const;
 		WString						ToKatagana(const WString& str)const;
+#endif
+
 		WString						ToLower(const WString& str)const;
 		WString						ToUpper(const WString& str)const;
 		WString						ToLinguisticLower(const WString& str)const;
 		WString						ToLinguisticUpper(const WString& str)const;
+
+#ifdef VCZH_MSVC
 		WString						ToSimplifiedChinese(const WString& str)const;
 		WString						ToTraditionalChinese(const WString& str)const;
 		WString						ToTileCase(const WString& str)const;
+#endif
 
 		enum Normalization
 		{
@@ -3454,8 +3461,7 @@ namespace vl
 		collections::Pair<vint, vint>			FindFirst(const WString& text, const WString& find, Normalization normalization)const;
 		collections::Pair<vint, vint>			FindLast(const WString& text, const WString& find, Normalization normalization)const;
 		bool									StartsWith(const WString& text, const WString& find, Normalization normalization)const;
-		bool									EndsWidth(const WString& text, const WString& find, Normalization normalization)const;
-		// <NOT_IMPLEMENTED_USING GCC> -- END
+		bool									EndsWith(const WString& text, const WString& find, Normalization normalization)const;
 	};
 
 #define INVLOC vl::Locale::Invariant()
@@ -14831,9 +14837,9 @@ namespace vl
 		struct ConditionVariableData;
 	}
 	
-#ifdef VCZH_MSVC
 	class WaitableObject : public Object, public NotCopyable
 	{
+#if defined VCZH_MSVC
 	private:
 		threading_internal::WaitableData*			waitableData;
 	protected:
@@ -14850,6 +14856,9 @@ namespace vl
 		static bool									WaitAllForTime(WaitableObject** objects, vint count, vint ms);
 		static vint									WaitAny(WaitableObject** objects, vint count, bool* abandoned);
 		static vint									WaitAnyForTime(WaitableObject** objects, vint count, vint ms, bool* abandoned);
+#elif defined VCZH_GCC
+		virtual bool								Wait() = 0;
+#endif
 	};
 
 	class Thread : public WaitableObject
@@ -14883,11 +14892,17 @@ namespace vl
 		static vint									GetCurrentThreadId();
 
 		bool										Start();
+#if defined VCZH_MSVC
 		bool										Pause();
 		bool										Resume();
+#elif defined VCZH_GCC
+		bool										Wait();
+#endif
 		bool										Stop();
 		ThreadState									GetState();
+#ifdef VCZH_MSVC
 		void										SetCPU(vint index);
+#endif
 	};
 
 	class Mutex : public WaitableObject
@@ -14901,7 +14916,14 @@ namespace vl
 		bool										Create(bool owned=false, const WString& name=L"");
 		bool										Open(bool inheritable, const WString& name);
 
+		// In the implementation for Linux,
+		// calling Release() more than once between two Wait(),
+		// or calling Wait() more than once between two Release(),
+		// will results in an undefined behavior
 		bool										Release();
+#ifdef VCZH_GCC
+		bool										Wait();
+#endif
 	};
 
 	class Semaphore : public WaitableObject
@@ -14912,11 +14934,15 @@ namespace vl
 		Semaphore();
 		~Semaphore();
 
+		// the maxCount is ignored in the implementation for Linux
 		bool										Create(vint initialCount, vint maxCount, const WString& name=L"");
 		bool										Open(bool inheritable, const WString& name);
 
 		bool										Release();
 		vint										Release(vint count);
+#ifdef VCZH_GCC
+		bool										Wait();
+#endif
 	};
 
 	class EventObject : public WaitableObject
@@ -14927,14 +14953,17 @@ namespace vl
 		EventObject();
 		~EventObject();
 
+		// Named event is not supported in the implementation for Linux
 		bool										CreateAutoUnsignal(bool signaled, const WString& name=L"");
 		bool										CreateManualUnsignal(bool signaled, const WString& name=L"");
 		bool										Open(bool inheritable, const WString& name);
 
 		bool										Signal();
 		bool										Unsignal();
-	};
+#ifdef VCZH_GCC
+		bool										Wait();
 #endif
+	};
 
 /***********************************************************************
 线程池
@@ -14956,11 +14985,14 @@ namespace vl
 		{
 			Queue(Func<void()>(proc));
 		}
+
+#ifdef VCZH_GCC
+		static bool									Stop(bool discardPendingTasks);
+#endif
 	};
 
 	// <NOT_IMPLEMENTED_USING GCC> -- END
 
-#ifdef VCZH_MSVC
 /***********************************************************************
 进程内对象
 ***********************************************************************/
@@ -15033,15 +15065,17 @@ namespace vl
 		~ConditionVariable();
 
 		bool										SleepWith(CriticalSection& cs);
+#ifdef VCZH_MSVC
 		bool										SleepWithForTime(CriticalSection& cs, vint ms);
 		bool										SleepWithReader(ReaderWriterLock& lock);
 		bool										SleepWithReaderForTime(ReaderWriterLock& lock, vint ms);
 		bool										SleepWithWriter(ReaderWriterLock& lock);
 		bool										SleepWithWriterForTime(ReaderWriterLock& lock, vint ms);
+#endif
 		void										WakeOnePending();
 		void										WakeAllPendings();
 	};
-#endif
+
 /***********************************************************************
 用户模式对象
 ***********************************************************************/
