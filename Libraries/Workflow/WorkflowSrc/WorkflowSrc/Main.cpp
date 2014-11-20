@@ -276,6 +276,7 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 					.First();
 				return L"(" + function->capturedVariableNames[ins.indexParameter] + L")";
 			}
+		default:;
 		}
 		return L"";
 	};
