@@ -435,7 +435,6 @@ EventObject
 			{
 				internalData->signaled = false;
 			}
-			return true;
 		}
 		else
 		{
@@ -450,6 +449,153 @@ EventObject
 /***********************************************************************
 ThreadPoolLite
 ***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct ThreadPoolTask
+		{
+			Func<void()>			task;
+			Ptr<ThreadPoolTask>		next;
+		};
+
+		struct ThreadPoolData
+		{
+			Semaphore				semaphore;
+			EventObject				taskFinishEvent;
+			Ptr<ThreadPoolTask>		taskBegin;
+			Ptr<ThreadPoolTask>*	taskEnd = nullptr;
+			volatile bool			stopping = false;
+			List<Thread*>			taskThreads;
+		};
+
+		SpinLock					threadPoolLock;
+		ThreadPoolData*				threadPoolData = nullptr;
+
+		void ThreadPoolProc(Thread* thread, void* argument)
+		{
+			while (true)
+			{
+				Ptr<ThreadPoolTask> task;
+
+				threadPoolData->semaphore.Wait();
+				SPIN_LOCK(threadPoolLock)
+				{
+					if (threadPoolData->taskBegin)
+					{
+						task = threadPoolData->taskBegin;
+						threadPoolData->taskBegin = task->next;
+					}
+
+					if (!threadPoolData->taskBegin)
+					{
+						threadPoolData->taskEnd = &threadPoolData->taskBegin;
+						threadPoolData->taskFinishEvent.Signal();
+					}
+				}
+
+				if (task)
+				{
+					task->task();
+				}
+				else if (threadPoolData->stopping)
+				{
+					return;
+				}
+			}
+		}
+
+		bool ThreadPoolQueue(const Func<void()>& proc)
+		{
+			SPIN_LOCK(threadPoolLock)
+			{
+				if (!threadPoolData)
+				{
+					threadPoolData = new ThreadPoolData;
+					threadPoolData->semaphore.Create(0, 65536);
+					threadPoolData->taskFinishEvent.CreateManualUnsignal(false);
+					threadPoolData->taskEnd = &threadPoolData->taskBegin;
+
+					for (vint i = 0; i < Thread::GetCPUCount() * 4; i++)
+					{
+						threadPoolData->taskThreads.Add(Thread::CreateAndStart(&ThreadPoolProc, nullptr, false));
+					}
+				}
+
+				if (threadPoolData)
+				{
+					if (threadPoolData->stopping)
+					{
+						return false;
+					}
+
+					auto task = MakePtr<ThreadPoolTask>();
+					task->task = proc;
+					*threadPoolData->taskEnd = task;
+					threadPoolData->taskEnd = &task->next;
+					threadPoolData->semaphore.Release();
+					threadPoolData->taskFinishEvent.Unsignal();
+				}
+			}
+			return true;
+		}
+
+		bool ThreadPoolStop(bool discardPendingTasks)
+		{
+			SPIN_LOCK(threadPoolLock)
+			{
+				if (!threadPoolData) return false;
+				if (threadPoolData->stopping) return false;
+
+				threadPoolData->stopping = true;
+				if (discardPendingTasks)
+				{
+					threadPoolData->taskEnd = &threadPoolData->taskBegin;
+					threadPoolData->taskBegin = nullptr;
+				}
+
+				threadPoolData->semaphore.Release(threadPoolData->taskThreads.Count());
+			}
+
+			threadPoolData->taskFinishEvent.Wait();
+			for (vint i = 0; i < threadPoolData->taskThreads.Count(); i++)
+			{
+				auto thread = threadPoolData->taskThreads[i];
+				thread->Wait();
+				delete thread;
+			}
+			threadPoolData->taskThreads.Clear();
+
+			SPIN_LOCK(threadPoolLock)
+			{
+				delete threadPoolData;
+				threadPoolData = nullptr;
+			}
+			return true;
+		}
+	}
+
+	ThreadPoolLite::ThreadPoolLite()
+	{
+	}
+
+	ThreadPoolLite::~ThreadPoolLite()
+	{
+	}
+
+	bool ThreadPoolLite::Queue(void(*proc)(void*), void* argument)
+	{
+		return ThreadPoolQueue([proc, argument](){proc(argument);});
+	}
+
+	bool ThreadPoolLite::Queue(const Func<void()>& proc)
+	{
+		return ThreadPoolQueue(proc);
+	}
+
+	bool ThreadPoolLite::Stop(bool discardPendingTasks)
+	{
+		return ThreadPoolStop(discardPendingTasks);
+	}
 
 /***********************************************************************
 CriticalSection
