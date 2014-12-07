@@ -39,7 +39,7 @@ FilePath
 			throw 0;
 		}
 
-		FilePath FilePath::operator+(const FilePath& filePath)
+		FilePath FilePath::operator/(const WString& relativePath)const
 		{
 			throw 0;
 		}

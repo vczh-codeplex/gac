@@ -33,7 +33,7 @@ namespace vl
 			bool						operator<=(const FilePath& filePath){ return Compare(*this, filePath) <= 0; }
 			bool						operator> (const FilePath& filePath){ return Compare(*this, filePath) >  0; }
 			bool						operator>=(const FilePath& filePath){ return Compare(*this, filePath) >= 0; }
-			FilePath					operator+(const FilePath& filePath);
+			FilePath					operator/(const WString& relativePath)const;
 
 			bool						IsFile()const;
 			bool						IsFolder()const;
