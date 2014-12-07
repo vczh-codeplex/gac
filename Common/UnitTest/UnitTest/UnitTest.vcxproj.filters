@@ -249,6 +249,12 @@
     <ClCompile Include="..\..\Source\ThreadingLinux.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\FileSystem.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="TestFileSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Basic.h">
@@ -442,6 +448,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Stream\CompressionStream.h">
       <Filter>Common\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\FileSystem.h">
+      <Filter>Common\Basic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
