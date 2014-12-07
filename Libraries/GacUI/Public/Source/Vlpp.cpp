@@ -11736,7 +11736,7 @@ Unescaping Function Foward Declarations
 						const RegexToken& endToken=tokens.Get(tokenEnd);
 						const wchar_t* textBegin=beginToken.reading;
 						const wchar_t* textEnd=endToken.reading+endToken.length;
-						WString text(textBegin, textEnd-textBegin);
+						WString text(textBegin, vint(textEnd-textBegin));
 						ParsingTextRange range(&beginToken, &endToken);
 
 						Ptr<XmlText> xmlText=new XmlText;
@@ -18330,7 +18330,7 @@ namespace vl
 			}
 			else
 			{
-				name=WString(input, read-input);
+				name=WString(input, vint(read-input));
 				input=read;
 				return true;
 			}

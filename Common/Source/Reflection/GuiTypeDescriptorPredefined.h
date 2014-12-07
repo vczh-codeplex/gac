@@ -215,7 +215,7 @@ EnumValueSerializer
 					{
 						const wchar_t* sep=wcschr(reading, L'|');
 						if(!sep) sep=reading+wcslen(reading);
-						WString item(reading, sep-reading);
+						WString item(reading, vint(sep-reading));
 						reading=*sep?sep+1:sep;
 
 						vint index=candidates.Keys().IndexOf(item);
