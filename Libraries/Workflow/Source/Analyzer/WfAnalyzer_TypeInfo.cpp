@@ -121,7 +121,7 @@ GetTypeFromTypeInfo
 								const wchar_t* delimiter = wcsstr(reading, L"::");
 								if (delimiter)
 								{
-									fragments.Add(WString(reading, delimiter - reading));
+									fragments.Add(WString(reading, vint(delimiter - reading)));
 									reading = delimiter + 2;
 								}
 								else

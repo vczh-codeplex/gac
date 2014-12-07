@@ -501,7 +501,7 @@ ValidateStructure(Expression)
 							{
 								Ptr<WfStringExpression> expression = new WfStringExpression;
 								expression->codeRange = node->codeRange;
-								expression->value.value = WString(reading, begin - reading);
+								expression->value.value = WString(reading, vint(begin - reading));
 								expressions.Add(expression);
 							}
 							else
@@ -537,7 +537,7 @@ ValidateStructure(Expression)
 							}
 							else
 							{
-								WString input(begin + 2, end - begin - 3);
+								WString input(begin + 2, vint(end - begin - 3));
 								List<Ptr<ParsingError>> errors;
 								if (auto expression = WfParseExpression(input, manager->parsingTable, errors))
 								{
