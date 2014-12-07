@@ -1371,7 +1371,7 @@ Helper Functions
 					WString pattern;
 					if(attSemicolon)
 					{
-						pattern = WString(attValue, attSemicolon - attValue);
+						pattern = WString(attValue, vint(attSemicolon - attValue));
 						attValue = attSemicolon + 1;
 					}
 					else

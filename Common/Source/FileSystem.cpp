@@ -1,5 +1,7 @@
 #include "FileSystem.h"
 
+#if defined VCZH_MSVC
+
 namespace vl
 {
 	namespace filesystem
@@ -183,3 +185,5 @@ Folder
 		}
 	}
 }
+
+#endif

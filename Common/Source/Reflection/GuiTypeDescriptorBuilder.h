@@ -770,7 +770,7 @@ StructValueSerializer
 						const wchar_t* space=FindSpace(reading);
 						if(space)
 						{
-							field=WString(reading, space-reading);
+							field=WString(reading, vint(space-reading));
 							reading=space+1;
 						}
 						else
@@ -815,7 +815,7 @@ StructValueSerializer
 						const wchar_t* comma=wcschr(reading, L':');
 						if(!comma) return false;
 
-						vint index=fieldSerializers.Keys().IndexOf(WString(reading, comma-reading));
+						vint index=fieldSerializers.Keys().IndexOf(WString(reading, vint(comma-reading)));
 						if(index==-1) return false;
 						reading=comma+1;
 

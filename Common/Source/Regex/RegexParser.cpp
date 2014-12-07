@@ -86,7 +86,7 @@ namespace vl
 			}
 			else
 			{
-				name=WString(input, read-input);
+				name=WString(input, vint(read-input));
 				input=read;
 				return true;
 			}

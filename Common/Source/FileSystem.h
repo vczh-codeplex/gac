@@ -13,6 +13,8 @@ Framework::FileSystem
 #include "Collections/List.h"
 #include "Stream/CharFormat.h"
 
+#if defined VCZH_MSVC
+
 namespace vl
 {
 	namespace filesystem
@@ -84,5 +86,7 @@ namespace vl
 		};
 	}
 }
+
+#endif
 
 #endif
