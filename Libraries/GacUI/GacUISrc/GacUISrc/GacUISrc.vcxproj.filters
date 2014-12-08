@@ -627,6 +627,9 @@
     <ClCompile Include="..\..\Source\Reflection\GuiInstanceLoader_WorkflowCompiler.cpp">
       <Filter>GacUI\Reflection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\ThreadingLinux.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">

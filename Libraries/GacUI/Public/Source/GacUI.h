@@ -15256,6 +15256,8 @@ Global Objects:
 #define VCZH_PRESENTATION_GACUI
 
 
+#if !defined(__APPLE__) && !defined(__APPLE_CC__) && !defined(GAC_HEADER_USE_NAMESPACE)
+
 using namespace vl;
 using namespace vl::presentation;
 using namespace vl::presentation::elements;
@@ -15263,6 +15265,8 @@ using namespace vl::presentation::compositions;
 using namespace vl::presentation::controls;
 using namespace vl::presentation::theme;
 using namespace vl::presentation::templates;
+
+#endif
 
 extern int SetupWindowsGDIRenderer();
 extern int SetupWindowsDirect2DRenderer();
