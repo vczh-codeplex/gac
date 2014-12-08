@@ -268,6 +268,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\Stream\RecorderStream.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\String.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\ThreadingLinux.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_BuildScope.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_Errors.cpp" />
