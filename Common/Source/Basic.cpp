@@ -4,6 +4,7 @@
 #elif defined VCZH_GCC
 #include <time.h>
 #include <memory.h>
+#include <chrono>
 #endif
 
 namespace vl
@@ -102,7 +103,9 @@ DateTime
 		dt.second = timeinfo->tm_sec;
 		dt.milliseconds = 0;
 		dt.filetime = (vuint64_t)timer;
-		dt.totalMilliseconds = (vuint64_t)(timer*1000);
+
+		using namespace std::chrono;
+		dt.totalMilliseconds =  duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		return dt;
 	}
 #endif
