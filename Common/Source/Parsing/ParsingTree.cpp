@@ -152,7 +152,8 @@ ParsingTreeNode
 		{
 			const NodeList& subNodes=GetSubNodesInternal();
 			ClearQueryCache();
-			if(&subNodes)
+			auto subNodesExists = &subNodes;
+			if(subNodesExists)
 			{
 				ParsingTextRange emptyRange;
 				CopyFrom(

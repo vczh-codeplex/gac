@@ -280,7 +280,8 @@ ParsingState
 			vint ParsingState::Reset(const WString& rule)
 			{
 				const ParsingTable::RuleInfo& info=table->GetRuleInfo(rule);
-				if(&info)
+				auto infoExists = &info;
+				if(infoExists)
 				{
 					walker->Reset();
 					walker->Move();
