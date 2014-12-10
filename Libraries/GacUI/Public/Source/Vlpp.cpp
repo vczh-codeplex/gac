@@ -11,6 +11,7 @@ Basic.cpp
 #include <Windows.h>
 #elif defined VCZH_GCC
 #include <time.h>
+#include <chrono>
 #endif
 
 namespace vl
@@ -109,7 +110,9 @@ DateTime
 		dt.second = timeinfo->tm_sec;
 		dt.milliseconds = 0;
 		dt.filetime = (vuint64_t)timer;
-		dt.totalMilliseconds = (vuint64_t)(timer*1000);
+
+		using namespace std::chrono;
+		dt.totalMilliseconds =  duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 		return dt;
 	}
 #endif
@@ -9308,7 +9311,8 @@ ParsingState
 			vint ParsingState::Reset(const WString& rule)
 			{
 				const ParsingTable::RuleInfo& info=table->GetRuleInfo(rule);
-				if(&info)
+				auto infoExists = &info;
+				if(infoExists)
 				{
 					walker->Reset();
 					walker->Move();
@@ -10839,7 +10843,8 @@ ParsingTreeNode
 		{
 			const NodeList& subNodes=GetSubNodesInternal();
 			ClearQueryCache();
-			if(&subNodes)
+			auto subNodesExists = &subNodes;
+			if(subNodesExists)
 			{
 				ParsingTextRange emptyRange;
 				CopyFrom(
