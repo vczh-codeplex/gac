@@ -25,7 +25,7 @@ namespace vl
 
 		bool IsChars(const wchar_t*& input, const wchar_t* chars, wchar_t& c)
 		{
-			const wchar_t* position=wcschr(chars, *input);
+			const wchar_t* position=::wcschr(chars, *input);
 			if(position)
 			{
 				c=*input++;

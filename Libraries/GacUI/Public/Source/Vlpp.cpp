@@ -18274,7 +18274,7 @@ namespace vl
 
 		bool IsChars(const wchar_t*& input, const wchar_t* chars, wchar_t& c)
 		{
-			const wchar_t* position=wcschr(chars, *input);
+			const wchar_t* position=::wcschr(chars, *input);
 			if(position)
 			{
 				c=*input++;
@@ -19967,7 +19967,7 @@ TextWriter
 						const wchar_t* cell=tableByRow[cellStart+c].Buffer();
 						for(vint i=0;i<r;i++)
 						{
-							if(cell) cell=wcsstr(cell, L"\r\n");
+							if(cell) cell=::wcsstr(cell, L"\r\n");
 							if(cell) cell+=2;
 						}
 
@@ -19975,7 +19975,7 @@ TextWriter
 						vint length=0;
 						if(cell)
 						{
-							const wchar_t* end=wcsstr(cell, L"\r\n");
+							const wchar_t* end=::wcsstr(cell, L"\r\n");
 							length=end?end-cell:(vint)wcslen(cell);
 							writer.WriteString(cell, length);
 						}
@@ -20011,7 +20011,7 @@ TextWriter
 					while(reading)
 					{
 						height++;
-						const wchar_t* crlf=wcsstr(reading, L"\r\n");
+						const wchar_t* crlf=::wcsstr(reading, L"\r\n");
 						if(crlf)
 						{
 							vint length=crlf-reading+2;
