@@ -13591,7 +13591,7 @@ LogTypeManager
 							}
 						}
 						const wchar_t* name=typeDescriptor->GetTypeName().Buffer();
-						while(const wchar_t* next=wcschr(name, L':'))
+						while(const wchar_t* next=::wcschr(name, L':'))
 						{
 							name=next+1;
 						}
