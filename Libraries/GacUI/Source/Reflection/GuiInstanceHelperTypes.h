@@ -11,6 +11,16 @@ Interfaces:
 
 #include "../Resources/GuiResource.h"
 
+#if !defined(__APPLE__) && !defined(__APPLE_CC__)
+
+using namespace vl;
+using namespace vl::presentation;
+using namespace vl::presentation::elements;
+using namespace vl::presentation::compositions;
+using namespace vl::presentation::controls;
+
+#endif
+
 namespace vl
 {
 	namespace presentation
