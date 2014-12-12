@@ -24426,6 +24426,9 @@ Semaphore
             CFUUIDRef cfuuid = CFUUIDCreate(kCFAllocatorDefault);
             CFStringRef cfstr = CFUUIDCreateString(kCFAllocatorDefault, cfuuid);
             auuid = CFStringGetCStringPtr(cfstr, kCFStringEncodingASCII);
+
+			CFRelease(cfstr);
+			CFRelease(cfuuid);
         }
         auuid = auuid.Insert(0, "/");
         // OSX SEM_NAME_LENGTH = 31
