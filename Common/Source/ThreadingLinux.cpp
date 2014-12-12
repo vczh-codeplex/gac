@@ -277,6 +277,7 @@ Semaphore
 		if (internalData) return false;
 		if (initialCount > maxCount) return false;
 
+		internalData = new SemaphoreData;
 #if defined(__APPLE__)
         
         AString auuid;
