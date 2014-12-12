@@ -315,9 +315,8 @@ Semaphore
         else
         {
             AString astr = wtoa(name);
-            auuid = auuid.Insert(0, "/");
             
-            if ((internalData->semNamed = sem_open(auuid.Buffer(), O_CREAT, 0777, initialCount)) == SEM_FAILED)
+            if ((internalData->semNamed = sem_open(astr.Buffer(), O_CREAT, 0777, initialCount)) == SEM_FAILED)
             {
                 delete internalData;
                 internalData = 0;
