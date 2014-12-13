@@ -26,6 +26,7 @@ namespace vm
 		ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
 		~ProjectItem();
 		
+		Ptr<IProjectFactoryModel>						GetProjectFactory();
 		bool											OpenProject();
 		bool											SaveProject();
 		bool											NewProject();
@@ -44,9 +45,10 @@ namespace vm
 	class SolutionItem : public Object, public virtual ISolutionItemModel
 	{
 	protected:
-		list::ObservableList<Ptr<ISolutionItemModel>>	projects;
+		list::ObservableList<Ptr<ISolutionItemModel>>			projects;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
+		bool											isSaved;
 
 	public:
 		SolutionItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
