@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include "FileSystem.h"
 #include "Locale.h"
 #include "Collections/OperationForEach.h"
@@ -27,7 +26,11 @@ FilePath
 		void FilePath::Initialize()
 		{
 			Array<wchar_t> buffer(fullPath.Length() + 1);
-			wcscpy(&buffer[0], fullPath.Buffer());
+#if defined VCZH_MSVC
+			wcscpy_s(&buffer[0], fullPath.Length() + 1, fullPath.Buffer());
+#elif defined VCZH_GCC
+			wcscpy_s(&buffer[0], fullPath.Buffer());
+#endif
 			for (vint i = 0; i < buffer.Count(); i++)
 			{
 				if (buffer[i] == L'\\' || buffer[i] == L'/')

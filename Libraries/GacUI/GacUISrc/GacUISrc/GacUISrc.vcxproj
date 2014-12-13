@@ -225,6 +225,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Console.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Exception.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\FileSystem.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\HttpUtility.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Locale.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Json\ParsingJson.cpp" />
@@ -441,6 +442,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\Console.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Event.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Exception.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\FileSystem.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Function.h" />
     <ClInclude Include="..\..\..\..\Common\Source\HttpUtility.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Locale.h" />
