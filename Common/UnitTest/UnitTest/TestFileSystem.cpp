@@ -34,6 +34,69 @@ void ClearTestFolders()
 TEST_CASE(TestFilePath)
 {
 	ClearTestFolders();
+	{
+		FilePath p;
+		TEST_ASSERT(p.IsFile() == false);
+		TEST_ASSERT(p.IsFolder() == false);
+		TEST_ASSERT(p.IsRoot() == true);
+		TEST_ASSERT(p.GetFullPath() == L"");
+	}
+	{
+		FilePath p = L"C:\\";
+		TEST_ASSERT(p.IsFile() == false);
+		TEST_ASSERT(p.IsFolder() == true);
+		TEST_ASSERT(p.IsRoot() == false);
+		TEST_ASSERT(p.GetFullPath() == L"C:");
+	}
+	{
+		FilePath p = L"C:\\Windows\\";
+		TEST_ASSERT(p.IsFile() == false);
+		TEST_ASSERT(p.IsFolder() == true);
+		TEST_ASSERT(p.IsRoot() == false);
+		TEST_ASSERT(p.GetFullPath() == L"C:\\Windows");
+	}
+	{
+		FilePath p = L"C:\\Windows\\Explorer.exe";
+		TEST_ASSERT(p.IsFile() == true);
+		TEST_ASSERT(p.IsFolder() == false);
+		TEST_ASSERT(p.IsRoot() == false);
+		TEST_ASSERT(p.GetFullPath() == L"C:\\Windows\\Explorer.exe");
+	}
+	{
+		FilePath p = L"C:\\Windows\\vczh.txt";
+		TEST_ASSERT(p.IsFile() == false);
+		TEST_ASSERT(p.IsFolder() == false);
+		TEST_ASSERT(p.IsRoot() == false);
+		TEST_ASSERT(p.GetFullPath() == L"C:\\Windows\\vczh.txt");
+	}
+	{
+		FilePath p = L"C:\\Windows";
+		auto q = p / L"Explorer.exe";
+		TEST_ASSERT(q.GetFullPath() == L"C:\\Windows\\Explorer.exe");
+	}
+	{
+		FilePath p = L"C:\\Program Files";
+		auto q = p / L"..\\Windows\\.\\Explorer.exe";
+		TEST_ASSERT(q.GetFullPath() == L"C:\\Windows\\Explorer.exe");
+	}
+	{
+		FilePath p = L"C:\\Program Files";
+		FilePath q = L"C:\\Windows\\Explorer.exe";
+		auto r = p.GetRelativePathFor(q);
+		TEST_ASSERT(r == L"..\\Windows\\Explorer.exe");
+	}
+	{
+		FilePath p = L"C:\\Program Files\\vczh.txt";
+		FilePath q = L"C:\\Windows\\Explorer.exe";
+		auto r = p.GetRelativePathFor(q);
+		TEST_ASSERT(r == L"..\\Windows\\Explorer.exe");
+	}
+	{
+		FilePath p = L"C:\\Program Files\\vczh.txt";
+		FilePath q = L"D:\\Windows\\Explorer.exe";
+		auto r = p.GetRelativePathFor(q);
+		TEST_ASSERT(r == L"D:\\Windows\\Explorer.exe");
+	}
 }
 
 TEST_CASE(CreateDeleteFolders)
