@@ -630,6 +630,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\ThreadingLinux.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\FileSystem.cpp">
+      <Filter>Common\Basic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1132,6 +1135,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Reflection\GuiInstanceLoader_WorkflowCompiler.h">
       <Filter>GacUI\Reflection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\FileSystem.h">
+      <Filter>Common\Basic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
