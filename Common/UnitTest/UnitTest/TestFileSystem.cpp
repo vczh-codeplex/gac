@@ -15,19 +15,25 @@ void ClearTestFolders()
 	Folder folder(GetPath() + L"FileSystem");
 	auto folderPath = folder.GetFilePath().GetFullPath();
 #if defined VCZH_MSVC
-	TEST_ASSERT(INVLOC.FindLast(folderPath, L"\\FileSystem\\", Locale::None).key == folderPath.Length() - 12);
+	TEST_ASSERT(folderPath[1] == L':');
+	TEST_ASSERT(INVLOC.FindLast(folderPath, L"\\FileSystem", Locale::None).key == folderPath.Length() - 11);
 #elif define VCZH_GCC
-	TEST_ASSERT(INVLOC.FindLast(folderPath, L"/FileSystem/", Locale::None).key == folderPath.Length() - 12);
+	TEST_ASSERT(folderPath[0] == L'/');
+	TEST_ASSERT(INVLOC.FindLast(folderPath, L"/FileSystem", Locale::None).key == folderPath.Length() - 11);
 #endif
 
-	if (!folder.Exists())
+	if (folder.Exists())
 	{
-		TEST_ASSERT(folder.Create(false) == true);
+		TEST_ASSERT(folder.Delete(true) == true);
 	}
-	else
-	{
-		TEST_ASSERT(folder.Create(false) == false);
-	}
+	TEST_ASSERT(folder.Create(false) == true);
+	TEST_ASSERT(folder.Exists() == true);
+	TEST_ASSERT(folder.Create(false) == false);
+}
+
+TEST_CASE(TestFilePath)
+{
+	ClearTestFolders();
 }
 
 TEST_CASE(CreateDeleteFolders)
