@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "FileSystem.h"
 #include "Locale.h"
+#include "Collections/OperationForEach.h"
 #if defined VCZH_MSVC
 #include <Windows.h>
 #elif defined VCZH_GCC
@@ -87,7 +88,14 @@ FilePath
 
 		FilePath FilePath::operator/(const WString& relativePath)const
 		{
-			throw 0;
+			if (IsRoot())
+			{
+				return relativePath;
+			}
+			else
+			{
+				return fullPath + L"/" + relativePath;
+			}
 		}
 
 		bool FilePath::IsFile()const
@@ -156,6 +164,10 @@ FilePath
 /***********************************************************************
 File
 ***********************************************************************/
+
+		File::File()
+		{
+		}
 		
 		File::File(const FilePath& _filePath)
 			:filePath(_filePath)
@@ -222,6 +234,10 @@ File
 /***********************************************************************
 Folder
 ***********************************************************************/
+
+		Folder::Folder()
+		{
+		}
 		
 		Folder::Folder(const FilePath& _filePath)
 			:filePath(_filePath)
@@ -240,7 +256,40 @@ Folder
 		bool Folder::GetFolders(collections::List<Folder>& folders)const
 		{
 #if defined VCZH_MSVC
-			throw 0;
+			if (!Exists()) return false;
+			WIN32_FIND_DATA findData;
+			HANDLE findHandle = INVALID_HANDLE_VALUE;
+
+			while (true)
+			{
+				if (findHandle == INVALID_HANDLE_VALUE)
+				{
+					WString searchPath = (filePath / L"*").GetFullPath();
+					findHandle = FindFirstFile(searchPath.Buffer(), &findData);
+					if (findHandle == INVALID_HANDLE_VALUE)
+					{
+						break;
+					}
+				}
+				else
+				{
+					BOOL result = FindNextFile(findHandle, &findData);
+					if (result == 0)
+					{
+						FindClose(findHandle);
+						break;
+					}
+				}
+
+				if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					if (wcscmp(findData.cFileName, L".") != 0 && wcscmp(findData.cFileName, L"..") != 0)
+					{
+						folders.Add(Folder(filePath / findData.cFileName));
+					}
+				}
+			}
+			return true;
 #elif defined VCZH_GCC
 			throw 0;
 #endif
@@ -249,7 +298,37 @@ Folder
 		bool Folder::GetFiles(collections::List<File>& files)const
 		{
 #if defined VCZH_MSVC
-			throw 0;
+			if (!Exists()) return false;
+			WIN32_FIND_DATA findData;
+			HANDLE findHandle = INVALID_HANDLE_VALUE;
+
+			while (true)
+			{
+				if (findHandle == INVALID_HANDLE_VALUE)
+				{
+					WString searchPath = (filePath / L"*").GetFullPath();
+					findHandle = FindFirstFile(searchPath.Buffer(), &findData);
+					if (findHandle == INVALID_HANDLE_VALUE)
+					{
+						break;
+					}
+				}
+				else
+				{
+					BOOL result = FindNextFile(findHandle, &findData);
+					if (result == 0)
+					{
+						FindClose(findHandle);
+						break;
+					}
+				}
+
+				if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+				{
+					files.Add(File(filePath / findData.cFileName));
+				}
+			}
+			return true;
 #elif defined VCZH_GCC
 			throw 0;
 #endif
@@ -279,14 +358,26 @@ Folder
 		bool Folder::Delete(bool recursively)const
 		{
 #if defined VCZH_MSVC
+			if (!Exists()) return false;
 			if (recursively)
 			{
-				throw 0;
+				List<Folder> folders;
+				GetFolders(folders);
+				FOREACH(Folder, folder, folders)
+				{
+					if (!folder.Delete(true)) return false;
+				}
+				
+				List<File> files;
+				GetFiles(files);
+				FOREACH(File, file, files)
+				{
+					if (!file.Delete()) return false;
+				}
+
+				return Delete(false);
 			}
-			else
-			{
-				return RemoveDirectory(filePath.GetFullPath().Buffer()) != 0;
-			}
+			return RemoveDirectory(filePath.GetFullPath().Buffer()) != 0;
 #elif defined VCZH_GCC
 			throw 0;
 #endif

@@ -60,6 +60,7 @@ namespace vl
 			FilePath					filePath;
 
 		public:
+			File();
 			File(const FilePath& _filePath);
 			~File();
 
@@ -81,6 +82,7 @@ namespace vl
 			FilePath					filePath;
 
 		public:
+			Folder();
 			Folder(const FilePath& _filePath);
 			~Folder();
 
