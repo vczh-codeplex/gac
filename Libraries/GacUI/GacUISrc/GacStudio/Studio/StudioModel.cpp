@@ -159,6 +159,16 @@ RootSolutionItemModel
 		throw true;
 	}
 
+	vint RootSolutionItemModel::GetErrorCount()
+	{
+		return 0;
+	}
+
+	WString RootSolutionItemModel::GetErrorText(vint index)
+	{
+		return L"";
+	}
+
 	bool RootSolutionItemModel::OpenFileItem()
 	{
 		return false;

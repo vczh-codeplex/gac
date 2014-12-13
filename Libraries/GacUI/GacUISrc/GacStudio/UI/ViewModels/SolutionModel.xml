@@ -24,6 +24,11 @@
     <Property Name="IsFileItem" Type="bool" Readonly="true"/>
     <Property Name="FilePath" Type="string" Readonly="true" Observable="true"/>
     <Property Name="IsSaved" Type="bool" Readonly="true" Observable="true"/>
+    
+    <Property Name="ErrorCount" Type="int" Readonly="true" Observable="true"/>
+    <Method Name="GetErrorText" Type="string">
+      <Argument Name="index" Type="int"/>
+    </Method>
 
     <Method Name="OpenFileItem" Type="bool">
     </Method>

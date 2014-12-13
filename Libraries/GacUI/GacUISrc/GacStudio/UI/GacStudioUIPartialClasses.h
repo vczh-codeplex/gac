@@ -73,6 +73,10 @@ namespace vm
 		virtual bool GetIsSaved() = 0;
 		vl::Event<void()> IsSavedChanged;
 
+		virtual vint GetErrorCount() = 0;
+		vl::Event<void()> ErrorCountChanged;
+
+		virtual WString GetErrorText(vint index) = 0;
 		virtual bool OpenFileItem() = 0;
 		virtual bool SaveFileItem() = 0;
 	};

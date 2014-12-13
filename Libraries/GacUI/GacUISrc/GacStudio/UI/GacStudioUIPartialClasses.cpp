@@ -57,6 +57,9 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(FilePath, FilePathChanged)
 				CLASS_MEMBER_EVENT(IsSavedChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(IsSaved, IsSavedChanged)
+				CLASS_MEMBER_EVENT(ErrorCountChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ErrorCount, ErrorCountChanged)
+				CLASS_MEMBER_METHOD(GetErrorText, { L"index" });
 				CLASS_MEMBER_METHOD(OpenFileItem, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveFileItem, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::ISolutionItemModel)

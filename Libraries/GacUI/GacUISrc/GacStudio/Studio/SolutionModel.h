@@ -21,6 +21,8 @@ namespace vm
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
+		bool											isSaved;
+		collections::List<WString>						errors;
 
 	public:
 		ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
@@ -38,6 +40,8 @@ namespace vm
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		bool											GetIsSaved()override;
+		vint											GetErrorCount()override;
+		WString											GetErrorText(vint index)override;
 		bool											OpenFileItem()override;
 		bool											SaveFileItem()override;
 	};
@@ -45,10 +49,11 @@ namespace vm
 	class SolutionItem : public Object, public virtual ISolutionItemModel
 	{
 	protected:
-		list::ObservableList<Ptr<ISolutionItemModel>>			projects;
+		list::ObservableList<Ptr<ISolutionItemModel>>	projects;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
 		bool											isSaved;
+		collections::List<WString>						errors;
 
 	public:
 		SolutionItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
@@ -65,6 +70,8 @@ namespace vm
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		bool											GetIsSaved()override;
+		vint											GetErrorCount()override;
+		WString											GetErrorText(vint index)override;
 		bool											OpenFileItem()override;
 		bool											SaveFileItem()override;
 	};
