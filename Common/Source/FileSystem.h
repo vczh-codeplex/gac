@@ -13,15 +13,23 @@ Framework::FileSystem
 #include "Collections/List.h"
 #include "Stream/CharFormat.h"
 
-#if defined VCZH_MSVC
-
 namespace vl
 {
 	namespace filesystem
 	{
 		class FilePath : public Object
 		{
+		protected:
+			WString						fullPath;
+
+			void						Initialize();
 		public:
+#if defined VCZH_MSVC
+			static const wchar_t		Delimiter = L'\\';
+#elif defined VCZH_GCC
+			static const wchar_t		Delimiter = L'/';
+#endif
+
 			FilePath();
 			FilePath(const WString& _filePath);
 			FilePath(const wchar_t* _filePath);
@@ -86,7 +94,5 @@ namespace vl
 		};
 	}
 }
-
-#endif
 
 #endif
