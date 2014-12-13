@@ -1,6 +1,10 @@
 #include "SolutionModel.h"
 
+using namespace vl::parsing::xml;
+using namespace vl::filesystem;
+using namespace vl::stream;
 using namespace vl::reflection::description;
+using namespace vl::presentation;
 
 namespace vm
 {
@@ -29,6 +33,11 @@ ProjectItem
 
 	ProjectItem::~ProjectItem()
 	{
+	}
+
+	Ptr<IProjectFactoryModel> ProjectItem::GetProjectFactory()
+	{
+		return projectFactory;
 	}
 		
 	bool ProjectItem::OpenProject()
@@ -93,6 +102,7 @@ SolutionItem
 	SolutionItem::SolutionItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath)
 		:projectFactory(_projectFactory)
 		, filePath(_filePath)
+		, isSaved(false)
 	{
 	}
 
@@ -102,17 +112,92 @@ SolutionItem
 		
 	bool SolutionItem::OpenSolution()
 	{
-		return false;
+		auto solutionFolder = FilePath(filePath).GetFolder();
+		Ptr<XmlDocument> xml;
+		{
+			FileStream fileStream(filePath, FileStream::ReadOnly);
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+
+			auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
+			if (!parser) return false;
+
+			List<WString> errors;
+			xml = parser->TypedParse(reader.ReadToEnd(), errors);
+			if (!xml || errors.Count() > 0) return false;
+		}
+
+		projects.Clear();
+		FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioProject"))
+		{
+			auto factoryId = XmlGetAttribute(xmlProject, L"Factory")->value.value;
+			auto filePath = XmlGetAttribute(xmlProject, L"FilePath")->value.value;
+			auto factory=projectFactory
+				->GetChildren()
+				.Where([=](Ptr<IProjectFactoryModel> factory)
+				{
+					return factory->GetId() == factoryId;
+				})
+				.First();
+			if (factory)
+			{
+				auto project = new ProjectItem(factory, (solutionFolder / filePath).GetFullPath());
+				projects.Add(project);
+			}
+		}
+
+		if (!isSaved)
+		{
+			isSaved = true;
+			IsSavedChanged();
+		}
+		return true;
 	}
 
 	bool SolutionItem::SaveSolution()
 	{
-		return false;
+		auto solutionFolder = FilePath(filePath).GetFolder();
+		auto xml = MakePtr<XmlDocument>();
+		auto xmlSolution = MakePtr<XmlElement>();
+		xmlSolution->name.value = L"GacStudioSolution";
+		xml->rootElement = xmlSolution;
+		{
+			XmlElementWriter xmlWriter(xmlSolution);
+			FOREACH(Ptr<ProjectItem>, project, From(projects).Cast<ProjectItem>())
+			{
+				xmlWriter
+					.Element(L"GacStudioProject")
+					.Attribute(L"Factory", project->GetProjectFactory()->GetId())
+					.Attribute(L"FilePath", solutionFolder.GetRelativePathFor(project->GetFilePath()))
+					;
+			}
+		}
+		{
+			FileStream fileStream(filePath, FileStream::WriteOnly);
+			if (!fileStream.IsAvailable()) return false;
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			XmlPrint(xml, writer);
+		}
+		if (!isSaved)
+		{
+			isSaved = true;
+			IsSavedChanged();
+		}
+		return true;
 	}
 
 	bool SolutionItem::NewSolution()
 	{
-		return false;
+		projects.Clear();
+		if (isSaved)
+		{
+			isSaved = false;
+			IsSavedChanged();
+		}
+		return true;
 	}
 
 	Ptr<GuiImageData> SolutionItem::GetImage()
@@ -142,7 +227,7 @@ SolutionItem
 
 	bool SolutionItem::GetIsSaved()
 	{
-		throw 0;
+		return isSaved;
 	}
 
 	bool SolutionItem::OpenFileItem()
