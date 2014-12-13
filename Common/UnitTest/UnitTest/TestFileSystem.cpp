@@ -112,6 +112,52 @@ TEST_CASE(TestFilePath)
 TEST_CASE(CreateDeleteFolders)
 {
 	ClearTestFolders();
+	FilePath folder = GetPath() + L"FileSystem";
+
+	File a = folder / L"A/vczh.txt";
+	File b = folder / L"A/B/C/vczh.txt";
+	Folder c = folder / L"A";
+	Folder d = folder / L"A/B/C";
+	
+	TEST_ASSERT(a.Exists() == false);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(c.Exists() == false);
+	TEST_ASSERT(d.Exists() == false);
+	TEST_ASSERT(a.WriteAllText(L"A") == false);
+	TEST_ASSERT(b.WriteAllText(L"B") == false);
+	TEST_ASSERT(a.ReadAllText() == L"");
+	TEST_ASSERT(b.ReadAllText() == L"");
+	
+	TEST_ASSERT(c.Create(false) == true);
+	TEST_ASSERT(d.Create(false) == false);
+	TEST_ASSERT(d.Create(true) == true);
+	TEST_ASSERT(c.Create(true) == false);
+	TEST_ASSERT(d.Create(true) == false);
+	
+	TEST_ASSERT(a.Exists() == false);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(c.Exists() == true);
+	TEST_ASSERT(d.Exists() == true);
+	TEST_ASSERT(a.WriteAllText(L"A") == true);
+	TEST_ASSERT(b.WriteAllText(L"B") == true);
+	TEST_ASSERT(a.ReadAllText() == L"A");
+	TEST_ASSERT(b.ReadAllText() == L"B");
+	TEST_ASSERT(a.Exists() == true);
+	TEST_ASSERT(b.Exists() == true);
+
+	TEST_ASSERT(c.Delete(false) == false);
+	TEST_ASSERT(d.Delete(false) == false);
+	TEST_ASSERT(c.Delete(true) == true);
+	TEST_ASSERT(d.Delete(true) == false);
+	
+	TEST_ASSERT(a.Exists() == false);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(c.Exists() == false);
+	TEST_ASSERT(d.Exists() == false);
+	TEST_ASSERT(a.WriteAllText(L"A") == false);
+	TEST_ASSERT(b.WriteAllText(L"B") == false);
+	TEST_ASSERT(a.ReadAllText() == L"");
+	TEST_ASSERT(b.ReadAllText() == L"");
 }
 
 TEST_CASE(EnumerateFoldersAndFiles)

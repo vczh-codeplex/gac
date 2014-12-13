@@ -435,7 +435,10 @@ Folder
 #if defined VCZH_MSVC
 			if (recursively)
 			{
-				throw 0;
+				auto folder = filePath.GetFolder();
+				if (folder.IsFile()) return false;
+				if (folder.IsFolder()) return Create(false);
+				return Folder(folder).Create(true) && Create(false);
 			}
 			else
 			{
