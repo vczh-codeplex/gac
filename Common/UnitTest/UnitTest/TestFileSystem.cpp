@@ -4,6 +4,8 @@
 
 using namespace vl;
 using namespace vl::filesystem;
+using namespace vl::collections;
+using namespace vl::stream;
 
 extern WString GetPath();
 
@@ -117,4 +119,61 @@ TEST_CASE(EnumerateFoldersAndFiles)
 TEST_CASE(FastAccessFiles)
 {
 	ClearTestFolders();
+	FilePath folder = GetPath() + L"FileSystem";
+	File file = folder / L"vczh.txt";
+
+	WString text;
+	List<WString> lines;
+	TEST_ASSERT(file.Exists() == false);
+	TEST_ASSERT(file.ReadAllText() == L"");
+	TEST_ASSERT(file.ReadAllText(text) == false && text == L"");
+	TEST_ASSERT(file.ReadAllLines(lines) == false && lines.Count() == 0);
+	
+	text = L"";
+	lines.Clear();
+	file.WriteAllText(L"Vczh is a genius!");
+	TEST_ASSERT(file.Exists() == true);
+	TEST_ASSERT(file.ReadAllText() == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllText(text) == true && text == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllLines(lines) == true && lines.Count() == 1 && lines[0] == L"Vczh is a genius!");
+	
+	text = L"";
+	lines.Clear();
+	file.WriteAllText(L"Vczh is a genius!", true, BomEncoder::Mbcs);
+	TEST_ASSERT(file.Exists() == true);
+	TEST_ASSERT(file.ReadAllText() == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllText(text) == true && text == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllLines(lines) == true && lines.Count() == 1 && lines[0] == L"Vczh is a genius!");
+	
+	text = L"";
+	lines.Clear();
+	file.WriteAllText(L"Vczh is a genius!", true, BomEncoder::Utf8);
+	TEST_ASSERT(file.Exists() == true);
+	TEST_ASSERT(file.ReadAllText() == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllText(text) == true && text == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllLines(lines) == true && lines.Count() == 1 && lines[0] == L"Vczh is a genius!");
+	
+	text = L"";
+	lines.Clear();
+	file.WriteAllText(L"Vczh is a genius!", true, BomEncoder::Utf16);
+	TEST_ASSERT(file.Exists() == true);
+	TEST_ASSERT(file.ReadAllText() == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllText(text) == true && text == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllLines(lines) == true && lines.Count() == 1 && lines[0] == L"Vczh is a genius!");
+	
+	text = L"";
+	lines.Clear();
+	file.WriteAllText(L"Vczh is a genius!", true, BomEncoder::Utf16BE);
+	TEST_ASSERT(file.Exists() == true);
+	TEST_ASSERT(file.ReadAllText() == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllText(text) == true && text == L"Vczh is a genius!");
+	TEST_ASSERT(file.ReadAllLines(lines) == true && lines.Count() == 1 && lines[0] == L"Vczh is a genius!");
+	
+	text = L"";
+	lines.Clear();
+	TEST_ASSERT(file.Delete());
+	TEST_ASSERT(file.Exists() == false);
+	TEST_ASSERT(file.ReadAllText() == L"");
+	TEST_ASSERT(file.ReadAllText(text) == false && text == L"");
+	TEST_ASSERT(file.ReadAllLines(lines) == false && lines.Count() == 0);
 }

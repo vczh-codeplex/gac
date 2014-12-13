@@ -2,6 +2,8 @@
 #include "FileSystem.h"
 #include "Locale.h"
 #include "Collections/OperationForEach.h"
+#include "Stream/FileStream.h"
+#include "Stream/Accessor.h"
 #if defined VCZH_MSVC
 #include <Windows.h>
 #include <Shlwapi.h>
@@ -14,6 +16,7 @@ namespace vl
 	namespace filesystem
 	{
 		using namespace collections;
+		using namespace stream;
 
 		// ReadDirectoryChangesW
 
@@ -84,7 +87,7 @@ FilePath
 
 		vint FilePath::Compare(const FilePath& a, const FilePath& b)
 		{
-			throw 0;
+			return WString::Compare(a.fullPath, b.fullPath);
 		}
 
 		FilePath FilePath::operator/(const WString& relativePath)const
@@ -198,27 +201,107 @@ File
 
 		WString File::ReadAllText()const
 		{
-			throw 0;
+			WString text;
+			ReadAllText(text);
+			return text;
 		}
 
 		bool File::ReadAllText(WString& text)const
 		{
-			throw 0;
+			FileStream fileStream(filePath.GetFullPath(), FileStream::ReadOnly);
+			if (!fileStream.IsAvailable()) return false;
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+			text = reader.ReadToEnd();
+			return true;
 		}
 
 		bool File::ReadAllLines(collections::List<WString>& lines)const
 		{
-			throw 0;
+			FileStream fileStream(filePath.GetFullPath(), FileStream::ReadOnly);
+			if (!fileStream.IsAvailable()) return false;
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+			while (!reader.IsEnd())
+			{
+				lines.Add(reader.ReadLine());
+			}
+			return true;
 		}
 
 		bool File::WriteAllText(const WString& text, bool bom, stream::BomEncoder::Encoding encoding)
 		{
-			throw 0;
+			FileStream fileStream(filePath.GetFullPath(), FileStream::WriteOnly);
+			if (!fileStream.IsAvailable()) return false;
+			
+			IEncoder* encoder = nullptr;
+			if (bom)
+			{
+				encoder = new BomEncoder(encoding);
+			}
+			else switch (encoding)
+			{
+			case BomEncoder::Utf8:
+				encoder = new Utf8Encoder;
+				break;
+			case BomEncoder::Utf16:
+				encoder = new Utf16Encoder;
+				break;
+			case BomEncoder::Utf16BE:
+				encoder = new Utf16BEEncoder;
+				break;
+			default:
+				encoder = new MbcsEncoder;
+				break;
+			}
+
+			{
+				EncoderStream encoderStream(fileStream, *encoder);
+				StreamWriter writer(encoderStream);
+				writer.WriteString(text);
+			}
+			delete encoder;
+			return true;
 		}
 
 		bool File::WriteAllLines(collections::List<WString>& lines, bool bom, stream::BomEncoder::Encoding encoding)
 		{
-			throw 0;
+			FileStream fileStream(filePath.GetFullPath(), FileStream::WriteOnly);
+			if (!fileStream.IsAvailable()) return false;
+			
+			IEncoder* encoder = nullptr;
+			if (bom)
+			{
+				encoder = new BomEncoder(encoding);
+			}
+			else switch (encoding)
+			{
+			case BomEncoder::Utf8:
+				encoder = new Utf8Encoder;
+				break;
+			case BomEncoder::Utf16:
+				encoder = new Utf16Encoder;
+				break;
+			case BomEncoder::Utf16BE:
+				encoder = new Utf16BEEncoder;
+				break;
+			default:
+				encoder = new MbcsEncoder;
+				break;
+			}
+
+			{
+				EncoderStream encoderStream(fileStream, *encoder);
+				StreamWriter writer(encoderStream);
+				FOREACH(WString, line, lines)
+				{
+					writer.WriteLine(line);
+				}
+			}
+			delete encoder;
+			return true;
 		}
 
 		bool File::Exists()const
@@ -226,19 +309,10 @@ File
 			return filePath.IsFile();
 		}
 
-		bool File::Create()const
-		{
-#if defined VCZH_MSVC
-			throw 0;
-#elif defined VCZH_GCC
-			throw 0;
-#endif
-		}
-
 		bool File::Delete()const
 		{
 #if defined VCZH_MSVC
-			throw 0;
+			return DeleteFile(filePath.GetFullPath().Buffer()) != 0;
 #elif defined VCZH_GCC
 			throw 0;
 #endif
