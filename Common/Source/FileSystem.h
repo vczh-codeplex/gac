@@ -72,7 +72,6 @@ namespace vl
 			bool						WriteAllLines(collections::List<WString>& lines, bool bom = true, stream::BomEncoder::Encoding encoding = stream::BomEncoder::Utf16);
 			
 			bool						Exists()const;
-			bool						Create()const;
 			bool						Delete()const;
 		};
 
