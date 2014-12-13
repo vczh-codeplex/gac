@@ -82,6 +82,8 @@ namespace vm
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		bool											GetIsSaved()override;
+		vint											GetErrorCount()override;
+		WString											GetErrorText(vint index)override;
 		bool											OpenFileItem()override;
 		bool											SaveFileItem()override;
 		

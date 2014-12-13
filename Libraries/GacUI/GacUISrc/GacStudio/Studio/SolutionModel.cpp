@@ -28,6 +28,7 @@ ProjectItem
 	ProjectItem::ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath)
 		:projectFactory(_projectFactory)
 		, filePath(_filePath)
+		, isSaved(false)
 	{
 	}
 
@@ -85,6 +86,16 @@ ProjectItem
 		throw 0;
 	}
 
+	vint ProjectItem::GetErrorCount()
+	{
+		return errors.Count();
+	}
+
+	WString ProjectItem::GetErrorText(vint index)
+	{
+		return 0 <= index && index < errors.Count() ? errors[index] : L"";
+	}
+
 	bool ProjectItem::OpenFileItem()
 	{
 		return OpenProject();
@@ -112,10 +123,16 @@ SolutionItem
 		
 	bool SolutionItem::OpenSolution()
 	{
+		errors.Count();
 		auto solutionFolder = FilePath(filePath).GetFolder();
 		Ptr<XmlDocument> xml;
 		{
 			FileStream fileStream(filePath, FileStream::ReadOnly);
+			if (!fileStream.IsAvailable())
+			{
+				errors.Add(L"Failed to read \"" + filePath + L"\".");
+				ErrorCountChanged();
+			}
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
@@ -123,27 +140,46 @@ SolutionItem
 			auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
 			if (!parser) return false;
 
-			List<WString> errors;
 			xml = parser->TypedParse(reader.ReadToEnd(), errors);
-			if (!xml || errors.Count() > 0) return false;
 		}
 
 		projects.Clear();
-		FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioProject"))
+		if (xml)
 		{
-			auto factoryId = XmlGetAttribute(xmlProject, L"Factory")->value.value;
-			auto filePath = XmlGetAttribute(xmlProject, L"FilePath")->value.value;
-			auto factory=projectFactory
-				->GetChildren()
-				.Where([=](Ptr<IProjectFactoryModel> factory)
-				{
-					return factory->GetId() == factoryId;
-				})
-				.First();
-			if (factory)
+			FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioProject"))
 			{
-				auto project = new ProjectItem(factory, (solutionFolder / filePath).GetFullPath());
-				projects.Add(project);
+				auto attFactoryId = XmlGetAttribute(xmlProject, L"Factory");
+				auto attFilePath = XmlGetAttribute(xmlProject, L"FilePath");
+				if (!attFactoryId)
+				{
+					errors.Add(L"Attribute \"Factory\" is missing.");
+				}
+				if (!attFilePath)
+				{
+					errors.Add(L"Attribute \"FilePath\" is missing.");
+				}
+
+				if (attFactoryId && attFilePath)
+				{
+					auto factoryId = attFactoryId->value.value;
+					auto projectPath = attFilePath->value.value;
+					auto factory=projectFactory
+						->GetChildren()
+						.Where([=](Ptr<IProjectFactoryModel> factory)
+						{
+							return factory->GetId() == factoryId;
+						})
+						.First();
+					if (factory)
+					{
+						auto project = new ProjectItem(factory, (solutionFolder / projectPath).GetFullPath());
+						projects.Add(project);
+					}
+					else
+					{
+						errors.Add(L"Unrecognizable project factory id \"" + factoryId + L"\".");
+					}
+				}
 			}
 		}
 
@@ -152,6 +188,7 @@ SolutionItem
 			isSaved = true;
 			IsSavedChanged();
 		}
+		ErrorCountChanged();
 		return true;
 	}
 
@@ -175,7 +212,12 @@ SolutionItem
 		}
 		{
 			FileStream fileStream(filePath, FileStream::WriteOnly);
-			if (!fileStream.IsAvailable()) return false;
+			if (!fileStream.IsAvailable())
+			{
+				errors.Add(L"Failed to write \"" + filePath + L"\".");
+				ErrorCountChanged();
+				return false;
+			}
 			BomEncoder encoder(BomEncoder::Utf16);
 			EncoderStream encoderStream(fileStream, encoder);
 			StreamWriter writer(encoderStream);
@@ -228,6 +270,16 @@ SolutionItem
 	bool SolutionItem::GetIsSaved()
 	{
 		return isSaved;
+	}
+
+	vint SolutionItem::GetErrorCount()
+	{
+		return errors.Count();
+	}
+
+	WString SolutionItem::GetErrorText(vint index)
+	{
+		return 0 <= index && index < errors.Count() ? errors[index] : L"";
 	}
 
 	bool SolutionItem::OpenFileItem()
