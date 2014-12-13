@@ -56,7 +56,6 @@ FilePath
 
 		FilePath::FilePath()
 		{
-			Initialize();
 		}
 
 		FilePath::FilePath(const WString& _filePath)
