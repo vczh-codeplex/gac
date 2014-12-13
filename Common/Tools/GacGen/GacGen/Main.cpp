@@ -72,23 +72,30 @@ void GuiMain()
 	WritePartialClassCppFile(config, typeSchemas, typeSchemaOrder, instances);
 	WriteGlobalHeaderFile(config, instances);
 
-	if (config->precompiledOutput != L"")
+	if (errors.Count() > 0)
 	{
-		WString fileName = config->precompiledOutput;
-		auto xml = resource->SaveToXml(true);
-		OPEN_FILE(L"Precompiled Resource Xml");
-		XmlPrint(xml, writer);
+		PrintErrorMessage(L"Skip generate precompiled resource because there are compilation errors.");
 	}
-	if (config->precompiledBinary != L"")
+	else
 	{
-		FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledBinary, FileStream::WriteOnly);
-		resource->SavePrecompiledBinary(fileStream);
-	}
-	if (config->precompiledCompressed != L"")
-	{
-		FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledCompressed, FileStream::WriteOnly);
-		LzwEncoder encoder;
-		EncoderStream encoderStream(fileStream, encoder);
-		resource->SavePrecompiledBinary(encoderStream);
+		if (config->precompiledOutput != L"")
+		{
+			WString fileName = config->precompiledOutput;
+			auto xml = resource->SaveToXml(true);
+			OPEN_FILE(L"Precompiled Resource Xml");
+			XmlPrint(xml, writer);
+		}
+		if (config->precompiledBinary != L"")
+		{
+			FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledBinary, FileStream::WriteOnly);
+			resource->SavePrecompiledBinary(fileStream);
+		}
+		if (config->precompiledCompressed != L"")
+		{
+			FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledCompressed, FileStream::WriteOnly);
+			LzwEncoder encoder;
+			EncoderStream encoderStream(fileStream, encoder);
+			resource->SavePrecompiledBinary(encoderStream);
+		}
 	}
 }

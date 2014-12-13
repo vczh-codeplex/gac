@@ -61,6 +61,31 @@ ProjectItem
 		return children.GetWrapper();
 	}
 
+	bool ProjectItem::GetIsFileItem()
+	{
+		return true;
+	}
+
+	WString ProjectItem::GetFilePath()
+	{
+		return filePath;
+	}
+
+	bool ProjectItem::GetIsSaved()
+	{
+		throw 0;
+	}
+
+	bool ProjectItem::OpenFileItem()
+	{
+		return OpenProject();
+	}
+
+	bool ProjectItem::SaveFileItem()
+	{
+		return SaveProject();
+	}
+
 /***********************************************************************
 SolutionItem
 ***********************************************************************/
@@ -103,5 +128,30 @@ SolutionItem
 	Ptr<description::IValueObservableList> SolutionItem::GetChildren()
 	{
 		return projects.GetWrapper();
+	}
+
+	bool SolutionItem::GetIsFileItem()
+	{
+		return true;
+	}
+
+	WString SolutionItem::GetFilePath()
+	{
+		return filePath;
+	}
+
+	bool SolutionItem::GetIsSaved()
+	{
+		throw 0;
+	}
+
+	bool SolutionItem::OpenFileItem()
+	{
+		return OpenSolution();
+	}
+
+	bool SolutionItem::SaveFileItem()
+	{
+		return SaveSolution();
 	}
 }
