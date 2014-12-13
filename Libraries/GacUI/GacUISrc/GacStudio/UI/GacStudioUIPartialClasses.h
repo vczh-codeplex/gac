@@ -64,6 +64,17 @@ namespace vm
 		vl::Event<void()> NameChanged;
 
 		virtual Ptr<description::IValueObservableList> GetChildren() = 0;
+
+		virtual bool GetIsFileItem() = 0;
+
+		virtual WString GetFilePath() = 0;
+		vl::Event<void()> FilePathChanged;
+
+		virtual bool GetIsSaved() = 0;
+		vl::Event<void()> IsSavedChanged;
+
+		virtual bool OpenFileItem() = 0;
+		virtual bool SaveFileItem() = 0;
 	};
 }
 

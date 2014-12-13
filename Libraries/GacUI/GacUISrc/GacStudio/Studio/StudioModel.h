@@ -78,6 +78,12 @@ namespace vm
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
+
+		bool											GetIsFileItem()override;
+		WString											GetFilePath()override;
+		bool											GetIsSaved()override;
+		bool											OpenFileItem()override;
+		bool											SaveFileItem()override;
 		
 		Ptr<ISolutionItemModel>							GetSolution();
 		void											SetSolution(Ptr<ISolutionItemModel> solution);

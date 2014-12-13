@@ -144,6 +144,31 @@ RootSolutionItemModel
 		return children.GetWrapper();
 	}
 
+	bool RootSolutionItemModel::GetIsFileItem()
+	{
+		return false;
+	}
+
+	WString RootSolutionItemModel::GetFilePath()
+	{
+		return L"";
+	}
+
+	bool RootSolutionItemModel::GetIsSaved()
+	{
+		throw true;
+	}
+
+	bool RootSolutionItemModel::OpenFileItem()
+	{
+		return false;
+	}
+
+	bool RootSolutionItemModel::SaveFileItem()
+	{
+		return false;
+	}
+
 	Ptr<ISolutionItemModel> RootSolutionItemModel::GetSolution()
 	{
 		if (children.Count() == 0)return 0;
