@@ -97,7 +97,7 @@ DateTime
 		return systemTime;
 	}
 #elif defined VCZH_GCC
-	DateTime ConvertTMToDateTime(tm* timeinfo)
+	DateTime ConvertTMToDateTime(tm* timeinfo, bool rewriteMilliseconds)
 	{
 		time_t timer = mktime(timeinfo);
 		DateTime dt;
@@ -110,9 +110,12 @@ DateTime
 		dt.second = timeinfo->tm_sec;
 		dt.milliseconds = 0;
 		dt.filetime = (vuint64_t)timer;
-
-		using namespace std::chrono;
-		dt.totalMilliseconds =  duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		
+		if (rewriteMilliseconds)
+		{
+			using namespace std::chrono;
+			dt.totalMilliseconds =  duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		}
 		return dt;
 	}
 #endif
@@ -126,7 +129,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = time(nullptr);
 		tm* timeinfo = localtime(&timer);
-		return ConvertTMToDateTime(timeinfo);
+		return ConvertTMToDateTime(timeinfo, true);
 #endif
 	}
 
@@ -139,7 +142,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = time(nullptr);
 		tm* timeinfo = gmtime(&timer);
-		return ConvertTMToDateTime(timeinfo);
+		return ConvertTMToDateTime(timeinfo, true);
 #endif
 	}
 
@@ -169,7 +172,11 @@ DateTime
 		timeinfo.tm_hour = _hour;
 		timeinfo.tm_min = _minute;
 		timeinfo.tm_sec = _second;
-		DateTime dt = ConvertTMToDateTime(&timeinfo);
+		DateTime dt = ConvertTMToDateTime(&timeinfo, false);
+		if (timeinfo.tm_isdst > 0)
+		{
+			dt.hour--;
+		}
 		dt.milliseconds = _milliseconds;
 		return dt;
 #endif
@@ -190,7 +197,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = (time_t)filetime;
 		tm* timeinfo = localtime(&timer);
-		return ConvertTMToDateTime(timeinfo);
+		return ConvertTMToDateTime(timeinfo, false);
 #endif
 	}
 
@@ -218,7 +225,10 @@ DateTime
 		time_t utcTimer = mktime(gmtime(&localTimer));
 		time_t timer = (time_t)filetime + localTimer - utcTimer;
 		tm* timeinfo = localtime(&timer);
-		return ConvertTMToDateTime(timeinfo);
+
+		auto dt = ConvertTMToDateTime(timeinfo, false);
+		dt.milliseconds = milliseconds;
+		return dt;
 #endif
 	}
 
@@ -232,7 +242,10 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = (time_t)filetime;
 		tm* timeinfo = gmtime(&timer);
-		return ConvertTMToDateTime(timeinfo);
+
+		auto dt = ConvertTMToDateTime(timeinfo, false);
+		dt.milliseconds = milliseconds;
+		return dt;
 #endif
 	}
 
@@ -24455,9 +24468,8 @@ Semaphore
         else
         {
             AString astr = wtoa(name);
-            auuid = auuid.Insert(0, "/");
             
-            if ((internalData->semNamed = sem_open(auuid.Buffer(), O_CREAT, 0777, initialCount)) == SEM_FAILED)
+            if ((internalData->semNamed = sem_open(astr.Buffer(), O_CREAT, 0777, initialCount)) == SEM_FAILED)
             {
                 delete internalData;
                 internalData = 0;
