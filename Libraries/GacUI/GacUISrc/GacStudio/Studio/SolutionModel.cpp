@@ -123,7 +123,9 @@ SolutionItem
 		
 	bool SolutionItem::OpenSolution()
 	{
-		errors.Count();
+		projects.Clear();
+		errors.Clear();
+
 		auto solutionFolder = FilePath(filePath).GetFolder();
 		Ptr<XmlDocument> xml;
 		{
@@ -143,7 +145,6 @@ SolutionItem
 			xml = parser->TypedParse(reader.ReadToEnd(), errors);
 		}
 
-		projects.Clear();
 		if (xml)
 		{
 			FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioProject"))
