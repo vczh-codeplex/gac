@@ -4,6 +4,8 @@
 #include "Collections/OperationForEach.h"
 #if defined VCZH_MSVC
 #include <Windows.h>
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 #elif defined VCZH_GCC
 #endif
 
@@ -35,12 +37,12 @@ FilePath
 #if defined VCZH_MSVC
 			if (fullPath.Length() < 2 || fullPath[1] != L':')
 			{
-				wchar_t buffer[MAX_PATH + 1];
+				wchar_t buffer[MAX_PATH + 1] = { 0 };
 				GetCurrentDirectory(sizeof(buffer) / sizeof(*buffer), buffer);
 				fullPath = WString(buffer) + L"\\" + fullPath;
 			}
 			{
-				wchar_t buffer[MAX_PATH + 1];
+				wchar_t buffer[MAX_PATH + 1] = { 0 };
 				GetFullPathName(fullPath.Buffer(), sizeof(buffer) / sizeof(*buffer), buffer, NULL);
 				fullPath = buffer;
 			}
@@ -154,7 +156,19 @@ FilePath
 		WString FilePath::GetRelativePathFor(const FilePath& _filePath)
 		{
 #if defined VCZH_MSVC
-			throw 0;
+			if (fullPath.Length()==0 || _filePath.fullPath.Length()==0 || fullPath[0] != _filePath.fullPath[0])
+			{
+				return _filePath.fullPath;
+			}
+			wchar_t buffer[MAX_PATH + 1] = { 0 };
+			PathRelativePathTo(
+				buffer,
+				fullPath.Buffer(),
+				(IsFolder() ? FILE_ATTRIBUTE_DIRECTORY : 0),
+				_filePath.fullPath.Buffer(),
+				(_filePath.IsFolder() ? FILE_ATTRIBUTE_DIRECTORY : 0)
+				);
+			return buffer;
 #elif defined VCZH_GCC
 			throw 0;
 #endif
