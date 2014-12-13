@@ -42,6 +42,8 @@ TEST_CASE(TestFilePath)
 		TEST_ASSERT(p.IsFolder() == false);
 		TEST_ASSERT(p.IsRoot() == true);
 		TEST_ASSERT(p.GetFullPath() == L"");
+		TEST_ASSERT(p.GetName() == L"");
+		TEST_ASSERT(p.GetFolder().GetFullPath() == L"");
 	}
 	{
 		FilePath p = L"C:\\";
@@ -49,6 +51,8 @@ TEST_CASE(TestFilePath)
 		TEST_ASSERT(p.IsFolder() == true);
 		TEST_ASSERT(p.IsRoot() == false);
 		TEST_ASSERT(p.GetFullPath() == L"C:");
+		TEST_ASSERT(p.GetName() == L"C:");
+		TEST_ASSERT(p.GetFolder().GetFullPath() == L"");
 	}
 	{
 		FilePath p = L"C:\\Windows\\";
@@ -56,6 +60,8 @@ TEST_CASE(TestFilePath)
 		TEST_ASSERT(p.IsFolder() == true);
 		TEST_ASSERT(p.IsRoot() == false);
 		TEST_ASSERT(p.GetFullPath() == L"C:\\Windows");
+		TEST_ASSERT(p.GetName() == L"Windows");
+		TEST_ASSERT(p.GetFolder().GetFullPath() == L"C:");
 	}
 	{
 		FilePath p = L"C:\\Windows\\Explorer.exe";
@@ -63,6 +69,8 @@ TEST_CASE(TestFilePath)
 		TEST_ASSERT(p.IsFolder() == false);
 		TEST_ASSERT(p.IsRoot() == false);
 		TEST_ASSERT(p.GetFullPath() == L"C:\\Windows\\Explorer.exe");
+		TEST_ASSERT(p.GetName() == L"Explorer.exe");
+		TEST_ASSERT(p.GetFolder().GetFullPath() == L"C:\\Windows");
 	}
 	{
 		FilePath p = L"C:\\Windows\\vczh.txt";
@@ -106,14 +114,54 @@ TEST_CASE(CreateDeleteFolders)
 	ClearTestFolders();
 }
 
-TEST_CASE(CreateDeleteFiles)
-{
-	ClearTestFolders();
-}
-
 TEST_CASE(EnumerateFoldersAndFiles)
 {
 	ClearTestFolders();
+	FilePath folder = GetPath() + L"FileSystem";
+
+	File a = folder / L"a.txt";
+	File b = folder / L"b.txt";
+	Folder c = folder / L"c";
+	Folder d = folder / L"d";
+	List<File> files;
+	List<Folder> folders;
+
+	TEST_ASSERT(a.Exists() == false);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(c.Exists() == false);
+	TEST_ASSERT(d.Exists() == false);
+	files.Clear();
+	folders.Clear();
+	TEST_ASSERT(Folder(folder).GetFiles(files) == true && files.Count() == 0);
+	TEST_ASSERT(Folder(folder).GetFolders(folders) == true && folders.Count() == 0);
+
+	TEST_ASSERT(a.WriteAllText(L"") == true);
+	TEST_ASSERT(b.WriteAllText(L"") == true);
+	TEST_ASSERT(c.Create(false) == true);
+	TEST_ASSERT(d.Create(false) == true);
+
+	TEST_ASSERT(a.Exists() == true);
+	TEST_ASSERT(b.Exists() == true);
+	TEST_ASSERT(c.Exists() == true);
+	TEST_ASSERT(d.Exists() == true);
+	files.Clear();
+	folders.Clear();
+	TEST_ASSERT(Folder(folder).GetFiles(files) == true && files.Count() == 2 && files[0].GetFilePath().GetName() == L"a.txt" && files[1].GetFilePath().GetName() == L"b.txt");
+	TEST_ASSERT(Folder(folder).GetFolders(folders) == true && folders.Count() == 2 && folders[0].GetFilePath().GetName() == L"c" && folders[1].GetFilePath().GetName() == L"d");
+
+	TEST_ASSERT(a.Delete() == true);
+	TEST_ASSERT(b.Delete() == true);
+	TEST_ASSERT(c.Delete(false) == true);
+	TEST_ASSERT(d.Delete(false) == true);
+
+	TEST_ASSERT(a.Exists() == false);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(c.Exists() == false);
+	TEST_ASSERT(d.Exists() == false);
+	files.Clear();
+	folders.Clear();
+	TEST_ASSERT(Folder(folder).GetFiles(files) == true && files.Count() == 0);
+	TEST_ASSERT(Folder(folder).GetFolders(folders) == true && folders.Count() == 0);
 }
 
 TEST_CASE(FastAccessFiles)

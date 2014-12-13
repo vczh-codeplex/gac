@@ -488,6 +488,7 @@ TEST_CASE(TestSpinLock2)
 		TEST_ASSERT(data.counter==0);
 	}
 	while (data.counter != 10);
+	Thread::Sleep(1000);
 	TEST_ASSERT(data.lock.TryEnter());
 #ifdef VCZH_GCC
 	TEST_ASSERT(ThreadPoolLite::Stop(true));

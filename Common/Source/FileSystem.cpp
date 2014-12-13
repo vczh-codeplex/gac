@@ -46,6 +46,10 @@ FilePath
 			}
 			{
 				wchar_t buffer[MAX_PATH + 1] = { 0 };
+				if (fullPath.Length() == 2 && fullPath[1] == L':')
+				{
+					fullPath += L"\\";
+				}
 				GetFullPathName(fullPath.Buffer(), sizeof(buffer) / sizeof(*buffer), buffer, NULL);
 				fullPath = buffer;
 			}
@@ -139,7 +143,7 @@ FilePath
 		{
 			WString delimiter = Delimiter;
 			auto index = INVLOC.FindLast(fullPath, delimiter, Locale::None);
-			if (index.key == -1) return L"";
+			if (index.key == -1) return fullPath;
 			return fullPath.Right(fullPath.Length() - index.key - 1);
 		}
 
@@ -147,7 +151,7 @@ FilePath
 		{
 			WString delimiter = Delimiter;
 			auto index = INVLOC.FindLast(fullPath, delimiter, Locale::None);
-			if (index.key == -1) return L"";
+			if (index.key == -1) return FilePath();
 			return fullPath.Left(index.key);
 		}
 
