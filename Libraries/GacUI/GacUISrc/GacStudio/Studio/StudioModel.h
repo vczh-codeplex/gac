@@ -15,7 +15,7 @@ using namespace vl::collections;
 
 namespace vm
 {
-	class FileFactoryModelBase : public Object, public virtual IFileFactoryModel
+	class FileFactoryModel : public Object, public virtual IFileFactoryModel
 	{
 	protected:
 		Ptr<GuiImageData>								image;
@@ -25,8 +25,8 @@ namespace vm
 		WString											id;
 
 	public:
-		FileFactoryModelBase(WString _imageUrl, WString _name, WString _category, WString _description, WString _id);
-		~FileFactoryModelBase();
+		FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id);
+		~FileFactoryModel();
 
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
@@ -35,7 +35,7 @@ namespace vm
 		WString											GetId()override;
 	};
 
-	class ProjectFactoryModelBase : public Object, public virtual IProjectFactoryModel
+	class ProjectFactoryModel : public Object, public virtual IProjectFactoryModel
 	{
 	protected:
 		Ptr<GuiImageData>								image;
@@ -45,8 +45,8 @@ namespace vm
 		WString											id;
 
 	public:
-		ProjectFactoryModelBase(WString _imageUrl, WString _smallImageUrl, WString _name, WString _description, WString _id);
-		~ProjectFactoryModelBase();
+		ProjectFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _description, WString _id);
+		~ProjectFactoryModel();
 
 		Ptr<GuiImageData>								GetImage()override;
 		Ptr<GuiImageData>								GetSmallImage()override;
@@ -56,16 +56,16 @@ namespace vm
 		LazyList<Ptr<IProjectFactoryModel>>				GetChildren()override;
 	};
 
-	class FileFactoryFilterModel : public ProjectFactoryModelBase
+	class FileFactoryFilterModel : public ProjectFactoryModel
 	{
 	protected:
-		List<Ptr<ProjectFactoryModelBase>>				children;
+		List<Ptr<ProjectFactoryModel>>					children;
 
 	public:
 		FileFactoryFilterModel();
 		~FileFactoryFilterModel();
 
-		void											AddChild(Ptr<ProjectFactoryModelBase> child);
+		void											AddChild(Ptr<ProjectFactoryModel> child);
 		LazyList<Ptr<IProjectFactoryModel>>				GetChildren()override;
 	};
 
