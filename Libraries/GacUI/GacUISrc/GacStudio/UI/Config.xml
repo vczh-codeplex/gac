@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Folder>
+  <Folder name="Projects">
+    <Xml name="GACUI_RESOURCE_PROJECT">
+      <Project>
+        <Image>ProjectImages/Dialog.png</Image>
+        <SmallImage>ProjectImages/DialogSmall.png</SmallImage>
+        <Display>GacUI Resource</Display>
+        <Description>Create an embedded resource for your GacUI program.</Description>
+      </Project>
+    </Xml>
+    <Xml name="PARSER_PROJECT">
+      <Project>
+        <Image>ProjectImages/Parser.png</Image>
+        <SmallImage>ProjectImages/ParserSmall.png</SmallImage>
+        <Display>Parser</Display>
+        <Description>Create a parser.</Description>
+      </Project>
+    </Xml>
+    <Xml name="HERODB_PROJECT">
+      <Project>
+        <Image>ProjectImages/Database.png</Image>
+        <SmallImage>ProjectImages/DatabaseSmall.png</SmallImage>
+        <Display>HeroDB Database</Display>
+        <Description>Create a HeroDB database instance.</Description>
+      </Project>
+    </Xml>
+  </Folder>
+  <Folder name="Files">
+    <Xml name="GACUI_WINDOW_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Dialog.png</Image>
+        <Display>Window Resource</Display>
+        <Description>Create a window for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="GACUI_CONTROL_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Control.png</Image>
+        <Display>Control Resource</Display>
+        <Description>Create a control for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="GACUI_TEMPLATE_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Template.png</Image>
+        <Display>Control Template</Display>
+        <Description>Create a control template for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="GACUI_IMAGE_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Image.png</Image>
+        <Display>Image Resource</Display>
+        <Description>Create an image resource for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="GACUI_TEXT_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Document.png</Image>
+        <Display>Text Resource</Display>
+        <Description>Create a text resource for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="GACUI_RICHTEXT_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/RichDocument.png</Image>
+        <Display>Rich Text Resource</Display>
+        <Description>Create a rich text resource for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="GACUI_XML_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/XmlDocument.png</Image>
+        <Display>XML Resource</Display>
+        <Description>Create an xml resource for your GacUI program.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="PARSER_FILE">
+      <File>
+        <Image>FileImages/Parser.png</Image>
+        <Display>Parser</Display>
+        <Description>Create a parser from a grammar.</Description>
+        <Category>PARSER_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="PARSER_TEST_FILE">
+      <File>
+        <Image>FileImages/Parser.png</Image>
+        <Display>Parser Test</Display>
+        <Description>Create a parser test.</Description>
+        <Category>PARSER_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="HERODB_SQL_DATABASE">
+      <File>
+        <Image>FileImages/SQLDatabase.png</Image>
+        <Display>SQL Database</Display>
+        <Description>Create a SQL Database in a HeroDB database instance.</Description>
+        <Category>HERODB_PROJECT</Category>
+      </File>
+    </Xml>
+    <Xml name="HERODB_GRAPH_DATABASE">
+      <File>
+        <Image>FileImages/GraphDatabase.png</Image>
+        <Display>Graph Database</Display>
+        <Description>Create a Graph Database in a HeroDB database instance.</Description>
+        <Category>HERODB_PROJECT</Category>
+      </File>
+    </Xml>
+  </Folder>
+</Folder>
