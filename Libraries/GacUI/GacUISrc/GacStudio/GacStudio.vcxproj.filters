@@ -145,6 +145,12 @@
     <Xml Include="UI\UserInterfaces\AboutWindow.xml">
       <Filter>Resource Files\UserInterfaces</Filter>
     </Xml>
+    <Xml Include="UI\About.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="UI\Config.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat">

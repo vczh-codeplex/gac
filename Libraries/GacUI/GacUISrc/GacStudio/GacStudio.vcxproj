@@ -202,7 +202,9 @@
     <ClInclude Include="UI\GsNewProjectWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="UI\About.xml" />
     <Xml Include="UI\CommandImages\Folder.xml" />
+    <Xml Include="UI\Config.xml" />
     <Xml Include="UI\FileImages\Folder.xml" />
     <Xml Include="UI\ProjectImages\Folder.xml" />
     <Xml Include="UI\Resources.xml">
