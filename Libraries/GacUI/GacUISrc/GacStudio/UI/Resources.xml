@@ -105,7 +105,7 @@
           <Image>FileImages/Parser.png</Image>
           <Display>Parser</Display>
           <Description>Create a parser from a grammar.</Description>
-          <Category>GACUI_RESOURCE_PROJECT</Category>
+          <Category>PARSER_PROJECT</Category>
         </File>
       </Xml>
       <Xml name="PARSER_TEST_FILE">
@@ -113,7 +113,7 @@
           <Image>FileImages/Parser.png</Image>
           <Display>Parser Test</Display>
           <Description>Create a parser test.</Description>
-          <Category>GACUI_RESOURCE_PROJECT</Category>
+          <Category>PARSER_PROJECT</Category>
         </File>
       </Xml>
       <Xml name="HERODB_SQL_DATABASE">
@@ -121,7 +121,7 @@
           <Image>FileImages/SQLDatabase.png</Image>
           <Display>SQL Database</Display>
           <Description>Create a SQL Database in a HeroDB database instance.</Description>
-          <Categor>HERODB_PROJECT</Categor>
+          <Category>HERODB_PROJECT</Category>
         </File>
       </Xml>
       <Xml name="HERODB_GRAPH_DATABASE">
@@ -129,7 +129,7 @@
           <Image>FileImages/GraphDatabase.png</Image>
           <Display>Graph Database</Display>
           <Description>Create a Graph Database in a HeroDB database instance.</Description>
-          <Categor>HERODB_PROJECT</Categor>
+          <Category>HERODB_PROJECT</Category>
         </File>
       </Xml>
     </Folder>

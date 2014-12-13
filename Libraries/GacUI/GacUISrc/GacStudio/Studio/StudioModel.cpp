@@ -3,6 +3,7 @@
 #include <Windows.h>
 
 using namespace vl::reflection::description;
+using namespace vl::parsing::xml;
 
 namespace vm
 {
@@ -168,6 +169,30 @@ StudioModel
 		Dictionary<WString, Ptr<FileFactoryModel>> configFiles;
 		{
 			auto resources = GetInstanceLoaderManager()->GetResource(L"GacStudioUI");
+
+			auto projects = resources->GetFolderByPath(L"Config/Projects/");
+			FOREACH(Ptr<GuiResourceItem>, item, projects->GetItems())
+			{
+				auto xml = item->AsXml()->rootElement;
+				auto id = item->GetName();
+				auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
+				auto smallImage = XmlGetValue(XmlGetElement(xml, L"SmallImage"));
+				auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
+				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
+				configProjects.Add(id, new ProjectFactoryModel(image, smallImage, display, description, id));
+			}
+
+			auto files = resources->GetFolderByPath(L"Config/Files/");
+			FOREACH(Ptr<GuiResourceItem>, item, files->GetItems())
+			{
+				auto xml = item->AsXml()->rootElement;
+				auto id = item->GetName();
+				auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
+				auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
+				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
+				auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
+				configFiles.Add(id, new FileFactoryModel(image, display, category, description, id));
+			}
 		}
 		auto allProjects = new FileFactoryFilterModel;
 		FOREACH(Ptr<ProjectFactoryModel>, project, configProjects.Values())
