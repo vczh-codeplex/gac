@@ -162,9 +162,6 @@ DateTime
 		timeinfo.tm_year = _year-1900;
 		timeinfo.tm_mon = _month-1;
 		timeinfo.tm_mday = _day;
-		timeinfo.tm_hour = 0;
-		timeinfo.tm_min = 0;
-		timeinfo.tm_sec = 0;
 
 		auto dt = ConvertTMToDateTime(&timeinfo, false);
 		dt.hour = _hour;
