@@ -162,28 +162,15 @@ DateTime
 		timeinfo.tm_year = _year-1900;
 		timeinfo.tm_mon = _month-1;
 		timeinfo.tm_mday = _day;
-		timeinfo.tm_hour = _hour;
-		timeinfo.tm_min = _minute;
-		timeinfo.tm_sec = _second;
+		timeinfo.tm_hour = 0;
+		timeinfo.tm_min = 0;
+		timeinfo.tm_sec = 0;
 
-		DateTime dt;
-		dt.year = _year;
-		dt.month = _month;
-		dt.day = _day;
+		auto dt = ConvertTMToDateTime(&timeinfo, false);
 		dt.hour = _hour;
 		dt.minute = _minute;
 		dt.second = _second;
 		dt.milliseconds = _milliseconds;
-
-		auto dt2 = ConvertTMToDateTime(&timeinfo, false);
-		dt.dayOfWeek = dt2.dayOfWeek;
-		dt.totalMilliseconds = dt2.totalMilliseconds;
-		dt.filetime = dt2.filetime;
-
-		if (timeinfo.tm_isdst > 0 && timeinfo.tm_hour == 0)
-		{
-			dt.dayOfWeek = (dt.dayOfWeek + 6) % 7;
-		}
 		return dt;
 #endif
 	}
