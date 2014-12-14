@@ -165,12 +165,25 @@ DateTime
 		timeinfo.tm_hour = _hour;
 		timeinfo.tm_min = _minute;
 		timeinfo.tm_sec = _second;
-		DateTime dt = ConvertTMToDateTime(&timeinfo, false);
-		if (timeinfo.tm_isdst > 0)
-		{
-			dt.hour--;
-		}
+
+		DateTime dt;
+		dt.year = _year;
+		dt.month = _month;
+		dt.day = _day;
+		dt.hour = _hour;
+		dt.minute = _minute;
+		dt.second = _second;
 		dt.milliseconds = _milliseconds;
+
+		auto dt2 = ConvertTMToDateTime(&timeinfo, false);
+		dt.dayOfWeek = dt2.dayOfWeek;
+		dt.totalMilliseconds = dt2.totalMilliseconds;
+		dt.filetime = dt2.filetime;
+
+		if (timeinfo.tm_isdst > 0 && timeinfo.tm_hour == 0)
+		{
+			dt.dayOfWeek = (dt.dayOfWeek + 6) % 7;
+		}
 		return dt;
 #endif
 	}
