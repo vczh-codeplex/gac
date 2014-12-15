@@ -57,11 +57,14 @@
     </Method>
     <Method Name="AddProject" Type="bool">
       <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
-      <Argument Name="projectName" Type="string"/>
+      <Argument Name="filePath" Type="string"/>
     </Method>
     
     <Method Name="OpenBrowser" Type="void">
       <Argument Name="url" Type="string"/>
+    </Method>
+    <Method Name="PromptError" Type="void">
+      <Argument Name="message" Type="string"/>
     </Method>
   </Interface>
 </Schemas>

@@ -106,8 +106,9 @@ namespace vm
 		virtual bool SaveSolution() = 0;
 		virtual bool NewSolution(WString filePath) = 0;
 		virtual bool CloseSolution() = 0;
-		virtual bool AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName) = 0;
+		virtual bool AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath) = 0;
 		virtual void OpenBrowser(WString url) = 0;
+		virtual void PromptError(WString message) = 0;
 	};
 }
 

@@ -299,7 +299,7 @@ SolutionItem
 		return true;
 	}
 
-	bool SolutionItem::SaveSolution()
+	bool SolutionItem::SaveSolution(bool saveContainingProjects)
 	{
 		auto solutionFolder = FilePath(filePath).GetFolder();
 		auto xml = MakePtr<XmlDocument>();
@@ -330,6 +330,13 @@ SolutionItem
 			StreamWriter writer(encoderStream);
 			XmlPrint(xml, writer);
 		}
+		if (saveContainingProjects)
+		{
+			FOREACH(Ptr<ProjectItem>, project, From(projects).Cast<ProjectItem>())
+			{
+				project->SaveProject(true);
+			}
+		}
 		if (!isSaved)
 		{
 			isSaved = true;
@@ -342,6 +349,18 @@ SolutionItem
 	{
 		projects.Clear();
 		if (isSaved)
+		{
+			isSaved = false;
+			IsSavedChanged();
+		}
+		return true;
+	}
+
+	bool SolutionItem::AddProject(Ptr<ProjectItem> project)
+	{
+		if (projects.Contains(project.Obj())) return false;
+		projects.Add(project);
+		if (!isSaved)
 		{
 			isSaved = false;
 			IsSavedChanged();
@@ -396,6 +415,6 @@ SolutionItem
 
 	bool SolutionItem::SaveFileItem()
 	{
-		return SaveSolution();
+		return SaveSolution(false);
 	}
 }

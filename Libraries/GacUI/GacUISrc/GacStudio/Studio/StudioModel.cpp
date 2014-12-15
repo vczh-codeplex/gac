@@ -322,7 +322,7 @@ StudioModel
 		// EnsureAllOpeningFilesSaved();
 		auto solution = openingSolution->GetSolution().Cast<SolutionItem>();
 		if (!solution) return false;
-		return solution->SaveSolution();
+		return solution->SaveSolution(true);
 	}
 
 	bool StudioModel::NewSolution(WString filePath)
@@ -341,13 +341,29 @@ StudioModel
 		return true;
 	}
 
-	bool StudioModel::AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName)
+	bool StudioModel::AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath)
 	{
-		return false;
+		auto solution = openingSolution->GetSolution().Cast<SolutionItem>();
+		if (!solution) return false;
+		Ptr<ProjectItem> project = new ProjectItem(projectFactory, filePath);
+		return solution->AddProject(project);
 	}
 
 	void StudioModel::OpenBrowser(WString url)
 	{
 		ShellExecute(NULL, NULL, url.Buffer(), NULL, NULL, SHOW_FULLSCREEN);
+	}
+
+	void StudioModel::PromptError(WString message)
+	{
+		auto mainWindow = GetApplication()->GetMainWindow();
+		GetCurrentController()->DialogService()->ShowMessageBox(
+			mainWindow->GetNativeWindow(),
+			message,
+			mainWindow->GetText(),
+			INativeDialogService::DisplayOK,
+			INativeDialogService::DefaultFirst,
+			INativeDialogService::IconError
+			);
 	}
 }
