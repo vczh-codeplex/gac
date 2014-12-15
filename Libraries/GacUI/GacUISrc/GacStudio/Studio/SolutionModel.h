@@ -31,7 +31,7 @@ namespace vm
 		
 		Ptr<IProjectFactoryModel>						GetProjectFactory();
 		bool											OpenProject();
-		bool											SaveProject();
+		bool											SaveProject(bool saveContainingFiles);
 		bool											NewProject();
 
 		Ptr<GuiImageData>								GetImage()override;

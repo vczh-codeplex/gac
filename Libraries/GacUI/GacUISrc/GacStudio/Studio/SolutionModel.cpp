@@ -95,7 +95,7 @@ ProjectItem
 		return true;
 	}
 
-	bool ProjectItem::SaveProject()
+	bool ProjectItem::SaveProject(bool saveContainingFiles)
 	{
 		if (unsupported) return false;
 		auto solutionFolder = FilePath(filePath).GetFolder();
@@ -119,6 +119,26 @@ ProjectItem
 			EncoderStream encoderStream(fileStream, encoder);
 			StreamWriter writer(encoderStream);
 			XmlPrint(xml, writer);
+		}
+		if (saveContainingFiles)
+		{
+			List<ISolutionItemModel*> content;
+			content.Add(this);
+			vint start = 0;
+			while (start < content.Count())
+			{
+				auto items = content[start]->GetChildren();
+				for (vint i = 0; i < items->GetCount(); i++)
+				{
+					auto item = UnboxValue<ISolutionItemModel*>(items->Get(i));
+					if (item->GetIsFileItem())
+					{
+						item->SaveFileItem();
+					}
+					content.Add(item);
+				}
+				start++;
+			}
 		}
 		if (!isSaved)
 		{
@@ -188,7 +208,7 @@ ProjectItem
 
 	bool ProjectItem::SaveFileItem()
 	{
-		return SaveProject();
+		return SaveProject(false);
 	}
 
 /***********************************************************************
