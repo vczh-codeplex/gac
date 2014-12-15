@@ -46,6 +46,7 @@ namespace vm
 
 	public:
 		ProjectFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _description, WString _id);
+		ProjectFactoryModel(Ptr<GuiImageData> _image, Ptr<GuiImageData> _smallImage, WString _id);
 		~ProjectFactoryModel();
 
 		Ptr<GuiImageData>								GetImage()override;

@@ -23,9 +23,10 @@ namespace vm
 		WString											filePath;
 		bool											isSaved;
 		collections::List<WString>						errors;
+		bool											unsupported;
 
 	public:
-		ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
+		ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
 		
 		Ptr<IProjectFactoryModel>						GetProjectFactory();

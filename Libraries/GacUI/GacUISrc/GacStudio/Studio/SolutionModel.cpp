@@ -1,4 +1,5 @@
 #include "SolutionModel.h"
+#include "StudioModel.h"
 
 using namespace vl::parsing::xml;
 using namespace vl::filesystem;
@@ -25,11 +26,16 @@ namespace vm
 ProjectItem
 ***********************************************************************/
 
-	ProjectItem::ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath)
+	ProjectItem::ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
 		:projectFactory(_projectFactory)
 		, filePath(_filePath)
 		, isSaved(false)
+		, unsupported(_unsupported)
 	{
+		if (unsupported)
+		{
+			errors.Add(L"This project is not supported.");
+		}
 	}
 
 	ProjectItem::~ProjectItem()
@@ -43,16 +49,94 @@ ProjectItem
 		
 	bool ProjectItem::OpenProject()
 	{
-		return false;
+		if (unsupported) return false;
+		errors.Clear();
+
+		auto solutionFolder = FilePath(filePath).GetFolder();
+		Ptr<XmlDocument> xml;
+		{
+			FileStream fileStream(filePath, FileStream::ReadOnly);
+			if (!fileStream.IsAvailable())
+			{
+				errors.Add(L"Failed to read \"" + filePath + L"\".");
+				ErrorCountChanged();
+			}
+			BomDecoder decoder;
+			DecoderStream decoderStream(fileStream, decoder);
+			StreamReader reader(decoderStream);
+
+			auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
+			if (!parser) return false;
+
+			xml = parser->TypedParse(reader.ReadToEnd(), errors);
+		}
+
+		if (xml)
+		{
+			children.Clear();
+			auto attFactoryId = XmlGetAttribute(xml->rootElement, L"Factory");
+			if (!attFactoryId)
+			{
+				errors.Add(L"Attribute \"Factory\" is missing.");
+			}
+			else if (attFactoryId->value.value != projectFactory->GetId())
+			{
+				errors.Add(L"This project is not matched with the solution specification.");
+				unsupported = true;
+			}
+		}
+
+		if (!isSaved)
+		{
+			isSaved = true;
+			IsSavedChanged();
+		}
+		ErrorCountChanged();
+		return true;
 	}
 
 	bool ProjectItem::SaveProject()
 	{
-		return false;
+		if (unsupported) return false;
+		auto solutionFolder = FilePath(filePath).GetFolder();
+		auto xml = MakePtr<XmlDocument>();
+		auto xmlSolution = MakePtr<XmlElement>();
+		xmlSolution->name.value = L"GacStudioProject";
+		xml->rootElement = xmlSolution;
+		{
+			XmlElementWriter xmlWriter(xmlSolution);
+			xmlWriter.Attribute(L"Factory", projectFactory->GetId());
+		}
+		{
+			FileStream fileStream(filePath, FileStream::WriteOnly);
+			if (!fileStream.IsAvailable())
+			{
+				errors.Add(L"Failed to write \"" + filePath + L"\".");
+				ErrorCountChanged();
+				return false;
+			}
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			XmlPrint(xml, writer);
+		}
+		if (!isSaved)
+		{
+			isSaved = true;
+			IsSavedChanged();
+		}
+		return true;
 	}
 
 	bool ProjectItem::NewProject()
 	{
+		if (unsupported) return false;
+		children.Clear();
+		if (isSaved)
+		{
+			isSaved = false;
+			IsSavedChanged();
+		}
 		return false;
 	}
 
@@ -73,7 +157,7 @@ ProjectItem
 
 	bool ProjectItem::GetIsFileItem()
 	{
-		return true;
+		return !unsupported;
 	}
 
 	WString ProjectItem::GetFilePath()
@@ -83,6 +167,7 @@ ProjectItem
 
 	bool ProjectItem::GetIsSaved()
 	{
+		if (unsupported) return true;
 		throw 0;
 	}
 
@@ -147,6 +232,7 @@ SolutionItem
 
 		if (xml)
 		{
+			projects.Clear();
 			FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioProject"))
 			{
 				auto attFactoryId = XmlGetAttribute(xmlProject, L"Factory");
@@ -171,15 +257,15 @@ SolutionItem
 							return factory->GetId() == factoryId;
 						})
 						.First();
-					if (factory)
+					bool unsupported = false;
+					if (!factory)
 					{
-						auto project = new ProjectItem(factory, (solutionFolder / projectPath).GetFullPath());
-						projects.Add(project);
-					}
-					else
-					{
+						unsupported = true;
+						factory = new ProjectFactoryModel(projectFactory->GetImage(), projectFactory->GetSmallImage(), factoryId);
 						errors.Add(L"Unrecognizable project factory id \"" + factoryId + L"\".");
 					}
+					auto project = new ProjectItem(factory, (solutionFolder / projectPath).GetFullPath(), unsupported);
+					projects.Add(project);
 				}
 			}
 		}
