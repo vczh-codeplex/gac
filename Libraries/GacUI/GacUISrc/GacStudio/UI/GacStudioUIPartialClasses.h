@@ -99,6 +99,8 @@ namespace vm
 
 		virtual Ptr<ISolutionItemModel> GetOpeningSolution() = 0;
 
+		virtual WString GetOpeningSolutionPath() = 0;
+
 		virtual bool GetHasOpeningSolution() = 0;
 		vl::Event<void()> HasOpeningSolutionChanged;
 

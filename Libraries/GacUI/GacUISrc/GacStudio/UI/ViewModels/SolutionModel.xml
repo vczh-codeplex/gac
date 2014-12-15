@@ -43,6 +43,7 @@
     
     <Property Name="FileCategory" Type="string"/>
     <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
+    <Property Name="OpeningSolutionPath" Type="string" Readonly="true"/>
     <Property Name="HasOpeningSolution" Type="bool" Readonly="true" Observable="true"/>
 
     <Method Name="OpenSolution" Type="bool">

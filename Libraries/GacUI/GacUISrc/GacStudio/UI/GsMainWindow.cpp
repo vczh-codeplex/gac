@@ -8,6 +8,8 @@ GacUI::MainWindow
 
 #include "GacStudioUI.h"
 
+using namespace vl::collections;
+
 namespace ui
 {
 	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
@@ -68,6 +70,26 @@ namespace ui
 
 	void MainWindow::commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		auto model = GetViewModel();
+		List<WString> fileNames;
+		vint filterIndex = 0;
+		if (GetCurrentController()->DialogService()->ShowFileDialog(
+			GetNativeWindow(),
+			fileNames,
+			filterIndex,
+			INativeDialogService::FileDialogOpen,
+			L"Open Solution",
+			L"",
+			L"",
+			L"gacsln.xml",
+			L"Gac Studio Solution (*.gacsln.xml)|*.gacsln.xml",
+			(INativeDialogService::FileDialogOptions)(
+				INativeDialogService::FileDialogDereferenceLinks |
+				INativeDialogService::FileDialogFileMustExist
+			)))
+		{
+			model->OpenSolution(fileNames[0]);
+		}
 	}
 
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)

@@ -237,14 +237,15 @@ StudioModel
 				configFiles.Add(id, new FileFactoryModel(image, display, category, description, id));
 			}
 		}
-		auto allProjects = new FileFactoryFilterModel;
+
+		solutionProjectFactory = new FileFactoryFilterModel;
 		FOREACH(Ptr<ProjectFactoryModel>, project, configProjects.Values())
 		{
-			allProjects->AddChild(project);
+			solutionProjectFactory->AddChild(project);
 		}
 
 		fileFilters = new FileFactoryFilterModel;
-		fileFilters->AddChild(allProjects);
+		fileFilters->AddChild(solutionProjectFactory);
 
 		openingSolution = new RootSolutionItemModel;
 		
@@ -303,6 +304,18 @@ StudioModel
 		return openingSolution;
 	}
 
+	WString StudioModel::GetOpeningSolutionPath()
+	{
+		if (auto solution = openingSolution->GetSolution())
+		{
+			return solution->GetFilePath();
+		}
+		else
+		{
+			return L"";
+		}
+	}
+
 	bool StudioModel::GetHasOpeningSolution()
 	{
 		return openingSolution->GetSolution();
@@ -311,7 +324,7 @@ StudioModel
 	bool StudioModel::OpenSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<SolutionItem>(fileFilters, filePath);
+		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
 		if (!solution->OpenSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -329,7 +342,7 @@ StudioModel
 	bool StudioModel::NewSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<SolutionItem>(fileFilters, filePath);
+		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
 		if (!solution->NewSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();

@@ -55,7 +55,7 @@
         <Label Text="Location:"/>
       </Cell>
       <Cell Site="row:3 column:1 rowSpan:1 columnSpan:2">
-        <SinglelineTextBox ref.Name="textBoxLocation" Alt="L">
+        <SinglelineTextBox ref.Name="textBoxLocation" Alt="L" Enabled-bind="comboSolution.SelectedIndex == 0">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
@@ -94,7 +94,7 @@
       <Cell Site="row:6 column:2">
         <Button ref.Name="buttonCreate" Text="Create" Alt="C" ev.Clicked="buttonCreate_Clicked">
           <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
-          <att.Enabled-bind>listViewProjectTemplate.SelectedItemIndex != -1 and textBoxLocation.Text != '' and (comboSolution.SelectedIndex == 1 or textBoxSolutionName.Text != '')</att.Enabled-bind>
+          <att.Enabled-bind>listViewProjectTemplate.SelectedItemIndex != -1 and (comboSolution.SelectedIndex == 1 or (textBoxLocation.Text != '' and textBoxSolutionName.Text != ''))</att.Enabled-bind>
         </Button>
       </Cell>
       <Cell Site="row:6 column:3">
