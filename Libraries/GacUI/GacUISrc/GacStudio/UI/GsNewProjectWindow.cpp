@@ -36,7 +36,11 @@ namespace ui
 		}
 
 		{
-			auto solutionFolder = Folder(FilePath(textBoxLocation->GetText()) / textBoxSolutionName->GetText());
+			auto solutionFolder =
+				comboSolution->GetSelectedIndex() == 0
+				? Folder(FilePath(textBoxLocation->GetText()) / textBoxSolutionName->GetText())
+				: Folder(FilePath(model->GetOpeningSolutionPath()).GetFolder())
+				;
 			auto solutionPath = solutionFolder.GetFilePath() / (textBoxSolutionName->GetText() + L".gacsln.xml");
 			auto projectFolder = Folder(solutionFolder.GetFilePath() / textBoxProjectName->GetText());
 			auto projectPath = projectFolder.GetFilePath() / (textBoxProjectName->GetText() + L".gacproj.xml");
@@ -46,13 +50,13 @@ namespace ui
 				if (!solutionFolder.Create(true))
 				{
 					model->PromptError(L"Failed to create empty folder \"" + solutionFolder.GetFilePath().GetFullPath() + L"\".");
-					goto CLOSE;
+					return;
 				}
 			}
 			if (!projectFolder.Create(true))
 			{
 				model->PromptError(L"Failed to create empty folder \"" + projectFolder.GetFilePath().GetFullPath() + L"\".");
-				goto CLOSE;
+				return;
 			}
 
 			if (comboSolution->GetSelectedIndex() == 0)

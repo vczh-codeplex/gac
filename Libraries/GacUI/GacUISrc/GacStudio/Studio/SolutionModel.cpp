@@ -276,7 +276,7 @@ SolutionItem
 						{
 							return factory->GetId() == factoryId;
 						})
-						.First();
+						.First(nullptr);
 					bool unsupported = false;
 					if (!factory)
 					{

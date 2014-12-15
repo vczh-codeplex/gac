@@ -95,6 +95,7 @@ namespace vm
 	class StudioModel : public Object, public virtual IStudioModel
 	{
 	protected:
+		Ptr<FileFactoryFilterModel>						solutionProjectFactory;
 		Ptr<FileFactoryFilterModel>						fileFilters;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		WString											fileCategory;
@@ -113,6 +114,7 @@ namespace vm
 		void											SetFileCategory(WString value)override;
 
 		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
+		WString											GetOpeningSolutionPath()override;
 		bool											GetHasOpeningSolution()override;
 
 		bool											OpenSolution(WString filePath)override;

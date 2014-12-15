@@ -71,6 +71,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFilters)
 				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolution)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolutionPath)
 				CLASS_MEMBER_EVENT(HasOpeningSolutionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(HasOpeningSolution, HasOpeningSolutionChanged)
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
