@@ -61,8 +61,9 @@ namespace vm
 		~SolutionItem();
 		
 		bool											OpenSolution();
-		bool											SaveSolution();
+		bool											SaveSolution(bool saveContainingProjects);
 		bool											NewSolution();
+		bool											AddProject(Ptr<ProjectItem> project);
 
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;

@@ -119,9 +119,10 @@ namespace vm
 		bool											SaveSolution()override;
 		bool											NewSolution(WString filePath)override;
 		bool											CloseSolution()override;
-		bool											AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString projectName)override;
+		bool											AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath)override;
 
 		void											OpenBrowser(WString url)override;
+		void											PromptError(WString message)override;
 	};
 }
 
