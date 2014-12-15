@@ -41,14 +41,17 @@ namespace ui
 			auto projectFolder = Folder(solutionFolder.GetFilePath() / textBoxProjectName->GetText());
 			auto projectPath = projectFolder.GetFilePath() / (textBoxProjectName->GetText() + L".gacproj.xml");
 
-			if (!solutionFolder.Exists() && !solutionFolder.Create(true))
+			if (comboSolution->GetSelectedIndex() == 0)
 			{
-				model->PromptError(L"Failed to create folder \"" + solutionFolder.GetFilePath().GetFullPath() + L"\".");
-				goto CLOSE;
+				if (!solutionFolder.Create(true))
+				{
+					model->PromptError(L"Failed to create empty folder \"" + solutionFolder.GetFilePath().GetFullPath() + L"\".");
+					goto CLOSE;
+				}
 			}
-			if (!projectFolder.Exists() && !projectFolder.Create(true))
+			if (!projectFolder.Create(true))
 			{
-				model->PromptError(L"Failed to create folder \"" + projectFolder.GetFilePath().GetFullPath() + L"\".");
+				model->PromptError(L"Failed to create empty folder \"" + projectFolder.GetFilePath().GetFullPath() + L"\".");
 				goto CLOSE;
 			}
 
