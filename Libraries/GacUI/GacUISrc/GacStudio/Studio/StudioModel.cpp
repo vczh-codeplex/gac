@@ -68,6 +68,14 @@ ProjectFactoryModel
 		}
 	}
 
+	ProjectFactoryModel::ProjectFactoryModel(Ptr<GuiImageData> _image, Ptr<GuiImageData> _smallImage, WString _id)
+		:image(_image)
+		, smallImage(_smallImage)
+		, name(L"Unsupported project \"" + id + L"\"")
+		, id(_id)
+	{
+	}
+
 	ProjectFactoryModel::~ProjectFactoryModel()
 	{
 	}
