@@ -314,6 +314,7 @@ StudioModel
 		auto solution = MakePtr<SolutionItem>(fileFilters, filePath);
 		if (!solution->OpenSolution()) return false;
 		openingSolution->SetSolution(solution);
+		HasOpeningSolutionChanged();
 		return true;
 	}
 
@@ -331,6 +332,7 @@ StudioModel
 		auto solution = MakePtr<SolutionItem>(fileFilters, filePath);
 		if (!solution->NewSolution()) return false;
 		openingSolution->SetSolution(solution);
+		HasOpeningSolutionChanged();
 		return true;
 	}
 
@@ -338,6 +340,7 @@ StudioModel
 	{
 		// EnsureAllOpeningFilesSaved();
 		openingSolution->SetSolution(0);
+		HasOpeningSolutionChanged();
 		return true;
 	}
 
