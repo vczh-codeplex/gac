@@ -23,13 +23,17 @@ namespace vl
 FilePath
 ***********************************************************************/
 
+#if defined VCZH_GCC
+		const wchar_t FilePath::Delimiter;
+#endif
+
 		void FilePath::Initialize()
 		{
 			Array<wchar_t> buffer(fullPath.Length() + 1);
 #if defined VCZH_MSVC
 			wcscpy_s(&buffer[0], fullPath.Length() + 1, fullPath.Buffer());
 #elif defined VCZH_GCC
-			wcscpy_s(&buffer[0], fullPath.Buffer());
+			wcscpy(&buffer[0], fullPath.Buffer());
 #endif
 			for (vint i = 0; i < buffer.Count(); i++)
 			{
