@@ -33,6 +33,7 @@
         <Display>Window Resource</Display>
         <Description>Create a window for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.window.xml</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="GACUI_CONTROL_RESOURCE_FILE">
@@ -41,6 +42,7 @@
         <Display>Control Resource</Display>
         <Description>Create a control for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.control.xml</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="GACUI_TEMPLATE_RESOURCE_FILE">
@@ -49,6 +51,7 @@
         <Display>Control Template</Display>
         <Description>Create a control template for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.template.xml</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="GACUI_IMAGE_RESOURCE_FILE">
@@ -57,6 +60,7 @@
         <Display>Image Resource</Display>
         <Description>Create an image resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.bmp</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="GACUI_TEXT_RESOURCE_FILE">
@@ -65,6 +69,7 @@
         <Display>Text Resource</Display>
         <Description>Create a text resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.txt</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="GACUI_RICHTEXT_RESOURCE_FILE">
@@ -73,6 +78,7 @@
         <Display>Rich Text Resource</Display>
         <Description>Create a rich text resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.document.xml</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="GACUI_XML_RESOURCE_FILE">
@@ -81,6 +87,7 @@
         <Display>XML Resource</Display>
         <Description>Create an xml resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.xml</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="PARSER_FILE">
@@ -89,6 +96,7 @@
         <Display>Parser</Display>
         <Description>Create a parser from a grammar.</Description>
         <Category>PARSER_PROJECT</Category>
+        <DefaultFileExt>.parser.txt</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="PARSER_TEST_FILE">
@@ -97,6 +105,7 @@
         <Display>Parser Test</Display>
         <Description>Create a parser test.</Description>
         <Category>PARSER_PROJECT</Category>
+        <DefaultFileExt>.parsertest.txt</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="HERODB_SQL_DATABASE">
@@ -105,6 +114,7 @@
         <Display>SQL Database</Display>
         <Description>Create a SQL Database in a HeroDB database instance.</Description>
         <Category>HERODB_PROJECT</Category>
+        <DefaultFileExt>.herosql.txt</DefaultFileExt>
       </File>
     </Xml>
     <Xml name="HERODB_GRAPH_DATABASE">
@@ -113,6 +123,7 @@
         <Display>Graph Database</Display>
         <Description>Create a Graph Database in a HeroDB database instance.</Description>
         <Category>HERODB_PROJECT</Category>
+        <DefaultFileExt>.herograph.txt</DefaultFileExt>
       </File>
     </Xml>
   </Folder>

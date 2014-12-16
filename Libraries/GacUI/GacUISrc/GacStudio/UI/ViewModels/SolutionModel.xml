@@ -25,6 +25,7 @@
     <Property Name="Category" Type="string" Readonly="true"/>
     <Property Name="Description" Type="string" Readonly="true"/>
     <Property Name="Id" Type="string" Readonly="true"/>
+    <Property Name="DefaultFileExt" Type="string" Readonly="true"/>
 
     <Method Name="GenerateFile" Type="bool">
       <Argument name="project" Type="vm::ISolutionItemModel^"/>
