@@ -15,44 +15,6 @@ DO NOT MODIFY
 
 namespace vm
 {
-	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
-	{
-	public:
-
-		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
-
-		virtual WString GetName() = 0;
-
-		virtual WString GetCategory() = 0;
-
-		virtual WString GetDescription() = 0;
-
-		virtual WString GetId() = 0;
-	};
-}
-
-namespace vm
-{
-	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
-	{
-	public:
-
-		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
-
-		virtual Ptr<presentation::GuiImageData> GetSmallImage() = 0;
-
-		virtual WString GetName() = 0;
-
-		virtual WString GetDescription() = 0;
-
-		virtual WString GetId() = 0;
-
-		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
-	};
-}
-
-namespace vm
-{
 	class ISolutionItemModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItemModel>
 	{
 	public:
@@ -79,6 +41,46 @@ namespace vm
 		virtual WString GetErrorText(vint index) = 0;
 		virtual bool OpenFileItem() = 0;
 		virtual bool SaveFileItem() = 0;
+	};
+}
+
+namespace vm
+{
+	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
+	{
+	public:
+
+		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+
+		virtual WString GetName() = 0;
+
+		virtual WString GetCategory() = 0;
+
+		virtual WString GetDescription() = 0;
+
+		virtual WString GetId() = 0;
+
+		virtual bool GenerateFile(Ptr<vm::ISolutionItemModel> , WString filePath) = 0;
+	};
+}
+
+namespace vm
+{
+	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
+	{
+	public:
+
+		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+
+		virtual Ptr<presentation::GuiImageData> GetSmallImage() = 0;
+
+		virtual WString GetName() = 0;
+
+		virtual WString GetDescription() = 0;
+
+		virtual WString GetId() = 0;
+
+		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
 	};
 }
 

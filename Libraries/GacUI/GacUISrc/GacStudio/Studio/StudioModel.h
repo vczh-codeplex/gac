@@ -33,6 +33,7 @@ namespace vm
 		WString											GetCategory()override;
 		WString											GetDescription()override;
 		WString											GetId()override;
+		bool											GenerateFile(Ptr<vm::ISolutionItemModel> project, WString filePath)override;
 	};
 
 	class ProjectFactoryModel : public Object, public virtual IProjectFactoryModel
