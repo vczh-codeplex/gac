@@ -49,6 +49,11 @@ FileFactoryModel
 		return id;
 	}
 
+	bool FileFactoryModel::GenerateFile(Ptr<vm::ISolutionItemModel>, WString filePath)
+	{
+		return false;
+	}
+
 /***********************************************************************
 ProjectFactoryModel
 ***********************************************************************/

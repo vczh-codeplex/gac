@@ -1,22 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Schemas>
-  <Interface ref.Class="vm::IFileFactoryModel">
-    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
-    <Property Name="Name" Type="string" Readonly="true"/>
-    <Property Name="Category" Type="string" Readonly="true"/>
-    <Property Name="Description" Type="string" Readonly="true"/>
-    <Property Name="Id" Type="string" Readonly="true"/>
-  </Interface>
-
-  <Interface ref.Class="vm::IProjectFactoryModel">
-    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
-    <Property Name="SmallImage" Type="presentation::GuiImageData^" Readonly="true"/>
-    <Property Name="Name" Type="string" Readonly="true"/>
-    <Property Name="Description" Type="string" Readonly="true"/>
-    <Property Name="Id" Type="string" Readonly="true"/>
-    <Property Name="Children" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
-  </Interface>
-
   <Interface ref.Class="vm::ISolutionItemModel">
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true" Observable="true"/>
     <Property Name="Name" Type="string" Readonly="true" Observable="true"/>
@@ -34,6 +17,28 @@
     </Method>
     <Method Name="SaveFileItem" Type="bool">
     </Method>
+  </Interface>
+  
+  <Interface ref.Class="vm::IFileFactoryModel">
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Category" Type="string" Readonly="true"/>
+    <Property Name="Description" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+
+    <Method Name="GenerateFile" Type="bool">
+      <Argument name="project" Type="vm::ISolutionItemModel^"/>
+      <Argument Name="filePath" Type="string"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IProjectFactoryModel">
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="SmallImage" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Description" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+    <Property Name="Children" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
   </Interface>
 
   <Interface ref.Class="vm::IStudioModel">
