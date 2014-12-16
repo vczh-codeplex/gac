@@ -60,6 +60,8 @@ namespace vm
 
 		virtual WString GetId() = 0;
 
+		virtual WString GetDefaultFileExt() = 0;
+
 		virtual bool GenerateFile(Ptr<vm::ISolutionItemModel> , WString filePath) = 0;
 	};
 }

@@ -11,11 +11,12 @@ namespace vm
 FileFactoryModel
 ***********************************************************************/
 
-	FileFactoryModel::FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id)
+	FileFactoryModel::FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext)
 		:name(_name)
 		, category(_category)
 		, description(_description)
 		, id(_id)
+		, ext(_ext)
 	{
 		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_imageUrl);
 	}
@@ -47,6 +48,11 @@ FileFactoryModel
 	WString FileFactoryModel::GetId()
 	{
 		return id;
+	}
+
+	WString FileFactoryModel::GetDefaultFileExt()
+	{
+		return ext;
 	}
 
 	bool FileFactoryModel::GenerateFile(Ptr<vm::ISolutionItemModel>, WString filePath)
@@ -239,7 +245,8 @@ StudioModel
 				auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
 				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
 				auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
-				configFiles.Add(id, new FileFactoryModel(image, display, category, description, id));
+				auto ext = XmlGetValue(XmlGetElement(xml, L"DefaultFileExt"));
+				configFiles.Add(id, new FileFactoryModel(image, display, category, description, id, ext));
 			}
 		}
 

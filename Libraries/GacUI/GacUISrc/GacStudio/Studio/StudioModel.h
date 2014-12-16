@@ -23,9 +23,10 @@ namespace vm
 		WString											category;
 		WString											description;
 		WString											id;
+		WString											ext;
 
 	public:
-		FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id);
+		FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext);
 		~FileFactoryModel();
 
 		Ptr<GuiImageData>								GetImage()override;
@@ -33,6 +34,7 @@ namespace vm
 		WString											GetCategory()override;
 		WString											GetDescription()override;
 		WString											GetId()override;
+		WString											GetDefaultFileExt()override;
 		bool											GenerateFile(Ptr<vm::ISolutionItemModel> project, WString filePath)override;
 	};
 
