@@ -356,7 +356,7 @@ SolutionItem
 		return true;
 	}
 
-	bool SolutionItem::AddProject(Ptr<ProjectItem> project)
+	bool SolutionItem::AddProject(Ptr<IProjectModel> project)
 	{
 		if (projects.Contains(project.Obj())) return false;
 		projects.Add(project);

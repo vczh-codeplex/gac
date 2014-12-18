@@ -88,6 +88,48 @@ namespace vm
 
 namespace vm
 {
+	class IFileModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFileModel>
+	{
+	public:
+	};
+}
+
+namespace vm
+{
+	class IFolderModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFolderModel>
+	{
+	public:
+	};
+}
+
+namespace vm
+{
+	class IProjectModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IProjectModel>
+	{
+	public:
+
+		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
+		virtual bool OpenProject() = 0;
+		virtual bool SaveProject(bool saveContainingFiles) = 0;
+		virtual bool NewProject() = 0;
+	};
+}
+
+namespace vm
+{
+	class ISolutionModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<ISolutionModel>
+	{
+	public:
+
+		virtual bool OpenSolution() = 0;
+		virtual bool SaveSolution(bool saveContainingProjects) = 0;
+		virtual bool NewSolution() = 0;
+		virtual bool AddProject(Ptr<vm::IProjectModel> project) = 0;
+	};
+}
+
+namespace vm
+{
 	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
 	{
 	public:
@@ -347,8 +389,12 @@ namespace vl
 		namespace description
 		{
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
+			DECL_TYPE_INFO(vm::IFileModel)
+			DECL_TYPE_INFO(vm::IFolderModel)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
+			DECL_TYPE_INFO(vm::IProjectModel)
 			DECL_TYPE_INFO(vm::ISolutionItemModel)
+			DECL_TYPE_INFO(vm::ISolutionModel)
 			DECL_TYPE_INFO(vm::IStudioModel)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::MainWindow)

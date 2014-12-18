@@ -169,14 +169,11 @@ DateTime
 		timeinfo.tm_year = _year-1900;
 		timeinfo.tm_mon = _month-1;
 		timeinfo.tm_mday = _day;
-		timeinfo.tm_hour = _hour;
-		timeinfo.tm_min = _minute;
-		timeinfo.tm_sec = _second;
-		DateTime dt = ConvertTMToDateTime(&timeinfo, false);
-		if (timeinfo.tm_isdst > 0)
-		{
-			dt.hour--;
-		}
+
+		auto dt = ConvertTMToDateTime(&timeinfo, false);
+		dt.hour = _hour;
+		dt.minute = _minute;
+		dt.second = _second;
 		dt.milliseconds = _milliseconds;
 		return dt;
 #endif
@@ -480,13 +477,17 @@ namespace vl
 FilePath
 ***********************************************************************/
 
+#if defined VCZH_GCC
+		const wchar_t FilePath::Delimiter;
+#endif
+
 		void FilePath::Initialize()
 		{
 			Array<wchar_t> buffer(fullPath.Length() + 1);
 #if defined VCZH_MSVC
 			wcscpy_s(&buffer[0], fullPath.Length() + 1, fullPath.Buffer());
 #elif defined VCZH_GCC
-			wcscpy_s(&buffer[0], fullPath.Buffer());
+			wcscpy(&buffer[0], fullPath.Buffer());
 #endif
 			for (vint i = 0; i < buffer.Count(); i++)
 			{

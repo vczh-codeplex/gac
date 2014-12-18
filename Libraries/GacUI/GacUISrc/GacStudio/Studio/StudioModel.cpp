@@ -336,7 +336,7 @@ StudioModel
 	bool StudioModel::OpenSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
+		auto solution = MakePtr<ISolutionModel>(solutionProjectFactory, filePath);
 		if (!solution->OpenSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -346,7 +346,7 @@ StudioModel
 	bool StudioModel::SaveSolution()
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = openingSolution->GetSolution().Cast<SolutionItem>();
+		auto solution = openingSolution->GetSolution().Cast<ISolutionModel>();
 		if (!solution) return false;
 		return solution->SaveSolution(true);
 	}
@@ -354,7 +354,7 @@ StudioModel
 	bool StudioModel::NewSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
+		auto solution = MakePtr<ISolutionModel>(solutionProjectFactory, filePath);
 		if (!solution->NewSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -371,9 +371,9 @@ StudioModel
 
 	bool StudioModel::AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath)
 	{
-		auto solution = openingSolution->GetSolution().Cast<SolutionItem>();
+		auto solution = openingSolution->GetSolution().Cast<ISolutionModel>();
 		if (!solution) return false;
-		Ptr<ProjectItem> project = new ProjectItem(projectFactory, filePath);
+		Ptr<IProjectModel> project = new ProjectItem(projectFactory, filePath);
 		return solution->AddProject(project);
 	}
 
