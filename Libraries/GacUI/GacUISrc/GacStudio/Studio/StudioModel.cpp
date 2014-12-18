@@ -336,7 +336,7 @@ StudioModel
 	bool StudioModel::OpenSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<ISolutionModel>(solutionProjectFactory, filePath);
+		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
 		if (!solution->OpenSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -354,7 +354,7 @@ StudioModel
 	bool StudioModel::NewSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<ISolutionModel>(solutionProjectFactory, filePath);
+		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
 		if (!solution->NewSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -373,7 +373,7 @@ StudioModel
 	{
 		auto solution = openingSolution->GetSolution().Cast<ISolutionModel>();
 		if (!solution) return false;
-		Ptr<IProjectModel> project = new ProjectItem(projectFactory, filePath);
+		auto project = MakePtr<ProjectItem>(projectFactory, filePath);
 		return solution->AddProject(project);
 	}
 
