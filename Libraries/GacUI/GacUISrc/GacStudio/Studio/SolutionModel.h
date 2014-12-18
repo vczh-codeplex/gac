@@ -15,7 +15,7 @@ using namespace vl::collections;
 
 namespace vm
 {
-	class ProjectItem : public Object, public virtual ISolutionItemModel
+	class ProjectItem : public Object, public virtual IProjectModel
 	{
 	protected:
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
@@ -29,10 +29,10 @@ namespace vm
 		ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
 		
-		Ptr<IProjectFactoryModel>						GetProjectFactory();
-		bool											OpenProject();
-		bool											SaveProject(bool saveContainingFiles);
-		bool											NewProject();
+		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
+		bool											OpenProject()override;
+		bool											SaveProject(bool saveContainingFiles)override;
+		bool											NewProject()override;
 
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
@@ -47,10 +47,10 @@ namespace vm
 		bool											SaveFileItem()override;
 	};
 
-	class SolutionItem : public Object, public virtual ISolutionItemModel
+	class SolutionItem : public Object, public virtual ISolutionModel
 	{
 	protected:
-		list::ObservableList<Ptr<ISolutionItemModel>>	projects;
+		list::ObservableList<Ptr<IProjectModel>>		projects;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
 		bool											isSaved;
@@ -60,10 +60,10 @@ namespace vm
 		SolutionItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
 		~SolutionItem();
 		
-		bool											OpenSolution();
-		bool											SaveSolution(bool saveContainingProjects);
-		bool											NewSolution();
-		bool											AddProject(Ptr<ProjectItem> project);
+		bool											OpenSolution()override;
+		bool											SaveSolution(bool saveContainingProjects)override;
+		bool											NewSolution()override;
+		bool											AddProject(Ptr<IProjectModel> project)override;
 
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;

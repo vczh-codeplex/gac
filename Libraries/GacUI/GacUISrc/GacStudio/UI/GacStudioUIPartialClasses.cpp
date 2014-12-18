@@ -18,8 +18,12 @@ namespace vl
 		{
 			#define _ ,
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
+			IMPL_TYPE_INFO(vm::IFileModel)
+			IMPL_TYPE_INFO(vm::IFolderModel)
 			IMPL_TYPE_INFO(vm::IProjectFactoryModel)
+			IMPL_TYPE_INFO(vm::IProjectModel)
 			IMPL_TYPE_INFO(vm::ISolutionItemModel)
+			IMPL_TYPE_INFO(vm::ISolutionModel)
 			IMPL_TYPE_INFO(vm::IStudioModel)
 			IMPL_TYPE_INFO(ui::AboutWindow)
 			IMPL_TYPE_INFO(ui::MainWindow)
@@ -37,6 +41,14 @@ namespace vl
 				CLASS_MEMBER_METHOD(GenerateFile, { L"" _ L"filePath" });
 			END_CLASS_MEMBER(vm::IFileFactoryModel)
 
+			BEGIN_CLASS_MEMBER(vm::IFileModel)
+				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
+			END_CLASS_MEMBER(vm::IFileModel)
+
+			BEGIN_CLASS_MEMBER(vm::IFolderModel)
+				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
+			END_CLASS_MEMBER(vm::IFolderModel)
+
 			BEGIN_CLASS_MEMBER(vm::IProjectFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Image)
@@ -46,6 +58,14 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Children)
 			END_CLASS_MEMBER(vm::IProjectFactoryModel)
+
+			BEGIN_CLASS_MEMBER(vm::IProjectModel)
+				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
+				CLASS_MEMBER_METHOD(GetProjectFactory, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
+				CLASS_MEMBER_METHOD(NewProject, NO_PARAMETER);
+			END_CLASS_MEMBER(vm::IProjectModel)
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -65,6 +85,14 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenFileItem, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveFileItem, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::ISolutionItemModel)
+
+			BEGIN_CLASS_MEMBER(vm::ISolutionModel)
+				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
+				CLASS_MEMBER_METHOD(OpenSolution, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(SaveSolution, { L"saveContainingProjects" });
+				CLASS_MEMBER_METHOD(NewSolution, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(AddProject, { L"project" });
+			END_CLASS_MEMBER(vm::ISolutionModel)
 
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -140,8 +168,12 @@ namespace vl
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
+					ADD_TYPE_INFO(vm::IFileModel)
+					ADD_TYPE_INFO(vm::IFolderModel)
 					ADD_TYPE_INFO(vm::IProjectFactoryModel)
+					ADD_TYPE_INFO(vm::IProjectModel)
 					ADD_TYPE_INFO(vm::ISolutionItemModel)
+					ADD_TYPE_INFO(vm::ISolutionModel)
 					ADD_TYPE_INFO(vm::IStudioModel)
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::MainWindow)

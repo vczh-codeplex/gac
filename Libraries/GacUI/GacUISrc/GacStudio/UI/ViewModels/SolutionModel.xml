@@ -42,6 +42,32 @@
     <Property Name="Children" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
   </Interface>
 
+  <Interface ref.Class="vm::IFileModel" Parent="vm::ISolutionItemModel">
+  </Interface>
+
+  <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
+  </Interface>
+
+  <Interface ref.Class="vm::IProjectModel" Parent="vm::ISolutionItemModel">
+    <Method Name="GetProjectFactory" Type="vm::IProjectFactoryModel^"/>
+    <Method Name="OpenProject" Type="bool"/>
+    <Method Name="SaveProject" Type="bool">
+      <Argument Name="saveContainingFiles" Type="bool"/>
+    </Method>
+    <Method Name="NewProject" Type="bool"/>
+  </Interface>
+
+  <Interface ref.Class="vm::ISolutionModel" Parent="vm::ISolutionItemModel">
+    <Method Name="OpenSolution" Type="bool"/>
+    <Method Name="SaveSolution" Type="bool">
+      <Argument Name="saveContainingProjects" Type="bool"/>
+    </Method>
+    <Method Name="NewSolution" Type="bool"/>
+    <Method Name="AddProject" Type="bool">
+      <Argument Name="project" Type="vm::IProjectModel^"/>
+    </Method>
+  </Interface>
+
   <Interface ref.Class="vm::IStudioModel">
     <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
