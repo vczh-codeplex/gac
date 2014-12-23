@@ -11,7 +11,7 @@ Basic.cpp
 #include <Windows.h>
 #elif defined VCZH_GCC
 #include <time.h>
-#include <chrono>
+#include <sys/time.h>
 #endif
 
 namespace vl
@@ -108,13 +108,18 @@ DateTime
 		dt.hour = timeinfo->tm_hour;
 		dt.minute = timeinfo->tm_min;
 		dt.second = timeinfo->tm_sec;
-		dt.milliseconds = 0;
-		dt.filetime = (vuint64_t)timer;
+
+		struct timeval tv;
+		gettimeofday(&tv, 0);
+
+		dt.milliseconds = tv.tv_usec / 1000;
+
+		dt.timestamp = (vuint64_t)timer;
+        dt.filetime = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 		
 		if (rewriteMilliseconds)
 		{
-			using namespace std::chrono;
-			dt.totalMilliseconds =  duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+			dt.totalMilliseconds = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 		}
 		return dt;
 	}
@@ -179,7 +184,11 @@ DateTime
 #endif
 	}
 
-	DateTime DateTime::FromFileTime(vuint64_t filetime)
+#if defined VCZH_GCC
+    DateTime DateTime::FromFileTime(vuint64_t filetime, vuint64_t timestamp)
+#else
+    DateTime DateTime::FromFileTime(vuint64_t filetime)
+#endif
 	{
 #if defined VCZH_MSVC
 		ULARGE_INTEGER largeInteger;
@@ -192,9 +201,11 @@ DateTime
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
 #elif defined VCZH_GCC
-		time_t timer = (time_t)filetime;
+		time_t timer = (time_t)timestamp;
 		tm* timeinfo = localtime(&timer);
-		return ConvertTMToDateTime(timeinfo, false);
+		DateTime t = ConvertTMToDateTime(timeinfo, true);
+        t.filetime = filetime;
+        return t;
 #endif
 	}
 
@@ -220,7 +231,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t localTimer = time(nullptr);
 		time_t utcTimer = mktime(gmtime(&localTimer));
-		time_t timer = (time_t)filetime + localTimer - utcTimer;
+		time_t timer = (time_t)timestamp + localTimer - utcTimer;
 		tm* timeinfo = localtime(&timer);
 
 		auto dt = ConvertTMToDateTime(timeinfo, false);
@@ -237,7 +248,7 @@ DateTime
 		TzSpecificLocalTimeToSystemTime(NULL, &localTime, &utcTime);
 		return SystemTimeToDateTime(utcTime);
 #elif defined VCZH_GCC
-		time_t timer = (time_t)filetime;
+		time_t timer = (time_t)timestamp;
 		tm* timeinfo = gmtime(&timer);
 
 		auto dt = ConvertTMToDateTime(timeinfo, false);
@@ -251,7 +262,7 @@ DateTime
 #if defined VCZH_MSVC
 		return FromFileTime(filetime+milliseconds*10000);
 #elif defined VCZH_GCC
-		return FromFileTime(filetime+milliseconds/1000);
+		return FromFileTime(filetime+milliseconds, timestamp);
 #endif
 	}
 
@@ -260,7 +271,7 @@ DateTime
 #if defined VCZH_MSVC
 		return FromFileTime(filetime-milliseconds*10000);
 #elif defined VCZH_GCC
-		return FromFileTime(filetime-milliseconds/1000);
+		return FromFileTime(filetime-milliseconds, timestamp);
 #endif
 	}
 
