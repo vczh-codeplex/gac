@@ -541,10 +541,19 @@ namespace vl
 		vuint64_t			totalMilliseconds;
 		vuint64_t			filetime;
 
+#if defined VCZH_GCC
+        vuint64_t           timestamp;
+#endif
+
 		static DateTime		LocalTime();
 		static DateTime		UtcTime();
 		static DateTime		FromDateTime(vint _year, vint _month, vint _day, vint _hour=0, vint _minute=0, vint _second=0, vint _milliseconds=0);
+	
+#if defined VCZH_GCC
+		static DateTime		FromFileTime(vuint64_t filetime, vuint64_t timestamp);
+#else
 		static DateTime		FromFileTime(vuint64_t filetime);
+#endif
 
 		DateTime();
 
