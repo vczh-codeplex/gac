@@ -844,6 +844,7 @@ GuiGraphicsHost
 				,mouseCaptureComposition(0)
 				,lastCaretTime(0)
 				,currentAltHost(0)
+				,supressAltKey(0)
 			{
 				windowComposition=new GuiWindowComposition;
 				windowComposition->SetAssociatedHost(this);
