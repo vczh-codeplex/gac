@@ -106,9 +106,7 @@ DateTime
 		gettimeofday(&tv, 0);
 
 		dt.milliseconds = tv.tv_usec / 1000;
-
-		dt.timestamp = (vuint64_t)timer;
-        dt.filetime = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+        dt.filetime = (vuint64_t)timer * 1000 + tv.tv_usec / 1000;
 		
 		if (rewriteMilliseconds)
 		{
@@ -177,11 +175,7 @@ DateTime
 #endif
 	}
 
-#if defined VCZH_GCC
-    DateTime DateTime::FromFileTime(vuint64_t filetime, vuint64_t timestamp)
-#else
     DateTime DateTime::FromFileTime(vuint64_t filetime)
-#endif
 	{
 #if defined VCZH_MSVC
 		ULARGE_INTEGER largeInteger;
@@ -194,10 +188,11 @@ DateTime
 		FileTimeToSystemTime(&fileTime, &systemTime);
 		return SystemTimeToDateTime(systemTime);
 #elif defined VCZH_GCC
-		time_t timer = (time_t)timestamp;
+		time_t timer = (time_t)(filetime / 1000);
 		tm* timeinfo = localtime(&timer);
 		DateTime t = ConvertTMToDateTime(timeinfo, true);
         t.filetime = filetime;
+        t.milliseconds = 0;
         return t;
 #endif
 	}
@@ -224,7 +219,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t localTimer = time(nullptr);
 		time_t utcTimer = mktime(gmtime(&localTimer));
-		time_t timer = (time_t)timestamp + localTimer - utcTimer;
+		time_t timer = (time_t)(filetime / 1000) + localTimer - utcTimer;
 		tm* timeinfo = localtime(&timer);
 
 		auto dt = ConvertTMToDateTime(timeinfo, false);
@@ -241,7 +236,7 @@ DateTime
 		TzSpecificLocalTimeToSystemTime(NULL, &localTime, &utcTime);
 		return SystemTimeToDateTime(utcTime);
 #elif defined VCZH_GCC
-		time_t timer = (time_t)timestamp;
+		time_t timer = (time_t)(filetime / 1000);
 		tm* timeinfo = gmtime(&timer);
 
 		auto dt = ConvertTMToDateTime(timeinfo, false);
@@ -255,7 +250,7 @@ DateTime
 #if defined VCZH_MSVC
 		return FromFileTime(filetime+milliseconds*10000);
 #elif defined VCZH_GCC
-		return FromFileTime(filetime+milliseconds, timestamp);
+		return FromFileTime(filetime+milliseconds);
 #endif
 	}
 
@@ -264,7 +259,7 @@ DateTime
 #if defined VCZH_MSVC
 		return FromFileTime(filetime-milliseconds*10000);
 #elif defined VCZH_GCC
-		return FromFileTime(filetime-milliseconds, timestamp);
+		return FromFileTime(filetime-milliseconds);
 #endif
 	}
 
