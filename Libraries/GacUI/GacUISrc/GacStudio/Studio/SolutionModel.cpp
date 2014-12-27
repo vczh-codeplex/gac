@@ -23,11 +23,159 @@ namespace vm
 	}
 
 /***********************************************************************
+FileItem
+***********************************************************************/
+
+	FileItem::FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported)
+		:studioModel(_studioModel)
+		, fileFactory(_fileFactory)
+		, filePath(_filePath)
+		, isSaved(false)
+		, unsupported(_unsupported)
+	{
+		if (unsupported)
+		{
+			errors.Add(L"This file is not supported.");
+		}
+	}
+
+	FileItem::~FileItem()
+	{
+	}
+
+	Ptr<IFileFactoryModel> FileItem::GetFileFactory()
+	{
+		return fileFactory;
+	}
+
+	Ptr<GuiImageData> FileItem::GetImage()
+	{
+		return fileFactory->GetSmallImage();
+	}
+
+	WString FileItem::GetName()
+	{
+		return GetDisplayNameFromFilePath(filePath);
+	}
+
+	Ptr<description::IValueObservableList> FileItem::GetChildren()
+	{
+		return children.GetWrapper();
+	}
+
+	bool FileItem::GetIsFileItem()
+	{
+		return true;
+	}
+
+	WString FileItem::GetFilePath()
+	{
+		return filePath;
+	}
+
+	bool FileItem::GetIsSaved()
+	{
+		if (unsupported) return true;
+		throw 0;
+	}
+
+	vint FileItem::GetErrorCount()
+	{
+		return errors.Count();
+	}
+
+	WString FileItem::GetErrorText(vint index)
+	{
+		return 0 <= index && index < errors.Count() ? errors[index] : L"";
+	}
+
+	bool FileItem::OpenFileItem()
+	{
+		if (unsupported) return true;
+		throw 0;
+	}
+
+	bool FileItem::SaveFileItem()
+	{
+		if (unsupported) return true;
+		throw 0;
+	}
+
+/***********************************************************************
+FolderItem
+***********************************************************************/
+
+	FolderItem::FolderItem( WString _filePath)
+		:filePath(_filePath)
+	{
+		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(L"FileImages/FolderSmall.png");
+	}
+
+	FolderItem::~FolderItem()
+	{
+	}
+
+	Ptr<GuiImageData> FolderItem::GetImage()
+	{
+		return image;
+	}
+
+	WString FolderItem::GetName()
+	{
+		return GetDisplayNameFromFilePath(filePath);
+	}
+
+	Ptr<description::IValueObservableList> FolderItem::GetChildren()
+	{
+		return children.GetWrapper();
+	}
+
+	bool FolderItem::GetIsFileItem()
+	{
+		return false;
+	}
+
+	WString FolderItem::GetFilePath()
+	{
+		return filePath;
+	}
+
+	bool FolderItem::GetIsSaved()
+	{
+		return false;
+	}
+
+	vint FolderItem::GetErrorCount()
+	{
+		return 0;
+	}
+
+	WString FolderItem::GetErrorText(vint index)
+	{
+		return L"";
+	}
+
+	bool FolderItem::OpenFileItem()
+	{
+		return false;
+	}
+
+	bool FolderItem::SaveFileItem()
+	{
+		return false;
+	}
+
+/***********************************************************************
 ProjectItem
 ***********************************************************************/
 
-	ProjectItem::ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
-		:projectFactory(_projectFactory)
+	void ProjectItem::AddFileItem(Ptr<FileItem> fileItem)
+	{
+	}
+
+	ProjectItem::ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
+		:studioModel(_studioModel)
+		, projectFactory(_projectFactory)
 		, filePath(_filePath)
 		, isSaved(false)
 		, unsupported(_unsupported)
@@ -84,6 +232,38 @@ ProjectItem
 				errors.Add(L"This project is not matched with the solution specification.");
 				unsupported = true;
 			}
+			
+			fileItems.Clear();
+			children.Clear();
+			FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioFile"))
+			{
+				auto attFactoryId = XmlGetAttribute(xmlProject, L"Factory");
+				auto attFilePath = XmlGetAttribute(xmlProject, L"FilePath");
+				if (!attFactoryId)
+				{
+					errors.Add(L"Attribute \"Factory\" is missing.");
+				}
+				if (!attFilePath)
+				{
+					errors.Add(L"Attribute \"FilePath\" is missing.");
+				}
+
+				if (attFactoryId && attFilePath)
+				{
+					auto factoryId = attFactoryId->value.value;
+					auto projectPath = attFilePath->value.value;
+					auto factory = studioModel->GetFileFactory(factoryId);
+					bool unsupported = false;
+					if (!factory)
+					{
+						unsupported = true;
+						factory = new FileFactoryModel(projectFactory->GetImage(), projectFactory->GetSmallImage(), factoryId);
+						errors.Add(L"Unrecognizable project factory id \"" + factoryId + L"\".");
+					}
+					auto file = new FileItem(studioModel, factory, (solutionFolder / projectPath).GetFullPath(), unsupported);
+					AddFileItem(file);
+				}
+			}
 		}
 
 		if (!isSaved)
@@ -106,6 +286,15 @@ ProjectItem
 		{
 			XmlElementWriter xmlWriter(xmlSolution);
 			xmlWriter.Attribute(L"Factory", projectFactory->GetId());
+
+			FOREACH(Ptr<FileItem>, fileItem, fileItems)
+			{
+				xmlWriter
+					.Element(L"GacStudioFile")
+					.Attribute(L"Factory", fileItem->GetFileFactory()->GetId())
+					.Attribute(L"FilePath", solutionFolder.GetRelativePathFor(fileItem->GetFilePath()))
+					;
+			}
 		}
 		{
 			FileStream fileStream(filePath, FileStream::WriteOnly);
@@ -122,22 +311,9 @@ ProjectItem
 		}
 		if (saveContainingFiles)
 		{
-			List<ISolutionItemModel*> content;
-			content.Add(this);
-			vint start = 0;
-			while (start < content.Count())
+			FOREACH(Ptr<FileItem>, fileItem, fileItems)
 			{
-				auto items = content[start]->GetChildren();
-				for (vint i = 0; i < items->GetCount(); i++)
-				{
-					auto item = UnboxValue<ISolutionItemModel*>(items->Get(i));
-					if (item->GetIsFileItem())
-					{
-						item->SaveFileItem();
-					}
-					content.Add(item);
-				}
-				start++;
+				fileItem->SaveFileItem();
 			}
 		}
 		if (!isSaved)
@@ -215,8 +391,9 @@ ProjectItem
 SolutionItem
 ***********************************************************************/
 
-	SolutionItem::SolutionItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath)
-		:projectFactory(_projectFactory)
+	SolutionItem::SolutionItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath)
+		:studioModel(_studioModel)
+		, projectFactory(_projectFactory)
 		, filePath(_filePath)
 		, isSaved(false)
 	{
@@ -270,13 +447,7 @@ SolutionItem
 				{
 					auto factoryId = attFactoryId->value.value;
 					auto projectPath = attFilePath->value.value;
-					auto factory=projectFactory
-						->GetChildren()
-						.Where([=](Ptr<IProjectFactoryModel> factory)
-						{
-							return factory->GetId() == factoryId;
-						})
-						.First(nullptr);
+					auto factory = studioModel->GetProjectFactory(factoryId);
 					bool unsupported = false;
 					if (!factory)
 					{
@@ -284,7 +455,7 @@ SolutionItem
 						factory = new ProjectFactoryModel(projectFactory->GetImage(), projectFactory->GetSmallImage(), factoryId);
 						errors.Add(L"Unrecognizable project factory id \"" + factoryId + L"\".");
 					}
-					auto project = new ProjectItem(factory, (solutionFolder / projectPath).GetFullPath(), unsupported);
+					auto project = new ProjectItem(studioModel, factory, (solutionFolder / projectPath).GetFullPath(), unsupported);
 					projects.Add(project);
 				}
 			}

@@ -22,6 +22,14 @@ FileFactoryModel
 		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_smallImageUrl);
 	}
 
+	FileFactoryModel::FileFactoryModel(Ptr<GuiImageData> _image, Ptr<GuiImageData> _smallImage, WString _id)
+		:image(_image)
+		, smallImage(_smallImage)
+		, name(L"Unsupported file \"" + id + L"\"")
+		, id(_id)
+	{
+	}
+
 	FileFactoryModel::~FileFactoryModel()
 	{
 	}
@@ -340,10 +348,30 @@ StudioModel
 		return openingSolution->GetSolution();
 	}
 
+	Ptr<IProjectFactoryModel> StudioModel::GetProjectFactory(WString id)
+	{
+		return GetProjectModels()
+			.Where([=](Ptr<IProjectFactoryModel> model)
+			{
+				return model->GetId() == id;
+		})
+		.First(nullptr);
+	}
+
+	Ptr<IFileFactoryModel> StudioModel::GetFileFactory(WString id)
+	{
+		return From(fileFactories)
+			.Where([=](Ptr<IFileFactoryModel> model)
+			{
+				return model->GetId() == id;
+		})
+		.First(nullptr);
+	}
+
 	bool StudioModel::OpenSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
+		auto solution = MakePtr<SolutionItem>(this, solutionProjectFactory, filePath);
 		if (!solution->OpenSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -361,7 +389,7 @@ StudioModel
 	bool StudioModel::NewSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
-		auto solution = MakePtr<SolutionItem>(solutionProjectFactory, filePath);
+		auto solution = MakePtr<SolutionItem>(this, solutionProjectFactory, filePath);
 		if (!solution->NewSolution()) return false;
 		openingSolution->SetSolution(solution);
 		HasOpeningSolutionChanged();
@@ -380,7 +408,7 @@ StudioModel
 	{
 		auto solution = openingSolution->GetSolution().Cast<ISolutionModel>();
 		if (!solution) return false;
-		auto project = MakePtr<ProjectItem>(projectFactory, filePath);
+		auto project = MakePtr<ProjectItem>(this, projectFactory, filePath);
 		return solution->AddProject(project);
 	}
 

@@ -93,6 +93,8 @@ namespace vm
 	class IFileModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFileModel>
 	{
 	public:
+
+		virtual Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
 	};
 }
 
@@ -152,6 +154,8 @@ namespace vm
 		virtual bool GetHasOpeningSolution() = 0;
 		vl::Event<void()> HasOpeningSolutionChanged;
 
+		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory(WString id) = 0;
+		virtual Ptr<vm::IFileFactoryModel> GetFileFactory(WString id) = 0;
 		virtual bool OpenSolution(WString filePath) = 0;
 		virtual bool SaveSolution() = 0;
 		virtual bool NewSolution(WString filePath) = 0;

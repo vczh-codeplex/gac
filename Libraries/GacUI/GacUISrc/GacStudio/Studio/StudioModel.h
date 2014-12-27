@@ -28,6 +28,7 @@ namespace vm
 
 	public:
 		FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext);
+		FileFactoryModel(Ptr<GuiImageData> _image, Ptr<GuiImageData> _smallImage, WString _id);
 		~FileFactoryModel();
 
 		Ptr<GuiImageData>								GetImage()override;
@@ -121,6 +122,9 @@ namespace vm
 		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
 		WString											GetOpeningSolutionPath()override;
 		bool											GetHasOpeningSolution()override;
+
+		Ptr<IProjectFactoryModel>						GetProjectFactory(WString id)override;
+		Ptr<IFileFactoryModel>							GetFileFactory(WString id)override;
 
 		bool											OpenSolution(WString filePath)override;
 		bool											SaveSolution()override;

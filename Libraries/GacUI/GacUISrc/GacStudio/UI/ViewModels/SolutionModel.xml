@@ -44,6 +44,7 @@
   </Interface>
 
   <Interface ref.Class="vm::IFileModel" Parent="vm::ISolutionItemModel">
+    <Method Name="GetFileFactory" Type="vm::IFileFactoryModel^"/>
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
@@ -78,6 +79,13 @@
     <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
     <Property Name="OpeningSolutionPath" Type="string" Readonly="true"/>
     <Property Name="HasOpeningSolution" Type="bool" Readonly="true" Observable="true"/>
+
+    <Method Name="GetProjectFactory" Type="vm::IProjectFactoryModel^">
+      <Argument Name="id" Type="string"/>
+    </Method>
+    <Method Name="GetFileFactory" Type="vm::IFileFactoryModel^">
+      <Argument Name="id" Type="string"/>
+    </Method>
 
     <Method Name="OpenSolution" Type="bool">
       <Argument Name="filePath" Type="string"/>
