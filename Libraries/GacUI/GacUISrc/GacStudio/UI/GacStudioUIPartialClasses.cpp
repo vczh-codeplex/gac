@@ -44,6 +44,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IFileModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
+				CLASS_MEMBER_METHOD(GetFileFactory, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
@@ -105,6 +106,8 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolutionPath)
 				CLASS_MEMBER_EVENT(HasOpeningSolutionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(HasOpeningSolution, HasOpeningSolutionChanged)
+				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
+				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });

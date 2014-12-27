@@ -15,18 +15,75 @@ using namespace vl::collections;
 
 namespace vm
 {
-	class ProjectItem : public Object, public virtual IProjectModel
+	class FileItem : public Object, public virtual IFileModel
 	{
 	protected:
+		IStudioModel*									studioModel;
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
-		Ptr<IProjectFactoryModel>						projectFactory;
+		Ptr<IFileFactoryModel>							fileFactory;
 		WString											filePath;
 		bool											isSaved;
 		collections::List<WString>						errors;
 		bool											unsupported;
 
 	public:
-		ProjectItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
+		FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported = false);
+		~FileItem();
+		
+		Ptr<IFileFactoryModel>							GetFileFactory()override;
+
+		Ptr<GuiImageData>								GetImage()override;
+		WString											GetName()override;
+		Ptr<description::IValueObservableList>			GetChildren()override;
+
+		bool											GetIsFileItem()override;
+		WString											GetFilePath()override;
+		bool											GetIsSaved()override;
+		vint											GetErrorCount()override;
+		WString											GetErrorText(vint index)override;
+		bool											OpenFileItem()override;
+		bool											SaveFileItem()override;
+	};
+
+	class FolderItem : public Object, public virtual IFolderModel
+	{
+	protected:
+		list::ObservableList<Ptr<ISolutionItemModel>>	children;
+		Ptr<GuiImageData>								image;
+		WString											filePath;
+
+	public:
+		FolderItem(WString _filePath);
+		~FolderItem();
+
+		Ptr<GuiImageData>								GetImage()override;
+		WString											GetName()override;
+		Ptr<description::IValueObservableList>			GetChildren()override;
+
+		bool											GetIsFileItem()override;
+		WString											GetFilePath()override;
+		bool											GetIsSaved()override;
+		vint											GetErrorCount()override;
+		WString											GetErrorText(vint index)override;
+		bool											OpenFileItem()override;
+		bool											SaveFileItem()override;
+	};
+
+	class ProjectItem : public Object, public virtual IProjectModel
+	{
+	protected:
+		IStudioModel*									studioModel;
+		list::ObservableList<Ptr<ISolutionItemModel>>	children;
+		Ptr<IProjectFactoryModel>						projectFactory;
+		WString											filePath;
+		List<Ptr<FileItem>>								fileItems;
+		bool											isSaved;
+		collections::List<WString>						errors;
+		bool											unsupported;
+
+		void											AddFileItem(Ptr<FileItem> fileItem);
+	public:
+		ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
 		
 		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
@@ -50,6 +107,7 @@ namespace vm
 	class SolutionItem : public Object, public virtual ISolutionModel
 	{
 	protected:
+		IStudioModel*									studioModel;
 		list::ObservableList<Ptr<IProjectModel>>		projects;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
@@ -57,7 +115,7 @@ namespace vm
 		collections::List<WString>						errors;
 
 	public:
-		SolutionItem(Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
+		SolutionItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
 		~SolutionItem();
 		
 		bool											OpenSolution()override;
