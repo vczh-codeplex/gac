@@ -281,8 +281,8 @@ namespace ui
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonCreate;
 		vl::presentation::controls::GuiBindableListView* listViewFileTemplate;
+		vl::presentation::controls::GuiSinglelineTextBox* textBoxFileName;
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
-		vl::presentation::controls::GuiSinglelineTextBox* textBoxProjectName;
 		vl::presentation::controls::GuiBindableTreeView* treeViewProjectTemplate;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
@@ -293,8 +293,8 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(buttonCancel);
 				GUI_INSTANCE_REFERENCE(buttonCreate);
 				GUI_INSTANCE_REFERENCE(listViewFileTemplate);
+				GUI_INSTANCE_REFERENCE(textBoxFileName);
 				GUI_INSTANCE_REFERENCE(textBoxLocation);
-				GUI_INSTANCE_REFERENCE(textBoxProjectName);
 				GUI_INSTANCE_REFERENCE(treeViewProjectTemplate);
 			}
 			else
@@ -309,8 +309,8 @@ namespace ui
 			,buttonCancel(0)
 			,buttonCreate(0)
 			,listViewFileTemplate(0)
+			,textBoxFileName(0)
 			,textBoxLocation(0)
-			,textBoxProjectName(0)
 			,treeViewProjectTemplate(0)
 		{
 		}
