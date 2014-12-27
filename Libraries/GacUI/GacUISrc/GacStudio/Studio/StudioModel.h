@@ -19,6 +19,7 @@ namespace vm
 	{
 	protected:
 		Ptr<GuiImageData>								image;
+		Ptr<GuiImageData>								smallImage;
 		WString											name;
 		WString											category;
 		WString											description;
@@ -26,10 +27,11 @@ namespace vm
 		WString											ext;
 
 	public:
-		FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext);
+		FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext);
 		~FileFactoryModel();
 
 		Ptr<GuiImageData>								GetImage()override;
+		Ptr<GuiImageData>								GetSmallImage()override;
 		WString											GetName()override;
 		WString											GetCategory()override;
 		WString											GetDescription()override;

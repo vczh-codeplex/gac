@@ -11,7 +11,7 @@ namespace vm
 FileFactoryModel
 ***********************************************************************/
 
-	FileFactoryModel::FileFactoryModel(WString _imageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext)
+	FileFactoryModel::FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext)
 		:name(_name)
 		, category(_category)
 		, description(_description)
@@ -19,6 +19,7 @@ FileFactoryModel
 		, ext(_ext)
 	{
 		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_imageUrl);
+		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_smallImageUrl);
 	}
 
 	FileFactoryModel::~FileFactoryModel()
@@ -28,6 +29,11 @@ FileFactoryModel
 	Ptr<GuiImageData> FileFactoryModel::GetImage()
 	{
 		return image;
+	}
+
+	Ptr<GuiImageData> FileFactoryModel::GetSmallImage()
+	{
+		return smallImage;
 	}
 
 	WString FileFactoryModel::GetName()
@@ -242,11 +248,12 @@ StudioModel
 				auto xml = item->AsXml()->rootElement;
 				auto id = item->GetName();
 				auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
+				auto smallImage = XmlGetValue(XmlGetElement(xml, L"SmallImage"));
 				auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
 				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
 				auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
 				auto ext = XmlGetValue(XmlGetElement(xml, L"DefaultFileExt"));
-				configFiles.Add(id, new FileFactoryModel(image, display, category, description, id, ext));
+				configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext));
 			}
 		}
 
