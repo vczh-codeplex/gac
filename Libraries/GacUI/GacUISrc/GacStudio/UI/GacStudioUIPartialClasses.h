@@ -52,6 +52,8 @@ namespace vm
 
 		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
 
+		virtual Ptr<presentation::GuiImageData> GetSmallImage() = 0;
+
 		virtual WString GetName() = 0;
 
 		virtual WString GetCategory() = 0;

@@ -21,6 +21,7 @@
   
   <Interface ref.Class="vm::IFileFactoryModel">
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="SmallImage" Type="presentation::GuiImageData^" Readonly="true"/>
     <Property Name="Name" Type="string" Readonly="true"/>
     <Property Name="Category" Type="string" Readonly="true"/>
     <Property Name="Description" Type="string" Readonly="true"/>

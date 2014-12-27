@@ -30,6 +30,7 @@
     <Xml name="GACUI_WINDOW_RESOURCE_FILE">
       <File>
         <Image>FileImages/Dialog.png</Image>
+        <SmallImage>FileImages/DialogSmall.png</SmallImage>
         <Display>Window Resource</Display>
         <Description>Create a window for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -39,6 +40,7 @@
     <Xml name="GACUI_CONTROL_RESOURCE_FILE">
       <File>
         <Image>FileImages/Control.png</Image>
+        <SmallImage>FileImages/ControlSmall.png</SmallImage>
         <Display>Control Resource</Display>
         <Description>Create a control for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -48,6 +50,7 @@
     <Xml name="GACUI_TEMPLATE_RESOURCE_FILE">
       <File>
         <Image>FileImages/Template.png</Image>
+        <SmallImage>FileImages/TemplateSmall.png</SmallImage>
         <Display>Control Template</Display>
         <Description>Create a control template for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -57,6 +60,7 @@
     <Xml name="GACUI_IMAGE_RESOURCE_FILE">
       <File>
         <Image>FileImages/Image.png</Image>
+        <SmallImage>FileImages/ImageSmall.png</SmallImage>
         <Display>Image Resource</Display>
         <Description>Create an image resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -66,6 +70,7 @@
     <Xml name="GACUI_TEXT_RESOURCE_FILE">
       <File>
         <Image>FileImages/Document.png</Image>
+        <SmallImage>FileImages/DocumentSmall.png</SmallImage>
         <Display>Text Resource</Display>
         <Description>Create a text resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -75,6 +80,7 @@
     <Xml name="GACUI_RICHTEXT_RESOURCE_FILE">
       <File>
         <Image>FileImages/RichDocument.png</Image>
+        <SmallImage>FileImages/RichDocumentSmall.png</SmallImage>
         <Display>Rich Text Resource</Display>
         <Description>Create a rich text resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -84,6 +90,7 @@
     <Xml name="GACUI_XML_RESOURCE_FILE">
       <File>
         <Image>FileImages/XmlDocument.png</Image>
+        <SmallImage>FileImages/XmlDocumentSmall.png</SmallImage>
         <Display>XML Resource</Display>
         <Description>Create an xml resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
@@ -93,6 +100,7 @@
     <Xml name="PARSER_FILE">
       <File>
         <Image>FileImages/Parser.png</Image>
+        <SmallImage>FileImages/ParserSmall.png</SmallImage>
         <Display>Parser</Display>
         <Description>Create a parser from a grammar.</Description>
         <Category>PARSER_PROJECT</Category>
@@ -102,6 +110,7 @@
     <Xml name="PARSER_TEST_FILE">
       <File>
         <Image>FileImages/Parser.png</Image>
+        <SmallImage>FileImages/ParserSmall.png</SmallImage>
         <Display>Parser Test</Display>
         <Description>Create a parser test.</Description>
         <Category>PARSER_PROJECT</Category>
@@ -111,6 +120,7 @@
     <Xml name="HERODB_SQL_DATABASE">
       <File>
         <Image>FileImages/SQLDatabase.png</Image>
+        <SmallImage>FileImages/SQLDatabaseSmall.png</SmallImage>
         <Display>SQL Database</Display>
         <Description>Create a SQL Database in a HeroDB database instance.</Description>
         <Category>HERODB_PROJECT</Category>
@@ -120,6 +130,7 @@
     <Xml name="HERODB_GRAPH_DATABASE">
       <File>
         <Image>FileImages/GraphDatabase.png</Image>
+        <SmallImage>FileImages/GraphDatabaseSmall.png</SmallImage>
         <Display>Graph Database</Display>
         <Description>Create a Graph Database in a HeroDB database instance.</Description>
         <Category>HERODB_PROJECT</Category>
