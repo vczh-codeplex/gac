@@ -9,16 +9,22 @@ using namespace vl::presentation;
 
 namespace vm
 {
-	WString GetDisplayNameFromFilePath(WString filePath)
+	WString GetDisplayNameFromFilePath(WString filePath, WString extension)
 	{
 		auto index = INVLOC.FindLast(filePath, L"\\", Locale::None);
 		if (index.key == -1)
 		{
 			return filePath;
 		}
+
+		WString fileName = filePath.Sub(index.key + 1, filePath.Length() - index.key - 1);
+		if (fileName.Length() >= extension.Length() && fileName.Right(extension.Length()) == extension)
+		{
+			return fileName.Left(fileName.Length() - extension.Length());
+		}
 		else
 		{
-			return filePath.Sub(index.key + 1, filePath.Length() - index.key - 1);
+			return fileName;
 		}
 	}
 
@@ -70,7 +76,7 @@ FileItem
 
 	WString FileItem::GetName()
 	{
-		return GetDisplayNameFromFilePath(filePath);
+		return GetDisplayNameFromFilePath(filePath, L"");
 	}
 
 	Ptr<description::IValueObservableList> FileItem::GetChildren()
@@ -86,6 +92,11 @@ FileItem
 	WString FileItem::GetFilePath()
 	{
 		return filePath;
+	}
+
+	WString FileItem::GetFileDirectory()
+	{
+		return FilePath(filePath).GetFolder().GetFullPath();
 	}
 
 	bool FileItem::GetIsSaved()
@@ -137,7 +148,7 @@ FolderItem
 
 	WString FolderItem::GetName()
 	{
-		return GetDisplayNameFromFilePath(filePath);
+		return GetDisplayNameFromFilePath(filePath, L"");
 	}
 
 	Ptr<description::IValueObservableList> FolderItem::GetChildren()
@@ -151,6 +162,11 @@ FolderItem
 	}
 
 	WString FolderItem::GetFilePath()
+	{
+		return filePath;
+	}
+
+	WString FolderItem::GetFileDirectory()
 	{
 		return filePath;
 	}
@@ -215,7 +231,7 @@ ProjectItem
 		if (unsupported) return false;
 		errors.Clear();
 
-		auto solutionFolder = FilePath(filePath).GetFolder();
+		auto projectFolder = FilePath(filePath).GetFolder();
 		Ptr<XmlDocument> xml;
 		{
 			FileStream fileStream(filePath, FileStream::ReadOnly);
@@ -266,7 +282,7 @@ ProjectItem
 				if (attFactoryId && attFilePath)
 				{
 					auto factoryId = attFactoryId->value.value;
-					auto projectPath = attFilePath->value.value;
+					auto filePath = attFilePath->value.value;
 					auto factory = studioModel->GetFileFactory(factoryId);
 					bool unsupported = false;
 					if (!factory)
@@ -275,7 +291,7 @@ ProjectItem
 						factory = new FileFactoryModel(projectFactory->GetImage(), projectFactory->GetSmallImage(), factoryId);
 						errors.Add(L"Unrecognizable project factory id \"" + factoryId + L"\".");
 					}
-					auto file = new FileItem(studioModel, factory, (solutionFolder / projectPath).GetFullPath(), unsupported);
+					auto file = new FileItem(studioModel, factory, (projectFolder / filePath).GetFullPath(), unsupported);
 					AddFileItem(file);
 				}
 			}
@@ -293,7 +309,7 @@ ProjectItem
 	bool ProjectItem::SaveProject(bool saveContainingFiles)
 	{
 		if (unsupported) return false;
-		auto solutionFolder = FilePath(filePath).GetFolder();
+		auto projectFolder = FilePath(filePath).GetFolder();
 		auto xml = MakePtr<XmlDocument>();
 		auto xmlSolution = MakePtr<XmlElement>();
 		xmlSolution->name.value = L"GacStudioProject";
@@ -307,7 +323,7 @@ ProjectItem
 				xmlWriter
 					.Element(L"GacStudioFile")
 					.Attribute(L"Factory", fileItem->GetFileFactory()->GetId())
-					.Attribute(L"FilePath", solutionFolder.GetRelativePathFor(fileItem->GetFilePath()))
+					.Attribute(L"FilePath", projectFolder.GetRelativePathFor(fileItem->GetFilePath()))
 					;
 			}
 		}
@@ -370,7 +386,7 @@ ProjectItem
 
 	WString ProjectItem::GetName()
 	{
-		return GetDisplayNameFromFilePath(filePath);
+		return GetDisplayNameFromFilePath(filePath, L".gacproj.xml");
 	}
 
 	Ptr<description::IValueObservableList> ProjectItem::GetChildren()
@@ -386,6 +402,11 @@ ProjectItem
 	WString ProjectItem::GetFilePath()
 	{
 		return filePath;
+	}
+
+	WString ProjectItem::GetFileDirectory()
+	{
+		return FilePath(filePath).GetFolder().GetFullPath();
 	}
 
 	bool ProjectItem::GetIsSaved()
@@ -573,7 +594,7 @@ SolutionItem
 
 	WString SolutionItem::GetName()
 	{
-		return GetDisplayNameFromFilePath(filePath);
+		return GetDisplayNameFromFilePath(filePath, L".gacsln.xml");
 	}
 
 	Ptr<description::IValueObservableList> SolutionItem::GetChildren()
@@ -589,6 +610,11 @@ SolutionItem
 	WString SolutionItem::GetFilePath()
 	{
 		return filePath;
+	}
+
+	WString SolutionItem::GetFileDirectory()
+	{
+		return FilePath(filePath).GetFolder().GetFullPath();
 	}
 
 	bool SolutionItem::GetIsSaved()

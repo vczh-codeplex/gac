@@ -187,6 +187,11 @@ RootSolutionItemModel
 		return L"";
 	}
 
+	WString RootSolutionItemModel::GetFileDirectory()
+	{
+		return L"";
+	}
+
 	bool RootSolutionItemModel::GetIsSaved()
 	{
 		throw true;

@@ -41,6 +41,7 @@ namespace vm
 
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
+		WString											GetFileDirectory()override;
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
@@ -65,6 +66,7 @@ namespace vm
 
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
+		WString											GetFileDirectory()override;
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
@@ -101,6 +103,7 @@ namespace vm
 
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
+		WString											GetFileDirectory()override;
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
@@ -133,6 +136,7 @@ namespace vm
 
 		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
+		WString											GetFileDirectory()override;
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
