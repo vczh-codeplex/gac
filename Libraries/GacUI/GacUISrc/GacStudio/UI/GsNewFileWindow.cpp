@@ -48,10 +48,10 @@ namespace ui
 				model->PromptError(L"Failed to add a file of \"" + fileFactory->GetName() + L"\" to project \"" + workingProject->GetName() + L"\".");
 				goto CLOSE;
 			}
-			else if (!fileItem->NewFile())
+			if (!fileItem->SaveFile())
 			{
-				model->PromptError(L"Failed to create a file of \"" + fileFactory->GetName() + L"\".");
-				// goto CLOSE;
+				model->PromptError(L"Failed to save file \"" + fileItem->GetName() + L"\".");
+				goto CLOSE;
 			}
 			if (!workingProject->SaveProject(false))
 			{

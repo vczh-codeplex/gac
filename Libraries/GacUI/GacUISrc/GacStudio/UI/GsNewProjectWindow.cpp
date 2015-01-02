@@ -39,7 +39,7 @@ namespace ui
 			auto solutionFolder =
 				comboSolution->GetSelectedIndex() == 0
 				? Folder(FilePath(textBoxLocation->GetText()) / textBoxSolutionName->GetText())
-				: Folder(FilePath(model->GetOpenedSolution()->GetFileDirectory()).GetFolder())
+				: Folder(FilePath(model->GetOpenedSolution()->GetFileDirectory()))
 				;
 			auto solutionPath = solutionFolder.GetFilePath() / (textBoxSolutionName->GetText() + L".gacsln.xml");
 			auto projectFolder = Folder(solutionFolder.GetFilePath() / textBoxProjectName->GetText());
@@ -66,12 +66,19 @@ namespace ui
 					goto CLOSE;
 				}
 			}
-			if (!model->AddProject(projectFactory, projectPath.GetFullPath()))
+
+			auto projectItem = model->AddProject(projectFactory, projectPath.GetFullPath());
+			if (!projectItem)
 			{
 				model->PromptError(L"Failed to add a project of \"" + projectFactory->GetName() + L"\".");
 				goto CLOSE;
 			}
-			if (!model->SaveSolution())
+			if (!projectItem->SaveProject(false))
+			{
+				model->PromptError(L"Failed to save project \"" + projectItem->GetName() + L"\".");
+				goto CLOSE;
+			}
+			if (!model->GetOpenedSolution()->SaveSolution(false))
 			{
 				model->PromptError(L"Failed to save the solution.");
 				goto CLOSE;
