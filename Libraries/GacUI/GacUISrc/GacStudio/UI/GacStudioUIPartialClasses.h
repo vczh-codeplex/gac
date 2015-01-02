@@ -19,6 +19,8 @@ namespace vm
 	{
 	public:
 
+		virtual vm::ISolutionItemModel* GetParent() = 0;
+
 		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
 		vl::Event<void()> ImageChanged;
 
@@ -98,6 +100,7 @@ namespace vm
 	public:
 
 		virtual Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
+
 		virtual bool OpenFile() = 0;
 		virtual bool SaveFile() = 0;
 		virtual bool NewFile() = 0;
@@ -119,6 +122,7 @@ namespace vm
 	public:
 
 		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
+
 		virtual bool OpenProject() = 0;
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
 		virtual bool NewProject() = 0;
@@ -159,6 +163,16 @@ namespace vm
 		virtual Ptr<vm::ISolutionModel> GetOpenedSolution() = 0;
 		vl::Event<void()> OpenedSolutionChanged;
 
+		virtual Ptr<vm::ISolutionItemModel> GetWorkingItem() = 0;
+		vl::Event<void()> WorkingItemChanged;
+
+		virtual Ptr<vm::IProjectModel> GetWorkingProject() = 0;
+		vl::Event<void()> WorkingProjectChanged;
+
+		virtual WString GetWorkingDirectory() = 0;
+		vl::Event<void()> WorkingDirectoryChanged;
+
+		virtual void NotifySelectedSolutionItem(Ptr<vm::ISolutionItemModel> solutionItem) = 0;
 		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory(WString id) = 0;
 		virtual Ptr<vm::IFileFactoryModel> GetFileFactory(WString id) = 0;
 		virtual bool OpenSolution(WString filePath) = 0;
@@ -232,6 +246,7 @@ namespace ui
 		vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
 		vl::presentation::controls::GuiToolstripCommand* commandHelpAbout;
 		vl::presentation::compositions::GuiTableComposition* tableMain;
+		vl::presentation::controls::GuiBindableTreeView* treeViewSolutionItem;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
 		{
@@ -248,6 +263,7 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(commandFileSaveAll);
 				GUI_INSTANCE_REFERENCE(commandHelpAbout);
 				GUI_INSTANCE_REFERENCE(tableMain);
+				GUI_INSTANCE_REFERENCE(treeViewSolutionItem);
 			}
 			else
 			{
@@ -268,6 +284,7 @@ namespace ui
 			,commandFileSaveAll(0)
 			,commandHelpAbout(0)
 			,tableMain(0)
+			,treeViewSolutionItem(0)
 		{
 		}
 
@@ -469,6 +486,7 @@ namespace ui
 		void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		MainWindow(Ptr<vm::IStudioModel> ViewModel);
@@ -522,6 +540,10 @@ namespace ui
 	}
 
 	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 

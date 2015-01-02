@@ -7,7 +7,7 @@
     <ToolstripCommand ref.Name="commandFileNewProject" Text="New Project..." Image-uri="res://CommandImages/NewProject.png" ShortcutBuilder="Ctrl+Shift+N">
       <ev.Executed>commandFileNewProject_Executed</ev.Executed>
     </ToolstripCommand>
-    <ToolstripCommand ref.Name="commandFileNewFile" Text="New File..." Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N">
+    <ToolstripCommand ref.Name="commandFileNewFile" Text="New File..." Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N" Enabled="false">
       <ev.Executed>commandFileNewFile_Executed</ev.Executed>
     </ToolstripCommand>
     <ToolstripCommand ref.Name="commandFileOpenProject" Text="Open Project..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+Shift+O">
@@ -96,9 +96,10 @@
         <Tab>
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
           <TabPage Text="Solution Explorer">
-            <BindableTreeView VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.RootSolutionItem" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
+            <BindableTreeView ref.Name="treeViewSolutionItem" VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.RootSolutionItem" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
               <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
               <att.Enabled-bind>ViewModel.OpenedSolution is not null</att.Enabled-bind>
+              <ev.SelectionChanged>treeViewSolutionItem_SelectionChanged</ev.SelectionChanged>
             </BindableTreeView>
           </TabPage>
 

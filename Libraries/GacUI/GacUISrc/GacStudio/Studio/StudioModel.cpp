@@ -162,9 +162,14 @@ AllFileFactoryFilterModel
 RootSolutionItemModel
 ***********************************************************************/
 
+	ISolutionItemModel* RootSolutionItemModel::GetParent()
+	{
+		return nullptr;
+	}
+
 	Ptr<GuiImageData> RootSolutionItemModel::GetImage()
 	{
-		return 0;
+		return nullptr;
 	}
 
 	WString RootSolutionItemModel::GetName()
@@ -219,7 +224,7 @@ RootSolutionItemModel
 
 	Ptr<ISolutionModel> RootSolutionItemModel::GetSolution()
 	{
-		if (children.Count() == 0)return 0;
+		if (children.Count() == 0) return nullptr;
 		return children[0].Cast<ISolutionModel>();
 	}
 
@@ -339,6 +344,38 @@ StudioModel
 	Ptr<ISolutionModel> StudioModel::GetOpenedSolution()
 	{
 		return rootSolutionItem->GetSolution();
+	}
+
+	void StudioModel::NotifySelectedSolutionItem(Ptr<ISolutionItemModel> selectedItem)
+	{
+		selectedSolutionItem = selectedItem;
+		WorkingItemChanged();
+		WorkingProjectChanged();
+		WorkingDirectoryChanged();
+	}
+
+	Ptr<ISolutionItemModel> StudioModel::GetWorkingItem()
+	{
+		return selectedSolutionItem;
+	}
+
+	Ptr<IProjectModel> StudioModel::GetWorkingProject()
+	{
+		auto item = selectedSolutionItem.Obj();
+		while (item)
+		{
+			if (auto projectModel = dynamic_cast<IProjectModel*>(item))
+			{
+				return projectModel;
+			}
+			item = item->GetParent();
+		}
+		return nullptr;
+	}
+
+	WString StudioModel::GetWorkingDirectory()
+	{
+		return selectedSolutionItem ? selectedSolutionItem->GetFileDirectory() : L"";
 	}
 
 	Ptr<IProjectFactoryModel> StudioModel::GetProjectFactory(WString id)

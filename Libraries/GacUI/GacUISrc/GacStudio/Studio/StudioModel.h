@@ -82,6 +82,7 @@ namespace vm
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 
 	public:
+		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
@@ -108,6 +109,7 @@ namespace vm
 		WString											fileCategory;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 		Ptr<RootSolutionItemModel>						rootSolutionItem;
+		Ptr<ISolutionItemModel>							selectedSolutionItem;
 
 	public:
 		StudioModel();
@@ -122,6 +124,10 @@ namespace vm
 
 		Ptr<ISolutionItemModel>							GetRootSolutionItem()override;
 		Ptr<ISolutionModel>								GetOpenedSolution()override;
+		void											NotifySelectedSolutionItem(Ptr<ISolutionItemModel> selectedItem)override;
+		Ptr<ISolutionItemModel>							GetWorkingItem()override;
+		Ptr<IProjectModel>								GetWorkingProject()override;
+		WString											GetWorkingDirectory()override;
 
 		Ptr<IProjectFactoryModel>						GetProjectFactory(WString id)override;
 		Ptr<IFileFactoryModel>							GetFileFactory(WString id)override;
