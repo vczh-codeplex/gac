@@ -58,7 +58,7 @@
         <Label Text="Location:"/>
       </Cell>
       <Cell Site="row:3 column:1 rowSpan:1 columnSpan:2">
-        <SinglelineTextBox ref.Name="textBoxLocation" Alt="L" Enabled-bind="comboSolution.SelectedIndex == 0">
+        <SinglelineTextBox ref.Name="textBoxLocation" Alt="L" Text-eval="ViewModel.OpenedSolution.FileDirectory ?? ''" Enabled-bind="comboSolution.SelectedIndex == 0">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
@@ -89,7 +89,7 @@
         <Label Text="Solution Name:"/>
       </Cell>
       <Cell Site="row:5 column:1 rowSpan:1 columnSpan:2">
-        <SinglelineTextBox ref.Name="textBoxSolutionName" Alt="N" Text="MySolution" Enabled-bind="comboSolution.SelectedIndex == 0">
+        <SinglelineTextBox ref.Name="textBoxSolutionName" Alt="N" Text-eval="ViewModel.OpenedSolution.Name ?? 'MySolution'" Enabled-bind="comboSolution.SelectedIndex == 0">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
