@@ -45,6 +45,9 @@
 
   <Interface ref.Class="vm::IFileModel" Parent="vm::ISolutionItemModel">
     <Method Name="GetFileFactory" Type="vm::IFileFactoryModel^"/>
+    <Method Name="OpenFile" Type="bool"/>
+    <Method Name="SaveFile" Type="bool"/>
+    <Method Name="NewFile" Type="bool"/>
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
@@ -57,6 +60,9 @@
       <Argument Name="saveContainingFiles" Type="bool"/>
     </Method>
     <Method Name="NewProject" Type="bool"/>
+    <Method Name="AddFile" Type="bool">
+      <Argument Name="file" Type="vm::IFileModel^"/>
+    </Method>
   </Interface>
 
   <Interface ref.Class="vm::ISolutionModel" Parent="vm::ISolutionItemModel">
@@ -76,9 +82,8 @@
     <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
     
     <Property Name="FileCategory" Type="string"/>
-    <Property Name="OpeningSolution" Type="ISolutionItemModel^" Readonly="true"/>
-    <Property Name="OpeningSolutionPath" Type="string" Readonly="true"/>
-    <Property Name="HasOpeningSolution" Type="bool" Readonly="true" Observable="true"/>
+    <Property Name="RootSolutionItem" Type="ISolutionItemModel^" Readonly="true"/>
+    <Property Name="OpenedSolution" Type="vm::ISolutionModel^" Readonly="true" Observable="true"/>
 
     <Method Name="GetProjectFactory" Type="vm::IProjectFactoryModel^">
       <Argument Name="id" Type="string"/>
@@ -97,8 +102,13 @@
     </Method>
     <Method Name="CloseSolution" Type="bool">
     </Method>
-    <Method Name="AddProject" Type="bool">
+    <Method Name="AddProject" Type="vm::IProjectModel^">
       <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
+      <Argument Name="filePath" Type="string"/>
+    </Method>
+    <Method Name="AddFile" Type="vm::IFileModel^">
+      <Argument Name="project" Type="vm::IProjectModel^"/>
+      <Argument Name="fileFactory" Type="vm::IFileFactoryModel^"/>
       <Argument Name="filePath" Type="string"/>
     </Method>
     

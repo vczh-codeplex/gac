@@ -31,6 +31,9 @@ namespace vm
 		~FileItem();
 		
 		Ptr<IFileFactoryModel>							GetFileFactory()override;
+		bool											OpenFile()override;
+		bool											SaveFile()override;
+		bool											NewFile()override;
 
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
@@ -76,12 +79,12 @@ namespace vm
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
-		List<Ptr<FileItem>>								fileItems;
+		List<Ptr<IFileModel>>								fileItems;
 		bool											isSaved;
 		collections::List<WString>						errors;
 		bool											unsupported;
 
-		void											AddFileItem(Ptr<FileItem> fileItem);
+		void											AddFileItem(Ptr<IFileModel> fileItem);
 	public:
 		ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
@@ -90,6 +93,7 @@ namespace vm
 		bool											OpenProject()override;
 		bool											SaveProject(bool saveContainingFiles)override;
 		bool											NewProject()override;
+		bool											AddFile(Ptr<IFileModel> file)override;
 
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;

@@ -95,6 +95,9 @@ namespace vm
 	public:
 
 		virtual Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
+		virtual bool OpenFile() = 0;
+		virtual bool SaveFile() = 0;
+		virtual bool NewFile() = 0;
 	};
 }
 
@@ -116,6 +119,7 @@ namespace vm
 		virtual bool OpenProject() = 0;
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
 		virtual bool NewProject() = 0;
+		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
 	};
 }
 
@@ -147,12 +151,10 @@ namespace vm
 		virtual WString GetFileCategory() = 0;
 		virtual void SetFileCategory(WString value) = 0;
 
-		virtual Ptr<ISolutionItemModel> GetOpeningSolution() = 0;
+		virtual Ptr<ISolutionItemModel> GetRootSolutionItem() = 0;
 
-		virtual WString GetOpeningSolutionPath() = 0;
-
-		virtual bool GetHasOpeningSolution() = 0;
-		vl::Event<void()> HasOpeningSolutionChanged;
+		virtual Ptr<vm::ISolutionModel> GetOpenedSolution() = 0;
+		vl::Event<void()> OpenedSolutionChanged;
 
 		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory(WString id) = 0;
 		virtual Ptr<vm::IFileFactoryModel> GetFileFactory(WString id) = 0;
@@ -160,7 +162,8 @@ namespace vm
 		virtual bool SaveSolution() = 0;
 		virtual bool NewSolution(WString filePath) = 0;
 		virtual bool CloseSolution() = 0;
-		virtual bool AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath) = 0;
+		virtual Ptr<vm::IProjectModel> AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath) = 0;
+		virtual Ptr<vm::IFileModel> AddFile(Ptr<vm::IProjectModel> project, Ptr<vm::IFileFactoryModel> fileFactory, WString filePath) = 0;
 		virtual void OpenBrowser(WString url) = 0;
 		virtual void PromptError(WString message) = 0;
 	};
