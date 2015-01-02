@@ -24,7 +24,7 @@
       </att.Columns>
 
       <Cell Site="row:0 column:0" Margin="left:4 top:4 right:4 bottom:4">
-        <Label Text="Select File Template to Create:"/>
+        <Label Text="Select File Template to Use:"/>
       </Cell>
 
       <Cell Site="row:1 column:0">
