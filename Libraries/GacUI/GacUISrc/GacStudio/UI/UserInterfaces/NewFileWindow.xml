@@ -82,7 +82,7 @@
       </Cell>
 
       <Cell Site="row:5 column:2">
-        <Button ref.Name="buttonCreate" Text="Create" Alt="C" Enabled="false" ev.Clicked="buttonCreate_Clicked">
+        <Button ref.Name="buttonCreate" Text="Create" Alt="C" Enabled-bind="listViewFileTemplate.SelectedItem is not null" ev.Clicked="buttonCreate_Clicked">
           <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
         </Button>
       </Cell>

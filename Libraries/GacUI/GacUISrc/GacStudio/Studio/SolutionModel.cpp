@@ -62,12 +62,12 @@ FileItem
 
 	bool FileItem::SaveFile()
 	{
-		throw 0;
+		return true;
 	}
 
 	bool FileItem::NewFile()
 	{
-		throw 0;
+		return false;
 	}
 
 	ISolutionItemModel* FileItem::GetParent()
