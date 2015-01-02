@@ -6,6 +6,7 @@
     <Property Name="Children" Type="description::IValueObservableList^" Readonly="true"/>
     <Property Name="IsFileItem" Type="bool" Readonly="true"/>
     <Property Name="FilePath" Type="string" Readonly="true" Observable="true"/>
+    <Property Name="FileDirectory" Type="string" Readonly="true" Observable="true"/>
     <Property Name="IsSaved" Type="bool" Readonly="true" Observable="true"/>
     
     <Property Name="ErrorCount" Type="int" Readonly="true" Observable="true"/>

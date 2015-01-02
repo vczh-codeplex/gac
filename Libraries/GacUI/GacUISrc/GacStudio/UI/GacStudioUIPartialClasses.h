@@ -32,6 +32,9 @@ namespace vm
 		virtual WString GetFilePath() = 0;
 		vl::Event<void()> FilePathChanged;
 
+		virtual WString GetFileDirectory() = 0;
+		vl::Event<void()> FileDirectoryChanged;
+
 		virtual bool GetIsSaved() = 0;
 		vl::Event<void()> IsSavedChanged;
 

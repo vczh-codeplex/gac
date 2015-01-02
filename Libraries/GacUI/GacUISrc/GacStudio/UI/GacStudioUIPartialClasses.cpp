@@ -83,6 +83,8 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(IsFileItem)
 				CLASS_MEMBER_EVENT(FilePathChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(FilePath, FilePathChanged)
+				CLASS_MEMBER_EVENT(FileDirectoryChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(FileDirectory, FileDirectoryChanged)
 				CLASS_MEMBER_EVENT(IsSavedChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(IsSaved, IsSavedChanged)
 				CLASS_MEMBER_EVENT(ErrorCountChanged)
