@@ -94,8 +94,8 @@ namespace vm
 		bool											OpenFileItem()override;
 		bool											SaveFileItem()override;
 		
-		Ptr<ISolutionItemModel>							GetSolution();
-		void											SetSolution(Ptr<ISolutionItemModel> solution);
+		Ptr<ISolutionModel>								GetSolution();
+		void											SetSolution(Ptr<ISolutionModel> solution);
 	};
 
 	class StudioModel : public Object, public virtual IStudioModel
@@ -106,7 +106,7 @@ namespace vm
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		WString											fileCategory;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
-		Ptr<RootSolutionItemModel>						openingSolution;
+		Ptr<RootSolutionItemModel>						rootSolutionItem;
 
 	public:
 		StudioModel();
@@ -119,9 +119,8 @@ namespace vm
 		WString											GetFileCategory()override;
 		void											SetFileCategory(WString value)override;
 
-		Ptr<ISolutionItemModel>							GetOpeningSolution()override;
-		WString											GetOpeningSolutionPath()override;
-		bool											GetHasOpeningSolution()override;
+		Ptr<ISolutionItemModel>							GetRootSolutionItem()override;
+		Ptr<ISolutionModel>								GetOpenedSolution()override;
 
 		Ptr<IProjectFactoryModel>						GetProjectFactory(WString id)override;
 		Ptr<IFileFactoryModel>							GetFileFactory(WString id)override;
@@ -130,7 +129,8 @@ namespace vm
 		bool											SaveSolution()override;
 		bool											NewSolution(WString filePath)override;
 		bool											CloseSolution()override;
-		bool											AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath)override;
+		Ptr<IProjectModel>								AddProject(Ptr<IProjectFactoryModel> projectFactory, WString filePath)override;
+		Ptr<IFileModel>									AddFile(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)override;
 
 		void											OpenBrowser(WString url)override;
 		void											PromptError(WString message)override;

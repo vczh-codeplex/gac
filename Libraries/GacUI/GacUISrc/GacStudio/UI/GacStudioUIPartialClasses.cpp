@@ -45,6 +45,9 @@ namespace vl
 			BEGIN_CLASS_MEMBER(vm::IFileModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_METHOD(GetFileFactory, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(NewFile, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
@@ -67,6 +70,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
 				CLASS_MEMBER_METHOD(NewProject, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(AddFile, { L"file" });
 			END_CLASS_MEMBER(vm::IProjectModel)
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
@@ -102,10 +106,9 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileModels)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFilters)
 				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolution)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(OpeningSolutionPath)
-				CLASS_MEMBER_EVENT(HasOpeningSolutionChanged)
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(HasOpeningSolution, HasOpeningSolutionChanged)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootSolutionItem)
+				CLASS_MEMBER_EVENT(OpenedSolutionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(OpenedSolution, OpenedSolutionChanged)
 				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
@@ -113,6 +116,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddProject, { L"projectFactory" _ L"filePath" });
+				CLASS_MEMBER_METHOD(AddFile, { L"project" _ L"fileFactory" _ L"filePath" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
 			END_CLASS_MEMBER(vm::IStudioModel)

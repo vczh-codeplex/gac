@@ -96,9 +96,9 @@
         <Tab>
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
           <TabPage Text="Solution Explorer">
-            <BindableTreeView VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.OpeningSolution" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
+            <BindableTreeView VerticalAlwaysVisible="false" ItemSource-eval="ViewModel.RootSolutionItem" ImageProperty="Image" TextProperty="Name" ChildrenProperty="Children">
               <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-              <att.Enabled-bind>ViewModel.HasOpeningSolution</att.Enabled-bind>
+              <att.Enabled-bind>ViewModel.OpenedSolution is not null</att.Enabled-bind>
             </BindableTreeView>
           </TabPage>
 

@@ -48,6 +48,21 @@ FileItem
 		return fileFactory;
 	}
 
+	bool FileItem::OpenFile()
+	{
+		throw 0;
+	}
+
+	bool FileItem::SaveFile()
+	{
+		throw 0;
+	}
+
+	bool FileItem::NewFile()
+	{
+		throw 0;
+	}
+
 	Ptr<GuiImageData> FileItem::GetImage()
 	{
 		return fileFactory->GetSmallImage();
@@ -169,7 +184,7 @@ FolderItem
 ProjectItem
 ***********************************************************************/
 
-	void ProjectItem::AddFileItem(Ptr<FileItem> fileItem)
+	void ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
 	{
 	}
 
@@ -287,7 +302,7 @@ ProjectItem
 			XmlElementWriter xmlWriter(xmlSolution);
 			xmlWriter.Attribute(L"Factory", projectFactory->GetId());
 
-			FOREACH(Ptr<FileItem>, fileItem, fileItems)
+			FOREACH(Ptr<IFileModel>, fileItem, fileItems)
 			{
 				xmlWriter
 					.Element(L"GacStudioFile")
@@ -311,7 +326,7 @@ ProjectItem
 		}
 		if (saveContainingFiles)
 		{
-			FOREACH(Ptr<FileItem>, fileItem, fileItems)
+			FOREACH(Ptr<IFileModel>, fileItem, fileItems)
 			{
 				fileItem->SaveFileItem();
 			}
@@ -334,6 +349,18 @@ ProjectItem
 			IsSavedChanged();
 		}
 		return false;
+	}
+
+	bool ProjectItem::AddFile(Ptr<IFileModel> file)
+	{
+		if (fileItems.Contains(file.Obj())) return false;
+		AddFileItem(file);
+		if (!isSaved)
+		{
+			isSaved = false;
+			IsSavedChanged();
+		}
+		return true;
 	}
 
 	Ptr<GuiImageData> ProjectItem::GetImage()

@@ -39,7 +39,7 @@ namespace ui
 			auto solutionFolder =
 				comboSolution->GetSelectedIndex() == 0
 				? Folder(FilePath(textBoxLocation->GetText()) / textBoxSolutionName->GetText())
-				: Folder(FilePath(model->GetOpeningSolutionPath()).GetFolder())
+				: Folder(FilePath(model->GetOpenedSolution()->GetFilePath()).GetFolder())
 				;
 			auto solutionPath = solutionFolder.GetFilePath() / (textBoxSolutionName->GetText() + L".gacsln.xml");
 			auto projectFolder = Folder(solutionFolder.GetFilePath() / textBoxProjectName->GetText());
