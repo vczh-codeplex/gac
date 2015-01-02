@@ -31,7 +31,7 @@ namespace ui
 		auto projectFactory = UnboxValue<Ptr<IProjectFactoryModel>>(listViewProjectTemplate->GetSelectedItem());
 		if (!projectFactory)
 		{
-			model->PromptError(L"Failed to add a project of \"" + projectFactory->GetName() + L"\".");
+			model->PromptError(L"Failed to add a project.");
 			goto CLOSE;
 		}
 
