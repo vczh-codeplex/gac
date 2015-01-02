@@ -376,7 +376,7 @@ ProjectItem
 			isSaved = false;
 			IsSavedChanged();
 		}
-		return false;
+		return true;
 	}
 
 	bool ProjectItem::AddFile(Ptr<IFileModel> file)

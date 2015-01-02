@@ -437,16 +437,18 @@ StudioModel
 	Ptr<IProjectModel> StudioModel::AddProject(Ptr<IProjectFactoryModel> projectFactory, WString filePath)
 	{
 		auto solution = rootSolutionItem->GetSolution();
-		if (!solution) return false;
+		if (!solution) return nullptr;
 		auto project = MakePtr<ProjectItem>(this, projectFactory, filePath);
+		if (!project->NewProject()) return nullptr;
 		return solution->AddProject(project) ? project : nullptr;
 	}
 
 	Ptr<IFileModel> StudioModel::AddFile(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)
 	{
 		auto solution = rootSolutionItem->GetSolution();
-		if (!solution) return false;
+		if (!solution) return nullptr;
 		auto file = MakePtr<FileItem>(this, fileFactory, filePath);
+		if (!file->NewFile()) return nullptr;
 		return project->AddFile(file) ? file : nullptr;
 	}
 
