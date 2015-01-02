@@ -110,6 +110,13 @@ namespace ui
 		});
 	}
 
+	void MainWindow::treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+		selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
+		commandFileNewFile->SetEnabled(selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>());
+		GetViewModel()->NotifySelectedSolutionItem(selectedSolutionItem);
+	}
+
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
 	MainWindow::MainWindow(Ptr<vm::IStudioModel> ViewModel)

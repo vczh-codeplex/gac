@@ -18,8 +18,9 @@ namespace ui
 		friend class MainWindow_<MainWindow>;
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<MainWindow>;
 	protected:
-		vint		splitterPosition = -1;
-		bool		splitterDragging = false;
+		vint							splitterPosition = -1;
+		bool							splitterDragging = false;
+		Ptr<vm::ISolutionItemModel>		selectedSolutionItem;
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 		void cellSplitter_leftButtonDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
@@ -33,6 +34,7 @@ namespace ui
 		void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		MainWindow(Ptr<vm::IStudioModel> ViewModel);

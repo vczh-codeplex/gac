@@ -38,6 +38,7 @@ FileItem
 		, filePath(_filePath)
 		, isSaved(false)
 		, unsupported(_unsupported)
+		, parent(0)
 	{
 		if (unsupported)
 		{
@@ -67,6 +68,11 @@ FileItem
 	bool FileItem::NewFile()
 	{
 		throw 0;
+	}
+
+	ISolutionItemModel* FileItem::GetParent()
+	{
+		return parent;
 	}
 
 	Ptr<GuiImageData> FileItem::GetImage()
@@ -131,14 +137,20 @@ FileItem
 FolderItem
 ***********************************************************************/
 
-	FolderItem::FolderItem( WString _filePath)
+	FolderItem::FolderItem(ISolutionItemModel* _parent, WString _filePath)
 		:filePath(_filePath)
+		, parent(_parent)
 	{
 		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(L"FileImages/FolderSmall.png");
 	}
 
 	FolderItem::~FolderItem()
 	{
+	}
+
+	ISolutionItemModel* FolderItem::GetParent()
+	{
+		return parent;
 	}
 
 	Ptr<GuiImageData> FolderItem::GetImage()
@@ -379,6 +391,11 @@ ProjectItem
 		return true;
 	}
 
+	ISolutionItemModel* ProjectItem::GetParent()
+	{
+		return studioModel->GetOpenedSolution().Obj();
+	}
+
 	Ptr<GuiImageData> ProjectItem::GetImage()
 	{
 		return projectFactory->GetSmallImage();
@@ -585,6 +602,11 @@ SolutionItem
 			IsSavedChanged();
 		}
 		return true;
+	}
+
+	ISolutionItemModel* SolutionItem::GetParent()
+	{
+		return studioModel->GetRootSolutionItem().Obj();
 	}
 
 	Ptr<GuiImageData> SolutionItem::GetImage()

@@ -44,7 +44,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IFileModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
-				CLASS_MEMBER_METHOD(GetFileFactory, NO_PARAMETER);
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactory)
 				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewFile, NO_PARAMETER);
@@ -66,7 +66,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IProjectModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
-				CLASS_MEMBER_METHOD(GetProjectFactory, NO_PARAMETER);
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactory)
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
 				CLASS_MEMBER_METHOD(NewProject, NO_PARAMETER);
@@ -75,6 +75,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
 				CLASS_MEMBER_EVENT(ImageChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Image, ImageChanged)
 				CLASS_MEMBER_EVENT(NameChanged)
@@ -111,6 +112,13 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootSolutionItem)
 				CLASS_MEMBER_EVENT(OpenedSolutionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(OpenedSolution, OpenedSolutionChanged)
+				CLASS_MEMBER_EVENT(WorkingItemChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(WorkingItem, WorkingItemChanged)
+				CLASS_MEMBER_EVENT(WorkingProjectChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(WorkingProject, WorkingProjectChanged)
+				CLASS_MEMBER_EVENT(WorkingDirectoryChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(WorkingDirectory, WorkingDirectoryChanged)
+				CLASS_MEMBER_METHOD(NotifySelectedSolutionItem, { L"solutionItem" });
 				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
@@ -145,6 +153,7 @@ namespace vl
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSaveAll_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandFileSave_Executed, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(commandHelpAbout_Executed, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(treeViewSolutionItem_SelectionChanged, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(ui::MainWindow)
