@@ -65,8 +65,11 @@ FileItem
 		return true;
 	}
 
-	bool FileItem::NewFile()
+	bool FileItem::NewFileAndSave()
 	{
+		if (fileFactory->GetTextTemplate())
+		{
+		}
 		return false;
 	}
 
@@ -367,7 +370,7 @@ ProjectItem
 		return true;
 	}
 
-	bool ProjectItem::NewProject()
+	bool ProjectItem::NewProjectAndSave()
 	{
 		if (unsupported) return false;
 		children.Clear();
@@ -376,7 +379,7 @@ ProjectItem
 			isSaved = false;
 			IsSavedChanged();
 		}
-		return true;
+		return SaveProject(false);
 	}
 
 	bool ProjectItem::AddFile(Ptr<IFileModel> file)

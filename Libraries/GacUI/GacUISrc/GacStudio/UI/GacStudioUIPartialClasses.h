@@ -51,6 +51,29 @@ namespace vm
 
 namespace vm
 {
+	class IMacroEnvironment : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IMacroEnvironment>
+	{
+	public:
+
+		virtual vm::IMacroEnvironment* GetParent() = 0;
+
+		virtual WString HasMacro(WString name, bool inherit) = 0;
+		virtual WString GetMacroValue(WString name, bool inherit) = 0;
+	};
+}
+
+namespace vm
+{
+	class ITextTemplate : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ITextTemplate>
+	{
+	public:
+
+		virtual WString Generate(Ptr<vm::IMacroEnvironment> macroEnvironment) = 0;
+	};
+}
+
+namespace vm
+{
 	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
 	{
 	public:
@@ -69,7 +92,7 @@ namespace vm
 
 		virtual WString GetDefaultFileExt() = 0;
 
-		virtual bool GenerateFile(Ptr<vm::ISolutionItemModel> , WString filePath) = 0;
+		virtual Ptr<vm::ITextTemplate> GetTextTemplate() = 0;
 	};
 }
 
@@ -103,7 +126,7 @@ namespace vm
 
 		virtual bool OpenFile() = 0;
 		virtual bool SaveFile() = 0;
-		virtual bool NewFile() = 0;
+		virtual bool NewFileAndSave() = 0;
 	};
 }
 
@@ -125,7 +148,7 @@ namespace vm
 
 		virtual bool OpenProject() = 0;
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
-		virtual bool NewProject() = 0;
+		virtual bool NewProjectAndSave() = 0;
 		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
 	};
 }
@@ -420,11 +443,13 @@ namespace vl
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IFileModel)
 			DECL_TYPE_INFO(vm::IFolderModel)
+			DECL_TYPE_INFO(vm::IMacroEnvironment)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
 			DECL_TYPE_INFO(vm::IProjectModel)
 			DECL_TYPE_INFO(vm::ISolutionItemModel)
 			DECL_TYPE_INFO(vm::ISolutionModel)
 			DECL_TYPE_INFO(vm::IStudioModel)
+			DECL_TYPE_INFO(vm::ITextTemplate)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::MainWindow)
 			DECL_TYPE_INFO(ui::NewFileWindow)
