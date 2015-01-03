@@ -48,6 +48,8 @@ namespace vm
 		bool											OpenFile()override;
 		bool											SaveFile()override;
 		bool											NewFileAndSave()override;
+		bool											RenameFile(WString newName)override;
+		bool											RemoveFile()override;
 		
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
@@ -124,6 +126,8 @@ namespace vm
 		bool											OpenProject()override;
 		bool											SaveProject(bool saveContainingFiles)override;
 		bool											NewProjectAndSave()override;
+		bool											RenameProject(WString newName)override;
+		bool											RemoveProject()override;
 		bool											AddFile(Ptr<IFileModel> file)override;
 		
 		ISolutionItemModel*								GetParent()override;

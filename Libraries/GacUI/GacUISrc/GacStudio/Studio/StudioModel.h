@@ -126,7 +126,8 @@ namespace vm
 		Ptr<FileFactoryFilterModel>						solutionProjectFactory;
 		Ptr<FileFactoryFilterModel>						fileFilters;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
-		WString											fileCategory;
+		List<Ptr<IEditorFactoryModel>>					editorFactories;
+		Ptr<IProjectFactoryModel>						selectedFileFilter;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 		Ptr<RootSolutionItemModel>						rootSolutionItem;
 		Ptr<ISolutionItemModel>							selectedSolutionItem;
@@ -135,12 +136,14 @@ namespace vm
 		StudioModel();
 		~StudioModel();
 
-		LazyList<Ptr<IProjectFactoryModel>>				GetProjectModels()override;
-		Ptr<description::IValueObservableList>			GetFileModels()override;
+		LazyList<Ptr<IProjectFactoryModel>>				GetProjectFactories()override;
+		LazyList<Ptr<IFileFactoryModel>>				GetFileFactories()override;
+		LazyList<Ptr<IEditorFactoryModel>>				GetEditorFactories()override;
+		
 		Ptr<IProjectFactoryModel>						GetFileFilters()override;
-
-		WString											GetFileCategory()override;
-		void											SetFileCategory(WString value)override;
+		Ptr<IProjectFactoryModel>						GetSelectedFileFilter()override;
+		void											SetSelectedFileFilter(Ptr<IProjectFactoryModel> value)override;
+		Ptr<description::IValueObservableList>			GetFilteredFileFactories()override;
 
 		Ptr<ISolutionItemModel>							GetRootSolutionItem()override;
 		Ptr<ISolutionModel>								GetOpenedSolution()override;
@@ -151,6 +154,7 @@ namespace vm
 
 		Ptr<IProjectFactoryModel>						GetProjectFactory(WString id)override;
 		Ptr<IFileFactoryModel>							GetFileFactory(WString id)override;
+		Ptr<IEditorFactoryModel>						GetEditorFactory(WString id)override;
 
 		bool											OpenSolution(WString filePath)override;
 		bool											SaveSolution()override;

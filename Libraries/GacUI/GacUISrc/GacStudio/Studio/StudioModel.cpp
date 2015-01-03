@@ -380,14 +380,19 @@ StudioModel
 	{
 	}
 
-	LazyList<Ptr<IProjectFactoryModel>> StudioModel::GetProjectModels()
+	LazyList<Ptr<IProjectFactoryModel>> StudioModel::GetProjectFactories()
 	{
 		return fileFilters->GetChildren().First()->GetChildren();
 	}
 
-	Ptr<IValueObservableList> StudioModel::GetFileModels()
+	LazyList<Ptr<IFileFactoryModel>> StudioModel::GetFileFactories()
 	{
-		return filteredFileFactories.GetWrapper();
+		return From(fileFactories);
+	}
+
+	LazyList<Ptr<IEditorFactoryModel>> StudioModel::GetEditorFactories()
+	{
+		return From(editorFactories);
 	}
 
 	Ptr<IProjectFactoryModel> StudioModel::GetFileFilters()
@@ -395,16 +400,16 @@ StudioModel
 		return fileFilters;
 	}
 
-	WString StudioModel::GetFileCategory()
+	Ptr<IProjectFactoryModel> StudioModel::GetSelectedFileFilter()
 	{
-		return fileCategory;
+		return selectedFileFilter;
 	}
 
-	void StudioModel::SetFileCategory(WString value)
+	void StudioModel::SetSelectedFileFilter(Ptr<IProjectFactoryModel> value)
 	{
-		fileCategory = value;
+		selectedFileFilter = value;
 		LazyList<Ptr<IFileFactoryModel>> source;
-		if (fileCategory == L"")
+		if (selectedFileFilter->GetId() == L"")
 		{
 			source = fileFactories;
 		}
@@ -413,10 +418,15 @@ StudioModel
 			source = From(fileFactories)
 				.Where([=](Ptr<IFileFactoryModel> model)
 				{
-					return model->GetCategory() == fileCategory;
+					return model->GetCategory() == selectedFileFilter->GetId();
 				});
 		}
 		CopyFrom(filteredFileFactories, source);
+	}
+
+	Ptr<IValueObservableList> StudioModel::GetFilteredFileFactories()
+	{
+		return filteredFileFactories.GetWrapper();
 	}
 
 	Ptr<ISolutionItemModel> StudioModel::GetRootSolutionItem()
@@ -463,11 +473,11 @@ StudioModel
 
 	Ptr<IProjectFactoryModel> StudioModel::GetProjectFactory(WString id)
 	{
-		return GetProjectModels()
+		return GetProjectFactories()
 			.Where([=](Ptr<IProjectFactoryModel> model)
 			{
 				return model->GetId() == id;
-		})
+			})
 		.First(nullptr);
 	}
 
@@ -477,7 +487,17 @@ StudioModel
 			.Where([=](Ptr<IFileFactoryModel> model)
 			{
 				return model->GetId() == id;
-		})
+			})
+		.First(nullptr);
+	}
+
+	Ptr<IEditorFactoryModel> StudioModel::GetEditorFactory(WString id)
+	{
+		return From(editorFactories)
+			.Where([=](Ptr<IEditorFactoryModel> model)
+			{
+				return model->GetId() == id;
+			})
 		.First(nullptr);
 	}
 

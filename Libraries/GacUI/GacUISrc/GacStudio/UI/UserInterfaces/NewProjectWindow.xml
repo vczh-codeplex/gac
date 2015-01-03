@@ -28,7 +28,7 @@
       <Cell Site="row:1 column:0 rowSpan:1 columnSpan:2">
         <BindableListView ref.Name="listViewProjectTemplate" Alt="T" View="BigIcon" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-          <att.ItemSource-eval>ViewModel.GetProjectModels()</att.ItemSource-eval>
+          <att.ItemSource-eval>ViewModel.ProjectFactories</att.ItemSource-eval>
           <att.LargeImageProperty>Image</att.LargeImageProperty>
           <att.Columns>
             <ListViewColumn Text="Name" TextProperty="Name"/>
