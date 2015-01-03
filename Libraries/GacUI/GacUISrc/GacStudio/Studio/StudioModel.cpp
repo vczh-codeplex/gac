@@ -409,7 +409,7 @@ StudioModel
 	{
 		selectedFileFilter = value;
 		LazyList<Ptr<IFileFactoryModel>> source;
-		if (selectedFileFilter->GetId() == L"")
+		if (!selectedFileFilter || selectedFileFilter->GetId() == L"")
 		{
 			source = fileFactories;
 		}
