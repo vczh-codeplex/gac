@@ -15,6 +15,39 @@ TextTemplate
 
 	TextTemplate::TextTemplate(const WString& content)
 	{
+		const wchar_t* reading = content.Buffer();
+		while (*reading)
+		{
+			auto begin = wcsstr(reading, L"{$");
+			if (!begin)
+			{
+				auto item = MakePtr<TextTemplateItem>();
+				item->isMacro = false;
+				item->content = reading;
+				break;
+			}
+
+			if (begin > reading)
+			{
+				auto item = MakePtr<TextTemplateItem>();
+				item->isMacro = false;
+				item->content = WString(reading, (vint)(begin - reading));
+			}
+
+			auto end = wcsstr(begin, L"}");
+			if (!end)
+			{
+				auto item = MakePtr<TextTemplateItem>();
+				item->isMacro = false;
+				item->content = begin;
+				break;
+			}
+			
+			auto item = MakePtr<TextTemplateItem>();
+			item->isMacro = false;
+			item->content = WString(begin + 2, (vint)(end - begin - 3));
+			reading = end + 1;
+		}
 	}
 
 	TextTemplate::~TextTemplate()
