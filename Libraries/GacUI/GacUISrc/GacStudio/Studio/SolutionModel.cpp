@@ -300,6 +300,7 @@ ProjectItem
 
 	void ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
 	{
+		fileItems.Add(fileItem);
 	}
 
 	ProjectItem::ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
