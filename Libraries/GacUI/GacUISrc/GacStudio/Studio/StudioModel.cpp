@@ -24,6 +24,7 @@ TextTemplate
 				auto item = MakePtr<TextTemplateItem>();
 				item->isMacro = false;
 				item->content = reading;
+				items.Add(item);
 				break;
 			}
 
@@ -32,6 +33,7 @@ TextTemplate
 				auto item = MakePtr<TextTemplateItem>();
 				item->isMacro = false;
 				item->content = WString(reading, (vint)(begin - reading));
+				items.Add(item);
 			}
 
 			auto end = wcsstr(begin, L"}");
@@ -40,12 +42,14 @@ TextTemplate
 				auto item = MakePtr<TextTemplateItem>();
 				item->isMacro = false;
 				item->content = begin;
+				items.Add(item);
 				break;
 			}
 			
 			auto item = MakePtr<TextTemplateItem>();
-			item->isMacro = false;
-			item->content = WString(begin + 2, (vint)(end - begin - 3));
+			item->isMacro = true;
+			item->content = WString(begin + 2, (vint)(end - begin - 2));
+			items.Add(item);
 			reading = end + 1;
 		}
 	}

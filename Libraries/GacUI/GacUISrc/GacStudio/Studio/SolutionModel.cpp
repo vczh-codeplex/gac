@@ -63,7 +63,7 @@ FileMacroEnvironment
 				auto ext = fileModel->GetFileFactory()->GetDefaultFileExt();
 				auto dir = fileModel->GetFileDirectory();
 				auto path = fileModel->GetFilePath();
-				path = path.Right(path.Length() - dir.Length());
+				path = path.Right(path.Length() - dir.Length() - 1);
 
 				if (path.Length() >= ext.Length() && path.Right(ext.Length()) == ext)
 				{
