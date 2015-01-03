@@ -15,6 +15,21 @@ using namespace vl::collections;
 
 namespace vm
 {
+	class TextTemplateItem : public Object
+	{
+	public:
+		bool											isMacro;
+		WString											content;
+	};
+
+	class TextTemplate : public Object, public virtual ITextTemplate
+	{
+	public:
+		collections::List<Ptr<TextTemplateItem>>		items;
+
+		WString											Generate(Ptr<IMacroEnvironment> macroEnvironment)override;
+	};
+
 	class FileFactoryModel : public Object, public virtual IFileFactoryModel
 	{
 	protected:
@@ -25,9 +40,10 @@ namespace vm
 		WString											description;
 		WString											id;
 		WString											ext;
+		Ptr<ITextTemplate>								textTemplate;
 
 	public:
-		FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext);
+		FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext, Ptr<ITextTemplate> _textTemplate);
 		FileFactoryModel(Ptr<GuiImageData> _image, Ptr<GuiImageData> _smallImage, WString _id);
 		~FileFactoryModel();
 
@@ -38,7 +54,7 @@ namespace vm
 		WString											GetDescription()override;
 		WString											GetId()override;
 		WString											GetDefaultFileExt()override;
-		bool											GenerateFile(Ptr<vm::ISolutionItemModel> project, WString filePath)override;
+		Ptr<ITextTemplate>								GetTextTemplate()override;
 	};
 
 	class ProjectFactoryModel : public Object, public virtual IProjectFactoryModel

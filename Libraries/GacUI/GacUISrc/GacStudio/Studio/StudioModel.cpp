@@ -7,16 +7,27 @@ using namespace vl::parsing::xml;
 
 namespace vm
 {
+
+/***********************************************************************
+TextTemplate
+***********************************************************************/
+
+	WString TextTemplate::Generate(Ptr<IMacroEnvironment> macroEnvironment)
+	{
+		return L"";
+	}
+
 /***********************************************************************
 FileFactoryModel
 ***********************************************************************/
 
-	FileFactoryModel::FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext)
+	FileFactoryModel::FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext, Ptr<ITextTemplate> _textTemplate)
 		:name(_name)
 		, category(_category)
 		, description(_description)
 		, id(_id)
 		, ext(_ext)
+		, textTemplate(_textTemplate)
 	{
 		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_imageUrl);
 		smallImage = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(_smallImageUrl);
@@ -69,9 +80,9 @@ FileFactoryModel
 		return ext;
 	}
 
-	bool FileFactoryModel::GenerateFile(Ptr<vm::ISolutionItemModel>, WString filePath)
+	Ptr<ITextTemplate> FileFactoryModel::GetTextTemplate()
 	{
-		return false;
+		return textTemplate;
 	}
 
 /***********************************************************************
@@ -271,7 +282,7 @@ StudioModel
 				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
 				auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
 				auto ext = XmlGetValue(XmlGetElement(xml, L"DefaultFileExt"));
-				configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext));
+				configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext, nullptr));
 			}
 		}
 
@@ -439,7 +450,7 @@ StudioModel
 		auto solution = rootSolutionItem->GetSolution();
 		if (!solution) return nullptr;
 		auto project = MakePtr<ProjectItem>(this, projectFactory, filePath);
-		if (!project->NewProject()) return nullptr;
+		if (!project->NewProjectAndSave()) return nullptr;
 		return solution->AddProject(project) ? project : nullptr;
 	}
 
@@ -448,7 +459,7 @@ StudioModel
 		auto solution = rootSolutionItem->GetSolution();
 		if (!solution) return nullptr;
 		auto file = MakePtr<FileItem>(this, fileFactory, filePath);
-		if (!file->NewFile()) return nullptr;
+		if (!file->NewFileAndSave()) return nullptr;
 		return project->AddFile(file) ? file : nullptr;
 	}
 

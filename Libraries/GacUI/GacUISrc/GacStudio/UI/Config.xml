@@ -35,6 +35,13 @@
         <Description>Create a window for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.window.xml</DefaultFileExt>
+        <TextTemplate>
+<![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<Instance ref.Class="ui::{$FILENAME}">
+  <Window Text="{$FILENAME}" ClientSize="x:800 y:600">
+  </Window>
+</Instance>]]>
+        </TextTemplate>
       </File>
     </Xml>
     <Xml name="GACUI_CONTROL_RESOURCE_FILE">
@@ -45,6 +52,13 @@
         <Description>Create a control for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.control.xml</DefaultFileExt>
+        <TextTemplate>
+<![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<Instance ref.Class="ui::{$FILENAME}">
+  <CustomControl>
+  </CustomControl>
+</Instance>]]>
+        </TextTemplate>
       </File>
     </Xml>
     <Xml name="GACUI_TEMPLATE_RESOURCE_FILE">
@@ -75,6 +89,7 @@
         <Description>Create a text resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.txt</DefaultFileExt>
+        <TextTemplate/>
       </File>
     </Xml>
     <Xml name="GACUI_RICHTEXT_RESOURCE_FILE">
@@ -85,6 +100,14 @@
         <Description>Create a rich text resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.document.xml</DefaultFileExt>
+        <TextTemplate>
+<![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<Doc>
+  <Content>
+    <p></p>
+  </Content>
+</Doc>]]>
+        </TextTemplate>
       </File>
     </Xml>
     <Xml name="GACUI_XML_RESOURCE_FILE">
@@ -95,6 +118,11 @@
         <Description>Create an xml resource for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.xml</DefaultFileExt>
+        <TextTemplate>
+<![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<Resource>
+</Resource>]]>
+        </TextTemplate>
       </File>
     </Xml>
     <Xml name="PARSER_FILE">
@@ -105,6 +133,7 @@
         <Description>Create a parser from a grammar.</Description>
         <Category>PARSER_PROJECT</Category>
         <DefaultFileExt>.parser.txt</DefaultFileExt>
+        <TextTemplate/>
       </File>
     </Xml>
     <Xml name="PARSER_TEST_FILE">
@@ -115,6 +144,7 @@
         <Description>Create a parser test.</Description>
         <Category>PARSER_PROJECT</Category>
         <DefaultFileExt>.parsertest.txt</DefaultFileExt>
+        <TextTemplate/>
       </File>
     </Xml>
     <Xml name="HERODB_SQL_DATABASE">
@@ -125,6 +155,7 @@
         <Description>Create a SQL Database in a HeroDB database instance.</Description>
         <Category>HERODB_PROJECT</Category>
         <DefaultFileExt>.herosql.txt</DefaultFileExt>
+        <TextTemplate/>
       </File>
     </Xml>
     <Xml name="HERODB_GRAPH_DATABASE">
@@ -135,6 +166,7 @@
         <Description>Create a Graph Database in a HeroDB database instance.</Description>
         <Category>HERODB_PROJECT</Category>
         <DefaultFileExt>.herograph.txt</DefaultFileExt>
+        <TextTemplate/>
       </File>
     </Xml>
   </Folder>

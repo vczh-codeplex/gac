@@ -34,7 +34,7 @@ namespace vm
 		Ptr<IFileFactoryModel>							GetFileFactory()override;
 		bool											OpenFile()override;
 		bool											SaveFile()override;
-		bool											NewFile()override;
+		bool											NewFileAndSave()override;
 		
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
@@ -85,7 +85,7 @@ namespace vm
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
-		List<Ptr<IFileModel>>								fileItems;
+		List<Ptr<IFileModel>>							fileItems;
 		bool											isSaved;
 		collections::List<WString>						errors;
 		bool											unsupported;
@@ -98,7 +98,7 @@ namespace vm
 		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
 		bool											OpenProject()override;
 		bool											SaveProject(bool saveContainingFiles)override;
-		bool											NewProject()override;
+		bool											NewProjectAndSave()override;
 		bool											AddFile(Ptr<IFileModel> file)override;
 		
 		ISolutionItemModel*								GetParent()override;

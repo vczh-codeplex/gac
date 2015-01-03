@@ -20,6 +20,24 @@
     <Method Name="SaveFileItem" Type="bool">
     </Method>
   </Interface>
+
+  <Interface ref.Class="vm::IMacroEnvironment">
+    <Property Name="Parent" Type="vm::IMacroEnvironment*" Readonly="true"/>
+    <Method Name="HasMacro" Type="string">
+      <Argument Name="name" Type="string"/>
+      <Argument Name="inherit" Type="bool"/>
+    </Method>
+    <Method Name="GetMacroValue" Type="string">
+      <Argument Name="name" Type="string"/>
+      <Argument Name="inherit" Type="bool"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::ITextTemplate">
+    <Method Name="Generate" Type="string">
+      <Argument Name="macroEnvironment" Type="vm::IMacroEnvironment^"/>
+    </Method>
+  </Interface>
   
   <Interface ref.Class="vm::IFileFactoryModel">
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
@@ -29,11 +47,7 @@
     <Property Name="Description" Type="string" Readonly="true"/>
     <Property Name="Id" Type="string" Readonly="true"/>
     <Property Name="DefaultFileExt" Type="string" Readonly="true"/>
-
-    <Method Name="GenerateFile" Type="bool">
-      <Argument name="project" Type="vm::ISolutionItemModel^"/>
-      <Argument Name="filePath" Type="string"/>
-    </Method>
+    <Property Name="TextTemplate" Type="vm::ITextTemplate^" Readonly="true"/>
   </Interface>
 
   <Interface ref.Class="vm::IProjectFactoryModel">
@@ -49,7 +63,7 @@
     <Property Name="FileFactory" Type="vm::IFileFactoryModel^" Readonly="true"/>
     <Method Name="OpenFile" Type="bool"/>
     <Method Name="SaveFile" Type="bool"/>
-    <Method Name="NewFile" Type="bool"/>
+    <Method Name="NewFileAndSave" Type="bool"/>
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
@@ -61,7 +75,7 @@
     <Method Name="SaveProject" Type="bool">
       <Argument Name="saveContainingFiles" Type="bool"/>
     </Method>
-    <Method Name="NewProject" Type="bool"/>
+    <Method Name="NewProjectAndSave" Type="bool"/>
     <Method Name="AddFile" Type="bool">
       <Argument Name="file" Type="vm::IFileModel^"/>
     </Method>

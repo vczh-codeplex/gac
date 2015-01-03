@@ -20,11 +20,13 @@ namespace vl
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_TYPE_INFO(vm::IFileModel)
 			IMPL_TYPE_INFO(vm::IFolderModel)
+			IMPL_TYPE_INFO(vm::IMacroEnvironment)
 			IMPL_TYPE_INFO(vm::IProjectFactoryModel)
 			IMPL_TYPE_INFO(vm::IProjectModel)
 			IMPL_TYPE_INFO(vm::ISolutionItemModel)
 			IMPL_TYPE_INFO(vm::ISolutionModel)
 			IMPL_TYPE_INFO(vm::IStudioModel)
+			IMPL_TYPE_INFO(vm::ITextTemplate)
 			IMPL_TYPE_INFO(ui::AboutWindow)
 			IMPL_TYPE_INFO(ui::MainWindow)
 			IMPL_TYPE_INFO(ui::NewFileWindow)
@@ -39,7 +41,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Description)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DefaultFileExt)
-				CLASS_MEMBER_METHOD(GenerateFile, { L"" _ L"filePath" });
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextTemplate)
 			END_CLASS_MEMBER(vm::IFileFactoryModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFileModel)
@@ -47,12 +49,19 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactory)
 				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(NewFile, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(NewFileAndSave, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 			END_CLASS_MEMBER(vm::IFolderModel)
+
+			BEGIN_CLASS_MEMBER(vm::IMacroEnvironment)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Parent)
+				CLASS_MEMBER_METHOD(HasMacro, { L"name" _ L"inherit" });
+				CLASS_MEMBER_METHOD(GetMacroValue, { L"name" _ L"inherit" });
+			END_CLASS_MEMBER(vm::IMacroEnvironment)
 
 			BEGIN_CLASS_MEMBER(vm::IProjectFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -69,7 +78,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactory)
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
-				CLASS_MEMBER_METHOD(NewProject, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(NewProjectAndSave, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddFile, { L"file" });
 			END_CLASS_MEMBER(vm::IProjectModel)
 
@@ -131,6 +140,11 @@ namespace vl
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
+			BEGIN_CLASS_MEMBER(vm::ITextTemplate)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(Generate, { L"macroEnvironment" });
+			END_CLASS_MEMBER(vm::ITextTemplate)
+
 			BEGIN_CLASS_MEMBER(ui::AboutWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(ui::AboutWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
@@ -189,11 +203,13 @@ namespace vl
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IFileModel)
 					ADD_TYPE_INFO(vm::IFolderModel)
+					ADD_TYPE_INFO(vm::IMacroEnvironment)
 					ADD_TYPE_INFO(vm::IProjectFactoryModel)
 					ADD_TYPE_INFO(vm::IProjectModel)
 					ADD_TYPE_INFO(vm::ISolutionItemModel)
 					ADD_TYPE_INFO(vm::ISolutionModel)
 					ADD_TYPE_INFO(vm::IStudioModel)
+					ADD_TYPE_INFO(vm::ITextTemplate)
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::MainWindow)
 					ADD_TYPE_INFO(ui::NewFileWindow)

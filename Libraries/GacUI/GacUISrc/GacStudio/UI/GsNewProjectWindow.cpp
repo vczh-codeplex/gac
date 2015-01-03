@@ -73,11 +73,6 @@ namespace ui
 				model->PromptError(L"Failed to add a project of \"" + projectFactory->GetName() + L"\".");
 				goto CLOSE;
 			}
-			if (!projectItem->SaveProject(false))
-			{
-				model->PromptError(L"Failed to save project \"" + projectItem->GetName() + L"\".");
-				goto CLOSE;
-			}
 			if (!model->GetOpenedSolution()->SaveSolution(false))
 			{
 				model->PromptError(L"Failed to save the solution.");
