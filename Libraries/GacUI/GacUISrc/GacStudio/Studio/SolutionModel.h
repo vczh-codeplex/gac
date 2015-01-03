@@ -64,13 +64,26 @@ namespace vm
 		bool											SaveFileItem()override;
 	};
 
-	class FolderItem : public Object, public virtual IFolderModel
+	class FolderItemBase : public Object
 	{
 	protected:
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
+		collections::SortedList<WString>				folderNames;
+		collections::SortedList<WString>				fileNames;
+
+		void											ClearInternal();
+		void											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
+	public:
+		FolderItemBase();
+		~FolderItemBase();
+	};
+
+	class FolderItem : public FolderItemBase, public virtual IFolderModel
+	{
+	protected:
+		ISolutionItemModel*								parent;
 		Ptr<GuiImageData>								image;
 		WString											filePath;
-		ISolutionItemModel*								parent;
 
 	public:
 		FolderItem(ISolutionItemModel* _parent, WString _filePath);
@@ -91,11 +104,10 @@ namespace vm
 		bool											SaveFileItem()override;
 	};
 
-	class ProjectItem : public Object, public virtual IProjectModel
+	class ProjectItem : public FolderItemBase, public virtual IProjectModel
 	{
 	protected:
 		IStudioModel*									studioModel;
-		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
 		List<Ptr<IFileModel>>							fileItems;

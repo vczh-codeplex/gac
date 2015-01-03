@@ -220,12 +220,64 @@ FileItem
 	}
 
 /***********************************************************************
+FolderItemBase
+***********************************************************************/
+
+	void FolderItemBase::ClearInternal()
+	{
+		children.Clear();
+		folderNames.Clear();
+		fileNames.Clear();
+	}
+
+	void FolderItemBase::AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
+	{
+		auto delimiter = wcschr(filePath, FilePath::Delimiter);
+		if (delimiter)
+		{
+			auto name = WString(filePath, (vint)(delimiter - filePath));
+			auto key = wupper(name);
+			Ptr<FolderItem> folder;
+			auto index = folderNames.IndexOf(key);
+
+			if (index == -1)
+			{
+				index = folderNames.Add(key);
+				auto solutionItem = dynamic_cast<ISolutionItemModel*>(this);
+				auto folderPath = (FilePath(solutionItem->GetFileDirectory()) / name).GetFullPath();
+				folder = MakePtr<FolderItem>(solutionItem, folderPath);
+				children.Insert(index, folder);
+			}
+			else
+			{
+				folder = children[index].Cast<FolderItem>();
+			}
+
+			folder->AddFileItemInternal(delimiter + 1, fileItem);
+		}
+		else
+		{
+			auto key = wupper(filePath);
+			auto index = fileNames.Add(key);
+			children.Insert(folderNames.Count() + index, fileItem);
+		}
+	}
+
+	FolderItemBase::FolderItemBase()
+	{
+	}
+
+	FolderItemBase::~FolderItemBase()
+	{
+	}
+
+/***********************************************************************
 FolderItem
 ***********************************************************************/
 
 	FolderItem::FolderItem(ISolutionItemModel* _parent, WString _filePath)
-		:filePath(_filePath)
-		, parent(_parent)
+		:parent(_parent)
+		, filePath(_filePath)
 	{
 		image = GetInstanceLoaderManager()->GetResource(L"GacStudioUI")->GetImageByPath(L"FileImages/FolderSmall.png");
 	}
@@ -261,7 +313,7 @@ FolderItem
 
 	WString FolderItem::GetFilePath()
 	{
-		return filePath;
+		return L"";
 	}
 
 	WString FolderItem::GetFileDirectory()
@@ -301,6 +353,15 @@ ProjectItem
 	void ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
 	{
 		fileItems.Add(fileItem);
+		auto projectFolder = FilePath(filePath).GetFolder();
+		auto filePath = FilePath(fileItem->GetFilePath());
+		auto relativePath = projectFolder.GetRelativePathFor(filePath);
+		auto buffer = relativePath.Buffer();
+		if (relativePath.Length() >= 2 && buffer[0] == L'.' && buffer[1] == FilePath::Delimiter)
+		{
+			buffer += 2;
+		}
+		AddFileItemInternal(buffer, fileItem);
 	}
 
 	ProjectItem::ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
@@ -351,7 +412,9 @@ ProjectItem
 
 		if (xml)
 		{
-			children.Clear();
+			ClearInternal();
+			fileItems.Clear();
+
 			auto attFactoryId = XmlGetAttribute(xml->rootElement, L"Factory");
 			if (!attFactoryId)
 			{
@@ -363,8 +426,6 @@ ProjectItem
 				unsupported = true;
 			}
 			
-			fileItems.Clear();
-			children.Clear();
 			FOREACH(Ptr<XmlElement>, xmlProject, XmlGetElements(xml->rootElement, L"GacStudioFile"))
 			{
 				auto attFactoryId = XmlGetAttribute(xmlProject, L"Factory");
@@ -457,7 +518,8 @@ ProjectItem
 	bool ProjectItem::NewProjectAndSave()
 	{
 		if (unsupported) return false;
-		children.Clear();
+		ClearInternal();
+		fileItems.Clear();
 		if (isSaved)
 		{
 			isSaved = false;
@@ -609,6 +671,7 @@ SolutionItem
 					}
 					auto project = new ProjectItem(studioModel, factory, (solutionFolder / projectPath).GetFullPath(), unsupported);
 					projects.Add(project);
+					project->OpenProject();
 				}
 			}
 		}
