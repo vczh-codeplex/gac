@@ -74,6 +74,18 @@ namespace vm
 
 namespace vm
 {
+	class IEditorFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorFactoryModel>
+	{
+	public:
+
+		virtual WString GetName() = 0;
+
+		virtual WString GetId() = 0;
+	};
+}
+
+namespace vm
+{
 	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
 	{
 	public:
@@ -127,6 +139,8 @@ namespace vm
 		virtual bool OpenFile() = 0;
 		virtual bool SaveFile() = 0;
 		virtual bool NewFileAndSave() = 0;
+		virtual bool RenameFile(WString newName) = 0;
+		virtual bool RemoveFile() = 0;
 	};
 }
 
@@ -149,6 +163,8 @@ namespace vm
 		virtual bool OpenProject() = 0;
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
 		virtual bool NewProjectAndSave() = 0;
+		virtual bool RenameProject(WString newName) = 0;
+		virtual bool RemoveProject() = 0;
 		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
 	};
 }
@@ -172,14 +188,18 @@ namespace vm
 	{
 	public:
 
-		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetProjectModels() = 0;
+		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetProjectFactories() = 0;
 
-		virtual Ptr<presentation::description::IValueObservableList> GetFileModels() = 0;
+		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetFileFactories() = 0;
+
+		virtual collections::LazyList<Ptr<vm::IEditorFactoryModel>> GetEditorFactories() = 0;
 
 		virtual Ptr<vm::IProjectFactoryModel> GetFileFilters() = 0;
 
-		virtual WString GetFileCategory() = 0;
-		virtual void SetFileCategory(WString value) = 0;
+		virtual Ptr<IProjectFactoryModel> GetSelectedFileFilter() = 0;
+		virtual void SetSelectedFileFilter(Ptr<IProjectFactoryModel> value) = 0;
+
+		virtual Ptr<presentation::description::IValueObservableList> GetFilteredFileFactories() = 0;
 
 		virtual Ptr<ISolutionItemModel> GetRootSolutionItem() = 0;
 
@@ -198,6 +218,7 @@ namespace vm
 		virtual void NotifySelectedSolutionItem(Ptr<vm::ISolutionItemModel> solutionItem) = 0;
 		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory(WString id) = 0;
 		virtual Ptr<vm::IFileFactoryModel> GetFileFactory(WString id) = 0;
+		virtual Ptr<vm::IEditorFactoryModel> GetEditorFactory(WString id) = 0;
 		virtual bool OpenSolution(WString filePath) = 0;
 		virtual bool SaveSolution() = 0;
 		virtual bool NewSolution(WString filePath) = 0;
@@ -458,6 +479,7 @@ namespace vl
 	{
 		namespace description
 		{
+			DECL_TYPE_INFO(vm::IEditorFactoryModel)
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IFileModel)
 			DECL_TYPE_INFO(vm::IFolderModel)

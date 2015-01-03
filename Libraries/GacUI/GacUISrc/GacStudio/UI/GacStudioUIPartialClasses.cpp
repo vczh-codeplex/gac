@@ -17,6 +17,7 @@ namespace vl
 		namespace description
 		{
 			#define _ ,
+			IMPL_TYPE_INFO(vm::IEditorFactoryModel)
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_TYPE_INFO(vm::IFileModel)
 			IMPL_TYPE_INFO(vm::IFolderModel)
@@ -31,6 +32,12 @@ namespace vl
 			IMPL_TYPE_INFO(ui::MainWindow)
 			IMPL_TYPE_INFO(ui::NewFileWindow)
 			IMPL_TYPE_INFO(ui::NewProjectWindow)
+
+			BEGIN_CLASS_MEMBER(vm::IEditorFactoryModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
+			END_CLASS_MEMBER(vm::IEditorFactoryModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFileFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -50,6 +57,8 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewFileAndSave, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(RenameFile, { L"newName" });
+				CLASS_MEMBER_METHOD(RemoveFile, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
@@ -79,6 +88,8 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
 				CLASS_MEMBER_METHOD(NewProjectAndSave, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(RenameProject, { L"newName" });
+				CLASS_MEMBER_METHOD(RemoveProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddFile, { L"file" });
 			END_CLASS_MEMBER(vm::IProjectModel)
 
@@ -114,10 +125,12 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectModels)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileModels)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactories)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactories)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFilters)
-				CLASS_MEMBER_PROPERTY_FAST(FileCategory)
+				CLASS_MEMBER_PROPERTY_FAST(SelectedFileFilter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FilteredFileFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootSolutionItem)
 				CLASS_MEMBER_EVENT(OpenedSolutionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(OpenedSolution, OpenedSolutionChanged)
@@ -130,6 +143,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(NotifySelectedSolutionItem, { L"solutionItem" });
 				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
+				CLASS_MEMBER_METHOD(GetEditorFactory, { L"id" });
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
@@ -206,6 +220,7 @@ namespace vl
 			public:
 				void Load(ITypeManager* manager)
 				{
+					ADD_TYPE_INFO(vm::IEditorFactoryModel)
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IFileModel)
 					ADD_TYPE_INFO(vm::IFolderModel)

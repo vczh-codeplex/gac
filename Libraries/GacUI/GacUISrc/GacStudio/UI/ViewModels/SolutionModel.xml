@@ -38,6 +38,11 @@
       <Argument Name="macroEnvironment" Type="vm::IMacroEnvironment^"/>
     </Method>
   </Interface>
+
+  <Interface ref.Class="vm::IEditorFactoryModel">
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+  </Interface>
   
   <Interface ref.Class="vm::IFileFactoryModel">
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
@@ -64,6 +69,10 @@
     <Method Name="OpenFile" Type="bool"/>
     <Method Name="SaveFile" Type="bool"/>
     <Method Name="NewFileAndSave" Type="bool"/>
+    <Method Name="RenameFile" Type="bool">
+      <Argument Name="newName" Type="string"/>
+    </Method>
+    <Method Name="RemoveFile" Type="bool"/>
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
@@ -76,6 +85,10 @@
       <Argument Name="saveContainingFiles" Type="bool"/>
     </Method>
     <Method Name="NewProjectAndSave" Type="bool"/>
+    <Method Name="RenameProject" Type="bool">
+      <Argument Name="newName" Type="string"/>
+    </Method>
+    <Method Name="RemoveProject" Type="bool"/>
     <Method Name="AddFile" Type="bool">
       <Argument Name="file" Type="vm::IFileModel^"/>
     </Method>
@@ -93,11 +106,14 @@
   </Interface>
 
   <Interface ref.Class="vm::IStudioModel">
-    <Property Name="ProjectModels" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
-    <Property Name="FileModels" Type="system::ObservableList^" Readonly="true"/>
-    <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
+    <Property Name="ProjectFactories" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
+    <Property Name="FileFactories" Type="vm::IFileFactoryModel^{}" Readonly="true"/>
+    <Property Name="EditorFactories" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
     
-    <Property Name="FileCategory" Type="string"/>
+    <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
+    <Property Name="SelectedFileFilter" Type="IProjectFactoryModel^"/>
+    <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
+    
     <Property Name="RootSolutionItem" Type="ISolutionItemModel^" Readonly="true"/>
     <Property Name="OpenedSolution" Type="vm::ISolutionModel^" Readonly="true" Observable="true"/>
     <Method Name="NotifySelectedSolutionItem" Type="void">
@@ -111,6 +127,9 @@
       <Argument Name="id" Type="string"/>
     </Method>
     <Method Name="GetFileFactory" Type="vm::IFileFactoryModel^">
+      <Argument Name="id" Type="string"/>
+    </Method>
+    <Method Name="GetEditorFactory" Type="vm::IEditorFactoryModel^">
       <Argument Name="id" Type="string"/>
     </Method>
 

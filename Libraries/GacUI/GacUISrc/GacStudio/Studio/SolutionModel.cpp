@@ -156,6 +156,16 @@ FileItem
 		return false;
 	}
 
+	bool FileItem::RenameFile(WString newName)
+	{
+		throw 0;
+	}
+
+	bool FileItem::RemoveFile()
+	{
+		throw 0;
+	}
+
 	ISolutionItemModel* FileItem::GetParent()
 	{
 		return parent;
@@ -526,6 +536,16 @@ ProjectItem
 			IsSavedChanged();
 		}
 		return SaveProject(false);
+	}
+
+	bool ProjectItem::RenameProject(WString newName)
+	{
+		throw 0;
+	}
+
+	bool ProjectItem::RemoveProject()
+	{
+		throw 0;
 	}
 
 	bool ProjectItem::AddFile(Ptr<IFileModel> file)

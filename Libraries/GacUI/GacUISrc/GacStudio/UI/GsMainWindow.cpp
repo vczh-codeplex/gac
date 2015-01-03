@@ -140,13 +140,14 @@ namespace ui
 	{
 		selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
 		bool canAddFile = selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>();
+		bool canEditProject = selectedSolutionItem.Cast<vm::IProjectModel>();
 		bool canEditFile = selectedSolutionItem.Cast<vm::IFileModel>();
 		commandFileAddNewFile->SetEnabled(canAddFile);
 		commandFileAddExistingFiles->SetEnabled(canAddFile);
 		commandFileOpen->SetEnabled(canEditFile);
 		commandFileOpenWith->SetEnabled(canEditFile);
-		commandFileRename->SetEnabled(canEditFile);
-		commandFileRemove->SetEnabled(canEditFile);
+		commandFileRename->SetEnabled(canEditFile || canEditProject);
+		commandFileRemove->SetEnabled(canEditFile || canEditProject);
 		GetViewModel()->NotifySelectedSolutionItem(selectedSolutionItem);
 	}
 
