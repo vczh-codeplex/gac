@@ -220,6 +220,16 @@
     <None Include="UI\Codegen.bat" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="UI\CommandImages\EditCopy.png" />
+    <Image Include="UI\CommandImages\EditCut.png" />
+    <Image Include="UI\CommandImages\EditDelete.png" />
+    <Image Include="UI\CommandImages\EditFind.png" />
+    <Image Include="UI\CommandImages\EditFindInFiles.png" />
+    <Image Include="UI\CommandImages\EditOpen.png" />
+    <Image Include="UI\CommandImages\EditPaste.png" />
+    <Image Include="UI\CommandImages\EditRedo.png" />
+    <Image Include="UI\CommandImages\EditRename.png" />
+    <Image Include="UI\CommandImages\EditUndo.png" />
     <Image Include="UI\CommandImages\Gaclib.png" />
     <Image Include="UI\CommandImages\New.png" />
     <Image Include="UI\CommandImages\NewProject.png" />

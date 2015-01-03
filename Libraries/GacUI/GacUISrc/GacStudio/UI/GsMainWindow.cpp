@@ -39,12 +39,11 @@ namespace ui
 		}
 	}
 
-	void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	void MainWindow::commandFileAddExistingFiles_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		Close();
 	}
 
-	void MainWindow::commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	void MainWindow::commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto window = new NewFileWindow(GetViewModel());
 		window->ForceCalculateSizeImmediately();
@@ -52,6 +51,16 @@ namespace ui
 		window->ShowModalAndDelete(this, []()
 		{
 		});
+	}
+
+	void MainWindow::commandFileCloseSolution_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+		GetViewModel()->CloseSolution();
+	}
+
+	void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+		Close();
 	}
 
 	void MainWindow::commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -62,10 +71,6 @@ namespace ui
 		window->ShowModalAndDelete(this, []()
 		{
 		});
-	}
-
-	void MainWindow::commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
-	{
 	}
 
 	void MainWindow::commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -92,6 +97,22 @@ namespace ui
 		}
 	}
 
+	void MainWindow::commandFileOpenWith_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileOpen_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
@@ -110,10 +131,22 @@ namespace ui
 		});
 	}
 
+	void MainWindow::treeViewSolutionItem_NodeRightButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiNodeMouseEventArgs& arguments)
+	{
+		toolstripMenuSolutionItem->ShowPopup(treeViewSolutionItem, Point(arguments.x, arguments.y));
+	}
+
 	void MainWindow::treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
-		commandFileNewFile->SetEnabled(selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>());
+		bool canAddFile = selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>();
+		bool canEditFile = selectedSolutionItem.Cast<vm::IFileModel>();
+		commandFileAddNewFile->SetEnabled(canAddFile);
+		commandFileAddExistingFiles->SetEnabled(canAddFile);
+		commandFileOpen->SetEnabled(canEditFile);
+		commandFileOpenWith->SetEnabled(canEditFile);
+		commandFileRename->SetEnabled(canEditFile);
+		commandFileRemove->SetEnabled(canEditFile);
 		GetViewModel()->NotifySelectedSolutionItem(selectedSolutionItem);
 	}
 

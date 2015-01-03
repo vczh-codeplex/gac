@@ -7,14 +7,17 @@
     <ToolstripCommand ref.Name="commandFileNewProject" Text="New Project..." Image-uri="res://CommandImages/NewProject.png" ShortcutBuilder="Ctrl+Shift+N">
       <ev.Executed>commandFileNewProject_Executed</ev.Executed>
     </ToolstripCommand>
-    <ToolstripCommand ref.Name="commandFileNewFile" Text="New File..." Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N" Enabled="false">
-      <ev.Executed>commandFileNewFile_Executed</ev.Executed>
+    <ToolstripCommand ref.Name="commandFileAddNewFile" Text="Add New File..." Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N" Enabled="false">
+      <ev.Executed>commandFileAddNewFile_Executed</ev.Executed>
+    </ToolstripCommand>
+    <ToolstripCommand ref.Name="commandFileAddExistingFiles" Text="Add Existing Files..." Image-uri="res://CommandImages/New.png" ShortcutBuilder="Ctrl+N" Enabled="false">
+      <ev.Executed>commandFileAddExistingFiles_Executed</ev.Executed>
     </ToolstripCommand>
     <ToolstripCommand ref.Name="commandFileOpenProject" Text="Open Project..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+Shift+O">
       <ev.Executed>commandFileOpenProject_Executed</ev.Executed>
     </ToolstripCommand>
-    <ToolstripCommand ref.Name="commandFileOpenFile" Text="Open File..." Image-uri="res://CommandImages/Open.png" ShortcutBuilder="Ctrl+O">
-      <ev.Executed>commandFileOpenFile_Executed</ev.Executed>
+    <ToolstripCommand ref.Name="commandFileCloseSolution" Text="Close Solution" Enabled-bind="ViewModel.OpenedSolution is not null">
+      <ev.Executed>commandFileCloseSolution_Executed</ev.Executed>
     </ToolstripCommand>
     <ToolstripCommand ref.Name="commandFileSave" Text="Save" Image-uri="res://CommandImages/Save.png" ShortcutBuilder="Ctrl+S">
       <ev.Executed>commandFileSave_Executed</ev.Executed>
@@ -22,12 +25,35 @@
     <ToolstripCommand ref.Name="commandFileSaveAll" Text="Save All" Image-uri="res://CommandImages/SaveAll.png" ShortcutBuilder="Ctrl+Shift+S">
       <ev.Executed>commandFileSaveAll_Executed</ev.Executed>
     </ToolstripCommand>
+    <ToolstripCommand ref.Name="commandFileOpen" Text="Open Selected File" Image-uri="res://CommandImages/EditOpen.png" Enabled="false">
+      <ev.Executed>commandFileOpen_Executed</ev.Executed>
+    </ToolstripCommand>
+    <ToolstripCommand ref.Name="commandFileOpenWith" Text="Open Selected File With..." Image-uri="res://CommandImages/EditOpen.png" Enabled="false">
+      <ev.Executed>commandFileOpenWith_Executed</ev.Executed>
+    </ToolstripCommand>
+    <ToolstripCommand ref.Name="commandFileRename" Text="Rename Selected File" Image-uri="res://CommandImages/EditRename.png" Enabled="false">
+      <ev.Executed>commandFileRename_Executed</ev.Executed>
+    </ToolstripCommand>
+    <ToolstripCommand ref.Name="commandFileRemove" Text="Remove Selected File" Image-uri="res://CommandImages/EditDelete.png" Enabled="false">
+      <ev.Executed>commandFileRemove_Executed</ev.Executed>
+    </ToolstripCommand>
     <ToolstripCommand ref.Name="commandFileExit" Text="Exit">
       <ev.Executed>commandFileExit_Executed</ev.Executed>
     </ToolstripCommand>
     <ToolstripCommand ref.Name="commandHelpAbout" Text="About GacStudio 1.0...">
       <ev.Executed>commandHelpAbout_Executed</ev.Executed>
     </ToolstripCommand>
+
+    <ToolstripMenu ref.Name="toolstripMenuSolutionItem">
+      <MenuItemButton Command-ref="commandFileAddNewFile" Alt="F"/>
+      <MenuItemButton Command-ref="commandFileAddExistingFiles" Alt="E"/>
+      <MenuSplitter/>
+      <MenuItemButton Command-ref="commandFileOpen" Alt="O"/>
+      <MenuItemButton Command-ref="commandFileOpenWith" Alt="W"/>
+      <MenuSplitter/>
+      <MenuItemButton Command-ref="commandFileRename" Alt="R"/>
+      <MenuItemButton Command-ref="commandFileRemove" Alt="D"/>
+    </ToolstripMenu>
 
     <Table ref.Name="tableMain" AlignmentToParent="left:0 top:0 right:0 bottom:0">
       <att.Rows>
@@ -46,20 +72,25 @@
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
           <MenuBarButton Text="File" Alt="F">
             <att.SubMenu-set>
-              <MenuItemButton Text="New" Alt="N" Image-uri="res://CommandImages/New.png">
+              <MenuItemButton Command-ref="commandFileNewProject" Alt="N"/>
+              <MenuItemButton Command-ref="commandFileOpenProject" Alt="O"/>
+              <MenuItemButton Text="Add" Alt="A" Image-uri="res://CommandImages/New.png">
                 <att.SubMenu-set>
-                  <MenuItemButton Command-ref="commandFileNewProject" Alt="P"/>
-                  <MenuItemButton Command-ref="commandFileNewFile" Alt="F"/>
+                  <MenuItemButton Command-ref="commandFileAddNewFile" Alt="F"/>
+                  <MenuItemButton Command-ref="commandFileAddExistingFiles" Alt="E"/>
                 </att.SubMenu-set>
               </MenuItemButton>
-              <MenuItemButton Text="Open" Alt="O" Image-uri="res://CommandImages/Open.png">
-                <att.SubMenu-set>
-                  <MenuItemButton Command-ref="commandFileOpenProject" Alt="P"/>
-                  <MenuItemButton Command-ref="commandFileOpenFile" Alt="F"/>
-                </att.SubMenu-set>
-              </MenuItemButton>
+              <MenuSplitter/>
+              <MenuItemButton Command-ref="commandFileCloseSolution" Alt="L"/>
+              <MenuSplitter/>
               <MenuItemButton Command-ref="commandFileSave" Alt="S"/>
               <MenuItemButton Command-ref="commandFileSaveAll" Alt="A"/>
+              <MenuSplitter/>
+              <MenuItemButton Command-ref="commandFileOpen" Alt="A"/>
+              <MenuItemButton Command-ref="commandFileOpenWith" Alt="A"/>
+              <MenuSplitter/>
+              <MenuItemButton Command-ref="commandFileRename" Alt="A"/>
+              <MenuItemButton Command-ref="commandFileRemove" Alt="A"/>
               <MenuSplitter/>
               <MenuItemButton Command-ref="commandFileExit" Alt="X"/>
             </att.SubMenu-set>
@@ -78,15 +109,11 @@
           <ToolstripSplitButton Command-ref="commandFileNewProject">
             <att.SubMenu-set>
               <MenuItemButton Command-ref="commandFileNewProject"/>
-              <MenuItemButton Command-ref="commandFileNewFile"/>
+              <MenuItemButton Command-ref="commandFileAddNewFile"/>
+              <MenuItemButton Command-ref="commandFileAddExistingFiles"/>
             </att.SubMenu-set>
           </ToolstripSplitButton>
-          <ToolstripSplitButton Command-ref="commandFileOpenProject">
-            <att.SubMenu-set>
-              <MenuItemButton Command-ref="commandFileOpenProject"/>
-              <MenuItemButton Command-ref="commandFileOpenFile"/>
-            </att.SubMenu-set>
-          </ToolstripSplitButton>
+          <ToolstripButton Command-ref="commandFileOpenProject"/>
           <ToolstripButton Command-ref="commandFileSave"/>
           <ToolstripButton Command-ref="commandFileSaveAll"/>
         </ToolstripToolBar>
@@ -100,6 +127,7 @@
               <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
               <att.Enabled-bind>ViewModel.OpenedSolution is not null</att.Enabled-bind>
               <ev.SelectionChanged>treeViewSolutionItem_SelectionChanged</ev.SelectionChanged>
+              <ev.NodeRightButtonUp>treeViewSolutionItem_NodeRightButtonUp</ev.NodeRightButtonUp>
             </BindableTreeView>
           </TabPage>
 
