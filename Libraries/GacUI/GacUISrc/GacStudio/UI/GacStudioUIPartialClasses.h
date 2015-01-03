@@ -260,15 +260,21 @@ namespace ui
 		Ptr<vm::IStudioModel> ViewModel_;
 	protected:
 		vl::presentation::compositions::GuiCellComposition* cellSplitter;
+		vl::presentation::controls::GuiToolstripCommand* commandFileAddExistingFiles;
+		vl::presentation::controls::GuiToolstripCommand* commandFileAddNewFile;
+		vl::presentation::controls::GuiToolstripCommand* commandFileCloseSolution;
 		vl::presentation::controls::GuiToolstripCommand* commandFileExit;
-		vl::presentation::controls::GuiToolstripCommand* commandFileNewFile;
 		vl::presentation::controls::GuiToolstripCommand* commandFileNewProject;
-		vl::presentation::controls::GuiToolstripCommand* commandFileOpenFile;
+		vl::presentation::controls::GuiToolstripCommand* commandFileOpen;
 		vl::presentation::controls::GuiToolstripCommand* commandFileOpenProject;
+		vl::presentation::controls::GuiToolstripCommand* commandFileOpenWith;
+		vl::presentation::controls::GuiToolstripCommand* commandFileRemove;
+		vl::presentation::controls::GuiToolstripCommand* commandFileRename;
 		vl::presentation::controls::GuiToolstripCommand* commandFileSave;
 		vl::presentation::controls::GuiToolstripCommand* commandFileSaveAll;
 		vl::presentation::controls::GuiToolstripCommand* commandHelpAbout;
 		vl::presentation::compositions::GuiTableComposition* tableMain;
+		vl::presentation::controls::GuiToolstripMenu* toolstripMenuSolutionItem;
 		vl::presentation::controls::GuiBindableTreeView* treeViewSolutionItem;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
@@ -277,15 +283,21 @@ namespace ui
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(cellSplitter);
+				GUI_INSTANCE_REFERENCE(commandFileAddExistingFiles);
+				GUI_INSTANCE_REFERENCE(commandFileAddNewFile);
+				GUI_INSTANCE_REFERENCE(commandFileCloseSolution);
 				GUI_INSTANCE_REFERENCE(commandFileExit);
-				GUI_INSTANCE_REFERENCE(commandFileNewFile);
 				GUI_INSTANCE_REFERENCE(commandFileNewProject);
-				GUI_INSTANCE_REFERENCE(commandFileOpenFile);
+				GUI_INSTANCE_REFERENCE(commandFileOpen);
 				GUI_INSTANCE_REFERENCE(commandFileOpenProject);
+				GUI_INSTANCE_REFERENCE(commandFileOpenWith);
+				GUI_INSTANCE_REFERENCE(commandFileRemove);
+				GUI_INSTANCE_REFERENCE(commandFileRename);
 				GUI_INSTANCE_REFERENCE(commandFileSave);
 				GUI_INSTANCE_REFERENCE(commandFileSaveAll);
 				GUI_INSTANCE_REFERENCE(commandHelpAbout);
 				GUI_INSTANCE_REFERENCE(tableMain);
+				GUI_INSTANCE_REFERENCE(toolstripMenuSolutionItem);
 				GUI_INSTANCE_REFERENCE(treeViewSolutionItem);
 			}
 			else
@@ -298,15 +310,21 @@ namespace ui
 			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"ui::MainWindow")
 			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
 			,cellSplitter(0)
+			,commandFileAddExistingFiles(0)
+			,commandFileAddNewFile(0)
+			,commandFileCloseSolution(0)
 			,commandFileExit(0)
-			,commandFileNewFile(0)
 			,commandFileNewProject(0)
-			,commandFileOpenFile(0)
+			,commandFileOpen(0)
 			,commandFileOpenProject(0)
+			,commandFileOpenWith(0)
+			,commandFileRemove(0)
+			,commandFileRename(0)
 			,commandFileSave(0)
 			,commandFileSaveAll(0)
 			,commandHelpAbout(0)
 			,tableMain(0)
+			,toolstripMenuSolutionItem(0)
 			,treeViewSolutionItem(0)
 		{
 		}
@@ -503,14 +521,20 @@ namespace ui
 		void cellSplitter_leftButtonDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
 		void cellSplitter_leftButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
 		void cellSplitter_mouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
+		void commandFileAddExistingFiles_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileCloseSolution_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-		void commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileNewProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
-		void commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileOpenWith_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileOpen_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		void commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void treeViewSolutionItem_NodeRightButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiNodeMouseEventArgs& arguments);
 		void treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
@@ -536,11 +560,19 @@ namespace ui
 	{
 	}
 
-	void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	void MainWindow::commandFileAddExistingFiles_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 
-	void MainWindow::commandFileNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	void MainWindow::commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileCloseSolution_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileExit_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 
@@ -548,11 +580,23 @@ namespace ui
 	{
 	}
 
-	void MainWindow::commandFileOpenFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	void MainWindow::commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 
-	void MainWindow::commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	void MainWindow::commandFileOpenWith_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileOpen_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 	}
 
@@ -565,6 +609,10 @@ namespace ui
 	}
 
 	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void MainWindow::treeViewSolutionItem_NodeRightButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiNodeMouseEventArgs& arguments)
 	{
 	}
 

@@ -266,5 +266,35 @@
     <Image Include="UI\FileImages\GraphDatabaseSmall.png">
       <Filter>Resource Files\FileImages</Filter>
     </Image>
+    <Image Include="UI\CommandImages\EditUndo.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditCopy.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditCut.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditDelete.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditFind.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditFindInFiles.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditPaste.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditRedo.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditRename.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
+    <Image Include="UI\CommandImages\EditOpen.png">
+      <Filter>Resource Files\CommandImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>
