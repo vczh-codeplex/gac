@@ -29,6 +29,79 @@ namespace vm
 	}
 
 /***********************************************************************
+FileMacroEnvironment
+***********************************************************************/
+
+		FileMacroEnvironment::FileMacroEnvironment(IFileModel* _fileModel)
+			:fileModel(_fileModel)
+		{
+		}
+
+		FileMacroEnvironment::~FileMacroEnvironment()
+		{
+		}
+
+		IMacroEnvironment* FileMacroEnvironment::GetParent()
+		{
+			return nullptr;
+		}
+
+		bool FileMacroEnvironment::HasMacro(WString name, bool inherit)
+		{
+			return
+				name == L"FILENAME" ||
+				name == L"FILEEXT" ||
+				name == L"FILEDIR" ||
+				name == L"FILEPATH"
+				;
+		}
+
+		WString FileMacroEnvironment::GetMacroValue(WString name, bool inherit)
+		{
+			if (name == L"FILENAME")
+			{
+				auto ext = fileModel->GetFileFactory()->GetDefaultFileExt();
+				auto dir = fileModel->GetFileDirectory();
+				auto path = fileModel->GetFilePath();
+				path = path.Right(path.Length() - dir.Length());
+
+				if (path.Length() >= ext.Length() && path.Right(ext.Length()) == ext)
+				{
+					return path.Left(path.Length() - ext.Length());
+				}
+				else
+				{
+					return path;
+				}
+			}
+			else if (name == L"FILEEXT")
+			{
+				auto ext = fileModel->GetFileFactory()->GetDefaultFileExt();
+				auto path = fileModel->GetFilePath();
+				if (path.Length() >= ext.Length() && path.Right(ext.Length()) == ext)
+				{
+					return ext;
+				}
+				else
+				{
+					return L"";
+				}
+			}
+			else if (name == L"FILEDIR")
+			{
+				return fileModel->GetFileDirectory();
+			}
+			else if (name == L"FILEPATH")
+			{
+				return fileModel->GetFilePath();
+			}
+			else
+			{
+				return L"";
+			}
+		}
+
+/***********************************************************************
 FileItem
 ***********************************************************************/
 
@@ -69,6 +142,16 @@ FileItem
 	{
 		if (fileFactory->GetTextTemplate())
 		{
+			auto env = MakePtr<FileMacroEnvironment>(this);
+			WString text = fileFactory->GetTextTemplate()->Generate(env);
+
+			FileStream fileStream(filePath, FileStream::WriteOnly);
+			if (!fileStream.IsAvailable()) return false;
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			writer.WriteString(text);
+			return true;
 		}
 		return false;
 	}
