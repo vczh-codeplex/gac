@@ -23,7 +23,7 @@
 
   <Interface ref.Class="vm::IMacroEnvironment">
     <Property Name="Parent" Type="vm::IMacroEnvironment*" Readonly="true"/>
-    <Method Name="HasMacro" Type="string">
+    <Method Name="HasMacro" Type="bool">
       <Argument Name="name" Type="string"/>
       <Argument Name="inherit" Type="bool"/>
     </Method>

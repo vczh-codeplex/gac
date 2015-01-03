@@ -15,6 +15,19 @@ using namespace vl::collections;
 
 namespace vm
 {
+	class FileMacroEnvironment : public Object, public virtual IMacroEnvironment
+	{
+	protected:
+		IFileModel*										fileModel;
+	public:
+		FileMacroEnvironment(IFileModel* _fileModel);
+		~FileMacroEnvironment();
+
+		IMacroEnvironment*								GetParent()override;
+		bool											HasMacro(WString name, bool inherit)override;
+		WString											GetMacroValue(WString name, bool inherit)override;
+	};
+
 	class FileItem : public Object, public virtual IFileModel
 	{
 	protected:

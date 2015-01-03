@@ -24,8 +24,12 @@ namespace vm
 
 	class TextTemplate : public Object, public virtual ITextTemplate
 	{
-	public:
+	protected:
 		collections::List<Ptr<TextTemplateItem>>		items;
+
+	public:
+		TextTemplate(const WString& content);
+		~TextTemplate();
 
 		WString											Generate(Ptr<IMacroEnvironment> macroEnvironment)override;
 	};

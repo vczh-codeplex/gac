@@ -2,6 +2,7 @@
 #include "SolutionModel.h"
 #include <Windows.h>
 
+using namespace vl::stream;
 using namespace vl::reflection::description;
 using namespace vl::parsing::xml;
 
@@ -12,9 +13,36 @@ namespace vm
 TextTemplate
 ***********************************************************************/
 
+	TextTemplate::TextTemplate(const WString& content)
+	{
+	}
+
+	TextTemplate::~TextTemplate()
+	{
+	}
+
 	WString TextTemplate::Generate(Ptr<IMacroEnvironment> macroEnvironment)
 	{
-		return L"";
+		MemoryStream stream;
+		{
+			StreamWriter writer(stream);
+			FOREACH(Ptr<TextTemplateItem>, item, items)
+			{
+				if (item->isMacro)
+				{
+					writer.WriteString(macroEnvironment->GetMacroValue(item->content, true));
+				}
+				else
+				{
+					writer.WriteString(item->content);
+				}
+			}
+		}
+		stream.SeekFromBegin(0);
+		{
+			StreamReader reader(stream);
+			return reader.ReadToEnd();
+		}
 	}
 
 /***********************************************************************
@@ -282,7 +310,14 @@ StudioModel
 				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
 				auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
 				auto ext = XmlGetValue(XmlGetElement(xml, L"DefaultFileExt"));
-				configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext, nullptr));
+
+				Ptr<ITextTemplate> textTemplate;
+				if (auto element = XmlGetElement(xml, L"TextTemplate"))
+				{
+					textTemplate = new TextTemplate(XmlGetValue(element));
+				}
+
+				configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext, textTemplate));
 			}
 		}
 

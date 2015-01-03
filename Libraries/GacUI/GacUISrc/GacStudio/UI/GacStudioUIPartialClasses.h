@@ -57,7 +57,7 @@ namespace vm
 
 		virtual vm::IMacroEnvironment* GetParent() = 0;
 
-		virtual WString HasMacro(WString name, bool inherit) = 0;
+		virtual bool HasMacro(WString name, bool inherit) = 0;
 		virtual WString GetMacroValue(WString name, bool inherit) = 0;
 	};
 }
