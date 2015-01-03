@@ -76,7 +76,7 @@
         <Label Text="Location:"/>
       </Cell>
       <Cell Site="row:4 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textBoxLocation" Text-eval="ViewModel.WorkingDirectory" Alt="L" Readonly="true">
+        <SinglelineTextBox ref.Name="textBoxLocation" Text-eval="ViewModel.WorkingDirectory" Alt="L">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
