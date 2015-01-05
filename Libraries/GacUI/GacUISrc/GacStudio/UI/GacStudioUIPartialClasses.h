@@ -140,7 +140,6 @@ namespace vm
 		virtual bool SaveFile() = 0;
 		virtual bool NewFileAndSave() = 0;
 		virtual bool RenameFile(WString newName) = 0;
-		virtual bool RemoveFile() = 0;
 	};
 }
 
@@ -164,8 +163,8 @@ namespace vm
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
 		virtual bool NewProjectAndSave() = 0;
 		virtual bool RenameProject(WString newName) = 0;
-		virtual bool RemoveProject() = 0;
 		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
+		virtual bool RemoveFile(Ptr<vm::IFileModel> file) = 0;
 	};
 }
 
@@ -179,6 +178,7 @@ namespace vm
 		virtual bool SaveSolution(bool saveContainingProjects) = 0;
 		virtual bool NewSolution() = 0;
 		virtual bool AddProject(Ptr<vm::IProjectModel> project) = 0;
+		virtual bool RemoveProject(Ptr<vm::IProjectModel> project) = 0;
 	};
 }
 

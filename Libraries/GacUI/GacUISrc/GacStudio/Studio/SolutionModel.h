@@ -49,7 +49,6 @@ namespace vm
 		bool											SaveFile()override;
 		bool											NewFileAndSave()override;
 		bool											RenameFile(WString newName)override;
-		bool											RemoveFile()override;
 		
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
@@ -74,7 +73,8 @@ namespace vm
 		collections::SortedList<WString>				fileNames;
 
 		void											ClearInternal();
-		void											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
+		bool											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
+		bool											RemoveFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 	public:
 		FolderItemBase();
 		~FolderItemBase();
@@ -117,7 +117,9 @@ namespace vm
 		collections::List<WString>						errors;
 		bool											unsupported;
 
-		void											AddFileItem(Ptr<IFileModel> fileItem);
+		WString											GetNormalizedRelativePath(Ptr<IFileModel> fileItem);
+		bool											AddFileItem(Ptr<IFileModel> fileItem);
+		bool											RemoveFileItem(Ptr<IFileModel> fileItem);
 	public:
 		ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
@@ -127,8 +129,8 @@ namespace vm
 		bool											SaveProject(bool saveContainingFiles)override;
 		bool											NewProjectAndSave()override;
 		bool											RenameProject(WString newName)override;
-		bool											RemoveProject()override;
 		bool											AddFile(Ptr<IFileModel> file)override;
+		bool											RemoveFile(Ptr<IFileModel> file)override;
 		
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
@@ -163,6 +165,7 @@ namespace vm
 		bool											SaveSolution(bool saveContainingProjects)override;
 		bool											NewSolution()override;
 		bool											AddProject(Ptr<IProjectModel> project)override;
+		bool											RemoveProject(Ptr<IProjectModel> project)override;
 
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
