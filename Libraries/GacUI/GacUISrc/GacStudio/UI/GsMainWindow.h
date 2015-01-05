@@ -20,7 +20,6 @@ namespace ui
 	protected:
 		vint							splitterPosition = -1;
 		bool							splitterDragging = false;
-		Ptr<vm::ISolutionItemModel>		selectedSolutionItem;
 
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 		void cellSplitter_leftButtonDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
