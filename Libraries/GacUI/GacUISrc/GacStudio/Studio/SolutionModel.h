@@ -28,8 +28,11 @@ namespace vm
 		WString											GetMacroValue(WString name, bool inherit)override;
 	};
 
+	class FolderItemBase;
+
 	class FileItem : public Object, public virtual IFileModel
 	{
+		friend class FolderItemBase;
 	protected:
 		IStudioModel*									studioModel;
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
