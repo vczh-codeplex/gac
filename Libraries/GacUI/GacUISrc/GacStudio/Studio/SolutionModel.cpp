@@ -269,6 +269,11 @@ FolderItemBase
 			}
 			auto index = fileNames.Add(key);
 			children.Insert(folderNames.Count() + index, fileItem);
+
+			if (auto file = fileItem.Cast<FileItem>())
+			{
+				file->parent = dynamic_cast<ISolutionItemModel*>(this);
+			}
 			return true;
 		}
 	}
@@ -301,6 +306,11 @@ FolderItemBase
 			{
 				fileNames.RemoveAt(index);
 				children.RemoveAt(folderNames.Count() + index);
+
+				if (auto file = fileItem.Cast<FileItem>())
+				{
+					file->parent = nullptr;
+				}
 			}
 		}
 		return children.Count() == 0;
