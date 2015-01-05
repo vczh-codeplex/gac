@@ -99,18 +99,54 @@ namespace ui
 
 	void MainWindow::commandFileOpenWith_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
+		{
+		}
 	}
 
 	void MainWindow::commandFileOpen_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
+		{
+		}
 	}
 
 	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
+		{
+			auto projectItem = GetViewModel()->GetWorkingProject();
+			if (projectItem->RemoveFile(fileItem))
+			{
+				projectItem->SaveProject(false);
+			}
+			else
+			{
+				GetViewModel()->PromptError(L"Failed to delete file \"" + fileItem->GetName() + L"\" in project \"" + projectItem->GetName() + L"\".");
+			}
+		}
+		else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
+		{
+			auto solutionItem = GetViewModel()->GetOpenedSolution();
+			if (solutionItem->RemoveProject(projectItem))
+			{
+				solutionItem->SaveSolution(false);
+			}
+			else
+			{
+				GetViewModel()->PromptError(L"Failed to delete project \"" + projectItem->GetName() + L"\".");
+			}
+		}
 	}
 
 	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
+		{
+		}
+		else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
+		{
+		}
 	}
 
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -138,7 +174,7 @@ namespace ui
 
 	void MainWindow::treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
+		auto selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
 		bool canAddFile = selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>();
 		bool canEditProject = selectedSolutionItem.Cast<vm::IProjectModel>();
 		bool canEditFile = selectedSolutionItem.Cast<vm::IFileModel>();
