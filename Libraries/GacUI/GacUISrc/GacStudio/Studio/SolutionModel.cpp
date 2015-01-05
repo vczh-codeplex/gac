@@ -161,11 +161,6 @@ FileItem
 		throw 0;
 	}
 
-	bool FileItem::RemoveFile()
-	{
-		throw 0;
-	}
-
 	ISolutionItemModel* FileItem::GetParent()
 	{
 		return parent;
@@ -240,7 +235,7 @@ FolderItemBase
 		fileNames.Clear();
 	}
 
-	void FolderItemBase::AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
+	bool FolderItemBase::AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
 	{
 		auto delimiter = wcschr(filePath, FilePath::Delimiter);
 		if (delimiter)
@@ -263,14 +258,52 @@ FolderItemBase
 				folder = children[index].Cast<FolderItem>();
 			}
 
-			folder->AddFileItemInternal(delimiter + 1, fileItem);
+			return folder->AddFileItemInternal(delimiter + 1, fileItem);
 		}
 		else
 		{
 			auto key = wupper(filePath);
+			if (fileNames.Contains(key))
+			{
+				return false;
+			}
 			auto index = fileNames.Add(key);
 			children.Insert(folderNames.Count() + index, fileItem);
+			return true;
 		}
+	}
+
+	bool FolderItemBase::RemoveFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
+	{
+		auto delimiter = wcschr(filePath, FilePath::Delimiter);
+		if (delimiter)
+		{
+			auto name = WString(filePath, (vint)(delimiter - filePath));
+			auto key = wupper(name);
+			auto index = folderNames.IndexOf(key);
+			if (index == -1)
+			{
+				return false;
+			}
+
+			auto folder = children[index].Cast<FolderItem>();
+			if (folder->RemoveFileItemInternal(delimiter + 1, fileItem))
+			{
+				folderNames.RemoveAt(index);
+				children.RemoveAt(index);
+			}
+		}
+		else
+		{
+			auto key = wupper(filePath);
+			auto index = fileNames.IndexOf(key);
+			if (index != -1)
+			{
+				fileNames.RemoveAt(index);
+				children.RemoveAt(folderNames.Count() + index);
+			}
+		}
+		return children.Count() == 0;
 	}
 
 	FolderItemBase::FolderItemBase()
@@ -360,18 +393,44 @@ FolderItem
 ProjectItem
 ***********************************************************************/
 
-	void ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
+	WString ProjectItem::GetNormalizedRelativePath(Ptr<IFileModel> fileItem)
 	{
-		fileItems.Add(fileItem);
 		auto projectFolder = FilePath(filePath).GetFolder();
 		auto filePath = FilePath(fileItem->GetFilePath());
 		auto relativePath = projectFolder.GetRelativePathFor(filePath);
-		auto buffer = relativePath.Buffer();
-		if (relativePath.Length() >= 2 && buffer[0] == L'.' && buffer[1] == FilePath::Delimiter)
+		if (relativePath.Length() >= 2 && relativePath[0] == L'.' && relativePath[1] == FilePath::Delimiter)
 		{
-			buffer += 2;
+			return relativePath.Right(relativePath.Length() - 2);
 		}
-		AddFileItemInternal(buffer, fileItem);
+		else
+		{
+			return relativePath;
+		}
+	}
+
+	bool ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
+	{
+		if (fileItems.Contains(fileItem.Obj())) return false;
+		auto path = GetNormalizedRelativePath(fileItem);
+		if (!AddFileItemInternal(path.Buffer(), fileItem))
+		{
+			return false;
+		}
+		fileItems.Add(fileItem);
+		return true;
+	}
+
+	bool ProjectItem::RemoveFileItem(Ptr<IFileModel> fileItem)
+	{
+		auto index = fileItems.IndexOf(fileItem.Obj());
+		if (index == -1)
+		{
+			return false;
+		}
+		auto path = GetNormalizedRelativePath(fileItem);
+		RemoveFileItemInternal(path.Buffer(), fileItem);
+		fileItems.RemoveAt(index);
+		return true;
 	}
 
 	ProjectItem::ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
@@ -543,15 +602,26 @@ ProjectItem
 		throw 0;
 	}
 
-	bool ProjectItem::RemoveProject()
-	{
-		throw 0;
-	}
-
 	bool ProjectItem::AddFile(Ptr<IFileModel> file)
 	{
-		if (fileItems.Contains(file.Obj())) return false;
-		AddFileItem(file);
+		if (!AddFileItem(file))
+		{
+			return false;
+		}
+		if (!isSaved)
+		{
+			isSaved = false;
+			IsSavedChanged();
+		}
+		return true;
+	}
+	
+	bool ProjectItem::RemoveFile(Ptr<IFileModel> file)
+	{
+		if (!RemoveFileItem(file))
+		{
+			return false;
+		}
 		if (!isSaved)
 		{
 			isSaved = false;
@@ -766,6 +836,19 @@ SolutionItem
 	{
 		if (projects.Contains(project.Obj())) return false;
 		projects.Add(project);
+		if (!isSaved)
+		{
+			isSaved = false;
+			IsSavedChanged();
+		}
+		return true;
+	}
+
+	bool SolutionItem::RemoveProject(Ptr<IProjectModel> project)
+	{
+		auto index = projects.IndexOf(project.Obj());
+		if (index == -1) return false;
+		projects.RemoveAt(index);
 		if (!isSaved)
 		{
 			isSaved = false;

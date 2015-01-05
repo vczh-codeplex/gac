@@ -72,7 +72,6 @@
     <Method Name="RenameFile" Type="bool">
       <Argument Name="newName" Type="string"/>
     </Method>
-    <Method Name="RemoveFile" Type="bool"/>
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
@@ -88,8 +87,10 @@
     <Method Name="RenameProject" Type="bool">
       <Argument Name="newName" Type="string"/>
     </Method>
-    <Method Name="RemoveProject" Type="bool"/>
     <Method Name="AddFile" Type="bool">
+      <Argument Name="file" Type="vm::IFileModel^"/>
+    </Method>
+    <Method Name="RemoveFile" Type="bool">
       <Argument Name="file" Type="vm::IFileModel^"/>
     </Method>
   </Interface>
@@ -101,6 +102,9 @@
     </Method>
     <Method Name="NewSolution" Type="bool"/>
     <Method Name="AddProject" Type="bool">
+      <Argument Name="project" Type="vm::IProjectModel^"/>
+    </Method>
+    <Method Name="RemoveProject" Type="bool">
       <Argument Name="project" Type="vm::IProjectModel^"/>
     </Method>
   </Interface>

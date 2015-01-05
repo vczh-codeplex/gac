@@ -58,7 +58,6 @@ namespace vl
 				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewFileAndSave, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(RenameFile, { L"newName" });
-				CLASS_MEMBER_METHOD(RemoveFile, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
@@ -89,8 +88,8 @@ namespace vl
 				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
 				CLASS_MEMBER_METHOD(NewProjectAndSave, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(RenameProject, { L"newName" });
-				CLASS_MEMBER_METHOD(RemoveProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddFile, { L"file" });
+				CLASS_MEMBER_METHOD(RemoveFile, { L"file" });
 			END_CLASS_MEMBER(vm::IProjectModel)
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
@@ -121,6 +120,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(SaveSolution, { L"saveContainingProjects" });
 				CLASS_MEMBER_METHOD(NewSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddProject, { L"project" });
+				CLASS_MEMBER_METHOD(RemoveProject, { L"project" });
 			END_CLASS_MEMBER(vm::ISolutionModel)
 
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)
