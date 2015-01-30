@@ -296,5 +296,17 @@
     <Image Include="UI\CommandImages\EditOpen.png">
       <Filter>Resource Files\CommandImages</Filter>
     </Image>
+    <Image Include="UI\FileImages\StyleSmall.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Style.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\SchemaSmall.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
+    <Image Include="UI\FileImages\Schema.png">
+      <Filter>Resource Files\FileImages</Filter>
+    </Image>
   </ItemGroup>
 </Project>
