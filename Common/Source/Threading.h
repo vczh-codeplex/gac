@@ -70,7 +70,6 @@ namespace vl
 		{
 			NotStarted,
 			Running,
-			Paused,
 			Stopped
 		};
 
@@ -93,10 +92,7 @@ namespace vl
 		static vint									GetCurrentThreadId();
 
 		bool										Start();
-#if defined VCZH_MSVC
-		bool										Pause();
-		bool										Resume();
-#elif defined VCZH_GCC
+#if defined VCZH_GCC
 		bool										Wait();
 #endif
 		bool										Stop();

@@ -329,6 +329,17 @@ File
 #endif
 		}
 
+		bool File::Rename(const WString& newName)const
+		{
+#if defined VCZH_MSVC
+			WString oldFileName = filePath.GetFullPath();
+			WString newFileName = (filePath.GetFolder() / newName).GetFullPath();
+			return MoveFile(oldFileName.Buffer(), newFileName.Buffer()) != 0;
+#elif defined VCZH_GCC
+			throw 0;
+#endif
+		}
+
 /***********************************************************************
 Folder
 ***********************************************************************/
@@ -479,6 +490,17 @@ Folder
 				return Delete(false);
 			}
 			return RemoveDirectory(filePath.GetFullPath().Buffer()) != 0;
+#elif defined VCZH_GCC
+			throw 0;
+#endif
+		}
+
+		bool Folder::Rename(const WString& newName)const
+		{
+#if defined VCZH_MSVC
+			WString oldFileName = filePath.GetFullPath();
+			WString newFileName = (filePath.GetFolder() / newName).GetFullPath();
+			return MoveFile(oldFileName.Buffer(), newFileName.Buffer()) != 0;
 #elif defined VCZH_GCC
 			throw 0;
 #endif

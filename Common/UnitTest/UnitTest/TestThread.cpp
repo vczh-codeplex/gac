@@ -40,45 +40,6 @@ TEST_CASE(TestSimpleThread)
 	TEST_ASSERT(data.modified==true);
 }
 
-#ifdef VCZH_MSVC
-TEST_CASE(TestPauseAndStopThread)
-{
-	{
-		ThreadData data;
-		Thread* thread=Thread::CreateAndStart(SimpleThreadProc, &data, false);
-		TEST_ASSERT(thread->GetState()==Thread::Running);
-		TEST_ASSERT(thread->Pause()==true);
-		TEST_ASSERT(thread->GetState()==Thread::Paused);
-		delete thread;
-		TEST_ASSERT(data.modified==false);
-	}
-	{
-		ThreadData data;
-		Thread* thread=Thread::CreateAndStart(SimpleThreadProc, &data, false);
-		TEST_ASSERT(thread->GetState()==Thread::Running);
-		TEST_ASSERT(thread->Stop()==true);
-		TEST_ASSERT(thread->GetState()==Thread::Stopped);
-		delete thread;
-		TEST_ASSERT(data.modified==false);
-	}
-}
-
-TEST_CASE(TestPauseAndResumeThread)
-{
-	ThreadData data;
-	Thread* thread=Thread::CreateAndStart(SimpleThreadProc, &data, false);
-	TEST_ASSERT(thread->GetState()==Thread::Running);
-	TEST_ASSERT(thread->Pause()==true);
-	TEST_ASSERT(thread->GetState()==Thread::Paused);
-	TEST_ASSERT(thread->Resume()==true);
-	TEST_ASSERT(thread->GetState()==Thread::Running);
-	TEST_ASSERT(thread->Wait()==true);
-	TEST_ASSERT(thread->GetState()==Thread::Stopped);
-	delete thread;
-	TEST_ASSERT(data.modified==true);
-}
-#endif
-
 /***********************************************************************
 Mutex
 ***********************************************************************/
