@@ -210,6 +210,56 @@ TEST_CASE(EnumerateFoldersAndFiles)
 	TEST_ASSERT(Folder(folder).GetFolders(folders) == true && folders.Count() == 0);
 }
 
+TEST_CASE(RenameFoldersAndFiles)
+{
+	ClearTestFolders();
+	FilePath folder = GetPath() + L"FileSystem";
+
+	File a = folder / L"a.txt";
+	File b = folder / L"d/b.txt";
+	File x = folder / L"y/x.txt";
+	Folder c = folder / L"c";
+	Folder d = folder / L"d";
+	Folder y = folder / L"y";
+
+	TEST_ASSERT(c.Create(false) == true);
+	TEST_ASSERT(d.Create(false) == true);
+	TEST_ASSERT(a.WriteAllText(L"A") == true);
+	TEST_ASSERT(b.WriteAllText(L"B") == true);
+
+	TEST_ASSERT(a.Exists() == true);
+	TEST_ASSERT(b.Exists() == true);
+	TEST_ASSERT(x.Exists() == false);
+	TEST_ASSERT(c.Exists() == true);
+	TEST_ASSERT(d.Exists() == true);
+	TEST_ASSERT(y.Exists() == false);
+	TEST_ASSERT(a.ReadAllText() == L"A");
+	TEST_ASSERT(b.ReadAllText() == L"B");
+	TEST_ASSERT(x.ReadAllText() == L"");
+
+	TEST_ASSERT(d.Rename(L"y"));
+	TEST_ASSERT(a.Exists() == true);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(x.Exists() == false);
+	TEST_ASSERT(c.Exists() == true);
+	TEST_ASSERT(d.Exists() == false);
+	TEST_ASSERT(y.Exists() == true);
+	TEST_ASSERT(a.ReadAllText() == L"A");
+	TEST_ASSERT(b.ReadAllText() == L"");
+	TEST_ASSERT(x.ReadAllText() == L"");
+
+	TEST_ASSERT(File(folder / L"y/b.txt").Rename(L"x.txt"));
+	TEST_ASSERT(a.Exists() == true);
+	TEST_ASSERT(b.Exists() == false);
+	TEST_ASSERT(x.Exists() == true);
+	TEST_ASSERT(c.Exists() == true);
+	TEST_ASSERT(d.Exists() == false);
+	TEST_ASSERT(y.Exists() == true);
+	TEST_ASSERT(a.ReadAllText() == L"A");
+	TEST_ASSERT(b.ReadAllText() == L"");
+	TEST_ASSERT(x.ReadAllText() == L"B");
+}
+
 TEST_CASE(FastAccessFiles)
 {
 	ClearTestFolders();

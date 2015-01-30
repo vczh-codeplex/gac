@@ -286,39 +286,15 @@ Thread
 		return false;
 	}
 
-	bool Thread::Pause()
-	{
-		if(threadState==Thread::Running)
-		{
-			if(SuspendThread(internalData->handle)!=-1)
-			{
-				threadState=Thread::Paused;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool Thread::Resume()
-	{
-		if(threadState==Thread::Paused)
-		{
-			if(ResumeThread(internalData->handle)!=-1)
-			{
-				threadState=Thread::Running;
-				return true;
-			}
-		}
-		return false;
-	}
-
 	bool Thread::Stop()
 	{
 		if(internalData->handle!=NULL)
 		{
-			Pause();
-			threadState=Thread::Stopped;
-			return true;
+			if (SuspendThread(internalData->handle) != -1)
+			{
+				threadState=Thread::Stopped;
+				return true;
+			}
 		}
 		return false;
 	}

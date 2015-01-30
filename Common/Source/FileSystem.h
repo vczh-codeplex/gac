@@ -73,6 +73,7 @@ namespace vl
 			
 			bool						Exists()const;
 			bool						Delete()const;
+			bool						Rename(const WString& newName)const;
 		};
 
 		class Folder : public Object
@@ -92,6 +93,7 @@ namespace vl
 			bool						Exists()const;
 			bool						Create(bool recursively)const;
 			bool						Delete(bool recursively)const;
+			bool						Rename(const WString& newName)const;
 		};
 	}
 }
