@@ -19,8 +19,12 @@
   <Image content="File">XmlDocumentSmall.png</Image>
   <Image content="File">Parser.png</Image>
   <Image content="File">ParserSmall.png</Image>
+  <Image content="File">Schema.png</Image>
+  <Image content="File">SchemaSmall.png</Image>
   <Image content="File">SQLDatabase.png</Image>
   <Image content="File">SQLDatabaseSmall.png</Image>
+  <Image content="File">Style.png</Image>
+  <Image content="File">StyleSmall.png</Image>
   <Image content="File">GraphDatabase.png</Image>
   <Image content="File">GraphDatabaseSmall.png</Image>
 </Folder>

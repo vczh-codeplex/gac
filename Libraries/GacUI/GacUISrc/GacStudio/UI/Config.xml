@@ -61,14 +61,53 @@
         </TextTemplate>
       </File>
     </Xml>
-    <Xml name="GACUI_TEMPLATE_RESOURCE_FILE">
+    <Xml name="GACUI_CONTROL_TEMPLATE_RESOURCE_FILE">
       <File>
         <Image>FileImages/Template.png</Image>
         <SmallImage>FileImages/TemplateSmall.png</SmallImage>
-        <Display>Control Template</Display>
+        <Display>Control Template Resource</Display>
         <Description>Create a control template for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.template.xml</DefaultFileExt>
+      </File>
+    </Xml>
+    <Xml name="GACUI_STYLE_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Style.png</Image>
+        <SmallImage>FileImages/StyleSmall.png</SmallImage>
+        <Display>Style Resource</Display>
+        <Description>Create a style resource to contain common configurations and apply to one or more objects in your UI resource files.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.style.xml</DefaultFileExt>
+        <TextTemplate>
+          <![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<InstanceStyle name="{$FILENAME}Style">
+  <Style ref.Path="//Button" Text="SampleButton">
+    <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+  </Style>
+</InstanceStyle>]]>
+        </TextTemplate>
+      </File>
+    </Xml>
+    <Xml name="GACUI_SCHEMA_RESOURCE_FILE">
+      <File>
+        <Image>FileImages/Schema.png</Image>
+        <SmallImage>FileImages/SchemaSmall.png</SmallImage>
+        <Display>Schema Resource</Display>
+        <Description>Create a schema resource to declare model interfaces for data bindings.</Description>
+        <Category>GACUI_RESOURCE_PROJECT</Category>
+        <DefaultFileExt>.schema.xml</DefaultFileExt>
+        <TextTemplate>
+          <![CDATA[<?xml version="1.0" encoding="utf-16"?>
+<Schemas>
+  <Interface ref.Class="vm::I{$FILENAME}Model">
+    <Property Name="SampleProperty" Type="string" Readonly="false" Observable="true"/>
+    <Method Name="SampleFunction" Type="string">
+      <Argument Name="argument" Type="string"/>
+    </Method>
+  </Interface>
+</Schemas>]]>
+        </TextTemplate>
       </File>
     </Xml>
     <Xml name="GACUI_IMAGE_RESOURCE_FILE">

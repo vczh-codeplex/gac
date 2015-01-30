@@ -253,8 +253,12 @@
     <Image Include="UI\FileImages\ParserSmall.png" />
     <Image Include="UI\FileImages\RichDocument.png" />
     <Image Include="UI\FileImages\RichDocumentSmall.png" />
+    <Image Include="UI\FileImages\Schema.png" />
+    <Image Include="UI\FileImages\SchemaSmall.png" />
     <Image Include="UI\FileImages\SQLDatabase.png" />
     <Image Include="UI\FileImages\SQLDatabaseSmall.png" />
+    <Image Include="UI\FileImages\Style.png" />
+    <Image Include="UI\FileImages\StyleSmall.png" />
     <Image Include="UI\FileImages\Template.png" />
     <Image Include="UI\FileImages\TemplateSmall.png" />
     <Image Include="UI\FileImages\XmlDocument.png" />
