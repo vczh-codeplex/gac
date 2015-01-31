@@ -12,8 +12,6 @@
     <Method Name="GetErrorText" Type="string">
       <Argument Name="index" Type="int"/>
     </Method>
-    <Method Name="FindProject" Type="vm::IProjectModel^"/>
-    <Method Name="FindSolution" Type="vm::ISolutionModel^"/>
   </Interface>
 
   <Interface ref.Class="vm::IMacroEnvironment">

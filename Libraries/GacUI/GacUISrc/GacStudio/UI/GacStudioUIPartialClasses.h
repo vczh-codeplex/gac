@@ -100,8 +100,6 @@ namespace vm
 		vl::Event<void()> ErrorCountChanged;
 
 		virtual WString GetErrorText(vint index) = 0;
-		virtual Ptr<vm::IProjectModel> FindProject() = 0;
-		virtual Ptr<vm::ISolutionModel> FindSolution() = 0;
 	};
 }
 

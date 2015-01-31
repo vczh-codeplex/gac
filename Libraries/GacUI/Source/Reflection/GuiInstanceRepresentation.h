@@ -128,8 +128,18 @@ Instance Namespace
 		class GuiInstanceParameter : public Object, public Description<GuiInstanceParameter>
 		{
 		public:
+			enum Kind
+			{
+				Parameter = 0,	// constructor argument, script can use the name directly
+				Property = 1,	// public property, both script and C++ can use it by accessing the instance
+				State = 2,		// private field, script can access it by <instance>-><stateName>
+			};
+
+			Kind									kind = Parameter;
 			GlobalStringKey							name;
-			GlobalStringKey							className;
+			WString									typeName;
+			bool									readonly = false;	// Property
+			bool									bindable = false;	// State
 		};
 
 /***********************************************************************

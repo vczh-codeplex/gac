@@ -983,9 +983,12 @@ GuiResourceInstanceLoader
 				{
 					FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 					{
-						if (description::GetTypeDescriptor(parameter->className.ToString()))
+						if (parameter->kind == GuiInstanceParameter::Parameter)
 						{
-							propertyNames.Add(parameter->name);
+							if (description::GetTypeDescriptor(parameter->className.ToString()))
+							{
+								propertyNames.Add(parameter->name);
+							}
 						}
 					}
 				}
@@ -997,7 +1000,7 @@ GuiResourceInstanceLoader
 				{
 					FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 					{
-						if (parameter->name == propertyInfo.propertyName)
+						if (parameter->kind == GuiInstanceParameter::Parameter && parameter->name == propertyInfo.propertyName)
 						{
 							if (auto td = description::GetTypeDescriptor(parameter->className.ToString()))
 							{

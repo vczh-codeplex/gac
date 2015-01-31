@@ -901,32 +901,35 @@ ExecuteBindingSetters
 			auto td = env->scope->rootInstance.GetTypeDescriptor();
 			FOREACH(Ptr<GuiInstanceParameter>, parameter, env->context->parameters)
 			{
-				auto info = td->GetPropertyByName(parameter->name.ToString(), true);
-				if (!info)
+				if (parameter->kind == GuiInstanceParameter::Parameter)
 				{
-					env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name.ToString() + L"\" in properties of \"" + td->GetTypeName() + L"\".");
-					continue;
-				}
+					auto info = td->GetPropertyByName(parameter->name.ToString(), true);
+					if (!info)
+					{
+						env->scope->errors.Add(L"Cannot find parameter \"" + parameter->name.ToString() + L"\" in properties of \"" + td->GetTypeName() + L"\".");
+						continue;
+					}
 
-				auto parameterTd = GetTypeDescriptor(parameter->className.ToString());
-				if (!parameterTd)
-				{
-					env->scope->errors.Add(L"Cannot find type \"" + parameter->className.ToString() + L"\" of parameter \"" + parameter->name.ToString() + L"\".");
-				}
+					auto parameterTd = GetTypeDescriptor(parameter->className.ToString());
+					if (!parameterTd)
+					{
+						env->scope->errors.Add(L"Cannot find type \"" + parameter->className.ToString() + L"\" of parameter \"" + parameter->name.ToString() + L"\".");
+					}
 
-				auto value = info->GetValue(env->scope->rootInstance);
-				if (parameterTd && !value.GetTypeDescriptor()->CanConvertTo(parameterTd))
-				{
-					env->scope->errors.Add(L"Value of parameter \"" + parameter->name.ToString() + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
-				}
+					auto value = info->GetValue(env->scope->rootInstance);
+					if (parameterTd && !value.GetTypeDescriptor()->CanConvertTo(parameterTd))
+					{
+						env->scope->errors.Add(L"Value of parameter \"" + parameter->name.ToString() + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
+					}
 
-				if (env->scope->referenceValues.Keys().Contains(parameter->name))
-				{
-					env->scope->errors.Add(L"Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
-				}
-				else
-				{
-					env->scope->referenceValues.Add(parameter->name, value);
+					if (env->scope->referenceValues.Keys().Contains(parameter->name))
+					{
+						env->scope->errors.Add(L"Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
+					}
+					else
+					{
+						env->scope->referenceValues.Add(parameter->name, value);
+					}
 				}
 			}
 		}
