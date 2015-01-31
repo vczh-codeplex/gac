@@ -75,6 +75,9 @@
     <ClCompile Include="Studio\SolutionModel.cpp">
       <Filter>Studio</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GsRenameFileWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -116,6 +119,9 @@
     <ClInclude Include="Studio\SolutionModel.h">
       <Filter>Studio</Filter>
     </ClInclude>
+    <ClInclude Include="UI\GsRenameFileWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\Resources.xml">
@@ -150,6 +156,9 @@
     </Xml>
     <Xml Include="UI\Config.xml">
       <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="UI\UserInterfaces\RenameFileWindow.xml">
+      <Filter>Resource Files\UserInterfaces</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>

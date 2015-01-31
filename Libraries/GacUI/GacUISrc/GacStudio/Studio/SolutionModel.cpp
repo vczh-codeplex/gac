@@ -327,6 +327,11 @@ FolderItem
 	{
 	}
 
+	bool FolderItem::RenameFolder(WString newName)
+	{
+		throw 0;
+	}
+
 	ISolutionItemModel* FolderItem::GetParent()
 	{
 		return parent;

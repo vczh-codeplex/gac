@@ -32,6 +32,7 @@ namespace vl
 			IMPL_TYPE_INFO(ui::MainWindow)
 			IMPL_TYPE_INFO(ui::NewFileWindow)
 			IMPL_TYPE_INFO(ui::NewProjectWindow)
+			IMPL_TYPE_INFO(ui::RenameFileWindow)
 
 			BEGIN_CLASS_MEMBER(vm::IEditorFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -62,6 +63,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
+				CLASS_MEMBER_METHOD(RenameFolder, { L"newName" });
 			END_CLASS_MEMBER(vm::IFolderModel)
 
 			BEGIN_CLASS_MEMBER(vm::IMacroEnvironment)
@@ -211,6 +213,16 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(ui::NewProjectWindow)
 
+			BEGIN_CLASS_MEMBER(ui::RenameFileWindow)
+				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(ui::RenameFileWindow*(Ptr<vm::ISolutionItemModel>), { L"SolutionItem" })
+
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SolutionItem)
+			END_CLASS_MEMBER(ui::RenameFileWindow)
+
 			#undef _
 
 			class GacStudioUIResourceLoader : public Object, public ITypeLoader
@@ -233,6 +245,7 @@ namespace vl
 					ADD_TYPE_INFO(ui::MainWindow)
 					ADD_TYPE_INFO(ui::NewFileWindow)
 					ADD_TYPE_INFO(ui::NewProjectWindow)
+					ADD_TYPE_INFO(ui::RenameFileWindow)
 				}
 
 				void Unload(ITypeManager* manager)

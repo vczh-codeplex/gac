@@ -144,14 +144,24 @@ namespace ui
 
 	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
+		auto window = new RenameFileWindow (GetViewModel()->GetWorkingItem());
+		window->ForceCalculateSizeImmediately();
+		window->MoveToScreenCenter();
+		window->ShowModalAndDelete(this, [=]()
 		{
-			// todo
-		}
-		else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
-		{
-			// todo
-		}
+			if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
+			{
+				// todo
+			}
+			else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
+			{
+				// todo
+			}
+			else if (auto folderItem = GetViewModel()->GetWorkingItem().Cast<vm::IFolderModel>())
+			{
+				// todo
+			}
+		});
 	}
 
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -183,14 +193,15 @@ namespace ui
 	{
 		auto selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
 		bool canAddFile = selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>();
-		bool canEditProject = selectedSolutionItem.Cast<vm::IProjectModel>();
-		bool canEditFile = selectedSolutionItem.Cast<vm::IFileModel>();
+		bool isProject = selectedSolutionItem.Cast<vm::IProjectModel>();
+		bool isFile = selectedSolutionItem.Cast<vm::IFileModel>();
+		bool isFolder = selectedSolutionItem.Cast<vm::IFolderModel>();
 		commandFileAddNewFile->SetEnabled(canAddFile);
 		commandFileAddExistingFiles->SetEnabled(canAddFile);
-		commandFileOpen->SetEnabled(canEditFile);
-		commandFileOpenWith->SetEnabled(canEditFile);
-		commandFileRename->SetEnabled(canEditFile || canEditProject);
-		commandFileRemove->SetEnabled(canEditFile || canEditProject);
+		commandFileOpen->SetEnabled(isFile);
+		commandFileOpenWith->SetEnabled(isFile);
+		commandFileRename->SetEnabled(isFile || isProject || isFolder);
+		commandFileRemove->SetEnabled(isFile || isProject);
 		GetViewModel()->NotifySelectedSolutionItem(selectedSolutionItem);
 	}
 
