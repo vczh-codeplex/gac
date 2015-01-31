@@ -64,8 +64,6 @@ namespace vm
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
-		bool											OpenFileItem()override;
-		bool											SaveFileItem()override;
 	};
 
 	class FolderItemBase : public Object
@@ -105,8 +103,6 @@ namespace vm
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
-		bool											OpenFileItem()override;
-		bool											SaveFileItem()override;
 	};
 
 	class ProjectItem : public FolderItemBase, public virtual IProjectModel
@@ -146,8 +142,6 @@ namespace vm
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
-		bool											OpenFileItem()override;
-		bool											SaveFileItem()override;
 	};
 
 	class SolutionItem : public Object, public virtual ISolutionModel
@@ -181,8 +175,6 @@ namespace vm
 		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
-		bool											OpenFileItem()override;
-		bool											SaveFileItem()override;
 	};
 }
 

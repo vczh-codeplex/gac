@@ -212,18 +212,6 @@ FileItem
 		return 0 <= index && index < errors.Count() ? errors[index] : L"";
 	}
 
-	bool FileItem::OpenFileItem()
-	{
-		if (unsupported) return true;
-		throw 0;
-	}
-
-	bool FileItem::SaveFileItem()
-	{
-		if (unsupported) return true;
-		throw 0;
-	}
-
 /***********************************************************************
 FolderItemBase
 ***********************************************************************/
@@ -387,16 +375,6 @@ FolderItem
 	WString FolderItem::GetErrorText(vint index)
 	{
 		return L"";
-	}
-
-	bool FolderItem::OpenFileItem()
-	{
-		return false;
-	}
-
-	bool FolderItem::SaveFileItem()
-	{
-		return false;
 	}
 
 /***********************************************************************
@@ -583,7 +561,7 @@ ProjectItem
 		{
 			FOREACH(Ptr<IFileModel>, fileItem, fileItems)
 			{
-				fileItem->SaveFileItem();
+				fileItem->SaveFile();
 			}
 		}
 		if (!isSaved)
@@ -689,16 +667,6 @@ ProjectItem
 	WString ProjectItem::GetErrorText(vint index)
 	{
 		return 0 <= index && index < errors.Count() ? errors[index] : L"";
-	}
-
-	bool ProjectItem::OpenFileItem()
-	{
-		return OpenProject();
-	}
-
-	bool ProjectItem::SaveFileItem()
-	{
-		return SaveProject(false);
 	}
 
 /***********************************************************************
@@ -915,15 +883,5 @@ SolutionItem
 	WString SolutionItem::GetErrorText(vint index)
 	{
 		return 0 <= index && index < errors.Count() ? errors[index] : L"";
-	}
-
-	bool SolutionItem::OpenFileItem()
-	{
-		return OpenSolution();
-	}
-
-	bool SolutionItem::SaveFileItem()
-	{
-		return SaveSolution(false);
 	}
 }
