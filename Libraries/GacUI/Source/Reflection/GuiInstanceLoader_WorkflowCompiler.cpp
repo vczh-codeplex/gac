@@ -792,24 +792,21 @@ Workflow_GetSharedManager
 			{
 				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
 				{
-					if (parameter->kind == GuiInstanceParameter::Parameter)
+					auto type = GetTypeDescriptor(parameter->className.ToString());
+					if (!type)
 					{
-						auto type = GetTypeDescriptor(parameter->className.ToString());
-						if (!type)
-						{
-							errors.Add(L"Precompile: Cannot find type \"" + parameter->className.ToString() + L"\".");
-						}
-						else if (typeInfos.Keys().Contains(parameter->name))
-						{
-							errors.Add(L"Precompile: Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
-						}
-						else
-						{
-							IGuiInstanceLoader::TypeInfo typeInfo;
-							typeInfo.typeDescriptor = type;
-							typeInfo.typeName = GlobalStringKey::Get(type->GetTypeName());
-							typeInfos.Add(parameter->name, typeInfo);
-						}
+						errors.Add(L"Precompile: Cannot find type \"" + parameter->className.ToString() + L"\".");
+					}
+					else if (typeInfos.Keys().Contains(parameter->name))
+					{
+						errors.Add(L"Precompile: Parameter \"" + parameter->name.ToString() + L"\" conflict with an existing named object.");
+					}
+					else
+					{
+						IGuiInstanceLoader::TypeInfo typeInfo;
+						typeInfo.typeDescriptor = type;
+						typeInfo.typeName = GlobalStringKey::Get(type->GetTypeName());
+						typeInfos.Add(parameter->name, typeInfo);
 					}
 				}
 

@@ -125,21 +125,33 @@ Instance Namespace
 			WString									postfix;
 		};
 
+		// Workflow:	<name>
+		// C++:			<instance>->Get<name>
 		class GuiInstanceParameter : public Object, public Description<GuiInstanceParameter>
 		{
 		public:
-			enum Kind
-			{
-				Parameter = 0,	// constructor argument, script can use the name directly
-				Property = 1,	// public property, both script and C++ can use it by accessing the instance
-				State = 2,		// private field, script can access it by <instance>-><stateName>
-			};
+			GlobalStringKey							name;
+			GlobalStringKey							className;
+		};
 
-			Kind									kind = Parameter;
+		// Workflow:	<instance>.<name>
+		// C++:			<instance>->Get<name>
+		//				<instance>->Set<name>
+		class GuiInstanceProperty : public Object, public Description<GuiInstanceProperty>
+		{
+		public:
 			GlobalStringKey							name;
 			WString									typeName;
-			bool									readonly = false;	// Property
-			bool									bindable = false;	// State
+			bool									readonly = false;
+		};
+		
+		// Workflow:	<instance>.<name>
+		// C++:			<instance>-><name>
+		class GuiInstanceState : public Object, public Description<GuiInstanceState>
+		{
+		public:
+			GlobalStringKey							name;
+			WString									typeName;
 		};
 
 /***********************************************************************
@@ -161,6 +173,8 @@ Instance Context
 			};
 			typedef collections::Dictionary<GlobalStringKey, Ptr<NamespaceInfo>>		NamespaceMap;
 			typedef collections::List<Ptr<GuiInstanceParameter>>						ParameterList;
+			typedef collections::List<Ptr<GuiInstanceProperty>>							PropertyList;
+			typedef collections::List<Ptr<GuiInstanceState>>							StateList;
 			typedef collections::List<Ptr<GuiInstanceStyleContext>>						StyleContextList;
 
 			class ElementName : public Object
@@ -183,6 +197,8 @@ Instance Context
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
 			ParameterList							parameters;
+			PropertyList							properties;
+			StateList								states;
 			collections::List<WString>				stylePaths;
 
 			bool									appliedStyles = false;
