@@ -933,7 +933,7 @@ namespace vl
 
 			#undef _
 
-			class GacStudioUIResourceLoader : public Object, public ITypeLoader
+			class GacStudioSolutionModelLoader : public Object, public ITypeLoader
 			{
 			public:
 				void Load(ITypeManager* manager)
@@ -949,12 +949,12 @@ namespace vl
 				}
 			};
 
-			class GacStudioUIResourcePlugin : public Object, public vl::presentation::controls::IGuiPlugin
+			class GacStudioSolutionModelPlugin : public Object, public vl::presentation::controls::IGuiPlugin
 			{
 			public:
 				void Load()override
 				{
-					GetGlobalTypeManager()->AddTypeLoader(new GacStudioUIResourceLoader);
+					GetGlobalTypeManager()->AddTypeLoader(new GacStudioSolutionModelLoader);
 				}
 
 				void AfterLoad()override
@@ -965,7 +965,7 @@ namespace vl
 				{
 				}
 			};
-			GUI_REGISTER_PLUGIN(GacStudioUIResourcePlugin)
+			GUI_REGISTER_PLUGIN(GacStudioSolutionModelPlugin)
 		}
 	}
 }

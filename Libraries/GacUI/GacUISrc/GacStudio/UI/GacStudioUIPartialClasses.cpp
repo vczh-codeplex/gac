@@ -165,8 +165,8 @@ namespace vl
 				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(AddProject, { L"projectFactory" _ L"filePath" });
-				CLASS_MEMBER_METHOD(AddFile, { L"project" _ L"fileFactory" _ L"filePath" });
+				CLASS_MEMBER_METHOD(CreateProjectModel, { L"projectFactory" _ L"filePath" });
+				CLASS_MEMBER_METHOD(CreateFileModel, { L"project" _ L"fileFactory" _ L"filePath" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
 			END_CLASS_MEMBER(vm::IStudioModel)

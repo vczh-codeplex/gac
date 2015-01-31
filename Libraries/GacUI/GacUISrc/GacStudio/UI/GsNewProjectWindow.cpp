@@ -67,8 +67,8 @@ namespace ui
 				}
 			}
 
-			auto projectItem = model->AddProject(projectFactory, projectPath.GetFullPath());
-			if (!projectItem)
+			auto projectItem = model->CreateProjectModel(projectFactory, projectPath.GetFullPath());
+			if (!projectItem || !model->GetOpenedSolution()->AddProject(projectItem))
 			{
 				model->PromptError(L"Failed to add a project of \"" + projectFactory->GetName() + L"\".");
 				goto CLOSE;

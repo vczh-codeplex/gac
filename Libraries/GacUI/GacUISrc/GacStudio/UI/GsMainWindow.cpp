@@ -42,12 +42,14 @@ namespace ui
 	void MainWindow::commandFileAddExistingFiles_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
+		if (!action) return;
 		// todo
 	}
 
 	void MainWindow::commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
+		if (!action) return;
 		auto window = new NewFileWindow(GetViewModel(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
@@ -103,34 +105,25 @@ namespace ui
 	void MainWindow::commandFileOpenWith_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IOpenInEditorItemAction>();
+		if (!action) return;
 		// todo
 	}
 
 	void MainWindow::commandFileOpen_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IOpenInEditorItemAction>();
+		if (!action) return;
 		// todo
 	}
 
 	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRemoveItemAction>();
-		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
-		{
-			auto projectItem = GetViewModel()->GetWorkingProject();
-			if (projectItem->RemoveFile(fileItem))
-			{
-				projectItem->SaveProject(false);
-			}
-			else
-			{
-				GetViewModel()->PromptError(L"Failed to delete file \"" + fileItem->GetName() + L"\" in project \"" + projectItem->GetName() + L"\".");
-			}
-		}
-		else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
+		if (!action) return;
+		if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
 		{
 			auto solutionItem = GetViewModel()->GetOpenedSolution();
-			if (solutionItem->RemoveProject(projectItem))
+			if (action->Remove())
 			{
 				solutionItem->SaveSolution(false);
 			}
@@ -139,11 +132,24 @@ namespace ui
 				GetViewModel()->PromptError(L"Failed to delete project \"" + projectItem->GetName() + L"\".");
 			}
 		}
+		else
+		{
+			projectItem = GetViewModel()->GetWorkingProject();
+			if (action->Remove())
+			{
+				projectItem->SaveProject(false);
+			}
+			else
+			{
+				GetViewModel()->PromptError(L"Failed to delete file \"" + GetViewModel()->GetWorkingItem()->GetName() + L"\" in project \"" + projectItem->GetName() + L"\".");
+			}
+		}
 	}
 
 	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRenameItemAction>();
+		if (!action) return;
 		auto window = new RenameFileWindow(GetViewModel()->GetWorkingItem(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
