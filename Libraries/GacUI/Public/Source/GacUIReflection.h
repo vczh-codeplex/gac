@@ -399,11 +399,33 @@ Instance Namespace
 			WString									postfix;
 		};
 
+		// Workflow:	<name>
+		// C++:			<instance>->Get<name>
 		class GuiInstanceParameter : public Object, public Description<GuiInstanceParameter>
 		{
 		public:
 			GlobalStringKey							name;
 			GlobalStringKey							className;
+		};
+
+		// Workflow:	<instance>.<name>
+		// C++:			<instance>->Get<name>
+		//				<instance>->Set<name>
+		class GuiInstanceProperty : public Object, public Description<GuiInstanceProperty>
+		{
+		public:
+			GlobalStringKey							name;
+			WString									typeName;
+			bool									readonly = false;
+		};
+		
+		// Workflow:	<instance>.<name>
+		// C++:			<instance>-><name>
+		class GuiInstanceState : public Object, public Description<GuiInstanceState>
+		{
+		public:
+			GlobalStringKey							name;
+			WString									typeName;
 		};
 
 /***********************************************************************
@@ -425,6 +447,8 @@ Instance Context
 			};
 			typedef collections::Dictionary<GlobalStringKey, Ptr<NamespaceInfo>>		NamespaceMap;
 			typedef collections::List<Ptr<GuiInstanceParameter>>						ParameterList;
+			typedef collections::List<Ptr<GuiInstanceProperty>>							PropertyList;
+			typedef collections::List<Ptr<GuiInstanceState>>							StateList;
 			typedef collections::List<Ptr<GuiInstanceStyleContext>>						StyleContextList;
 
 			class ElementName : public Object
@@ -447,6 +471,8 @@ Instance Context
 			NamespaceMap							namespaces;
 			Nullable<WString>						className;
 			ParameterList							parameters;
+			PropertyList							properties;
+			StateList								states;
 			collections::List<WString>				stylePaths;
 
 			bool									appliedStyles = false;

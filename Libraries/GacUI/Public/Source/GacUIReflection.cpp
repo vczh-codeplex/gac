@@ -7241,6 +7241,35 @@ GuiInstanceContext
 							context->parameters.Add(parameter);
 						}
 					}
+					else if (element->name.value == L"ref.Property")
+					{
+						auto attName = XmlGetAttribute(element, L"Name");
+						auto attType = XmlGetAttribute(element, L"Type");
+						auto attReadonly = XmlGetAttribute(element, L"Readonly");
+						if (attName && attType)
+						{
+							auto prop = MakePtr<GuiInstanceProperty>();
+							prop->name = GlobalStringKey::Get(attName->value.value);
+							prop->typeName = attType->value.value;
+							if (attReadonly)
+							{
+								prop->readonly = attReadonly->value.value == L"true";
+							}
+							context->properties.Add(prop);
+						}
+					}
+					else if (element->name.value == L"ref.State")
+					{
+						auto attName = XmlGetAttribute(element, L"Name");
+						auto attType = XmlGetAttribute(element, L"Type");
+						if (attName && attType)
+						{
+							auto state = MakePtr<GuiInstanceState>();
+							state->name = GlobalStringKey::Get(attName->value.value);
+							state->typeName = attType->value.value;
+							context->states.Add(state);
+						}
+					}
 					else if (element->name.value == L"ref.Cache")
 					{
 						auto attName = XmlGetAttribute(element, L"Name");
@@ -7319,6 +7348,45 @@ GuiInstanceContext
 				attClass->name.value = L"Class";
 				attClass->value.value = parameter->className.ToString();
 				xmlParameter->attributes.Add(attClass);
+			}
+
+			FOREACH(Ptr<GuiInstanceProperty>, prop, properties)
+			{
+				auto xmlProperty = MakePtr<XmlElement>();
+				xmlProperty->name.value = L"ref.Property";
+				xmlInstance->subNodes.Add(xmlProperty);
+
+				auto attName = MakePtr<XmlAttribute>();
+				attName->name.value = L"Name";
+				attName->value.value = prop->name.ToString();
+				xmlProperty->attributes.Add(attName);
+
+				auto attType = MakePtr<XmlAttribute>();
+				attType->name.value = L"Type";
+				attType->value.value = prop->typeName;
+				xmlProperty->attributes.Add(attType);
+
+				auto attReadonly = MakePtr<XmlAttribute>();
+				attReadonly->name.value = L"Readonly";
+				attReadonly->value.value = prop->readonly ? L"true" : L"false";
+				xmlProperty->attributes.Add(attReadonly);
+			}
+
+			FOREACH(Ptr<GuiInstanceState>, state, states)
+			{
+				auto xmlState = MakePtr<XmlElement>();
+				xmlState->name.value = L"ref.State";
+				xmlInstance->subNodes.Add(xmlState);
+
+				auto attName = MakePtr<XmlAttribute>();
+				attName->name.value = L"Name";
+				attName->value.value = state->name.ToString();
+				xmlState->attributes.Add(attName);
+
+				auto attType = MakePtr<XmlAttribute>();
+				attType->name.value = L"Type";
+				attType->value.value = state->typeName;
+				xmlState->attributes.Add(attType);
 			}
 
 			if (!serializePrecompiledResource && stylePaths.Count() > 0)
@@ -7441,6 +7509,38 @@ GuiInstanceContext
 				}
 			}
 			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint nameIndex = -1;
+					WString typeName;
+					bool readonly = false;
+					reader << nameIndex << typeName << readonly;
+
+					auto prop = MakePtr<GuiInstanceProperty>();
+					prop->name = sortedKeys[nameIndex];
+					prop->typeName = typeName;
+					prop->readonly = readonly;
+					context->properties.Add(prop);
+				}
+			}
+			{
+				vint count = -1;
+				reader << count;
+				for (vint i = 0; i < count; i++)
+				{
+					vint nameIndex = -1;
+					WString typeName;
+					reader << nameIndex << typeName;
+
+					auto state = MakePtr<GuiInstanceState>();
+					state->name = sortedKeys[nameIndex];
+					state->typeName = typeName;
+					context->states.Add(state);
+				}
+			}
+			{
 				vint count = 0;
 				reader << count;
 
@@ -7517,6 +7617,29 @@ GuiInstanceContext
 					vint classNameIndex = sortedKeys.IndexOf(parameter->className);
 					CHECK_ERROR(nameIndex != -1 && classNameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
 					writer << nameIndex << classNameIndex;
+				}
+			}
+			{
+				vint count = properties.Count();
+				writer << count;
+				FOREACH(Ptr<GuiInstanceProperty>, prop, properties)
+				{
+					vint nameIndex = sortedKeys.IndexOf(prop->name);
+					WString typeName = prop->typeName;
+					bool readonly = prop->readonly;
+					CHECK_ERROR(nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << nameIndex << typeName << readonly;
+				}
+			}
+			{
+				vint count = states.Count();
+				writer << count;
+				FOREACH(Ptr<GuiInstanceState>, state, states)
+				{
+					vint nameIndex = sortedKeys.IndexOf(state->name);
+					WString typeName = state->typeName;
+					CHECK_ERROR(nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << nameIndex << typeName;
 				}
 			}
 			{
