@@ -288,16 +288,6 @@ RootSolutionItemModel
 		return L"";
 	}
 
-	bool RootSolutionItemModel::OpenFileItem()
-	{
-		return false;
-	}
-
-	bool RootSolutionItemModel::SaveFileItem()
-	{
-		return false;
-	}
-
 	Ptr<ISolutionModel> RootSolutionItemModel::GetSolution()
 	{
 		if (children.Count() == 0) return nullptr;

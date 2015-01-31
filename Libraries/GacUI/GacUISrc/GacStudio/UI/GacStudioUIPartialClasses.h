@@ -44,8 +44,6 @@ namespace vm
 		vl::Event<void()> ErrorCountChanged;
 
 		virtual WString GetErrorText(vint index) = 0;
-		virtual bool OpenFileItem() = 0;
-		virtual bool SaveFileItem() = 0;
 	};
 }
 

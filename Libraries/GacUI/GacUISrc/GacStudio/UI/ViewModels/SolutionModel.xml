@@ -14,11 +14,6 @@
     <Method Name="GetErrorText" Type="string">
       <Argument Name="index" Type="int"/>
     </Method>
-
-    <Method Name="OpenFileItem" Type="bool">
-    </Method>
-    <Method Name="SaveFileItem" Type="bool">
-    </Method>
   </Interface>
 
   <Interface ref.Class="vm::IMacroEnvironment">
