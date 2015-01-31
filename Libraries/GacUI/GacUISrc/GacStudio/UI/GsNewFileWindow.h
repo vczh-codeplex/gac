@@ -24,7 +24,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		NewFileWindow(Ptr<vm::IStudioModel> ViewModel);
+		NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action);
 	};
 }
 

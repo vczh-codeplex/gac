@@ -22,8 +22,8 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem)
+	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
 	{
-		InitializeComponents(SolutionItem);
+		InitializeComponents(SolutionItem, Action);
 	}
 }

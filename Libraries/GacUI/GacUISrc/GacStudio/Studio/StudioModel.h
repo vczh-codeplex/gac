@@ -107,10 +107,8 @@ namespace vm
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
 
-		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		WString											GetFileDirectory()override;
-		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
 		

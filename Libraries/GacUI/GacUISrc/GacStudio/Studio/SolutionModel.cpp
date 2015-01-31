@@ -109,7 +109,6 @@ FileItem
 		:studioModel(_studioModel)
 		, fileFactory(_fileFactory)
 		, filePath(_filePath)
-		, isSaved(false)
 		, unsupported(_unsupported)
 		, parent(0)
 	{
@@ -121,6 +120,35 @@ FileItem
 
 	FileItem::~FileItem()
 	{
+	}
+
+	WString FileItem::GetRenameablePart()
+	{
+		throw 0;
+	}
+
+	WString FileItem::PreviewRename(WString newName)
+	{
+		throw 0;
+	}
+
+	bool FileItem::Rename(WString newName)
+	{
+		throw 0;
+	}
+
+	bool FileItem::Remove()
+	{
+		auto current = parent;
+		while (current)
+		{
+			if (auto project = dynamic_cast<ProjectItem*>(current))
+			{
+				return project->RemoveFileItem(this);
+			}
+			current = current->GetParent();
+		}
+		return false;
 	}
 
 	Ptr<IFileFactoryModel> FileItem::GetFileFactory()
@@ -156,11 +184,6 @@ FileItem
 		return false;
 	}
 
-	bool FileItem::RenameFile(WString newName)
-	{
-		throw 0;
-	}
-
 	ISolutionItemModel* FileItem::GetParent()
 	{
 		return parent;
@@ -181,11 +204,6 @@ FileItem
 		return children.GetWrapper();
 	}
 
-	bool FileItem::GetIsFileItem()
-	{
-		return true;
-	}
-
 	WString FileItem::GetFilePath()
 	{
 		return filePath;
@@ -194,12 +212,6 @@ FileItem
 	WString FileItem::GetFileDirectory()
 	{
 		return FilePath(filePath).GetFolder().GetFullPath();
-	}
-
-	bool FileItem::GetIsSaved()
-	{
-		if (unsupported) return true;
-		throw 0;
 	}
 
 	vint FileItem::GetErrorCount()
@@ -326,10 +338,83 @@ FolderItem
 	FolderItem::~FolderItem()
 	{
 	}
+	
+	bool FolderItem::AddFile(Ptr<IFileModel> file)
+	{
+		auto current = parent;
+		while (current)
+		{
+			if (auto project = dynamic_cast<ProjectItem*>(current))
+			{
+				return project->AddFileItem(file);
+			}
+			current = current->GetParent();
+		}
+		return false;
+	}
 
-	bool FolderItem::RenameFolder(WString newName)
+	WString FolderItem::GetRenameablePart()
 	{
 		throw 0;
+	}
+
+	WString FolderItem::PreviewRename(WString newName)
+	{
+		throw 0;
+	}
+
+	bool FolderItem::Rename(WString newName)
+	{
+		throw 0;
+	}
+
+	bool FolderItem::Remove()
+	{
+		ProjectItem* project = nullptr;
+		{
+			auto current = parent;
+			while (current)
+			{
+				if (project = dynamic_cast<ProjectItem*>(current))
+				{
+					goto CONTINUE;
+				}
+				current = current->GetParent();
+			}
+			return false;
+		}
+
+	CONTINUE:
+		List<Ptr<IFileModel>> files;
+		List<FolderItem*> items;
+		items.Add(this);
+		vint current = 0;
+
+		while (current < items.Count())
+		{
+			auto folder = items[current++];
+			FOREACH(Ptr<ISolutionItemModel>, item, folder->children)
+			{
+				if (auto subFolder = item.Cast<FolderItem>())
+				{
+					items.Add(subFolder.Obj());
+				}
+				else if (auto fileItem = item.Cast<IFileModel>())
+				{
+					files.Add(fileItem);
+				}
+			}
+		}
+
+		FOREACH(Ptr<IFileModel>, fileItem, files)
+		{
+			if (!project->RemoveFileItem(fileItem))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	ISolutionItemModel* FolderItem::GetParent()
@@ -352,11 +437,6 @@ FolderItem
 		return children.GetWrapper();
 	}
 
-	bool FolderItem::GetIsFileItem()
-	{
-		return false;
-	}
-
 	WString FolderItem::GetFilePath()
 	{
 		return L"";
@@ -365,11 +445,6 @@ FolderItem
 	WString FolderItem::GetFileDirectory()
 	{
 		return filePath;
-	}
-
-	bool FolderItem::GetIsSaved()
-	{
-		return false;
 	}
 
 	vint FolderItem::GetErrorCount()
@@ -430,7 +505,6 @@ ProjectItem
 		:studioModel(_studioModel)
 		, projectFactory(_projectFactory)
 		, filePath(_filePath)
-		, isSaved(false)
 		, unsupported(_unsupported)
 	{
 		if (unsupported)
@@ -441,6 +515,31 @@ ProjectItem
 
 	ProjectItem::~ProjectItem()
 	{
+	}
+
+	bool ProjectItem::AddFile(Ptr<IFileModel> file)
+	{
+		return AddFileItem(file);
+	}
+
+	WString ProjectItem::GetRenameablePart()
+	{
+		throw 0;
+	}
+
+	WString ProjectItem::PreviewRename(WString newName)
+	{
+		throw 0;
+	}
+
+	bool ProjectItem::Rename(WString newName)
+	{
+		throw 0;
+	}
+
+	bool ProjectItem::Remove()
+	{
+		return studioModel->GetOpenedSolution()->RemoveProject(this);
 	}
 
 	Ptr<IProjectFactoryModel> ProjectItem::GetProjectFactory()
@@ -519,11 +618,6 @@ ProjectItem
 			}
 		}
 
-		if (!isSaved)
-		{
-			isSaved = true;
-			IsSavedChanged();
-		}
 		ErrorCountChanged();
 		return true;
 	}
@@ -569,11 +663,6 @@ ProjectItem
 				fileItem->SaveFile();
 			}
 		}
-		if (!isSaved)
-		{
-			isSaved = true;
-			IsSavedChanged();
-		}
 		return true;
 	}
 
@@ -582,45 +671,7 @@ ProjectItem
 		if (unsupported) return false;
 		ClearInternal();
 		fileItems.Clear();
-		if (isSaved)
-		{
-			isSaved = false;
-			IsSavedChanged();
-		}
 		return SaveProject(false);
-	}
-
-	bool ProjectItem::RenameProject(WString newName)
-	{
-		throw 0;
-	}
-
-	bool ProjectItem::AddFile(Ptr<IFileModel> file)
-	{
-		if (!AddFileItem(file))
-		{
-			return false;
-		}
-		if (!isSaved)
-		{
-			isSaved = false;
-			IsSavedChanged();
-		}
-		return true;
-	}
-	
-	bool ProjectItem::RemoveFile(Ptr<IFileModel> file)
-	{
-		if (!RemoveFileItem(file))
-		{
-			return false;
-		}
-		if (!isSaved)
-		{
-			isSaved = false;
-			IsSavedChanged();
-		}
-		return true;
 	}
 
 	ISolutionItemModel* ProjectItem::GetParent()
@@ -643,11 +694,6 @@ ProjectItem
 		return children.GetWrapper();
 	}
 
-	bool ProjectItem::GetIsFileItem()
-	{
-		return !unsupported;
-	}
-
 	WString ProjectItem::GetFilePath()
 	{
 		return filePath;
@@ -656,12 +702,6 @@ ProjectItem
 	WString ProjectItem::GetFileDirectory()
 	{
 		return FilePath(filePath).GetFolder().GetFullPath();
-	}
-
-	bool ProjectItem::GetIsSaved()
-	{
-		if (unsupported) return true;
-		throw 0;
 	}
 
 	vint ProjectItem::GetErrorCount()
@@ -682,7 +722,6 @@ SolutionItem
 		:studioModel(_studioModel)
 		, projectFactory(_projectFactory)
 		, filePath(_filePath)
-		, isSaved(false)
 	{
 	}
 
@@ -749,11 +788,6 @@ SolutionItem
 			}
 		}
 
-		if (!isSaved)
-		{
-			isSaved = true;
-			IsSavedChanged();
-		}
 		ErrorCountChanged();
 		return true;
 	}
@@ -796,22 +830,12 @@ SolutionItem
 				project->SaveProject(true);
 			}
 		}
-		if (!isSaved)
-		{
-			isSaved = true;
-			IsSavedChanged();
-		}
 		return true;
 	}
 
 	bool SolutionItem::NewSolution()
 	{
 		projects.Clear();
-		if (isSaved)
-		{
-			isSaved = false;
-			IsSavedChanged();
-		}
 		return true;
 	}
 
@@ -819,11 +843,6 @@ SolutionItem
 	{
 		if (projects.Contains(project.Obj())) return false;
 		projects.Add(project);
-		if (!isSaved)
-		{
-			isSaved = false;
-			IsSavedChanged();
-		}
 		return true;
 	}
 
@@ -832,11 +851,6 @@ SolutionItem
 		auto index = projects.IndexOf(project.Obj());
 		if (index == -1) return false;
 		projects.RemoveAt(index);
-		if (!isSaved)
-		{
-			isSaved = false;
-			IsSavedChanged();
-		}
 		return true;
 	}
 
@@ -860,11 +874,6 @@ SolutionItem
 		return projects.GetWrapper();
 	}
 
-	bool SolutionItem::GetIsFileItem()
-	{
-		return true;
-	}
-
 	WString SolutionItem::GetFilePath()
 	{
 		return filePath;
@@ -875,11 +884,6 @@ SolutionItem
 		return FilePath(filePath).GetFolder().GetFullPath();
 	}
 
-	bool SolutionItem::GetIsSaved()
-	{
-		return isSaved;
-	}
-
 	vint SolutionItem::GetErrorCount()
 	{
 		return errors.Count();
@@ -888,5 +892,80 @@ SolutionItem
 	WString SolutionItem::GetErrorText(vint index)
 	{
 		return 0 <= index && index < errors.Count() ? errors[index] : L"";
+	}
+}
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			#define _ ,
+			IMPL_TYPE_INFO(vm::FileItem)
+			IMPL_TYPE_INFO(vm::FolderItem)
+			IMPL_TYPE_INFO(vm::ProjectItem)
+			IMPL_TYPE_INFO(vm::SolutionItem)
+
+			BEGIN_CLASS_MEMBER(vm::FileItem)
+				CLASS_MEMBER_BASE(vm::IFileModel)
+				CLASS_MEMBER_BASE(vm::IRenameItemAction)
+				CLASS_MEMBER_BASE(vm::IRemoveItemAction)
+			END_CLASS_MEMBER(vm::FileItem)
+
+			BEGIN_CLASS_MEMBER(vm::FolderItem)
+				CLASS_MEMBER_BASE(vm::IFolderModel)
+				CLASS_MEMBER_BASE(vm::IAddFileItemAction)
+				CLASS_MEMBER_BASE(vm::IRenameItemAction)
+				CLASS_MEMBER_BASE(vm::IRemoveItemAction)
+			END_CLASS_MEMBER(vm::FolderItem)
+
+			BEGIN_CLASS_MEMBER(vm::ProjectItem)
+				CLASS_MEMBER_BASE(vm::IProjectModel)
+				CLASS_MEMBER_BASE(vm::IAddFileItemAction)
+				CLASS_MEMBER_BASE(vm::IRenameItemAction)
+				CLASS_MEMBER_BASE(vm::IRemoveItemAction)
+			END_CLASS_MEMBER(vm::ProjectItem)
+
+			BEGIN_CLASS_MEMBER(vm::SolutionItem)
+				CLASS_MEMBER_BASE(vm::ISolutionModel)
+			END_CLASS_MEMBER(vm::SolutionItem)
+
+			#undef _
+
+			class GacStudioUIResourceLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					ADD_TYPE_INFO(vm::FileItem)
+					ADD_TYPE_INFO(vm::FolderItem)
+					ADD_TYPE_INFO(vm::ProjectItem)
+					ADD_TYPE_INFO(vm::SolutionItem)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			class GacStudioUIResourcePlugin : public Object, public vl::presentation::controls::IGuiPlugin
+			{
+			public:
+				void Load()override
+				{
+					GetGlobalTypeManager()->AddTypeLoader(new GacStudioUIResourceLoader);
+				}
+
+				void AfterLoad()override
+				{
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(GacStudioUIResourcePlugin)
+		}
 	}
 }

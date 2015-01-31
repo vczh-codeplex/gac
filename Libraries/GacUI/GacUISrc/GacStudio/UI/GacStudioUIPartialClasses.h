@@ -29,16 +29,11 @@ namespace vm
 
 		virtual Ptr<description::IValueObservableList> GetChildren() = 0;
 
-		virtual bool GetIsFileItem() = 0;
-
 		virtual WString GetFilePath() = 0;
 		vl::Event<void()> FilePathChanged;
 
 		virtual WString GetFileDirectory() = 0;
 		vl::Event<void()> FileDirectoryChanged;
-
-		virtual bool GetIsSaved() = 0;
-		vl::Event<void()> IsSavedChanged;
 
 		virtual vint GetErrorCount() = 0;
 		vl::Event<void()> ErrorCountChanged;
@@ -137,7 +132,6 @@ namespace vm
 		virtual bool OpenFile() = 0;
 		virtual bool SaveFile() = 0;
 		virtual bool NewFileAndSave() = 0;
-		virtual bool RenameFile(WString newName) = 0;
 	};
 }
 
@@ -146,8 +140,6 @@ namespace vm
 	class IFolderModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFolderModel>
 	{
 	public:
-
-		virtual bool RenameFolder(WString newName) = 0;
 	};
 }
 
@@ -162,9 +154,6 @@ namespace vm
 		virtual bool OpenProject() = 0;
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
 		virtual bool NewProjectAndSave() = 0;
-		virtual bool RenameProject(WString newName) = 0;
-		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
-		virtual bool RemoveFile(Ptr<vm::IFileModel> file) = 0;
 	};
 }
 
@@ -179,6 +168,46 @@ namespace vm
 		virtual bool NewSolution() = 0;
 		virtual bool AddProject(Ptr<vm::IProjectModel> project) = 0;
 		virtual bool RemoveProject(Ptr<vm::IProjectModel> project) = 0;
+	};
+}
+
+namespace vm
+{
+	class IAddFileItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IAddFileItemAction>
+	{
+	public:
+
+		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
+	};
+}
+
+namespace vm
+{
+	class IOpenInEditorItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IOpenInEditorItemAction>
+	{
+	public:
+	};
+}
+
+namespace vm
+{
+	class IRenameItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRenameItemAction>
+	{
+	public:
+
+		virtual WString GetRenameablePart() = 0;
+		virtual WString PreviewRename(WString newName) = 0;
+		virtual bool Rename(WString newName) = 0;
+	};
+}
+
+namespace vm
+{
+	class IRemoveItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRemoveItemAction>
+	{
+	public:
+
+		virtual bool Remove() = 0;
 	};
 }
 
@@ -366,6 +395,7 @@ namespace ui
 	{
 	private:
 		Ptr<vm::IStudioModel> ViewModel_;
+		Ptr<vm::IAddFileItemAction> Action_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonCreate;
@@ -374,9 +404,10 @@ namespace ui
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
 		vl::presentation::controls::GuiBindableTreeView* treeViewProjectTemplate;
 
-		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel)
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
 		{
 			ViewModel_ = ViewModel;
+			Action_ = Action;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(buttonCancel);
@@ -389,6 +420,7 @@ namespace ui
 			else
 			{
 				ViewModel_ = 0;
+				Action_ = 0;
 			}
 		}
 	public:
@@ -407,6 +439,11 @@ namespace ui
 		Ptr<vm::IStudioModel> GetViewModel()
 		{
 			return ViewModel_;
+		}
+
+		Ptr<vm::IAddFileItemAction> GetAction()
+		{
+			return Action_;
 		}
 	};
 
@@ -480,6 +517,7 @@ namespace ui
 	{
 	private:
 		Ptr<vm::ISolutionItemModel> SolutionItem_;
+		Ptr<vm::IRenameItemAction> Action_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonRename;
@@ -488,9 +526,10 @@ namespace ui
 		vl::presentation::controls::GuiSinglelineTextBox* textNew;
 		vl::presentation::controls::GuiSinglelineTextBox* textOriginal;
 
-		void InitializeComponents(Ptr<vm::ISolutionItemModel> SolutionItem)
+		void InitializeComponents(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
 		{
 			SolutionItem_ = SolutionItem;
+			Action_ = Action;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(buttonCancel);
@@ -503,6 +542,7 @@ namespace ui
 			else
 			{
 				SolutionItem_ = 0;
+				Action_ = 0;
 			}
 		}
 	public:
@@ -522,6 +562,11 @@ namespace ui
 		{
 			return SolutionItem_;
 		}
+
+		Ptr<vm::IRenameItemAction> GetAction()
+		{
+			return Action_;
+		}
 	};
 
 	class RenameFileWindow;
@@ -533,13 +578,17 @@ namespace vl
 	{
 		namespace description
 		{
+			DECL_TYPE_INFO(vm::IAddFileItemAction)
 			DECL_TYPE_INFO(vm::IEditorFactoryModel)
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IFileModel)
 			DECL_TYPE_INFO(vm::IFolderModel)
 			DECL_TYPE_INFO(vm::IMacroEnvironment)
+			DECL_TYPE_INFO(vm::IOpenInEditorItemAction)
 			DECL_TYPE_INFO(vm::IProjectFactoryModel)
 			DECL_TYPE_INFO(vm::IProjectModel)
+			DECL_TYPE_INFO(vm::IRemoveItemAction)
+			DECL_TYPE_INFO(vm::IRenameItemAction)
 			DECL_TYPE_INFO(vm::ISolutionItemModel)
 			DECL_TYPE_INFO(vm::ISolutionModel)
 			DECL_TYPE_INFO(vm::IStudioModel)
@@ -720,7 +769,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		NewFileWindow(Ptr<vm::IStudioModel> ViewModel);
+		NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action);
 	};
 }
 
@@ -740,9 +789,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel)
+	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
 	{
-		InitializeComponents(ViewModel);
+		InitializeComponents(ViewModel, Action);
 	}
 }
 
@@ -807,7 +856,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem);
+		RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action);
 	};
 }
 
@@ -827,9 +876,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem)
+	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
 	{
-		InitializeComponents(SolutionItem);
+		InitializeComponents(SolutionItem, Action);
 	}
 }
 

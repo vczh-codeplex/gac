@@ -258,11 +258,6 @@ RootSolutionItemModel
 		return children.GetWrapper();
 	}
 
-	bool RootSolutionItemModel::GetIsFileItem()
-	{
-		return false;
-	}
-
 	WString RootSolutionItemModel::GetFilePath()
 	{
 		return L"";
@@ -271,11 +266,6 @@ RootSolutionItemModel
 	WString RootSolutionItemModel::GetFileDirectory()
 	{
 		return L"";
-	}
-
-	bool RootSolutionItemModel::GetIsSaved()
-	{
-		throw true;
 	}
 
 	vint RootSolutionItemModel::GetErrorCount()

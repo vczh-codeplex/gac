@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Instance ref.Class="ui::RenameFileWindow">
   <ref.Parameter Name="SolutionItem" Class="vm::ISolutionItemModel"/>
+  <ref.Parameter Name="Action" Class="vm::IRenameItemAction"/>
   <Window ref.Name="self" Text="Rename File" ClientSize="x:480 y:160" MinimizedBox="false" MaximizedBox="true" SizeBox="true">
     <att.BoundsComposition-set PreferredMinSize="x:480 y:160"/>
     

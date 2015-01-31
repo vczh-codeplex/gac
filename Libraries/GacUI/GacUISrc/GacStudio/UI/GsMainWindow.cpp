@@ -41,12 +41,14 @@ namespace ui
 
 	void MainWindow::commandFileAddExistingFiles_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
 		// todo
 	}
 
 	void MainWindow::commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto window = new NewFileWindow(GetViewModel());
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
+		auto window = new NewFileWindow(GetViewModel(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, []()
@@ -100,22 +102,19 @@ namespace ui
 
 	void MainWindow::commandFileOpenWith_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
-		{
-			// todo
-		}
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IOpenInEditorItemAction>();
+		// todo
 	}
 
 	void MainWindow::commandFileOpen_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
-		{
-			// todo
-		}
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IOpenInEditorItemAction>();
+		// todo
 	}
 
 	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRemoveItemAction>();
 		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
 		{
 			auto projectItem = GetViewModel()->GetWorkingProject();
@@ -144,34 +143,24 @@ namespace ui
 
 	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto window = new RenameFileWindow (GetViewModel()->GetWorkingItem());
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRenameItemAction>();
+		auto window = new RenameFileWindow(GetViewModel()->GetWorkingItem(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, [=]()
 		{
-			if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
-			{
-				// todo
-			}
-			else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
-			{
-				// todo
-			}
-			else if (auto folderItem = GetViewModel()->GetWorkingItem().Cast<vm::IFolderModel>())
-			{
-				// todo
-			}
+			// todo
 		});
 	}
 
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-			// todo
+		// todo
 	}
 
 	void MainWindow::commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-			// todo
+		// todo
 	}
 
 	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -191,18 +180,14 @@ namespace ui
 
 	void MainWindow::treeViewSolutionItem_SelectionChanged(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto selectedSolutionItem = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
-		bool canAddFile = selectedSolutionItem && !selectedSolutionItem.Cast<vm::ISolutionModel>();
-		bool isProject = selectedSolutionItem.Cast<vm::IProjectModel>();
-		bool isFile = selectedSolutionItem.Cast<vm::IFileModel>();
-		bool isFolder = selectedSolutionItem.Cast<vm::IFolderModel>();
-		commandFileAddNewFile->SetEnabled(canAddFile);
-		commandFileAddExistingFiles->SetEnabled(canAddFile);
-		commandFileOpen->SetEnabled(isFile);
-		commandFileOpenWith->SetEnabled(isFile);
-		commandFileRename->SetEnabled(isFile || isProject || isFolder);
-		commandFileRemove->SetEnabled(isFile || isProject);
-		GetViewModel()->NotifySelectedSolutionItem(selectedSolutionItem);
+		auto item = description::UnboxValue<Ptr<vm::ISolutionItemModel>>(treeViewSolutionItem->GetSelectedItem());
+		commandFileAddNewFile->SetEnabled(item.Cast<vm::IAddFileItemAction>());
+		commandFileAddExistingFiles->SetEnabled(item.Cast<vm::IAddFileItemAction>());
+		commandFileOpen->SetEnabled(item.Cast<vm::IOpenInEditorItemAction>());
+		commandFileOpenWith->SetEnabled(item.Cast<vm::IOpenInEditorItemAction>());
+		commandFileRename->SetEnabled(item.Cast<vm::IRenameItemAction>());
+		commandFileRemove->SetEnabled(item.Cast<vm::IRemoveItemAction>());
+		GetViewModel()->NotifySelectedSolutionItem(item);
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
