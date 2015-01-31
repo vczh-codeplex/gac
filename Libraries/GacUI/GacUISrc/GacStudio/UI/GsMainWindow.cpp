@@ -41,6 +41,7 @@ namespace ui
 
 	void MainWindow::commandFileAddExistingFiles_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		// todo
 	}
 
 	void MainWindow::commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -101,6 +102,7 @@ namespace ui
 	{
 		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
 		{
+			// todo
 		}
 	}
 
@@ -108,6 +110,7 @@ namespace ui
 	{
 		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
 		{
+			// todo
 		}
 	}
 
@@ -143,18 +146,22 @@ namespace ui
 	{
 		if (auto fileItem = GetViewModel()->GetWorkingItem().Cast<vm::IFileModel>())
 		{
+			// todo
 		}
 		else if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
 		{
+			// todo
 		}
 	}
 
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+			// todo
 	}
 
 	void MainWindow::commandFileSave_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+			// todo
 	}
 
 	void MainWindow::commandHelpAbout_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
