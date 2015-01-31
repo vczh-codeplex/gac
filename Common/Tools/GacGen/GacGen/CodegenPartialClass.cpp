@@ -14,6 +14,29 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 	writer.WriteLine(L"");
 	writer.WriteLine(L"#include \"" + config->include + L"\"");
 	writer.WriteLine(L"");
+	
+	FOREACH(WString, typeSchemaName, typeSchemaOrder)
+	{
+		auto instance = typeSchemas[typeSchemaName];
+		WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+		if (auto data = instance->schema.Cast<GuiInstanceDataSchema>())
+		{
+			if (data->referenceType)
+			{
+				writer.WriteLine(prefix + L"class " + instance->typeName + L";");
+			}
+			else
+			{
+				writer.WriteLine(prefix + L"struct " + instance->typeName + L";");
+			}
+		}
+		else if (auto itf = instance->schema.Cast<GuiInstanceInterfaceSchema>())
+		{
+			writer.WriteLine(prefix + L"class " + instance->typeName + L";");
+		}
+		WriteNamespaceEnd(instance->namespaces, writer);
+	}
+	writer.WriteLine(L"");
 
 	FOREACH(WString, typeSchemaName, typeSchemaOrder)
 	{

@@ -15,6 +15,67 @@ DO NOT MODIFY
 
 namespace vm
 {
+	class ISolutionItemModel;
+}
+namespace vm
+{
+	class IMacroEnvironment;
+}
+namespace vm
+{
+	class ITextTemplate;
+}
+namespace vm
+{
+	class IEditorFactoryModel;
+}
+namespace vm
+{
+	class IFileFactoryModel;
+}
+namespace vm
+{
+	class IProjectFactoryModel;
+}
+namespace vm
+{
+	class IFileModel;
+}
+namespace vm
+{
+	class IFolderModel;
+}
+namespace vm
+{
+	class IProjectModel;
+}
+namespace vm
+{
+	class ISolutionModel;
+}
+namespace vm
+{
+	class IAddFileItemAction;
+}
+namespace vm
+{
+	class IOpenInEditorItemAction;
+}
+namespace vm
+{
+	class IRenameItemAction;
+}
+namespace vm
+{
+	class IRemoveItemAction;
+}
+namespace vm
+{
+	class IStudioModel;
+}
+
+namespace vm
+{
 	class ISolutionItemModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItemModel>
 	{
 	public:
@@ -39,6 +100,8 @@ namespace vm
 		vl::Event<void()> ErrorCountChanged;
 
 		virtual WString GetErrorText(vint index) = 0;
+		virtual Ptr<vm::IProjectModel> FindProject() = 0;
+		virtual Ptr<vm::ISolutionModel> FindSolution() = 0;
 	};
 }
 
