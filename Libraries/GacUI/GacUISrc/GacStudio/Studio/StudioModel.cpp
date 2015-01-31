@@ -517,22 +517,22 @@ StudioModel
 		return true;
 	}
 
-	Ptr<IProjectModel> StudioModel::AddProject(Ptr<IProjectFactoryModel> projectFactory, WString filePath)
+	Ptr<IProjectModel> StudioModel::CreateProjectModel(Ptr<IProjectFactoryModel> projectFactory, WString filePath)
 	{
 		auto solution = rootSolutionItem->GetSolution();
 		if (!solution) return nullptr;
 		auto project = MakePtr<ProjectItem>(this, projectFactory, filePath);
 		if (!project->NewProjectAndSave()) return nullptr;
-		return solution->AddProject(project) ? project : nullptr;
+		return project;
 	}
 
-	Ptr<IFileModel> StudioModel::AddFile(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)
+	Ptr<IFileModel> StudioModel::CreateFileModel(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)
 	{
 		auto solution = rootSolutionItem->GetSolution();
 		if (!solution) return nullptr;
 		auto file = MakePtr<FileItem>(this, fileFactory, filePath);
 		if (!file->NewFileAndSave()) return nullptr;
-		return project->AddFile(file) ? file : nullptr;
+		return file;
 	}
 
 	void StudioModel::OpenBrowser(WString url)

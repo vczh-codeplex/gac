@@ -42,8 +42,8 @@ namespace ui
 				return;
 			}
 
-			auto fileItem = model->AddFile(workingProject, fileFactory, filePath.GetFullPath());
-			if (!fileItem)
+			auto fileItem = model->CreateFileModel(workingProject, fileFactory, filePath.GetFullPath());
+			if (!fileItem || !GetAction()->AddFile(fileItem))
 			{
 				model->PromptError(L"Failed to add a file of \"" + fileFactory->GetName() + L"\" to project \"" + workingProject->GetName() + L"\".");
 				goto CLOSE;

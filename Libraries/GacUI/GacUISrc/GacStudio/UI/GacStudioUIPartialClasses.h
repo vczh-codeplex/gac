@@ -252,8 +252,8 @@ namespace vm
 		virtual bool SaveSolution() = 0;
 		virtual bool NewSolution(WString filePath) = 0;
 		virtual bool CloseSolution() = 0;
-		virtual Ptr<vm::IProjectModel> AddProject(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath) = 0;
-		virtual Ptr<vm::IFileModel> AddFile(Ptr<vm::IProjectModel> project, Ptr<vm::IFileFactoryModel> fileFactory, WString filePath) = 0;
+		virtual Ptr<vm::IProjectModel> CreateProjectModel(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath) = 0;
+		virtual Ptr<vm::IFileModel> CreateFileModel(Ptr<vm::IProjectModel> project, Ptr<vm::IFileFactoryModel> fileFactory, WString filePath) = 0;
 		virtual void OpenBrowser(WString url) = 0;
 		virtual void PromptError(WString message) = 0;
 	};

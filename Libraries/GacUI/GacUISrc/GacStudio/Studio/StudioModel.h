@@ -156,8 +156,8 @@ namespace vm
 		bool											SaveSolution()override;
 		bool											NewSolution(WString filePath)override;
 		bool											CloseSolution()override;
-		Ptr<IProjectModel>								AddProject(Ptr<IProjectFactoryModel> projectFactory, WString filePath)override;
-		Ptr<IFileModel>									AddFile(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)override;
+		Ptr<IProjectModel>								CreateProjectModel(Ptr<IProjectFactoryModel> projectFactory, WString filePath)override;
+		Ptr<IFileModel>									CreateFileModel(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)override;
 
 		void											OpenBrowser(WString url)override;
 		void											PromptError(WString message)override;

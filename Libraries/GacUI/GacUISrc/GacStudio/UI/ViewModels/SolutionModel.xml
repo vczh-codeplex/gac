@@ -151,11 +151,11 @@
     </Method>
     <Method Name="CloseSolution" Type="bool">
     </Method>
-    <Method Name="AddProject" Type="vm::IProjectModel^">
+    <Method Name="CreateProjectModel" Type="vm::IProjectModel^">
       <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
       <Argument Name="filePath" Type="string"/>
     </Method>
-    <Method Name="AddFile" Type="vm::IFileModel^">
+    <Method Name="CreateFileModel" Type="vm::IFileModel^">
       <Argument Name="project" Type="vm::IProjectModel^"/>
       <Argument Name="fileFactory" Type="vm::IFileFactoryModel^"/>
       <Argument Name="filePath" Type="string"/>
