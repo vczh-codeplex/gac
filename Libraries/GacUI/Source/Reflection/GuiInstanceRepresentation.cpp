@@ -733,15 +733,48 @@ GuiInstanceContext
 				// load instance
 				FOREACH(Ptr<XmlElement>, element, XmlGetElements(xml->rootElement))
 				{
-					if (element->name.value == L"ref.Parameter")
+					if (element->name.value == L"ref.Parameter" || element->name.value == L"ref.Property" || element->name.value == L"ref.State")
 					{
 						auto attName = XmlGetAttribute(element, L"Name");
 						auto attClass = XmlGetAttribute(element, L"Class");
-						if (attName && attClass)
+						auto attType = XmlGetAttribute(element, L"Type");
+						auto attReadonly = XmlGetAttribute(element, L"Readonly");
+						auto attBindable = XmlGetAttribute(element, L"Bindable");
+						if (attName && (attClass || attType))
 						{
 							auto parameter = MakePtr<GuiInstanceParameter>();
+							if (element->name.value == L"ref.Parameter")
+							{
+								parameter->kind = GuiInstanceParameter::Parameter;
+							}
+							else if (element->name.value == L"ref.Property")
+							{
+								parameter->kind = GuiInstanceParameter::Property;
+							}
+							else if (element->name.value == L"ref.State")
+							{
+								parameter->kind = GuiInstanceParameter::State;
+							}
+
 							parameter->name = GlobalStringKey::Get(attName->value.value);
-							parameter->className = GlobalStringKey::Get(attClass->value.value);
+							if (attType)
+							{
+								parameter->typeName = attType->value.value;
+							}
+							else
+							{
+								parameter->typeName = attClass->value.value + L"^";
+							}
+
+							if (attReadonly)
+							{
+								parameter->readonly = attReadonly->value.value == L"true";
+							}
+							if (attBindable)
+							{
+								parameter->bindable = attBindable->value.value == L"true";
+							}
+
 							context->parameters.Add(parameter);
 						}
 					}
@@ -811,18 +844,45 @@ GuiInstanceContext
 			FOREACH(Ptr<GuiInstanceParameter>, parameter, parameters)
 			{
 				auto xmlParameter = MakePtr<XmlElement>();
-				xmlParameter->name.value = L"ref.Parameter";
+				switch (parameter->kind)
+				{
+				case GuiInstanceParameter::Parameter:
+					xmlParameter->name.value = L"ref.Parameter";
+					break;
+				case GuiInstanceParameter::Property:
+					xmlParameter->name.value = L"ref.Property";
+					break;
+				case GuiInstanceParameter::State:
+					xmlParameter->name.value = L"ref.State";
+					break;
+				}
 				xmlInstance->subNodes.Add(xmlParameter);
-
-				auto attName = MakePtr<XmlAttribute>();
-				attName->name.value = L"Name";
-				attName->value.value = parameter->name.ToString();
-				xmlParameter->attributes.Add(attName);
-
-				auto attClass = MakePtr<XmlAttribute>();
-				attClass->name.value = L"Class";
-				attClass->value.value = parameter->className.ToString();
-				xmlParameter->attributes.Add(attClass);
+				{
+					auto attName = MakePtr<XmlAttribute>();
+					attName->name.value = L"Name";
+					attName->value.value = parameter->name.ToString();
+					xmlParameter->attributes.Add(attName);
+				}
+				{
+					auto attClass = MakePtr<XmlAttribute>();
+					attClass->name.value = L"Type";
+					attClass->value.value = parameter->typeName;
+					xmlParameter->attributes.Add(attClass);
+				}
+				if (parameter->kind == GuiInstanceParameter::Property)
+				{
+					auto attReadonly = MakePtr<XmlAttribute>();
+					attReadonly->name.value = L"Readonly";
+					attReadonly->value.value = parameter->readonly ? L"true" : L"false";
+					xmlParameter->attributes.Add(attReadonly);
+				}
+				if (parameter->kind == GuiInstanceParameter::Property)
+				{
+					auto attBindable = MakePtr<XmlAttribute>();
+					attBindable->name.value = L"Bindable";
+					attBindable->value.value = parameter->bindable ? L"true" : L"false";
+					xmlParameter->attributes.Add(attBindable);
+				}
 			}
 
 			if (!serializePrecompiledResource && stylePaths.Count() > 0)
@@ -934,13 +994,19 @@ GuiInstanceContext
 				reader << count;
 				for (vint i = 0; i < count; i++)
 				{
+					vint kind = -1;
 					vint nameIndex = -1;
-					vint classNameIndex = -1;
-					reader << nameIndex << classNameIndex;
+					WString typeName;
+					bool readonly = false;
+					bool bindable = false;
+					reader << kind << nameIndex << typeName << readonly << bindable;
 
 					auto parameter = MakePtr<GuiInstanceParameter>();
+					parameter->kind = (GuiInstanceParameter::Kind)kind;
 					parameter->name = sortedKeys[nameIndex];
-					parameter->className = sortedKeys[classNameIndex];
+					parameter->typeName = typeName;
+					parameter->readonly = readonly;
+					parameter->bindable = bindable;
 					context->parameters.Add(parameter);
 				}
 			}
@@ -1017,10 +1083,13 @@ GuiInstanceContext
 				writer << count;
 				FOREACH(Ptr<GuiInstanceParameter>, parameter, parameters)
 				{
+					vint kind = (vint)parameter->kind;
 					vint nameIndex = sortedKeys.IndexOf(parameter->name);
-					vint classNameIndex = sortedKeys.IndexOf(parameter->className);
-					CHECK_ERROR(nameIndex != -1 && classNameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
-					writer << nameIndex << classNameIndex;
+					WString typeName = parameter->typeName;
+					bool readonly = parameter->readonly;
+					bool bindable = parameter->bindable;
+					CHECK_ERROR(nameIndex != -1, L"GuiInstanceContext::SavePrecompiledBinary(stream::IStream&)#Internal Error.");
+					writer << kind << nameIndex << typeName << readonly << bindable;
 				}
 			}
 			{
@@ -1058,7 +1127,6 @@ GuiInstanceContext
 			for (vint i = 0; i < parameters.Count(); i++)
 			{
 				keys.Add(parameters[i]->name);
-				keys.Add(parameters[i]->className);
 			}
 
 			for (vint i = 0; i < precompiledCaches.Count(); i++)
