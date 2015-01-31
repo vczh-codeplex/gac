@@ -15,5 +15,6 @@ DO NOT MODIFY
 #include "GsMainWindow.h"
 #include "GsNewFileWindow.h"
 #include "GsNewProjectWindow.h"
+#include "GsRenameFileWindow.h"
 
 #endif

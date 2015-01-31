@@ -70,6 +70,9 @@
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
+    <Method Name="RenameFolder" Type="bool">
+      <Argument Name="newName" Type="string"/>
+    </Method>
   </Interface>
 
   <Interface ref.Class="vm::IProjectModel" Parent="vm::ISolutionItemModel">

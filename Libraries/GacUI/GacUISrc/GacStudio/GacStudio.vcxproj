@@ -185,6 +185,7 @@
     <ClCompile Include="UI\GsMainWindow.cpp" />
     <ClCompile Include="UI\GsNewFileWindow.cpp" />
     <ClCompile Include="UI\GsNewProjectWindow.cpp" />
+    <ClCompile Include="UI\GsRenameFileWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="UI\GsMainWindow.h" />
     <ClInclude Include="UI\GsNewFileWindow.h" />
     <ClInclude Include="UI\GsNewProjectWindow.h" />
+    <ClInclude Include="UI\GsRenameFileWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\About.xml" />
@@ -214,6 +216,7 @@
     <Xml Include="UI\UserInterfaces\MainWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewFileWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewProjectWindow.xml" />
+    <Xml Include="UI\UserInterfaces\RenameFileWindow.xml" />
     <Xml Include="UI\ViewModels\SolutionModel.xml" />
   </ItemGroup>
   <ItemGroup>

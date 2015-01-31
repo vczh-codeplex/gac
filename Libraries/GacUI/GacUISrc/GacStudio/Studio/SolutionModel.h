@@ -91,6 +91,8 @@ namespace vm
 	public:
 		FolderItem(ISolutionItemModel* _parent, WString _filePath);
 		~FolderItem();
+
+		bool											RenameFolder(WString newName)override;
 		
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;

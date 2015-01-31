@@ -146,6 +146,8 @@ namespace vm
 	class IFolderModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFolderModel>
 	{
 	public:
+
+		virtual bool RenameFolder(WString newName) = 0;
 	};
 }
 
@@ -471,6 +473,60 @@ namespace ui
 	class NewProjectWindow;
 }
 
+namespace ui
+{
+	template<typename TImpl>
+	class RenameFileWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
+	{
+	private:
+		Ptr<vm::ISolutionItemModel> SolutionItem_;
+	protected:
+		vl::presentation::controls::GuiButton* buttonCancel;
+		vl::presentation::controls::GuiButton* buttonRename;
+		vl::presentation::controls::GuiWindow* self;
+		vl::presentation::controls::GuiSinglelineTextBox* textName;
+		vl::presentation::controls::GuiSinglelineTextBox* textNew;
+		vl::presentation::controls::GuiSinglelineTextBox* textOriginal;
+
+		void InitializeComponents(Ptr<vm::ISolutionItemModel> SolutionItem)
+		{
+			SolutionItem_ = SolutionItem;
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(buttonCancel);
+				GUI_INSTANCE_REFERENCE(buttonRename);
+				GUI_INSTANCE_REFERENCE(self);
+				GUI_INSTANCE_REFERENCE(textName);
+				GUI_INSTANCE_REFERENCE(textNew);
+				GUI_INSTANCE_REFERENCE(textOriginal);
+			}
+			else
+			{
+				SolutionItem_ = 0;
+			}
+		}
+	public:
+		RenameFileWindow_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"ui::RenameFileWindow")
+			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+			,buttonCancel(0)
+			,buttonRename(0)
+			,self(0)
+			,textName(0)
+			,textNew(0)
+			,textOriginal(0)
+		{
+		}
+
+		Ptr<vm::ISolutionItemModel> GetSolutionItem()
+		{
+			return SolutionItem_;
+		}
+	};
+
+	class RenameFileWindow;
+}
+
 namespace vl
 {
 	namespace reflection
@@ -492,6 +548,7 @@ namespace vl
 			DECL_TYPE_INFO(ui::MainWindow)
 			DECL_TYPE_INFO(ui::NewFileWindow)
 			DECL_TYPE_INFO(ui::NewProjectWindow)
+			DECL_TYPE_INFO(ui::RenameFileWindow)
 		}
 	}
 }
@@ -732,6 +789,47 @@ namespace ui
 	NewProjectWindow::NewProjectWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
 		InitializeComponents(ViewModel);
+	}
+}
+
+
+GsRenameFileWindow.h :
+namespace ui
+{
+	class RenameFileWindow : public ui::RenameFileWindow_<ui::RenameFileWindow>
+	{
+		friend class ui::RenameFileWindow_<ui::RenameFileWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::RenameFileWindow>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem);
+	};
+}
+
+
+GsRenameFileWindow.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void RenameFileWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void RenameFileWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem)
+	{
+		InitializeComponents(SolutionItem);
 	}
 }
 
