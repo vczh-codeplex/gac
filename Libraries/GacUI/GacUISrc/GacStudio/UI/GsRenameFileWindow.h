@@ -24,7 +24,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem);
+		RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action);
 	};
 }
 

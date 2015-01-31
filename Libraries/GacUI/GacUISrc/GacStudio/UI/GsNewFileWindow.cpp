@@ -61,8 +61,8 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel)
+	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
 	{
-		InitializeComponents(ViewModel);
+		InitializeComponents(ViewModel, Action);
 	}
 }

@@ -17,13 +17,17 @@ namespace vl
 		namespace description
 		{
 			#define _ ,
+			IMPL_TYPE_INFO(vm::IAddFileItemAction)
 			IMPL_TYPE_INFO(vm::IEditorFactoryModel)
 			IMPL_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_TYPE_INFO(vm::IFileModel)
 			IMPL_TYPE_INFO(vm::IFolderModel)
 			IMPL_TYPE_INFO(vm::IMacroEnvironment)
+			IMPL_TYPE_INFO(vm::IOpenInEditorItemAction)
 			IMPL_TYPE_INFO(vm::IProjectFactoryModel)
 			IMPL_TYPE_INFO(vm::IProjectModel)
+			IMPL_TYPE_INFO(vm::IRemoveItemAction)
+			IMPL_TYPE_INFO(vm::IRenameItemAction)
 			IMPL_TYPE_INFO(vm::ISolutionItemModel)
 			IMPL_TYPE_INFO(vm::ISolutionModel)
 			IMPL_TYPE_INFO(vm::IStudioModel)
@@ -33,6 +37,11 @@ namespace vl
 			IMPL_TYPE_INFO(ui::NewFileWindow)
 			IMPL_TYPE_INFO(ui::NewProjectWindow)
 			IMPL_TYPE_INFO(ui::RenameFileWindow)
+
+			BEGIN_CLASS_MEMBER(vm::IAddFileItemAction)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(AddFile, { L"file" });
+			END_CLASS_MEMBER(vm::IAddFileItemAction)
 
 			BEGIN_CLASS_MEMBER(vm::IEditorFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -58,12 +67,10 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewFileAndSave, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(RenameFile, { L"newName" });
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
-				CLASS_MEMBER_METHOD(RenameFolder, { L"newName" });
 			END_CLASS_MEMBER(vm::IFolderModel)
 
 			BEGIN_CLASS_MEMBER(vm::IMacroEnvironment)
@@ -72,6 +79,10 @@ namespace vl
 				CLASS_MEMBER_METHOD(HasMacro, { L"name" _ L"inherit" });
 				CLASS_MEMBER_METHOD(GetMacroValue, { L"name" _ L"inherit" });
 			END_CLASS_MEMBER(vm::IMacroEnvironment)
+
+			BEGIN_CLASS_MEMBER(vm::IOpenInEditorItemAction)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+			END_CLASS_MEMBER(vm::IOpenInEditorItemAction)
 
 			BEGIN_CLASS_MEMBER(vm::IProjectFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -89,10 +100,19 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
 				CLASS_MEMBER_METHOD(NewProjectAndSave, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(RenameProject, { L"newName" });
-				CLASS_MEMBER_METHOD(AddFile, { L"file" });
-				CLASS_MEMBER_METHOD(RemoveFile, { L"file" });
 			END_CLASS_MEMBER(vm::IProjectModel)
+
+			BEGIN_CLASS_MEMBER(vm::IRemoveItemAction)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(Remove, NO_PARAMETER);
+			END_CLASS_MEMBER(vm::IRemoveItemAction)
+
+			BEGIN_CLASS_MEMBER(vm::IRenameItemAction)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(GetRenameablePart, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(PreviewRename, { L"newName" });
+				CLASS_MEMBER_METHOD(Rename, { L"newName" });
+			END_CLASS_MEMBER(vm::IRenameItemAction)
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -102,13 +122,10 @@ namespace vl
 				CLASS_MEMBER_EVENT(NameChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Name, NameChanged)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Children)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(IsFileItem)
 				CLASS_MEMBER_EVENT(FilePathChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(FilePath, FilePathChanged)
 				CLASS_MEMBER_EVENT(FileDirectoryChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(FileDirectory, FileDirectoryChanged)
-				CLASS_MEMBER_EVENT(IsSavedChanged)
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(IsSaved, IsSavedChanged)
 				CLASS_MEMBER_EVENT(ErrorCountChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(ErrorCount, ErrorCountChanged)
 				CLASS_MEMBER_METHOD(GetErrorText, { L"index" });
@@ -194,12 +211,13 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(ui::NewFileWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(ui::NewFileWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
+				CLASS_MEMBER_CONSTRUCTOR(ui::NewFileWindow*(Ptr<vm::IStudioModel>, Ptr<vm::IAddFileItemAction>), { L"ViewModel" _ L"Action" })
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
 			END_CLASS_MEMBER(ui::NewFileWindow)
 
 			BEGIN_CLASS_MEMBER(ui::NewProjectWindow)
@@ -215,12 +233,13 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(ui::RenameFileWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(ui::RenameFileWindow*(Ptr<vm::ISolutionItemModel>), { L"SolutionItem" })
+				CLASS_MEMBER_CONSTRUCTOR(ui::RenameFileWindow*(Ptr<vm::ISolutionItemModel>, Ptr<vm::IRenameItemAction>), { L"SolutionItem" _ L"Action" })
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SolutionItem)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
 			END_CLASS_MEMBER(ui::RenameFileWindow)
 
 			#undef _
@@ -230,13 +249,17 @@ namespace vl
 			public:
 				void Load(ITypeManager* manager)
 				{
+					ADD_TYPE_INFO(vm::IAddFileItemAction)
 					ADD_TYPE_INFO(vm::IEditorFactoryModel)
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IFileModel)
 					ADD_TYPE_INFO(vm::IFolderModel)
 					ADD_TYPE_INFO(vm::IMacroEnvironment)
+					ADD_TYPE_INFO(vm::IOpenInEditorItemAction)
 					ADD_TYPE_INFO(vm::IProjectFactoryModel)
 					ADD_TYPE_INFO(vm::IProjectModel)
+					ADD_TYPE_INFO(vm::IRemoveItemAction)
+					ADD_TYPE_INFO(vm::IRenameItemAction)
 					ADD_TYPE_INFO(vm::ISolutionItemModel)
 					ADD_TYPE_INFO(vm::ISolutionModel)
 					ADD_TYPE_INFO(vm::IStudioModel)

@@ -5,10 +5,8 @@
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true" Observable="true"/>
     <Property Name="Name" Type="string" Readonly="true" Observable="true"/>
     <Property Name="Children" Type="description::IValueObservableList^" Readonly="true"/>
-    <Property Name="IsFileItem" Type="bool" Readonly="true"/>
     <Property Name="FilePath" Type="string" Readonly="true" Observable="true"/>
     <Property Name="FileDirectory" Type="string" Readonly="true" Observable="true"/>
-    <Property Name="IsSaved" Type="bool" Readonly="true" Observable="true"/>
     
     <Property Name="ErrorCount" Type="int" Readonly="true" Observable="true"/>
     <Method Name="GetErrorText" Type="string">
@@ -64,15 +62,9 @@
     <Method Name="OpenFile" Type="bool"/>
     <Method Name="SaveFile" Type="bool"/>
     <Method Name="NewFileAndSave" Type="bool"/>
-    <Method Name="RenameFile" Type="bool">
-      <Argument Name="newName" Type="string"/>
-    </Method>
   </Interface>
 
   <Interface ref.Class="vm::IFolderModel" Parent="vm::ISolutionItemModel">
-    <Method Name="RenameFolder" Type="bool">
-      <Argument Name="newName" Type="string"/>
-    </Method>
   </Interface>
 
   <Interface ref.Class="vm::IProjectModel" Parent="vm::ISolutionItemModel">
@@ -82,15 +74,6 @@
       <Argument Name="saveContainingFiles" Type="bool"/>
     </Method>
     <Method Name="NewProjectAndSave" Type="bool"/>
-    <Method Name="RenameProject" Type="bool">
-      <Argument Name="newName" Type="string"/>
-    </Method>
-    <Method Name="AddFile" Type="bool">
-      <Argument Name="file" Type="vm::IFileModel^"/>
-    </Method>
-    <Method Name="RemoveFile" Type="bool">
-      <Argument Name="file" Type="vm::IFileModel^"/>
-    </Method>
   </Interface>
 
   <Interface ref.Class="vm::ISolutionModel" Parent="vm::ISolutionItemModel">
@@ -105,6 +88,29 @@
     <Method Name="RemoveProject" Type="bool">
       <Argument Name="project" Type="vm::IProjectModel^"/>
     </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IAddFileItemAction">
+    <Method Name="AddFile" Type="bool">
+      <Argument Name="file" Type="vm::IFileModel^"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IOpenInEditorItemAction">
+  </Interface>
+
+  <Interface ref.Class="vm::IRenameItemAction">
+    <Method Name="GetRenameablePart" Type="string"/>
+    <Method Name="PreviewRename" Type="string">
+      <Argument Name="newName" Type="string"/>
+    </Method>
+    <Method Name="Rename" Type="bool">
+      <Argument Name="newName" Type="string"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IRemoveItemAction">
+    <Method Name="Remove" Type="bool"/>
   </Interface>
 
   <Interface ref.Class="vm::IStudioModel">

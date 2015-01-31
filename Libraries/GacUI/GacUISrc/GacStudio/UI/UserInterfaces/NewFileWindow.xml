@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Instance ref.Class="ui::NewFileWindow">
   <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
+  <ref.Parameter Name="Action" Class="vm::IAddFileItemAction"/>
   <Window Text="New File" ClientSize="x:640 y:480">
     <att.ViewModel-set>
       <att.SelectedFileFilter-bind>cast (vm::IProjectFactoryModel^) treeViewProjectTemplate.SelectedItem</att.SelectedFileFilter-bind>

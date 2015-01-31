@@ -30,7 +30,9 @@ namespace vm
 
 	class FolderItemBase;
 
-	class FileItem : public Object, public virtual IFileModel
+	class FileItem : public Object, public virtual IFileModel, public Description<FileItem>
+		, public virtual IRenameItemAction
+		, public virtual IRemoveItemAction
 	{
 		friend class FolderItemBase;
 	protected:
@@ -38,7 +40,6 @@ namespace vm
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 		Ptr<IFileFactoryModel>							fileFactory;
 		WString											filePath;
-		bool											isSaved;
 		collections::List<WString>						errors;
 		bool											unsupported;
 		ISolutionItemModel*								parent;
@@ -46,22 +47,26 @@ namespace vm
 	public:
 		FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported = false);
 		~FileItem();
-		
+
+		// --------------------------- action
+		WString											GetRenameablePart()override;
+		WString											PreviewRename(WString newName)override;
+		bool											Rename(WString newName)override;
+		bool											Remove()override;
+
+		// --------------------------- feature
 		Ptr<IFileFactoryModel>							GetFileFactory()override;
 		bool											OpenFile()override;
 		bool											SaveFile()override;
 		bool											NewFileAndSave()override;
-		bool											RenameFile(WString newName)override;
-		
+
+		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
-
-		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		WString											GetFileDirectory()override;
-		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
 	};
@@ -81,7 +86,10 @@ namespace vm
 		~FolderItemBase();
 	};
 
-	class FolderItem : public FolderItemBase, public virtual IFolderModel
+	class FolderItem : public FolderItemBase, public virtual IFolderModel, public Description<FolderItem>
+		, public virtual IAddFileItemAction
+		, public virtual IRenameItemAction
+		, public virtual IRemoveItemAction
 	{
 	protected:
 		ISolutionItemModel*								parent;
@@ -91,30 +99,37 @@ namespace vm
 	public:
 		FolderItem(ISolutionItemModel* _parent, WString _filePath);
 		~FolderItem();
-
-		bool											RenameFolder(WString newName)override;
 		
+		// --------------------------- action
+		bool											AddFile(Ptr<IFileModel> file)override;
+		WString											GetRenameablePart()override;
+		WString											PreviewRename(WString newName)override;
+		bool											Rename(WString newName)override;
+		bool											Remove()override;
+		
+		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
-
-		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		WString											GetFileDirectory()override;
-		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
 	};
 
-	class ProjectItem : public FolderItemBase, public virtual IProjectModel
+	class ProjectItem : public FolderItemBase, public virtual IProjectModel, public Description<ProjectItem>
+		, public virtual IAddFileItemAction
+		, public virtual IRenameItemAction
+		, public virtual IRemoveItemAction
 	{
+		friend class FileItem;
+		friend class FolderItem;
 	protected:
 		IStudioModel*									studioModel;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
 		List<Ptr<IFileModel>>							fileItems;
-		bool											isSaved;
 		collections::List<WString>						errors;
 		bool											unsupported;
 
@@ -125,59 +140,74 @@ namespace vm
 		ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
 		
+		// --------------------------- action
+		bool											AddFile(Ptr<IFileModel> file)override;
+		WString											GetRenameablePart()override;
+		WString											PreviewRename(WString newName)override;
+		bool											Rename(WString newName)override;
+		bool											Remove()override;
+		
+		// --------------------------- feature
 		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
 		bool											OpenProject()override;
 		bool											SaveProject(bool saveContainingFiles)override;
 		bool											NewProjectAndSave()override;
-		bool											RenameProject(WString newName)override;
-		bool											AddFile(Ptr<IFileModel> file)override;
-		bool											RemoveFile(Ptr<IFileModel> file)override;
 		
+		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
-
-		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		WString											GetFileDirectory()override;
-		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
 	};
 
-	class SolutionItem : public Object, public virtual ISolutionModel
+	class SolutionItem : public Object, public virtual ISolutionModel, public Description<SolutionItem>
 	{
 	protected:
 		IStudioModel*									studioModel;
 		list::ObservableList<Ptr<IProjectModel>>		projects;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
-		bool											isSaved;
 		collections::List<WString>						errors;
 
 	public:
 		SolutionItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);
 		~SolutionItem();
 		
+		// --------------------------- action
 		bool											OpenSolution()override;
 		bool											SaveSolution(bool saveContainingProjects)override;
 		bool											NewSolution()override;
 		bool											AddProject(Ptr<IProjectModel> project)override;
 		bool											RemoveProject(Ptr<IProjectModel> project)override;
-
+		
+		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
 		Ptr<GuiImageData>								GetImage()override;
 		WString											GetName()override;
 		Ptr<description::IValueObservableList>			GetChildren()override;
-
-		bool											GetIsFileItem()override;
 		WString											GetFilePath()override;
 		WString											GetFileDirectory()override;
-		bool											GetIsSaved()override;
 		vint											GetErrorCount()override;
 		WString											GetErrorText(vint index)override;
 	};
+}
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			DECL_TYPE_INFO(vm::FileItem)
+			DECL_TYPE_INFO(vm::FolderItem)
+			DECL_TYPE_INFO(vm::ProjectItem)
+			DECL_TYPE_INFO(vm::SolutionItem)
+		}
+	}
 }
 
 #endif
