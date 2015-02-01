@@ -38,7 +38,7 @@ void GuiMain()
 	}
 	FOREACH(WString, error, errors)
 	{
-		PrintInformationMessage(error);
+		PrintErrorMessage(error);
 	}
 	GetInstanceLoaderManager()->SetResource(L"GACGEN", resource);
 
