@@ -17,6 +17,10 @@ namespace vl
 		namespace description
 		{
 			#define _ ,
+			IMPL_TYPE_INFO(data::Node)
+			IMPL_TYPE_INFO(data::Point)
+			IMPL_TYPE_INFO(data::PointNode)
+			IMPL_TYPE_INFO(data::PointProvider)
 			IMPL_TYPE_INFO(demos::BottomScrollButtonTemplate)
 			IMPL_TYPE_INFO(demos::ButtonTemplate)
 			IMPL_TYPE_INFO(demos::CheckBoxTemplate)
@@ -63,6 +67,29 @@ namespace vl
 			IMPL_TYPE_INFO(demos::VScrollTemplate)
 			IMPL_TYPE_INFO(demos::VTrackerTemplate)
 			IMPL_TYPE_INFO(demos::WindowTemplate)
+
+			BEGIN_CLASS_MEMBER(data::Node)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<data::Node>(), NO_PARAMETER)
+				CLASS_MEMBER_FIELD(Next)
+			END_CLASS_MEMBER(data::Node)
+
+			BEGIN_STRUCT_MEMBER(data::Point)
+				STRUCT_MEMBER(X)
+				STRUCT_MEMBER(Y)
+			END_STRUCT_MEMBER(data::Point)
+
+			BEGIN_CLASS_MEMBER(data::PointNode)
+				CLASS_MEMBER_BASE(data::Node)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<data::PointNode>(), NO_PARAMETER)
+				CLASS_MEMBER_FIELD(Point)
+			END_CLASS_MEMBER(data::PointNode)
+
+			BEGIN_CLASS_MEMBER(data::PointProvider)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_EVENT(CountChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(Count, CountChanged)
+				CLASS_MEMBER_METHOD(GetPoint, { L"index" });
+			END_CLASS_MEMBER(data::PointProvider)
 
 			BEGIN_CLASS_MEMBER(demos::BottomScrollButtonTemplate)
 				CLASS_MEMBER_BASE(vl::presentation::templates::GuiButtonTemplate)
@@ -164,7 +191,12 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<data::PointProvider>), { L"ViewModel" })
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(PointCount)
+				CLASS_MEMBER_PROPERTY_EVENT_FAST(PointData)
+				CLASS_MEMBER_FIELD(pointCountInternal)
 			END_CLASS_MEMBER(demos::MainWindow)
 
 			BEGIN_CLASS_MEMBER(demos::MenuBarButtonTemplate)
@@ -317,6 +349,10 @@ namespace vl
 			public:
 				void Load(ITypeManager* manager)
 				{
+					ADD_TYPE_INFO(data::Node)
+					ADD_TYPE_INFO(data::Point)
+					ADD_TYPE_INFO(data::PointNode)
+					ADD_TYPE_INFO(data::PointProvider)
 					ADD_TYPE_INFO(demos::BottomScrollButtonTemplate)
 					ADD_TYPE_INFO(demos::ButtonTemplate)
 					ADD_TYPE_INFO(demos::CheckBoxTemplate)

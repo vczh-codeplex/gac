@@ -13,6 +13,63 @@ DO NOT MODIFY
 
 #include "..\..\..\..\Libraries\GacUI\Public\Source\GacUIReflection.h"
 
+namespace data
+{
+	struct Point;
+}
+namespace data
+{
+	class Node;
+}
+namespace data
+{
+	class PointNode;
+}
+namespace data
+{
+	class PointProvider;
+}
+
+namespace data
+{
+	struct Point
+	{
+		vint X;
+		vint Y;
+	};
+}
+
+namespace data
+{
+	class Node : public vl::Object, public vl::reflection::Description<Node>
+	{
+	public:
+		Ptr<data::Node> Next;
+	};
+}
+
+namespace data
+{
+	class PointNode : public data::Node, public vl::reflection::Description<PointNode>
+	{
+	public:
+		data::Point Point;
+	};
+}
+
+namespace data
+{
+	class PointProvider : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<PointProvider>
+	{
+	public:
+
+		virtual vint GetCount() = 0;
+		vl::Event<void()> CountChanged;
+
+		virtual data::Point GetPoint(vint index) = 0;
+	};
+}
+
 namespace demos
 {
 	template<typename TImpl>
@@ -592,6 +649,10 @@ namespace demos
 	class MainWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
 	{
 	private:
+		Ptr<data::PointProvider> ViewModel_;
+		vint PointCount_;
+		data::Point PointData_;
+		WString pointCountInternal;
 	protected:
 		vl::presentation::controls::GuiButton* buttonAddTab;
 		vl::presentation::controls::GuiButton* buttonEnable;
@@ -615,6 +676,7 @@ namespace demos
 		vl::presentation::controls::GuiToolstripCommand* commandFileSaveAs;
 		vl::presentation::controls::GuiToolstripMenu* menuDropDown;
 		vl::presentation::controls::GuiSelectableButton::MutexGroupController* radioGroup;
+		vl::presentation::controls::GuiWindow* self;
 		vl::presentation::controls::GuiTab* tabControls;
 		vl::presentation::controls::GuiTabPage* tabPageBasic;
 		vl::presentation::controls::GuiTabPage* tabPageList;
@@ -622,8 +684,9 @@ namespace demos
 		vl::presentation::controls::GuiTabPage* tabPageToolstrip;
 		vl::presentation::controls::GuiScroll* tracker;
 
-		void InitializeComponents()
+		void InitializeComponents(Ptr<data::PointProvider> ViewModel)
 		{
+			ViewModel_ = ViewModel;
 			if (InitializeFromResource())
 			{
 				GUI_INSTANCE_REFERENCE(buttonAddTab);
@@ -648,6 +711,7 @@ namespace demos
 				GUI_INSTANCE_REFERENCE(commandFileSaveAs);
 				GUI_INSTANCE_REFERENCE(menuDropDown);
 				GUI_INSTANCE_REFERENCE(radioGroup);
+				GUI_INSTANCE_REFERENCE(self);
 				GUI_INSTANCE_REFERENCE(tabControls);
 				GUI_INSTANCE_REFERENCE(tabPageBasic);
 				GUI_INSTANCE_REFERENCE(tabPageList);
@@ -657,6 +721,7 @@ namespace demos
 			}
 			else
 			{
+				ViewModel_ = 0;
 			}
 		}
 	public:
@@ -691,6 +756,7 @@ return style;
 			,commandFileSaveAs(0)
 			,menuDropDown(0)
 			,radioGroup(0)
+			,self(0)
 			,tabControls(0)
 			,tabPageBasic(0)
 			,tabPageList(0)
@@ -698,6 +764,30 @@ return style;
 			,tabPageToolstrip(0)
 			,tracker(0)
 		{
+		}
+
+		Ptr<data::PointProvider> GetViewModel()
+		{
+			return ViewModel_;
+		}
+
+		vl::Event<void()> PointCountChanged;
+
+		vint GetPointCount()
+		{
+			return PointCount_;
+		}
+
+		vl::Event<void()> PointDataChanged;
+
+		data::Point GetPointData()
+		{
+			return PointData_;
+		}
+
+		void SetPointData(data::Point value)
+		{
+			PointData_ = value;
 		}
 	};
 
@@ -1562,6 +1652,10 @@ namespace vl
 	{
 		namespace description
 		{
+			DECL_TYPE_INFO(data::Node)
+			DECL_TYPE_INFO(data::Point)
+			DECL_TYPE_INFO(data::PointNode)
+			DECL_TYPE_INFO(data::PointProvider)
 			DECL_TYPE_INFO(demos::BottomScrollButtonTemplate)
 			DECL_TYPE_INFO(demos::ButtonTemplate)
 			DECL_TYPE_INFO(demos::CheckBoxTemplate)
@@ -2213,7 +2307,7 @@ namespace demos
 		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		MainWindow();
+		MainWindow(Ptr<data::PointProvider> ViewModel);
 	};
 }
 
@@ -2225,9 +2319,9 @@ namespace demos
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	MainWindow::MainWindow()
+	MainWindow::MainWindow(Ptr<data::PointProvider> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
 

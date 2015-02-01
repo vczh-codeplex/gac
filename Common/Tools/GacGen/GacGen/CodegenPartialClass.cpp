@@ -113,7 +113,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		writer.WriteLine(prefix + L"class " + instance->typeName + L"_ : public " + GetCppTypeName(instance->baseType) + L", public vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">, public vl::reflection::Description<TImpl>");
 		writer.WriteLine(prefix + L"{");
 		writer.WriteLine(prefix + L"private:");
-		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		FOREACH(Ptr<GuiInstanceParameter>, parameter, instance->context->parameters)
 		{
 			writer.WriteString(prefix + L"\t");
 			writer.WriteString(L"Ptr<");
@@ -121,6 +121,22 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteString(L"> ");
 			writer.WriteString(parameter->name.ToString());
 			writer.WriteLine(L"_;");
+		}
+		FOREACH(Ptr<GuiInstanceProperty>, prop, instance->context->properties)
+		{
+			writer.WriteString(prefix + L"\t");
+			writer.WriteString(GetCppTypeNameFromWorkflowType(config, prop->typeName));
+			writer.WriteString(L" ");
+			writer.WriteString(prop->name.ToString());
+			writer.WriteLine(L"_;");
+		}
+		FOREACH(Ptr<GuiInstanceState>, state, instance->context->states)
+		{
+			writer.WriteString(prefix + L"\t");
+			writer.WriteString(GetCppTypeNameFromWorkflowType(config, state->typeName));
+			writer.WriteString(L" ");
+			writer.WriteString(state->name.ToString());
+			writer.WriteLine(L";");
 		}
 		writer.WriteLine(prefix + L"protected:");
 		FOREACH(WString, field, instance->fields.Keys())
@@ -213,7 +229,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		}
 		writer.WriteLine(prefix + L"\t{");
 		writer.WriteLine(prefix + L"\t}");
-		FOREACH_INDEXER(Ptr<GuiInstanceParameter>, parameter, index, instance->context->parameters)
+		FOREACH(Ptr<GuiInstanceParameter>, parameter, instance->context->parameters)
 		{
 			writer.WriteLine(L"");
 			writer.WriteString(prefix + L"\t");
@@ -225,6 +241,38 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteLine(prefix + L"\t{");
 			writer.WriteLine(prefix + L"\t\treturn " + parameter->name.ToString() + L"_;");
 			writer.WriteLine(prefix + L"\t}");
+		}
+		FOREACH(Ptr<GuiInstanceProperty>, prop, instance->context->properties)
+		{
+			{
+				writer.WriteLine(L"");
+				writer.WriteString(prefix + L"\tvl::Event<void()> ");
+				writer.WriteString(prop->name.ToString());
+				writer.WriteLine(L"Changed;");
+			}
+			{
+				writer.WriteLine(L"");
+				writer.WriteString(prefix + L"\t");
+				writer.WriteString(GetCppTypeNameFromWorkflowType(config, prop->typeName));
+				writer.WriteString(L" Get");
+				writer.WriteString(prop->name.ToString());
+				writer.WriteLine(L"()");
+				writer.WriteLine(prefix + L"\t{");
+				writer.WriteLine(prefix + L"\t\treturn " + prop->name.ToString() + L"_;");
+				writer.WriteLine(prefix + L"\t}");
+			}
+			if (!prop->readonly)
+			{
+				writer.WriteLine(L"");
+				writer.WriteString(prefix + L"\tvoid Set");
+				writer.WriteString(prop->name.ToString());
+				writer.WriteString(L"(");
+				writer.WriteString(GetCppTypeNameFromWorkflowType(config, prop->typeName));
+				writer.WriteLine(L" value)");
+				writer.WriteLine(prefix + L"\t{");
+				writer.WriteLine(prefix + L"\t\t" + prop->name.ToString() + L"_ = value;");
+				writer.WriteLine(prefix + L"\t}");
+			}
 		}
 		writer.WriteLine(prefix + L"};");
 		writer.WriteLine(L"");
@@ -428,6 +476,27 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 			{
 				writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_READONLY_FAST(");
 				writer.WriteString(parameter->name.ToString());
+				writer.WriteLine(L")");
+			}
+			FOREACH(Ptr<GuiInstanceProperty>, prop, instance->context->properties)
+			{
+				if (prop->readonly)
+				{
+					writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(");
+					writer.WriteString(prop->name.ToString());
+					writer.WriteLine(L")");
+				}
+				else
+				{
+					writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_FAST(");
+					writer.WriteString(prop->name.ToString());
+					writer.WriteLine(L")");
+				}
+			}
+			FOREACH(Ptr<GuiInstanceState>, state, instance->context->states)
+			{
+				writer.WriteString(prefix + L"\tCLASS_MEMBER_FIELD(");
+				writer.WriteString(state->name.ToString());
 				writer.WriteLine(L")");
 			}
 		}
