@@ -16,6 +16,6 @@ namespace demos
 
 	MenuSplitterTemplate::MenuSplitterTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

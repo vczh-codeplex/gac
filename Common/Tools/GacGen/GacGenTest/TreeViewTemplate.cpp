@@ -16,6 +16,6 @@ namespace demos
 
 	TreeViewTemplate::TreeViewTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

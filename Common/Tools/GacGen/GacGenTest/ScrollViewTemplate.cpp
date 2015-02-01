@@ -16,6 +16,6 @@ namespace demos
 
 	ScrollViewTemplate::ScrollViewTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

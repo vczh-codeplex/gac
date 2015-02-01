@@ -16,6 +16,6 @@ namespace demos
 
 	TabHeaderTemplate::TabHeaderTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

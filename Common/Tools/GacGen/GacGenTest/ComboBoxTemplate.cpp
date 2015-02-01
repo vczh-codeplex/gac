@@ -16,6 +16,6 @@ namespace demos
 
 	ComboBoxTemplate::ComboBoxTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

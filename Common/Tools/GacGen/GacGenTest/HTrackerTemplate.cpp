@@ -58,6 +58,6 @@ namespace demos
 
 	HTrackerTemplate::HTrackerTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

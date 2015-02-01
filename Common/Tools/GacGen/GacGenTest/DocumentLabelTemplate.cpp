@@ -16,6 +16,6 @@ namespace demos
 
 	DocumentLabelTemplate::DocumentLabelTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

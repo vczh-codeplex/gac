@@ -16,6 +16,6 @@ namespace demos
 
 	ExpandingDecoratorTemplate::ExpandingDecoratorTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

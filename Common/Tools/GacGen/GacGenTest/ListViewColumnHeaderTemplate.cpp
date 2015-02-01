@@ -16,6 +16,6 @@ namespace demos
 
 	ListViewColumnHeaderTemplate::ListViewColumnHeaderTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

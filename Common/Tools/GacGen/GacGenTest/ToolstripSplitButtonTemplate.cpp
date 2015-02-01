@@ -16,6 +16,6 @@ namespace demos
 
 	ToolstripSplitButtonTemplate::ToolstripSplitButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

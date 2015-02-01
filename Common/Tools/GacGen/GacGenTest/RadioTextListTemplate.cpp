@@ -16,6 +16,6 @@ namespace demos
 
 	RadioTextListTemplate::RadioTextListTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

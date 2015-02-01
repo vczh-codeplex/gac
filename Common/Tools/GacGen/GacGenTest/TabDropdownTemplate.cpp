@@ -16,6 +16,6 @@ namespace demos
 
 	TabDropdownTemplate::TabDropdownTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

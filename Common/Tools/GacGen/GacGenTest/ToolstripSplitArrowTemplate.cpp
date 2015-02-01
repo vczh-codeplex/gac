@@ -16,6 +16,6 @@ namespace demos
 
 	ToolstripSplitArrowTemplate::ToolstripSplitArrowTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

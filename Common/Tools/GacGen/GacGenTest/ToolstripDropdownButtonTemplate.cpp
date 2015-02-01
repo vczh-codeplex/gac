@@ -16,6 +16,6 @@ namespace demos
 
 	ToolstripDropdownButtonTemplate::ToolstripDropdownButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

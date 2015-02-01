@@ -16,6 +16,6 @@ namespace demos
 
 	MenuBarButtonTemplate::MenuBarButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

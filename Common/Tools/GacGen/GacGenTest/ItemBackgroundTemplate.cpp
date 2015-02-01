@@ -16,6 +16,6 @@ namespace demos
 
 	ItemBackgroundTemplate::ItemBackgroundTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

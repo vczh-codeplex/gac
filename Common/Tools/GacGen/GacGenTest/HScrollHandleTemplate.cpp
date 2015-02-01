@@ -16,6 +16,6 @@ namespace demos
 
 	HScrollHandleTemplate::HScrollHandleTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

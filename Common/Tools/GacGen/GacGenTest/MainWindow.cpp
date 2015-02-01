@@ -14,8 +14,8 @@ namespace demos
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	MainWindow::MainWindow()
+	MainWindow::MainWindow(Ptr<data::PointProvider> ViewModel)
 	{
-		InitializeComponents();
+		InitializeComponents(ViewModel);
 	}
 }
