@@ -272,6 +272,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 				writer.WriteLine(L" value)");
 				writer.WriteLine(prefix + L"\t{");
 				writer.WriteLine(prefix + L"\t\t" + prop->name.ToString() + L"_ = value;");
+				writer.WriteLine(prefix + L"\t\t" + prop->name.ToString() + L"Changed();");
 				writer.WriteLine(prefix + L"\t}");
 			}
 		}
