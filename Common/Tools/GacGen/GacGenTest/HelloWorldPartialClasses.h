@@ -807,6 +807,7 @@ return style;
 		void SetPointData(data::Point value)
 		{
 			PointData_ = value;
+			PointDataChanged();
 		}
 	};
 
