@@ -652,8 +652,8 @@ namespace demos
 		Ptr<data::PointProvider> ViewModel_;
 		vint PointCount_;
 		data::Point PointData_;
-		WString pointCountInternal;
 	protected:
+		WString pointCountInternal;
 		vl::presentation::controls::GuiButton* buttonAddTab;
 		vl::presentation::controls::GuiButton* buttonEnable;
 		vl::presentation::controls::GuiComboBoxListControl* comboBoxSeasons;

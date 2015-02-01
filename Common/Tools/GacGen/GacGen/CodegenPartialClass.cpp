@@ -130,6 +130,7 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteString(prop->name.ToString());
 			writer.WriteLine(L"_;");
 		}
+		writer.WriteLine(prefix + L"protected:");
 		FOREACH(Ptr<GuiInstanceState>, state, instance->context->states)
 		{
 			writer.WriteString(prefix + L"\t");
@@ -138,7 +139,6 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			writer.WriteString(state->name.ToString());
 			writer.WriteLine(L";");
 		}
-		writer.WriteLine(prefix + L"protected:");
 		FOREACH(WString, field, instance->fields.Keys())
 		{
 			writer.WriteLine(prefix + L"\t" + GetCppTypeName(config, instances, instance, instance->fields[field]) + L"* " + field + L";");
@@ -484,13 +484,17 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 				{
 					writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(");
 					writer.WriteString(prop->name.ToString());
-					writer.WriteLine(L")");
+					writer.WriteString(L", ");
+					writer.WriteString(prop->name.ToString());
+					writer.WriteLine(L"Changed)");
 				}
 				else
 				{
 					writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_FAST(");
 					writer.WriteString(prop->name.ToString());
-					writer.WriteLine(L")");
+					writer.WriteString(L", ");
+					writer.WriteString(prop->name.ToString());
+					writer.WriteLine(L"Changed)");
 				}
 			}
 			FOREACH(Ptr<GuiInstanceState>, state, instance->context->states)
