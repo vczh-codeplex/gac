@@ -111,6 +111,10 @@ void											WriteControlClassCppFileEventHandlers(Ptr<CodegenConfig> config, 
 Codegen::ControlClassContent
 ***********************************************************************/
 
+void											WriteControlClassHeaderCtorArgs(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer);
+void											WriteControlClassHeaderCtor(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer);
+void											WriteControlClassCppCtor(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer);
+void											WriteControlClassCppInit(Ptr<CodegenConfig> config, Ptr<Instance> instance, const WString& prefix, StreamWriter& writer);
 void											WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer);
 void											WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer);
 

@@ -16,6 +16,6 @@ namespace demos
 
 	RightScrollButtonTemplate::RightScrollButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

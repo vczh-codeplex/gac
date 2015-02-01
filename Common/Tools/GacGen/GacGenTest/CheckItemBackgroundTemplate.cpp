@@ -16,6 +16,6 @@ namespace demos
 
 	CheckItemBackgroundTemplate::CheckItemBackgroundTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

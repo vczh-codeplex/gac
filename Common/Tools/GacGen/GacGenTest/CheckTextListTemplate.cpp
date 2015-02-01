@@ -16,6 +16,6 @@ namespace demos
 
 	CheckTextListTemplate::CheckTextListTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

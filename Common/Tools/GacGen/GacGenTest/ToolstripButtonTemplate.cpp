@@ -16,6 +16,6 @@ namespace demos
 
 	ToolstripButtonTemplate::ToolstripButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

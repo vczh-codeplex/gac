@@ -1,4 +1,4 @@
-#include"GacGen.h"
+#include "GacGen.h"
 
 /***********************************************************************
 Codegen::ControlClass
@@ -31,6 +31,8 @@ bool TryReadFile(Ptr<CodegenConfig> config, const WString& fileName, List<WStrin
 
 void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
+	Regex regexCtor(L"^(<prefix>/s*)" + instance->typeName + L"/([^)]*/);");
+
 	WString fileName = config->GetControlClassHeaderFileName(instance);
 	List<WString> lines;
 	if (TryReadFile(config, fileName, lines))
@@ -58,7 +60,15 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 		WriteControlClassHeaderFileEventHandlers(config, instance, prefix, writer);
 		for (vint i = end + 1; i < lines.Count(); i++)
 		{
-			writer.WriteLine(lines[i]);
+			if (auto match = regexCtor.MatchHead(lines[i]))
+			{
+				auto prefix = match->Groups()[L"prefix"][0].Value();
+				WriteControlClassHeaderCtor(config, instance, prefix, writer);
+			}
+			else
+			{
+				writer.WriteLine(lines[i]);
+			}
 		}
 	}
 	else
@@ -77,6 +87,9 @@ void WriteControlClassHeaderFile(Ptr<CodegenConfig> config, Ptr<Instance> instan
 
 void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 {
+	Regex regexCtor(L"^(<prefix>/s*)" + instance->typeName + L"::" + instance->typeName + L"/([^)]*/)");
+	Regex regexInit(L"^(<prefix>/s*)InitializeComponents/([^)]*/);");
+
 	WString fileName = config->GetControlClassCppFileName(instance);
 	List<WString> lines;
 	if (TryReadFile(config, fileName, lines))
@@ -176,7 +189,20 @@ void WriteControlClassCppFile(Ptr<CodegenConfig> config, Ptr<Instance> instance)
 		WriteControlClassCppFileEventHandlers(config, instance, prefix, existingEventHandlers, additionalLines, writer);
 		for (vint i = end + 1; i < lines.Count(); i++)
 		{
-			writer.WriteLine(lines[i]);
+			if (auto match = regexCtor.MatchHead(lines[i]))
+			{
+				auto prefix = match->Groups()[L"prefix"][0].Value();
+				WriteControlClassCppCtor(config, instance, prefix, writer);
+			}
+			else if (auto match = regexInit.MatchHead(lines[i]))
+			{
+				auto prefix = match->Groups()[L"prefix"][0].Value();
+				WriteControlClassCppInit(config, instance, prefix, writer);
+			}
+			else
+			{
+				writer.WriteLine(lines[i]);
+			}
 		}
 	}
 	else

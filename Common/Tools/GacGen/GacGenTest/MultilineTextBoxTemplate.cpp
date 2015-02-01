@@ -16,6 +16,6 @@ namespace demos
 
 	MultilineTextBoxTemplate::MultilineTextBoxTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

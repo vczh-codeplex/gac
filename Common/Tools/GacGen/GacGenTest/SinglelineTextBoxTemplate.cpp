@@ -16,6 +16,6 @@ namespace demos
 
 	SinglelineTextBoxTemplate::SinglelineTextBoxTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

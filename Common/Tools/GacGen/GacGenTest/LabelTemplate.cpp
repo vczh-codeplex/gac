@@ -16,6 +16,6 @@ namespace demos
 
 	LabelTemplate::LabelTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

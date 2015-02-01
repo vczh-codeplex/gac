@@ -16,6 +16,6 @@ namespace demos
 
 	LeftScrollButtonTemplate::LeftScrollButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

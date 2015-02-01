@@ -16,6 +16,6 @@ namespace demos
 
 	WindowTemplate::WindowTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

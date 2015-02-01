@@ -16,6 +16,6 @@ namespace demos
 
 	TopScrollButtonTemplate::TopScrollButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

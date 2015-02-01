@@ -58,6 +58,6 @@ namespace demos
 
 	VScrollTemplate::VScrollTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

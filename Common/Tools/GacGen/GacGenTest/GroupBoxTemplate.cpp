@@ -16,6 +16,6 @@ namespace demos
 
 	GroupBoxTemplate::GroupBoxTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

@@ -16,6 +16,6 @@ namespace demos
 
 	ListViewTemplate::ListViewTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

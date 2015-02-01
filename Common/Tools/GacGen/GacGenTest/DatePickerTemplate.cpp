@@ -16,6 +16,6 @@ namespace demos
 
 	DatePickerTemplate::DatePickerTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

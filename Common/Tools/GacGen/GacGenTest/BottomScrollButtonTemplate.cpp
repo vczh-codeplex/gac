@@ -16,6 +16,6 @@ namespace demos
 
 	BottomScrollButtonTemplate::BottomScrollButtonTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

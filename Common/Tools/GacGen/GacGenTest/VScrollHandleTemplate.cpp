@@ -16,6 +16,6 @@ namespace demos
 
 	VScrollHandleTemplate::VScrollHandleTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

@@ -58,6 +58,6 @@ namespace demos
 
 	VTrackerTemplate::VTrackerTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

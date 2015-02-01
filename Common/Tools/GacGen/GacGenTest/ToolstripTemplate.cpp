@@ -16,6 +16,6 @@ namespace demos
 
 	ToolstripTemplate::ToolstripTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }

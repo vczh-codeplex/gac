@@ -16,6 +16,6 @@ namespace demos
 
 	TextListTemplate::TextListTemplate()
 	{
-		InitializeComponents();
+			InitializeComponents();
 	}
 }
