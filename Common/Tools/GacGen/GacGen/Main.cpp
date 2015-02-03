@@ -27,6 +27,48 @@ public:
 
 private:
 
+	class FieldInfo : public FieldInfoImpl
+	{
+	protected:
+
+		Value GetValueInternal(const Value& thisObject)override
+		{
+			throw TypeDescriptorException(L"Field \"" + GetName() + L"\" of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+		void SetValueInternal(Value& thisObject, const Value& newValue)override
+		{
+			throw TypeDescriptorException(L"Field \"" + GetName() + L"\" of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+	public:
+		FieldInfo(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<ITypeInfo> _returnInfo)
+			:FieldInfoImpl(_ownerTypeDescriptor, _name, _returnInfo)
+		{
+		}
+	};
+
+	class ConstructorInfo : public MethodInfoImpl
+	{
+	protected:
+		
+		Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+		{
+			throw TypeDescriptorException(L"Constructor of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+		Value CreateFunctionProxyInternal(const Value& thisObject)override
+		{
+			throw TypeDescriptorException(L"Constructor of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+	public:
+		ConstructorInfo(Ptr<ITypeInfo> _return)
+			:MethodInfoImpl(nullptr, _return, true)
+		{
+		}
+	};
+
 	class ClassTypeDescriptor : public TypeDescriptorImpl
 	{
 	protected:
@@ -35,7 +77,26 @@ private:
 
 		void LoadInternal()override
 		{
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, schema->properties)
+			{
+				if (!IsPropertyExists(prop->name, false))
+				{
+					if (auto type = GetTypeInfoFromWorkflowType(loader->config, prop->typeName))
+					{
+						AddProperty(new FieldInfo(this, prop->name, type));
+					}
+				}
+			}
+
+			auto descriptorType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+			descriptorType->SetTypeDescriptor(this);
+
+			auto pointerType = MakePtr<TypeInfoImpl>(ITypeInfo::SharedPtr);
+			pointerType->SetElementType(descriptorType);
+
+			AddConstructor(new ConstructorInfo(pointerType));
 		}
+
 	public:
 		ClassTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceDataSchema> _schema)
 			:TypeDescriptorImpl(_schema->typeName)
@@ -45,59 +106,62 @@ private:
 		}
 	};
 
-	class StructTypeSerializer : public Object, public virtual IValueSerializer
-	{
-	protected:
-		ITypeDescriptor*						ownerTypeDescriptor;
-	public:
-		StructTypeSerializer(ITypeDescriptor* _ownerTypeDescriptor)
-			:ownerTypeDescriptor(_ownerTypeDescriptor)
-		{
-		}
-
-		ITypeDescriptor* GetOwnerTypeDescriptor()override
-		{
-			return ownerTypeDescriptor;
-		}
-
-		bool Validate(const WString& text)override
-		{
-			return false;
-		}
-
-		bool Parse(const WString& input, Value& output)override
-		{
-			return false;
-		}
-
-		WString GetDefaultText()override
-		{
-			return L"";
-		}
-
-		bool HasCandidate()override
-		{
-			return false;
-		}
-
-		vint GetCandidateCount()override
-		{
-			return 0;
-		}
-
-		WString GetCandidate(vint index)override
-		{
-			return L"";
-		}
-
-		bool CanMergeCandidate()override
-		{
-			return false;
-		}
-	};
-
 	class StructTypeDescriptor : public TypeDescriptorImpl
 	{
+	private:
+
+		class Serializer : public Object, public virtual IValueSerializer
+		{
+		protected:
+			StructTypeDescriptor*				ownerTypeDescriptor;
+
+		public:
+			Serializer(StructTypeDescriptor* _ownerTypeDescriptor)
+				:ownerTypeDescriptor(_ownerTypeDescriptor)
+			{
+			}
+
+			ITypeDescriptor* GetOwnerTypeDescriptor()override
+			{
+				return ownerTypeDescriptor;
+			}
+
+			bool Validate(const WString& text)override
+			{
+				return false;
+			}
+
+			bool Parse(const WString& input, Value& output)override
+			{
+				return false;
+			}
+
+			WString GetDefaultText()override
+			{
+				return L"";
+			}
+
+			bool HasCandidate()override
+			{
+				return false;
+			}
+
+			vint GetCandidateCount()override
+			{
+				return 0;
+			}
+
+			WString GetCandidate(vint index)override
+			{
+				return L"";
+			}
+
+			bool CanMergeCandidate()override
+			{
+				return false;
+			}
+		};
+
 	protected:
 		ResourceMockTypeLoader*					loader;
 		Ptr<GuiInstanceDataSchema>				schema;
@@ -105,14 +169,25 @@ private:
 
 		void LoadInternal()override
 		{
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, schema->properties)
+			{
+				if (!IsPropertyExists(prop->name, false))
+				{
+					if (auto type = GetTypeInfoFromWorkflowType(loader->config, prop->typeName))
+					{
+						AddProperty(new FieldInfo(this, prop->name, type));
+					}
+				}
+			}
 		}
+
 	public:
 		StructTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceDataSchema> _schema)
 			:TypeDescriptorImpl(_schema->typeName)
 			, loader(_loader)
 			, schema(_schema)
 		{
-			serializer = new StructTypeSerializer(this);
+			serializer = new Serializer(this);
 		}
 
 		IValueSerializer* GetValueSerializer()override
@@ -130,6 +205,7 @@ private:
 		void LoadInternal()override
 		{
 		}
+
 	public:
 		InterfaceTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceInterfaceSchema> _schema)
 			:TypeDescriptorImpl(_schema->typeName)
@@ -148,6 +224,7 @@ private:
 		void LoadInternal()override
 		{
 		}
+
 	public:
 		InstanceTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceContext> _context)
 			:TypeDescriptorImpl(_context->className.Value())

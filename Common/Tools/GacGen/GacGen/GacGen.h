@@ -77,7 +77,9 @@ TypeTransformation
 WString											GetCppTypeName(ITypeDescriptor* typeDescriptor);
 WString											GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor);
 IGuiInstanceLoader::TypeInfo					GetCppTypeInfo(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor);
+Ptr<WfType>										ParseWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType);
 WString											GetCppTypeNameFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType);
+Ptr<ITypeInfo>									GetTypeInfoFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType);
 
 /***********************************************************************
 Search

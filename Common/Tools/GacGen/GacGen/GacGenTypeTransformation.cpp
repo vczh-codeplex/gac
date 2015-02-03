@@ -347,7 +347,7 @@ public:
 	}
 };
 
-WString GetCppTypeNameFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
+Ptr<WfType> ParseWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
 {
 	if (!config->workflowTable)
 	{
@@ -389,8 +389,8 @@ using presentation::templates::*;
 	auto type = WfParseType(workflowType, config->workflowTable);
 	if (!type)
 	{
-		PrintErrorMessage(L"Invalid workflow type: \"" + workflowType + L"\".");
-		return L"vint";
+		PrintErrorMessage(L"Failed to parse workflow type: \"" + workflowType + L"\".");
+		return nullptr;
 	}
 
 	auto module = config->workflowManager->modules[0];
@@ -404,9 +404,33 @@ using presentation::templates::*;
 			PrintErrorMessage(error->errorMessage);
 		}
 		config->workflowManager->errors.Clear();
-		return L"vint";
+		return nullptr;
 	}
 
+	return type;
+}
+
+WString GetCppTypeNameFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
+{
+	auto type = ParseWorkflowType(config, workflowType);
+	if (!type)
+	{
+		return L"vint";
+	}
 	auto cppType = GetCppTypeNameFromWorkflowTypeVisitor::Call(type.Obj());
 	return cppType == L"" ? L"vint" : cppType;
+}
+
+Ptr<ITypeInfo> GetTypeInfoFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
+{
+	auto type = ParseWorkflowType(config, workflowType);
+	if (!type)
+	{
+		return nullptr;
+	}
+	
+	auto module = config->workflowManager->modules[0];
+	auto scope = config->workflowManager->moduleScopes[module.Obj()];
+	auto typeInfo = CreateTypeInfoFromType(scope.Obj(), type);
+	return typeInfo;
 }
