@@ -194,7 +194,9 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<data::PointProvider>), { L"ViewModel" })
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_EVENT(PointCountChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(PointCount, PointCountChanged)
+				CLASS_MEMBER_EVENT(PointDataChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_FAST(PointData, PointDataChanged)
 				CLASS_MEMBER_FIELD(pointCountInternal)
 			END_CLASS_MEMBER(demos::MainWindow)
