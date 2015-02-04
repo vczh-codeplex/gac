@@ -33,17 +33,59 @@ private:
 
 		Value GetValueInternal(const Value& thisObject)override
 		{
-			throw TypeDescriptorException(L"Field \"" + GetName() + L"\" of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+			throw TypeDescriptorException(L"Field \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
 		}
 
 		void SetValueInternal(Value& thisObject, const Value& newValue)override
 		{
-			throw TypeDescriptorException(L"Field \"" + GetName() + L"\" of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+			throw TypeDescriptorException(L"Field \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
 		}
 
 	public:
 		FieldInfo(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name, Ptr<ITypeInfo> _returnInfo)
 			:FieldInfoImpl(_ownerTypeDescriptor, _name, _returnInfo)
+		{
+		}
+	};
+
+	class EventInfo : public EventInfoImpl
+	{
+	protected:
+		void AttachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
+		{
+			throw TypeDescriptorException(L"Event \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+		void DetachInternal(DescriptableObject* thisObject, IEventHandler* eventHandler)override
+		{
+			throw TypeDescriptorException(L"Event \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+		void InvokeInternal(DescriptableObject* thisObject, collections::Array<Value>& arguments)override
+		{
+			throw TypeDescriptorException(L"Event \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+		Ptr<ITypeInfo> GetHandlerTypeInternal()override
+		{
+			auto voidType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+			voidType->SetTypeDescriptor(description::GetTypeDescriptor<void>());
+
+			auto funcType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+			funcType->SetTypeDescriptor(description::GetTypeDescriptor<IValueFunctionProxy>());
+
+			auto genericType = MakePtr<TypeInfoImpl>(ITypeInfo::Generic);
+			genericType->SetElementType(funcType);
+			genericType->AddGenericArgument(voidType);
+
+			auto pointerType = MakePtr<TypeInfoImpl>(ITypeInfo::SharedPtr);
+			pointerType->SetElementType(genericType);
+
+			return pointerType;
+		}
+	public:
+		EventInfo(ITypeDescriptor* _ownerTypeDescriptor, const WString& _name)
+			:EventInfoImpl(_ownerTypeDescriptor, _name)
 		{
 		}
 	};
@@ -54,16 +96,37 @@ private:
 		
 		Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
 		{
-			throw TypeDescriptorException(L"Constructor of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+			throw TypeDescriptorException(L"Constructor of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
 		}
 
 		Value CreateFunctionProxyInternal(const Value& thisObject)override
 		{
-			throw TypeDescriptorException(L"Constructor of a mock type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+			throw TypeDescriptorException(L"Constructor of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
 		}
 
 	public:
 		ConstructorInfo(Ptr<ITypeInfo> _return)
+			:MethodInfoImpl(nullptr, _return, true)
+		{
+		}
+	};
+
+	class MethodInfo : public MethodInfoImpl
+	{
+	protected:
+		
+		Value InvokeInternal(const Value& thisObject, collections::Array<Value>& arguments)override
+		{
+			throw TypeDescriptorException(L"Method \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+		Value CreateFunctionProxyInternal(const Value& thisObject)override
+		{
+			throw TypeDescriptorException(L"Method \"" + GetName() + L"\" of mocking type \"" + GetOwnerTypeDescriptor()->GetTypeName() + L"\" is not accessible.");
+		}
+
+	public:
+		MethodInfo(Ptr<ITypeInfo> _return)
 			:MethodInfoImpl(nullptr, _return, true)
 		{
 		}
@@ -223,6 +286,71 @@ private:
 
 		void LoadInternal()override
 		{
+			{
+				auto descriptorType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+				descriptorType->SetTypeDescriptor(this);
+
+				auto pointerType = MakePtr<TypeInfoImpl>(ITypeInfo::RawPtr);
+				pointerType->SetElementType(descriptorType);
+
+				auto ctor = new ConstructorInfo(pointerType);
+				FOREACH(Ptr<GuiInstanceParameter>, parameter, context->parameters)
+				{
+					if (auto td = description::GetTypeDescriptor(parameter->className.ToString()))
+					{
+						auto descriptorType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+						descriptorType->SetTypeDescriptor(td);
+
+						auto pointerType = MakePtr<TypeInfoImpl>(ITypeInfo::SharedPtr);
+						pointerType->SetElementType(descriptorType);
+
+						auto parameterInfo = new ParameterInfoImpl(ctor, parameter->name.ToString(), pointerType);
+						ctor->AddParameter(parameterInfo);
+					}
+				}
+				AddConstructor(ctor);
+			}
+
+			auto voidType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+			voidType->SetTypeDescriptor(description::GetTypeDescriptor<void>());
+
+			FOREACH(Ptr<GuiInstanceProperty>, prop, context->properties)
+			{
+				if (!IsPropertyExists(prop->name.ToString(), false))
+				{
+					if (auto type = GetTypeInfoFromWorkflowType(loader->config, prop->typeName))
+					{
+						auto eventInfo = MakePtr<EventInfo>(this, prop->name.ToString() + L"Changed");
+						auto getter = MakePtr<MethodInfo>(type);
+						auto setter = prop->readonly ? nullptr : MakePtr<MethodInfo>(voidType);
+						if (setter)
+						{
+							auto parameterInfo = new ParameterInfoImpl(setter.Obj(), L"value", type);
+							setter->AddParameter(parameterInfo);
+						}
+						auto propInfo = MakePtr<PropertyInfoImpl>(this, prop->name.ToString(), getter.Obj(), setter.Obj(), eventInfo.Obj());
+
+						AddEvent(eventInfo);
+						AddMethod(L"Get" + prop->name.ToString(), getter);
+						if (setter)
+						{
+							AddMethod(L"Set" + prop->name.ToString(), setter);
+						}
+						AddProperty(propInfo);
+					}
+				}
+			}
+
+			FOREACH(Ptr<GuiInstanceState>, state, context->states)
+			{
+				if (!IsPropertyExists(state->name.ToString(), false))
+				{
+					if (auto type = GetTypeInfoFromWorkflowType(loader->config, state->typeName))
+					{
+						AddProperty(new FieldInfo(this, state->name.ToString(), type));
+					}
+				}
+			}
 		}
 
 	public:
