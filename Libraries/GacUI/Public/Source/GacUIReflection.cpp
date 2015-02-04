@@ -6156,9 +6156,26 @@ Workflow_GetSharedManager
 
 			void Visit(GuiConstructorRepr* repr)override
 			{
-				auto source = FindInstanceLoadingSource(context, repr);
-				bindingTargetTypeInfo.typeName = source.typeName;
-				bindingTargetTypeInfo.typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				bool found = false;
+				if (repr == context->instance.Obj() && context->className)
+				{
+					auto fullName = GlobalStringKey::Get(context->className.Value());
+					auto td = GetInstanceLoaderManager()->GetTypeDescriptorForType(fullName);
+					if (td)
+					{
+						found = true;
+						bindingTargetTypeInfo.typeName = fullName;
+						bindingTargetTypeInfo.typeDescriptor = td;
+					}
+				}
+
+				if (!found)
+				{
+					auto source = FindInstanceLoadingSource(context, repr);
+					bindingTargetTypeInfo.typeName = source.typeName;
+					bindingTargetTypeInfo.typeDescriptor = GetInstanceLoaderManager()->GetTypeDescriptorForType(source.typeName);
+				}
+
 				if (!bindingTargetTypeInfo.typeDescriptor)
 				{
 					errors.Add(
