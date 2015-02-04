@@ -267,6 +267,53 @@ private:
 
 		void LoadInternal()override
 		{
+			auto voidType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
+			voidType->SetTypeDescriptor(description::GetTypeDescriptor<void>());
+
+			FOREACH(Ptr<GuiInstancePropertySchame>, prop, schema->properties)
+			{
+				if (!IsPropertyExists(prop->name, false))
+				{
+					if (auto type = GetTypeInfoFromWorkflowType(loader->config, prop->typeName))
+					{
+						auto eventInfo = prop->observable ? MakePtr<EventInfo>(this, prop->name + L"Changed") : nullptr;
+						auto getter = MakePtr<MethodInfo>(type);
+						auto setter = prop->readonly ? nullptr : MakePtr<MethodInfo>(voidType);
+						if (setter)
+						{
+							auto parameterInfo = new ParameterInfoImpl(setter.Obj(), L"value", type);
+							setter->AddParameter(parameterInfo);
+						}
+						auto propInfo = MakePtr<PropertyInfoImpl>(this, prop->name, getter.Obj(), setter.Obj(), eventInfo.Obj());
+
+						AddEvent(eventInfo);
+						AddMethod(L"Get" + prop->name, getter);
+						if (setter)
+						{
+							AddMethod(L"Set" + prop->name, setter);
+						}
+						AddProperty(propInfo);
+					}
+				}
+			}
+
+			FOREACH(Ptr<GuiInstanceMethodSchema>, method, schema->methods)
+			{
+				auto returnType = GetTypeInfoFromWorkflowType(loader->config, method->returnType);
+				if (!returnType) returnType = voidType;
+
+				auto methodInfo = MakePtr<MethodInfo>(returnType);
+				FOREACH(Ptr<GuiInstancePropertySchame>, argument, method->arguments)
+				{
+					if (auto type = GetTypeInfoFromWorkflowType(loader->config, argument->typeName))
+					{
+						auto parameterInfo = new ParameterInfoImpl(methodInfo.Obj(), argument->name, type);
+						methodInfo->AddParameter(parameterInfo);
+					}
+				}
+
+				AddMethod(method->name, methodInfo);
+			}
 		}
 
 	public:
