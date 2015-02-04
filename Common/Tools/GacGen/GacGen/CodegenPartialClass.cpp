@@ -14,11 +14,13 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 	writer.WriteLine(L"");
 	writer.WriteLine(L"#include \"" + config->include + L"\"");
 	writer.WriteLine(L"");
+
+	List<WString> currentNamespaces;
 	
 	FOREACH(WString, typeSchemaName, typeSchemaOrder)
 	{
 		auto instance = typeSchemas[typeSchemaName];
-		WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+		WString prefix = WriteNamespace(currentNamespaces, instance->namespaces, writer);
 		if (auto data = instance->schema.Cast<GuiInstanceDataSchema>())
 		{
 			if (data->referenceType)
@@ -34,14 +36,18 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		{
 			writer.WriteLine(prefix + L"class " + instance->typeName + L";");
 		}
-		WriteNamespaceEnd(instance->namespaces, writer);
+	}
+	FOREACH(Ptr<Instance>, instance, instances.Values())
+	{
+		WString prefix = WriteNamespace(currentNamespaces, instance->namespaces, writer);
+		writer.WriteLine(prefix + L"class " + instance->typeName + L";");
 	}
 	writer.WriteLine(L"");
 
 	FOREACH(WString, typeSchemaName, typeSchemaOrder)
 	{
 		auto instance = typeSchemas[typeSchemaName];
-		WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+		WString prefix = WriteNamespace(currentNamespaces, instance->namespaces, writer);
 		if (auto data = instance->schema.Cast<GuiInstanceDataSchema>())
 		{
 			if (data->referenceType)
@@ -102,13 +108,12 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 			}
 			writer.WriteLine(prefix + L"};");
 		}
-		WriteNamespaceEnd(instance->namespaces, writer);
 		writer.WriteLine(L"");
 	}
 
 	FOREACH(Ptr<Instance>, instance, instances.Values())
 	{
-		WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+		WString prefix = WriteNamespace(currentNamespaces, instance->namespaces, writer);
 		writer.WriteLine(prefix + L"template<typename TImpl>");
 		writer.WriteLine(prefix + L"class " + instance->typeName + L"_ : public " + GetCppTypeName(instance->baseType) + L", public vl::presentation::GuiInstancePartialClass<vl::" + instance->baseType->GetTypeName() + L">, public vl::reflection::Description<TImpl>");
 		writer.WriteLine(prefix + L"{");
@@ -278,15 +283,12 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		}
 		writer.WriteLine(prefix + L"};");
 		writer.WriteLine(L"");
-		writer.WriteLine(prefix + L"class " + instance->typeName + L";");
-		WriteNamespaceEnd(instance->namespaces, writer);
-		writer.WriteLine(L"");
 	}
 
 	{
 		List<WString> ns;
 		FillReflectionNamespaces(ns);
-		WString prefix = WriteNamespaceBegin(ns, writer);
+		WString prefix = WriteNamespace(currentNamespaces, ns, writer);
 
 		FOREACH(Ptr<InstanceSchema>, instance, typeSchemas.Values())
 		{
@@ -296,9 +298,10 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 		{
 			writer.WriteLine(prefix + L"DECL_TYPE_INFO(" + instance->GetFullName() + L")");
 		}
-		WriteNamespaceEnd(ns, writer);
 		writer.WriteLine(L"");
 	}
+
+	WriteNamespaceStop(currentNamespaces, writer);
 
 	writer.WriteLine(L"/*");
 	FOREACH(Ptr<Instance>, instance, instances.Values())
@@ -324,9 +327,9 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
 
-	List<WString> ns;
+	List<WString> ns, currentNamespaces;
 	FillReflectionNamespaces(ns);
-	WString prefix = WriteNamespaceBegin(ns, writer);
+	WString prefix = WriteNamespace(currentNamespaces, ns, writer);
 	writer.WriteLine(prefix + L"#define _ ,");
 	
 	FOREACH(Ptr<InstanceSchema>, instance, typeSchemas.Values())
@@ -552,6 +555,6 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 	writer.WriteLine(prefix + L"};");
 	writer.WriteLine(prefix + L"GUI_REGISTER_PLUGIN(" + config->name + L"ResourcePlugin)");
 
-	WriteNamespaceEnd(ns, writer);
+	WriteNamespaceStop(currentNamespaces, writer);
 	writer.WriteLine(L"");
 }
