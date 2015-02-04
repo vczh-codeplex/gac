@@ -329,6 +329,7 @@ private:
 	{
 	protected:
 		ResourceMockTypeLoader*					loader;
+		ITypeDescriptor*						baseType;
 		Ptr<GuiInstanceContext>					context;
 
 		void LoadInternal()override
@@ -357,6 +358,8 @@ private:
 				}
 				AddConstructor(ctor);
 			}
+
+			AddBaseType(baseType);
 
 			auto voidType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
 			voidType->SetTypeDescriptor(description::GetTypeDescriptor<void>());
@@ -401,9 +404,10 @@ private:
 		}
 
 	public:
-		InstanceTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceContext> _context)
+		InstanceTypeDescriptor(ResourceMockTypeLoader* _loader, ITypeDescriptor* _baseType, Ptr<GuiInstanceContext> _context)
 			:TypeDescriptorImpl(_context->className.Value())
 			, loader(_loader)
+			, baseType(_baseType)
 			, context(_context)
 		{
 		}
@@ -452,9 +456,9 @@ public:
 
 		FOREACH(Ptr<Instance>, instance, instances.Values())
 		{
-			if (instance->context->className)
+			if (instance->context->className && instance->baseType)
 			{
-				Ptr<ITypeDescriptor> typeDescriptor = new InstanceTypeDescriptor(this, instance->context);
+				Ptr<ITypeDescriptor> typeDescriptor = new InstanceTypeDescriptor(this, instance->baseType, instance->context);
 				manager->SetTypeDescriptor(typeDescriptor->GetTypeName(), typeDescriptor);
 			}
 		}
