@@ -485,6 +485,9 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 			}
 			FOREACH(Ptr<GuiInstanceProperty>, prop, instance->context->properties)
 			{
+				writer.WriteString(prefix + L"\tCLASS_MEMBER_EVENT(");
+				writer.WriteString(prop->name.ToString());
+				writer.WriteLine(L"Changed)");
 				if (prop->readonly)
 				{
 					writer.WriteString(prefix + L"\tCLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(");
