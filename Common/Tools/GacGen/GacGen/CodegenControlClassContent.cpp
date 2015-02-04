@@ -49,7 +49,8 @@ void WriteControlClassCppInit(Ptr<CodegenConfig> config, Ptr<Instance> instance,
 
 void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance> instance, StreamWriter& writer)
 {
-	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+	List<WString> currentNamespaces;
+	WString prefix = WriteNamespace(currentNamespaces, instance->namespaces, writer);
 	WString instanceClassName;
 	FOREACH(WString, ns, instance->namespaces)
 	{
@@ -67,7 +68,7 @@ void WriteControlClassHeaderFileContent(Ptr<CodegenConfig> config, Ptr<Instance>
 	writer.WriteLine(prefix + L"public:");
 	WriteControlClassHeaderCtor(config, instance, prefix + L"\t" , writer);
 	writer.WriteLine(prefix + L"};");
-	WriteNamespaceEnd(instance->namespaces, writer);
+	WriteNamespaceStop(currentNamespaces, writer);
 	writer.WriteLine(L"");
 }
 
@@ -75,13 +76,14 @@ void WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<Instance> in
 {
 	Group<WString, WString> existingEventHandlers;
 	List<WString> additionalLines;
-	WString prefix = WriteNamespaceBegin(instance->namespaces, writer);
+	List<WString> currentNamespaces;
+	WString prefix = WriteNamespace(currentNamespaces, instance->namespaces, writer);
 	WriteControlClassCppFileEventHandlers(config, instance, prefix, existingEventHandlers, additionalLines, writer);
 	writer.WriteLine(L"");
 	WriteControlClassCppCtor(config, instance, prefix, writer);
 	writer.WriteLine(prefix + L"{");
 	WriteControlClassCppInit(config, instance, prefix + L"\t", writer);
 	writer.WriteLine(prefix + L"}");
-	WriteNamespaceEnd(instance->namespaces, writer);
+	WriteNamespaceStop(currentNamespaces, writer);
 	writer.WriteLine(L"");
 }

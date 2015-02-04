@@ -28,27 +28,48 @@ void FillReflectionNamespaces(List<WString>& namespaces)
 	namespaces.Add(L"description");
 }
 
-WString WriteNamespaceBegin(List<WString>& namespaces, StreamWriter& writer)
+WString WriteNamespace(List<WString>& currentNamespaces, List<WString>& namespaces, StreamWriter& writer)
 {
-	WString prefix;
-	FOREACH(WString, ns, namespaces)
+	vint common = 0;
+	for (vint i = 0; i < currentNamespaces.Count() && i < namespaces.Count(); i++)
 	{
-		writer.WriteLine(prefix + L"namespace " + ns);
-		writer.WriteLine(prefix + L"{");
-		prefix += L"\t";
+		if (currentNamespaces[i] == namespaces[i])
+		{
+			common++;
+		}
+		else
+		{
+			break;
+		}
 	}
-	return prefix;
-}
 
-void WriteNamespaceEnd(List<WString>& namespaces, StreamWriter& writer)
-{
-	FOREACH_INDEXER(WString, ns, index, namespaces)
+	for (vint i = 0; i < currentNamespaces.Count() - common; i++)
 	{
 		WString prefix;
-		for (vint i = 0; i < namespaces.Count() - index - 1; i++)
+		for (vint j = 0; j < currentNamespaces.Count() - i - 1; j++)
 		{
 			prefix += L"\t";
 		}
 		writer.WriteLine(prefix + L"}");
 	}
+
+	WString prefix;
+	FOREACH_INDEXER(WString, ns, i, namespaces)
+	{
+		if (i >= common)
+		{
+			writer.WriteLine(prefix + L"namespace " + ns);
+			writer.WriteLine(prefix + L"{");
+		}
+		prefix += L"\t";
+	}
+
+	CopyFrom(currentNamespaces, namespaces);
+	return prefix;
+}
+
+void WriteNamespaceStop(List<WString>& currentNamespaces, StreamWriter& writer)
+{
+	List<WString> namespaces;
+	WriteNamespace(currentNamespaces, namespaces, writer);
 }

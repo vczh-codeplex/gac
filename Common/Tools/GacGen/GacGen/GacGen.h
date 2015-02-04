@@ -96,8 +96,8 @@ Codegen::Utility
 
 void											WriteFileComment(const WString& name, bool doNotModify, StreamWriter& writer);
 void											FillReflectionNamespaces(List<WString>& namespaces);
-WString											WriteNamespaceBegin(List<WString>& namespaces, StreamWriter& writer);
-void											WriteNamespaceEnd(List<WString>& namespaces, StreamWriter& writer);
+WString											WriteNamespace(List<WString>& currentNamespaces, List<WString>& namespaces, StreamWriter& writer);
+void											WriteNamespaceStop(List<WString>& currentNamespaces, StreamWriter& writer);
 
 /***********************************************************************
 Codegen::EventHandlers
