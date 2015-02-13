@@ -11,6 +11,7 @@
 #include <Windows.h>
 
 using namespace vl::collections;
+using namespace vl::stream;
 using namespace ui;
 using namespace vm;
 
@@ -23,10 +24,22 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return result;
 }
 
+#define GACSTUDIO_LOADBINARYRESOURCE
+
 void GuiMain()
 {
 	List<WString> errors;
+#ifdef GACSTUDIO_LOADBINARYRESOURCE
+	Ptr<GuiResource> resource;
+	{
+		FileStream fileStream(L"..\\GacStudio\\UI\\Resources.bin", FileStream::ReadOnly);
+		LzwDecoder decoder;
+		DecoderStream decoderStream(fileStream, decoder);
+		resource = GuiResource::LoadPrecompiledBinary(decoderStream, errors);
+	}
+#else
 	auto resource = GuiResource::LoadFromXml(L"..\\GacStudio\\UI\\Resources.xml", errors);
+#endif
 	GetInstanceLoaderManager()->SetResource(L"GacStudioUI", resource);
 	MainWindow window(new StudioModel);
 	window.ForceCalculateSizeImmediately();

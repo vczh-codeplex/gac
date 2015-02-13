@@ -165,6 +165,9 @@
     <None Include="UI\Codegen.bat">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="UI\Resources.bin">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="UI\CommandImages\New.png">

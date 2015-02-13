@@ -4,7 +4,7 @@
     <Text name="Include">..\..\..\Public\Source\GacUIReflection.h</Text>
     <Text name="Name">GacStudioUI</Text>
     <Text name="Prefix">Gs</Text>
-    <Text name="PrecompiledBinary">Resources.bin</Text>
+    <Text name="PrecompiledCompressed">Resources.bin</Text>
   </Folder>
   <Folder name="CommandImages" content="Link">CommandImages\Folder.xml</Folder>
   <Folder name="ProjectImages" content="Link">ProjectImages\Folder.xml</Folder>

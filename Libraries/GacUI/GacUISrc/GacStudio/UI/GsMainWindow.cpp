@@ -155,7 +155,6 @@ namespace ui
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, [=]()
 		{
-			// todo
 		});
 	}
 

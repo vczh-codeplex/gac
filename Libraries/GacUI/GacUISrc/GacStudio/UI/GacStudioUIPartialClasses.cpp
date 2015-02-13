@@ -236,7 +236,7 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(ui::RenameFileWindow*(Ptr<vm::ISolutionItemModel>, Ptr<vm::IRenameItemAction>), { L"SolutionItem" _ L"Action" })
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
-				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonRename_Clicked, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SolutionItem)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
