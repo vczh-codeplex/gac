@@ -221,6 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat" />
+    <None Include="UI\Resources.bin" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="UI\CommandImages\EditCopy.png" />

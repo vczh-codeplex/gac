@@ -4,7 +4,7 @@
     <Property Name="Parent" Type="vm::ISolutionItemModel*" Readonly="true"/>
     <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true" Observable="true"/>
     <Property Name="Name" Type="string" Readonly="true" Observable="true"/>
-    <Property Name="Children" Type="description::IValueObservableList^" Readonly="true"/>
+    <Property Name="Children" Type="ObservableList^" Readonly="true"/>
     <Property Name="FilePath" Type="string" Readonly="true" Observable="true"/>
     <Property Name="FileDirectory" Type="string" Readonly="true" Observable="true"/>
     
@@ -119,10 +119,10 @@
     <Property Name="EditorFactories" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
     
     <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
-    <Property Name="SelectedFileFilter" Type="IProjectFactoryModel^"/>
+    <Property Name="SelectedFileFilter" Type="vm::IProjectFactoryModel^"/>
     <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
     
-    <Property Name="RootSolutionItem" Type="ISolutionItemModel^" Readonly="true"/>
+    <Property Name="RootSolutionItem" Type="vm::ISolutionItemModel^" Readonly="true"/>
     <Property Name="OpenedSolution" Type="vm::ISolutionModel^" Readonly="true" Observable="true"/>
     <Method Name="NotifySelectedSolutionItem" Type="void">
       <Argument Name="solutionItem" Type="vm::ISolutionItemModel^"/>

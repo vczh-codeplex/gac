@@ -347,6 +347,16 @@ public:
 	}
 };
 
+void PrintAndClearWorkflowErrors(Ptr<CodegenConfig> config, const WString& title)
+{
+	PrintErrorMessage(title);
+	FOREACH(Ptr<ParsingError>, error, config->workflowManager->errors)
+	{
+		PrintErrorMessage(error->errorMessage);
+	}
+	config->workflowManager->errors.Clear();
+}
+
 Ptr<WfType> ParseWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
 {
 	if (!config->workflowTable)
@@ -398,12 +408,7 @@ using presentation::templates::*;
 	analyzer::ValidateTypeStructure(config->workflowManager.Obj(), type, true);
 	if (config->workflowManager->errors.Count() > 0)
 	{
-		PrintErrorMessage(L"Invalid workflow type: \"" + workflowType + L"\".");
-		FOREACH(Ptr<ParsingError>, error, config->workflowManager->errors)
-		{
-			PrintErrorMessage(error->errorMessage);
-		}
-		config->workflowManager->errors.Clear();
+		PrintAndClearWorkflowErrors(config, L"Invalid workflow type: \"" + workflowType + L"\".");
 		return nullptr;
 	}
 
@@ -432,5 +437,10 @@ Ptr<ITypeInfo> GetTypeInfoFromWorkflowType(Ptr<CodegenConfig> config, const WStr
 	auto module = config->workflowManager->modules[0];
 	auto scope = config->workflowManager->moduleScopes[module.Obj()];
 	auto typeInfo = CreateTypeInfoFromType(scope.Obj(), type);
+	if (config->workflowManager->errors.Count() > 0)
+	{
+		PrintAndClearWorkflowErrors(config, L"Invalid workflow type: \"" + workflowType + L"\".");
+		return nullptr;
+	}
 	return typeInfo;
 }

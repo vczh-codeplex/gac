@@ -27,6 +27,25 @@ namespace vm
 			return fileName;
 		}
 	}
+	
+	WString GetDisplayNamePreviewFromFilePath(WString filePath, WString extension, WString newName)
+	{
+		auto index = INVLOC.FindLast(filePath, L"\\", Locale::None);
+		if (index.key == -1)
+		{
+			return newName;
+		}
+
+		WString fileName = filePath.Sub(index.key + 1, filePath.Length() - index.key - 1);
+		if (fileName.Length() >= extension.Length() && fileName.Right(extension.Length()) == extension)
+		{
+			return filePath.Left(index.key + 1) + newName + extension;
+		}
+		else
+		{
+			return filePath.Left(index.key + 1) + newName;
+		}
+	}
 
 	ProjectItem* GetOwnerProject(ISolutionItemModel* item)
 	{
@@ -138,12 +157,12 @@ FileItem
 
 	WString FileItem::GetRenameablePart()
 	{
-		throw 0;
+		return GetDisplayNameFromFilePath(filePath, fileFactory->GetDefaultFileExt());
 	}
 
 	WString FileItem::PreviewRename(WString newName)
 	{
-		throw 0;
+		return GetDisplayNamePreviewFromFilePath(filePath, fileFactory->GetDefaultFileExt(), newName);
 	}
 
 	bool FileItem::Rename(WString newName)
@@ -205,7 +224,7 @@ FileItem
 
 	WString FileItem::GetName()
 	{
-		return GetDisplayNameFromFilePath(filePath, L"");
+		return GetDisplayNameFromFilePath(filePath, fileFactory->GetDefaultFileExt());
 	}
 
 	Ptr<description::IValueObservableList> FileItem::GetChildren()
@@ -359,12 +378,12 @@ FolderItem
 
 	WString FolderItem::GetRenameablePart()
 	{
-		throw 0;
+		return GetDisplayNameFromFilePath(filePath, L"");
 	}
 
 	WString FolderItem::PreviewRename(WString newName)
 	{
-		throw 0;
+		return GetDisplayNamePreviewFromFilePath(filePath, L"", newName);
 	}
 
 	bool FolderItem::Rename(WString newName)
@@ -380,7 +399,6 @@ FolderItem
 			return false;
 		}
 
-	CONTINUE:
 		List<Ptr<IFileModel>> files;
 		List<FolderItem*> items;
 		items.Add(this);
@@ -520,12 +538,12 @@ ProjectItem
 
 	WString ProjectItem::GetRenameablePart()
 	{
-		throw 0;
+		return GetDisplayNameFromFilePath(filePath, L".gacproj.xml");
 	}
 
 	WString ProjectItem::PreviewRename(WString newName)
 	{
-		throw 0;
+		return GetDisplayNamePreviewFromFilePath(filePath, L".gacproj.xml", newName);
 	}
 
 	bool ProjectItem::Rename(WString newName)

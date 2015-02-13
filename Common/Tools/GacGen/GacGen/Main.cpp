@@ -270,6 +270,14 @@ private:
 			auto voidType = MakePtr<TypeInfoImpl>(ITypeInfo::TypeDescriptor);
 			voidType->SetTypeDescriptor(description::GetTypeDescriptor<void>());
 
+			if (schema->parentType != L"")
+			{
+				if (auto td = description::GetTypeDescriptor(schema->parentType))
+				{
+					AddBaseType(td);
+				}
+			}
+
 			FOREACH(Ptr<GuiInstancePropertySchame>, prop, schema->properties)
 			{
 				if (!IsPropertyExists(prop->name, false))
@@ -286,7 +294,10 @@ private:
 						}
 						auto propInfo = MakePtr<PropertyInfoImpl>(this, prop->name, getter.Obj(), setter.Obj(), eventInfo.Obj());
 
-						AddEvent(eventInfo);
+						if (eventInfo)
+						{
+							AddEvent(eventInfo);
+						}
 						AddMethod(L"Get" + prop->name, getter);
 						if (setter)
 						{
@@ -524,17 +535,19 @@ void GuiMain()
 		{
 			WString fileName = config->precompiledOutput;
 			auto xml = resource->SaveToXml(true);
-			OPEN_FILE(L"Precompiled Resource Xml");
+			OPEN_FILE(L"Precompiled Xml Resource");
 			XmlPrint(xml, writer);
 		}
 		if (config->precompiledBinary != L"")
 		{
-			FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledBinary, FileStream::WriteOnly);
+			WString fileName = config->precompiledBinary;
+			OPEN_BINARY_FILE(L"Precompiled Binary Resource");
 			resource->SavePrecompiledBinary(fileStream);
 		}
 		if (config->precompiledCompressed != L"")
 		{
-			FileStream fileStream(config->resource->GetWorkingDirectory() + config->precompiledCompressed, FileStream::WriteOnly);
+			WString fileName = config->precompiledCompressed;
+			OPEN_BINARY_FILE(L"Precompiled Compressed Binary Resource");
 			LzwEncoder encoder;
 			EncoderStream encoderStream(fileStream, encoder);
 			resource->SavePrecompiledBinary(encoderStream);

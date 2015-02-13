@@ -124,6 +124,15 @@ void											WriteControlClassCppFileContent(Ptr<CodegenConfig> config, Ptr<In
 Codegen::FileUtility
 ***********************************************************************/
 
+#define OPEN_BINARY_FILE(NAME)\
+	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::WriteOnly); \
+	if (!fileStream.IsAvailable()) \
+	{ \
+		PrintErrorMessage(L"error> Failed to generate " + fileName); \
+		return; \
+	} \
+	PrintSuccessMessage(L"gacgen> Generating " + fileName);
+
 #define OPEN_FILE(NAME)\
 	FileStream fileStream(config->resource->GetWorkingDirectory() + fileName, FileStream::WriteOnly); \
 	if (!fileStream.IsAvailable()) \
