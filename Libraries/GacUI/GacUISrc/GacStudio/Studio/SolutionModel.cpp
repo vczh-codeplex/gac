@@ -28,6 +28,20 @@ namespace vm
 		}
 	}
 
+	ProjectItem* GetOwnerProject(ISolutionItemModel* item)
+	{
+		auto current = item;
+		while (current)
+		{
+			if (auto project = dynamic_cast<ProjectItem*>(current))
+			{
+				return project;
+			}
+			current = current->GetParent();
+		}
+		return nullptr;
+	}
+
 /***********************************************************************
 FileMacroEnvironment
 ***********************************************************************/
@@ -139,14 +153,9 @@ FileItem
 
 	bool FileItem::Remove()
 	{
-		auto current = parent;
-		while (current)
+		if (auto project = GetOwnerProject(this))
 		{
-			if (auto project = dynamic_cast<ProjectItem*>(current))
-			{
-				return project->RemoveFileItem(this);
-			}
-			current = current->GetParent();
+			return project->RemoveFileItem(this);
 		}
 		return false;
 	}
@@ -341,14 +350,9 @@ FolderItem
 	
 	bool FolderItem::AddFile(Ptr<IFileModel> file)
 	{
-		auto current = parent;
-		while (current)
+		if (auto project = GetOwnerProject(this))
 		{
-			if (auto project = dynamic_cast<ProjectItem*>(current))
-			{
-				return project->AddFileItem(file);
-			}
-			current = current->GetParent();
+			return project->AddFileItem(file);
 		}
 		return false;
 	}
@@ -370,17 +374,9 @@ FolderItem
 
 	bool FolderItem::Remove()
 	{
-		ProjectItem* project = nullptr;
+		auto project = GetOwnerProject(this);
+		if (!project)
 		{
-			auto current = parent;
-			while (current)
-			{
-				if (project = dynamic_cast<ProjectItem*>(current))
-				{
-					goto CONTINUE;
-				}
-				current = current->GetParent();
-			}
 			return false;
 		}
 
