@@ -763,8 +763,9 @@ TypeDescriptorImpl
 				}
 			}
 
-			TypeDescriptorImpl::TypeDescriptorImpl(const WString& _typeName)
+			TypeDescriptorImpl::TypeDescriptorImpl(const WString& _typeName, const WString& _cppFullTypeName)
 				:typeName(_typeName)
+				,cppFullTypeName(_cppFullTypeName)
 				,loaded(false)
 			{
 			}
@@ -776,6 +777,11 @@ TypeDescriptorImpl
 			const WString& TypeDescriptorImpl::GetTypeName()
 			{
 				return typeName;
+			}
+
+			const WString& TypeDescriptorImpl::GetCppFullTypeName()
+			{
+				return cppFullTypeName;
 			}
 
 			IValueSerializer* TypeDescriptorImpl::GetValueSerializer()

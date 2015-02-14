@@ -29,7 +29,7 @@ namespace vl
 Type Declaration
 ***********************************************************************/
 
-			GUIREFLECTIONHELPERTYPES_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONHELPERTYPES_TYPELIST(IMPL_VL_TYPE_INFO)
 
 #define _ ,
 
@@ -8977,7 +8977,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONBASIC_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONBASIC_TYPELIST(IMPL_VL_TYPE_INFO)
 
 			Color TypedValueSerializerProvider<Color>::GetDefaultValue()
 			{
@@ -9727,7 +9727,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONCOMPOSITION_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONCOMPOSITION_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 External Functions
@@ -10021,7 +10021,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONCONTROLS_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 External Functions
@@ -11865,7 +11865,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONELEMENT_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONELEMENT_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 External Functions
@@ -12158,7 +12158,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONEVENT_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONEVENT_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 Type Declaration
@@ -12346,7 +12346,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONTEMPLATES_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONTEMPLATES_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 Type Declaration

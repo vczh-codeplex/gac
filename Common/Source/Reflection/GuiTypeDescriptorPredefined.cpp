@@ -17,8 +17,9 @@ namespace vl
 SerializableTypeDescriptorBase
 ***********************************************************************/
 
-			SerializableTypeDescriptorBase::SerializableTypeDescriptorBase(const WString& _typeName, Ptr<IValueSerializer> _serializer)
+			SerializableTypeDescriptorBase::SerializableTypeDescriptorBase(const WString& _typeName, const WString& _cppFullTypeName, Ptr<IValueSerializer> _serializer)
 				:typeName(_typeName)
+				,cppFullTypeName(_cppFullTypeName)
 				,serializer(_serializer)
 			{
 			}
@@ -30,6 +31,11 @@ SerializableTypeDescriptorBase
 			const WString& SerializableTypeDescriptorBase::GetTypeName()
 			{
 				return typeName;
+			}
+
+			const WString& SerializableTypeDescriptorBase::GetCppFullTypeName()
+			{
+				return cppFullTypeName;
 			}
 
 			IValueSerializer* SerializableTypeDescriptorBase::GetValueSerializer()
@@ -121,50 +127,50 @@ SerializableTypeDescriptorBase
 TypeName
 ***********************************************************************/
 			
-			const wchar_t* TypeInfo<void>::TypeName						= L"system::Void";
-			const wchar_t* TypeInfo<VoidValue>::TypeName				= L"system::Void";
-			const wchar_t* TypeInfo<IDescriptable>::TypeName			= L"system::Interface";
-			const wchar_t* TypeInfo<DescriptableObject>::TypeName		= L"system::ReferenceType";
-			const wchar_t* TypeInfo<Value>::TypeName					= L"system::Object";
-			const wchar_t* TypeInfo<vuint8_t>::TypeName					= L"system::UInt8";
-			const wchar_t* TypeInfo<vuint16_t>::TypeName				= L"system::UInt16";
-			const wchar_t* TypeInfo<vuint32_t>::TypeName				= L"system::UInt32";
-			const wchar_t* TypeInfo<vuint64_t>::TypeName				= L"system::UInt64";
-			const wchar_t* TypeInfo<vint8_t>::TypeName					= L"system::Int8";
-			const wchar_t* TypeInfo<vint16_t>::TypeName					= L"system::Int16";
-			const wchar_t* TypeInfo<vint32_t>::TypeName					= L"system::Int32";
-			const wchar_t* TypeInfo<vint64_t>::TypeName					= L"system::Int64";
-			const wchar_t* TypeInfo<float>::TypeName					= L"system::Single";
-			const wchar_t* TypeInfo<double>::TypeName					= L"system::Double";
-			const wchar_t* TypeInfo<bool>::TypeName						= L"system::Boolean";
-			const wchar_t* TypeInfo<wchar_t>::TypeName					= L"system::Char";
-			const wchar_t* TypeInfo<WString>::TypeName					= L"system::String";
-			const wchar_t* TypeInfo<DateTime>::TypeName					= L"system::DateTime";
-			const wchar_t* TypeInfo<Locale>::TypeName					= L"system::Locale";
+			IMPL_TYPE_INFO_RENAME(void,														system::Void)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::VoidValue,					system::Void)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::IDescriptable,							system::Interface)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::DescriptableObject,						system::ReferenceType)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::Value,						system::Object)
+			IMPL_TYPE_INFO_RENAME(vl::vuint8_t,												system::UInt8)
+			IMPL_TYPE_INFO_RENAME(vl::vuint16_t,											system::UInt16)
+			IMPL_TYPE_INFO_RENAME(vl::vuint32_t,											system::UInt32)
+			IMPL_TYPE_INFO_RENAME(vl::vuint64_t,											system::UInt64)
+			IMPL_TYPE_INFO_RENAME(vl::vint8_t,												system::Int8)
+			IMPL_TYPE_INFO_RENAME(vl::vint16_t,												system::Int16)
+			IMPL_TYPE_INFO_RENAME(vl::vint32_t,												system::Int32)
+			IMPL_TYPE_INFO_RENAME(vl::vint64_t,												system::Int64)
+			IMPL_TYPE_INFO_RENAME(float,													system::Single)
+			IMPL_TYPE_INFO_RENAME(double,													system::Double)
+			IMPL_TYPE_INFO_RENAME(bool,														system::Boolean)
+			IMPL_TYPE_INFO_RENAME(wchar_t,													system::Char)
+			IMPL_TYPE_INFO_RENAME(vl::WString,												system::String)
+			IMPL_TYPE_INFO_RENAME(vl::DateTime,												system::DateTime)
+			IMPL_TYPE_INFO_RENAME(vl::Locale,												system::Locale)
 
-			const wchar_t* TypeInfo<IValueEnumerator>::TypeName			= L"system::Enumerator";
-			const wchar_t* TypeInfo<IValueEnumerable>::TypeName			= L"system::Enumerable";
-			const wchar_t* TypeInfo<IValueReadonlyList>::TypeName		= L"system::ReadonlyList";
-			const wchar_t* TypeInfo<IValueList>::TypeName				= L"system::List";
-			const wchar_t* TypeInfo<IValueObservableList>::TypeName		= L"system::ObservableList";
-			const wchar_t* TypeInfo<IValueReadonlyDictionary>::TypeName	= L"system::ReadonlyDictionary";
-			const wchar_t* TypeInfo<IValueDictionary>::TypeName			= L"system::Dictionary";
-			const wchar_t* TypeInfo<IValueInterfaceProxy>::TypeName		= L"system::InterfaceProxy";
-			const wchar_t* TypeInfo<IValueFunctionProxy>::TypeName		= L"system::Function";
-			const wchar_t* TypeInfo<IValueListener>::TypeName			= L"system::Listener";
-			const wchar_t* TypeInfo<IValueSubscription>::TypeName		= L"system::Subscription";
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueEnumerator,			system::Enumerator)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueEnumerable,			system::Enumerable)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueReadonlyList,			system::ReadonlyList)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueList,					system::List)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueObservableList,		system::ObservableList)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueReadonlyDictionary,	system::ReadonlyDictionary)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueDictionary,			system::Dictionary)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueInterfaceProxy,		system::InterfaceProxy)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueFunctionProxy,			system::Function)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueListener,				system::Listener)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueSubscription,			system::Subscription)
 
-			const wchar_t* TypeInfo<IValueSerializer>::TypeName			= L"system::reflection::ValueSerializer";
-			const wchar_t* TypeInfo<ITypeInfo>::TypeName				= L"system::reflection::TypeInfo";
-			const wchar_t* TypeInfo<ITypeInfo::Decorator>::TypeName		= L"system::reflection::TypeInfo::Decorator";
-			const wchar_t* TypeInfo<IMemberInfo>::TypeName				= L"system::reflection::MemberInfo";
-			const wchar_t* TypeInfo<IEventHandler>::TypeName			= L"system::reflection::EventHandler";
-			const wchar_t* TypeInfo<IEventInfo>::TypeName				= L"system::reflection::EventInfo";
-			const wchar_t* TypeInfo<IPropertyInfo>::TypeName			= L"system::reflection::PropertyInfo";
-			const wchar_t* TypeInfo<IParameterInfo>::TypeName			= L"system::reflection::ParameterInfo";
-			const wchar_t* TypeInfo<IMethodInfo>::TypeName				= L"system::reflection::MethodInfo";
-			const wchar_t* TypeInfo<IMethodGroupInfo>::TypeName			= L"system::reflection::MethodGroupInfo";
-			const wchar_t* TypeInfo<ITypeDescriptor>::TypeName			= L"system::reflection::TypeDescriptor";
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueSerializer,			system::reflection::ValueSerializer)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::ITypeInfo,					system::reflection::TypeInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::ITypeInfo::Decorator,		system::reflection::TypeInfo::Decorator)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IMemberInfo,					system::reflection::MemberInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IEventHandler,				system::reflection::EventHandler)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IEventInfo,					system::reflection::EventInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IPropertyInfo,				system::reflection::PropertyInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IParameterInfo,				system::reflection::ParameterInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IMethodInfo,					system::reflection::MethodInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IMethodGroupInfo,			system::reflection::MethodGroupInfo)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::ITypeDescriptor,				system::reflection::TypeDescriptor)
 
 /***********************************************************************
 TypedValueSerializerProvider
@@ -461,7 +467,7 @@ ObjectTypeDescriptor
 			{
 			public:
 				ObjectTypeDescriptor()
-					:SerializableTypeDescriptorBase(TypeInfo<Value>::TypeName, 0)
+					:SerializableTypeDescriptorBase(TypeInfo<Value>::TypeName, TypeInfo<Value>::CppFullTypeName, 0)
 				{
 				}
 			};
@@ -901,7 +907,7 @@ Collections
 				{
 				public:
 					CustomTypeDescriptorImpl()
-						:TypeDescriptorImpl(TypeInfo<DescriptableObject>::TypeName)
+						:TypeDescriptorImpl(TypeInfo<DescriptableObject>::TypeName, TypeInfo<DescriptableObject>::CppFullTypeName)
 					{
 						Description<DescriptableObject>::SetAssociatedTypeDescroptor(this);
 					}

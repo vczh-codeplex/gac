@@ -10,7 +10,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONELEMENT_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONELEMENT_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 External Functions

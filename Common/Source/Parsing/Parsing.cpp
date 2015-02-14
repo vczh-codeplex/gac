@@ -934,7 +934,7 @@ namespace vl
 		{
 			using namespace parsing;
 
-			PARSINGREFLECTION_TYPELIST(IMPL_TYPE_INFO)
+			PARSINGREFLECTION_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 Type Declaration

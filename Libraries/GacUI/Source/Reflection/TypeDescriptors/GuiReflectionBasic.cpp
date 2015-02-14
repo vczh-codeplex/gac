@@ -14,7 +14,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONBASIC_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONBASIC_TYPELIST(IMPL_VL_TYPE_INFO)
 
 			Color TypedValueSerializerProvider<Color>::GetDefaultValue()
 			{

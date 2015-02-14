@@ -90,7 +90,7 @@ namespace vl
 			F(demos::MainWindow)
 
 			DEMO_TYPES(DECL_TYPE_INFO)
-			DEMO_TYPES(IMPL_TYPE_INFO)
+			DEMO_TYPES(IMPL_CPP_TYPE_INFO)
 
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(GuiWindow)

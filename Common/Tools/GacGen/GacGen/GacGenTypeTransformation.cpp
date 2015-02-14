@@ -40,7 +40,14 @@ bool DetermineCppType(
 
 WString GetCppTypeName(ITypeDescriptor* typeDescriptor)
 {
-	return L"vl::" + typeDescriptor->GetTypeName();
+	if (typeDescriptor == description::GetTypeDescriptor<void>())
+	{
+		return L"void";
+	}
+	else
+	{
+		return typeDescriptor->GetCppFullTypeName();
+	}
 }
 
 WString GetCppTypeName(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<Instance>>& instances, Ptr<Instance> instance, GuiConstructorRepr* ctor)
@@ -77,275 +84,6 @@ IGuiInstanceLoader::TypeInfo GetCppTypeInfo(Ptr<CodegenConfig> config, Dictionar
 /***********************************************************************
 WorkflowTypeTransformation
 ***********************************************************************/
-
-class GetCppTypeNameFromWorkflowTypeVisitor : public Object, public WfType::IVisitor
-{
-public:
-	WString					result;
-
-	static WString Call(Ptr<WfType> node)
-	{
-		GetCppTypeNameFromWorkflowTypeVisitor visitor;
-		node->Accept(&visitor);
-		return visitor.result;
-	}
-
-	void VisitReferenceType(WfType* node)
-	{
-		WString typeName;
-		{
-			MemoryStream stream;
-			{
-				StreamWriter writer(stream);
-				WfPrint(node, L"", writer);
-			}
-
-			stream.SeekFromBegin(0);
-			StreamReader reader(stream);
-			typeName = reader.ReadToEnd();
-		}
-
-		auto td = description::GetTypeDescriptor(typeName);
-		if (td)
-		{
-			typeName = td->GetTypeName();
-			if (typeName == L"system::Void")
-			{
-				result = L"void";
-			}
-			else if (typeName == L"system::Interface")
-			{
-				result = L"IDescriptable";
-			}
-			else if (typeName == L"system::ReferenceType")
-			{
-				result = L"DescriptableObject";
-			}
-			else if (typeName == L"system::Object")
-			{
-				result = L"descriptable::Value";
-			}
-			else if (typeName == L"system::UInt8")
-			{
-				result = L"vuint8_t";
-			}
-			else if (typeName == L"system::UInt16")
-			{
-				result = L"vuint16_t";
-			}
-			else if (typeName == L"system::UInt32")
-			{
-				result = L"vuint32_t";
-			}
-			else if (typeName == L"system::UInt64")
-			{
-				result = L"vuint64_t";
-			}
-			else if (typeName == L"system::Int8")
-			{
-				result = L"vint8_t";
-			}
-			else if (typeName == L"system::Int16")
-			{
-				result = L"vint16_t";
-			}
-			else if (typeName == L"system::Int32")
-			{
-				result = L"vint32_t";
-			}
-			else if (typeName == L"system::Int64")
-			{
-				result = L"vint64_t";
-			}
-			else if (typeName == L"system::Single")
-			{
-				result = L"float";
-			}
-			else if (typeName == L"system::Double")
-			{
-				result = L"double";
-			}
-			else if (typeName == L"system::Boolean")
-			{
-				result = L"bool";
-			}
-			else if (typeName == L"system::Char")
-			{
-				result = L"wchar_t";
-			}
-			else if (typeName == L"system::String")
-			{
-				result = L"WString";
-			}
-			else if (typeName == L"system::DateTime")
-			{
-				result = L"DateTime";
-			}
-			else if (typeName == L"system::Locale")
-			{
-				result = L"Locale";
-			}
-			else if (typeName == L"system::ObservableList")
-			{
-				result = L"presentation::description::IValueObservableList";
-			}
-			else if (typeName.Length() >= 11 && typeName.Left(11) == L"system::Xml")
-			{
-				result = L"parsing::xml::" + typeName.Right(typeName.Length() - 8);
-			}
-			else if (typeName.Length() >= 12 && typeName.Left(12) == L"system::Json")
-			{
-				result = L"parsing::json::" + typeName.Right(typeName.Length() - 8);
-			}
-			else
-			{
-				result = typeName;
-			}
-		}
-		else
-		{
-			result = typeName;
-		}
-	}
-
-	void Visit(WfPredefinedType* node)override
-	{
-		switch (node->name)
-		{
-		case WfPredefinedTypeName::Void:
-			result = L"void";
-			break;
-		case WfPredefinedTypeName::Object:
-			result = L"description::Value";
-			break;
-		case WfPredefinedTypeName::Interface:
-			result = L"IDescriptable";
-			break;
-		case WfPredefinedTypeName::Int:
-			result = L"vint";
-			break;
-		case WfPredefinedTypeName::UInt:
-			result = L"vuint";
-			break;
-		case WfPredefinedTypeName::Float:
-			result = L"float";
-			break;
-		case WfPredefinedTypeName::Double:
-			result = L"double";
-			break;
-		case WfPredefinedTypeName::String:
-			result = L"WString";
-			break;
-		case WfPredefinedTypeName::Char:
-			result = L"wchar_t";
-			break;
-		case WfPredefinedTypeName::Bool:
-			result = L"bool";
-			break;
-		}
-	}
-
-	void Visit(WfTopQualifiedType* node)override
-	{
-		VisitReferenceType(node);
-	}
-
-	void Visit(WfReferenceType* node)override
-	{
-		VisitReferenceType(node);
-	}
-
-	void Visit(WfRawPointerType* node)override
-	{
-		auto type = Call(node->element);
-		if (type != L"")
-		{
-			result = type + L"*";
-		}
-	}
-
-	void Visit(WfSharedPointerType* node)override
-	{
-		auto type = Call(node->element);
-		if (type != L"")
-		{
-			result = L"Ptr<" + type + L">";
-		}
-	}
-
-	void Visit(WfNullableType* node)override
-	{
-		auto type = Call(node->element);
-		if (type != L"")
-		{
-			result = L"Nullable<" + type + L">";
-		}
-	}
-
-	void Visit(WfEnumerableType* node)override
-	{
-		auto type = Call(node->element);
-		if (type != L"")
-		{
-			result = L"collections::LazyList<" + type + L">";
-		}
-	}
-
-	void Visit(WfMapType* node)override
-	{
-		auto key = node->key ? Call(node->key) : L"";
-		auto value = Call(node->value);
-		if (value != L"" && (!node->key || key != L""))
-		{
-			if (node->writability == WfMapWritability::Readonly)
-			{
-				result = L"const ";
-			}
-
-			if (key == L"")
-			{
-				result += L"collections::List<" + value + L">&";
-			}
-			else
-			{
-				result += L"collections::Dictionary<" + key + L", " + value + L">&";
-			}
-		}
-	}
-
-	void Visit(WfFunctionType* node)override
-	{
-		auto resultType = Call(node->result);
-		if (resultType == L"")
-		{
-			return;
-		}
-
-		List<WString> argumentTypes;
-		FOREACH(Ptr<WfType>, type, node->arguments)
-		{
-			auto argumentType = Call(type);
-			if (argumentType == L"")
-			{
-				return;
-			}
-			argumentTypes.Add(argumentType);
-		}
-
-		result = L"Func<" + resultType + L"(";
-		FOREACH_INDEXER(WString, type, index, argumentTypes)
-		{
-			if (index > 0)result += L", ";
-			result += type;
-		}
-		result += L")>";
-	}
-
-	void Visit(WfChildType* node)override
-	{
-		VisitReferenceType(node);
-	}
-};
 
 void PrintAndClearWorkflowErrors(Ptr<CodegenConfig> config, const WString& title)
 {
@@ -415,17 +153,6 @@ using presentation::templates::*;
 	return type;
 }
 
-WString GetCppTypeNameFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
-{
-	auto type = ParseWorkflowType(config, workflowType);
-	if (!type)
-	{
-		return L"vint";
-	}
-	auto cppType = GetCppTypeNameFromWorkflowTypeVisitor::Call(type.Obj());
-	return cppType == L"" ? L"vint" : cppType;
-}
-
 Ptr<ITypeInfo> GetTypeInfoFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
 {
 	auto type = ParseWorkflowType(config, workflowType);
@@ -443,4 +170,73 @@ Ptr<ITypeInfo> GetTypeInfoFromWorkflowType(Ptr<CodegenConfig> config, const WStr
 		return nullptr;
 	}
 	return typeInfo;
+}
+
+WString GetCppTypeFromTypeInfo(ITypeInfo* typeInfo)
+{
+	switch (typeInfo->GetDecorator())
+	{
+	case ITypeInfo::RawPtr:
+		return GetCppTypeFromTypeInfo(typeInfo->GetElementType()) + L"*";
+	case ITypeInfo::SharedPtr:
+		if (typeInfo->GetElementType()->GetDecorator() == ITypeInfo::Generic)
+		{
+			auto type = GetCppTypeFromTypeInfo(typeInfo->GetElementType());
+			if (type != L"")
+			{
+				return type;
+			}
+		}
+		return L"vl::Ptr<" + GetCppTypeFromTypeInfo(typeInfo->GetElementType()) + L">";
+	case ITypeInfo::Nullable:
+		return L"vl::Nullable" + GetCppTypeFromTypeInfo(typeInfo->GetElementType()) + L">";
+	case ITypeInfo::Generic:
+		{
+			auto td = typeInfo->GetTypeDescriptor();
+			if (td == description::GetTypeDescriptor<IValueEnumerable>())
+			{
+				return L"vl::collections::LazyList<" + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(0)) + L">";
+			}
+			else if (td == description::GetTypeDescriptor<IValueReadonlyList>())
+			{
+				return L"const vl::collections::List<" + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(0)) + L">&";
+			}
+			else if (td == description::GetTypeDescriptor<IValueList>())
+			{
+				return L"vl::collections::List<" + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(0)) + L">&";
+			}
+			else if (td == description::GetTypeDescriptor<IValueReadonlyDictionary>())
+			{
+				return L"const vl::collections::Dictionary<" + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(0)) + L"," + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(1)) + L">&";
+			}
+			else if (td == description::GetTypeDescriptor<IValueDictionary>())
+			{
+				return L"vl::collections::Dictionary<" + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(0)) + L"," + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(1)) + L">&";
+			}
+			else if (td == description::GetTypeDescriptor<IValueFunctionProxy>())
+			{
+				WString result = L"vl::Func<" + GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(0)) + L"(";
+				for (vint i = 1; i < typeInfo->GetGenericArgumentCount(); i++)
+				{
+					if (i>1)result += L", ";
+					result += GetCppTypeFromTypeInfo(typeInfo->GetGenericArgument(i));
+				}
+				result += L")>";
+				return result;
+			}
+		}
+		return L"";
+	default:
+		return GetCppTypeName(typeInfo->GetTypeDescriptor());
+	}
+}
+
+WString GetCppTypeNameFromWorkflowType(Ptr<CodegenConfig> config, const WString& workflowType)
+{
+	auto typeInfo = GetTypeInfoFromWorkflowType(config, workflowType);
+	if (!typeInfo)
+	{
+		return L"vl::vint";
+	}
+	return GetCppTypeFromTypeInfo(typeInfo.Obj());
 }

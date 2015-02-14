@@ -23,6 +23,7 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 	{
 		writer.WriteString(prefix);
 		writer.WriteString(L"IMPL_TYPE_INFO_RENAME(");
+		PrintNamespaces(config.codeNamespaces, writer);
 		PrintType(type, config.classPrefix, writer);
 		writer.WriteString(L", ");
 		PrintNamespaces(config.reflectionNamespaces, writer);
@@ -36,6 +37,7 @@ void WriteTypeReflectionImplementation(ParsingSymbolManager* manager, const WStr
 		{
 			writer.WriteString(prefix);
 			writer.WriteString(L"IMPL_TYPE_INFO_RENAME(");
+			PrintNamespaces(config.codeNamespaces, writer);
 			PrintType(type, config.classPrefix, writer);
 			writer.WriteString(L"::IVisitor, ");
 			PrintNamespaces(config.reflectionNamespaces, writer);

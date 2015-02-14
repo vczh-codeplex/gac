@@ -48,24 +48,24 @@ namespace vm
 
 		virtual vm::ISolutionItemModel* GetParent() = 0;
 
-		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
 		vl::Event<void()> ImageChanged;
 
-		virtual WString GetName() = 0;
+		virtual vl::WString GetName() = 0;
 		vl::Event<void()> NameChanged;
 
-		virtual Ptr<description::IValueObservableList> GetChildren() = 0;
+		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetChildren() = 0;
 
-		virtual WString GetFilePath() = 0;
+		virtual vl::WString GetFilePath() = 0;
 		vl::Event<void()> FilePathChanged;
 
-		virtual WString GetFileDirectory() = 0;
+		virtual vl::WString GetFileDirectory() = 0;
 		vl::Event<void()> FileDirectoryChanged;
 
-		virtual vint GetErrorCount() = 0;
+		virtual vl::vint32_t GetErrorCount() = 0;
 		vl::Event<void()> ErrorCountChanged;
 
-		virtual WString GetErrorText(vint index) = 0;
+		virtual vl::WString GetErrorText(vl::vint32_t index) = 0;
 	};
 
 	class IMacroEnvironment : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IMacroEnvironment>
@@ -74,69 +74,69 @@ namespace vm
 
 		virtual vm::IMacroEnvironment* GetParent() = 0;
 
-		virtual bool HasMacro(WString name, bool inherit) = 0;
-		virtual WString GetMacroValue(WString name, bool inherit) = 0;
+		virtual bool HasMacro(vl::WString name, bool inherit) = 0;
+		virtual vl::WString GetMacroValue(vl::WString name, bool inherit) = 0;
 	};
 
 	class ITextTemplate : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ITextTemplate>
 	{
 	public:
 
-		virtual WString Generate(Ptr<vm::IMacroEnvironment> macroEnvironment) = 0;
+		virtual vl::WString Generate(vl::Ptr<vm::IMacroEnvironment> macroEnvironment) = 0;
 	};
 
 	class IEditorFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorFactoryModel>
 	{
 	public:
 
-		virtual WString GetName() = 0;
+		virtual vl::WString GetName() = 0;
 
-		virtual WString GetId() = 0;
+		virtual vl::WString GetId() = 0;
 	};
 
 	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
 	{
 	public:
 
-		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
 
-		virtual Ptr<presentation::GuiImageData> GetSmallImage() = 0;
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetSmallImage() = 0;
 
-		virtual WString GetName() = 0;
+		virtual vl::WString GetName() = 0;
 
-		virtual WString GetCategory() = 0;
+		virtual vl::WString GetCategory() = 0;
 
-		virtual WString GetDescription() = 0;
+		virtual vl::WString GetDescription() = 0;
 
-		virtual WString GetId() = 0;
+		virtual vl::WString GetId() = 0;
 
-		virtual WString GetDefaultFileExt() = 0;
+		virtual vl::WString GetDefaultFileExt() = 0;
 
-		virtual Ptr<vm::ITextTemplate> GetTextTemplate() = 0;
+		virtual vl::Ptr<vm::ITextTemplate> GetTextTemplate() = 0;
 	};
 
 	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
 	{
 	public:
 
-		virtual Ptr<presentation::GuiImageData> GetImage() = 0;
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
 
-		virtual Ptr<presentation::GuiImageData> GetSmallImage() = 0;
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetSmallImage() = 0;
 
-		virtual WString GetName() = 0;
+		virtual vl::WString GetName() = 0;
 
-		virtual WString GetDescription() = 0;
+		virtual vl::WString GetDescription() = 0;
 
-		virtual WString GetId() = 0;
+		virtual vl::WString GetId() = 0;
 
-		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
 	};
 
 	class IFileModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFileModel>
 	{
 	public:
 
-		virtual Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
+		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
 
 		virtual bool OpenFile() = 0;
 		virtual bool SaveFile() = 0;
@@ -152,7 +152,7 @@ namespace vm
 	{
 	public:
 
-		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
+		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
 
 		virtual bool OpenProject() = 0;
 		virtual bool SaveProject(bool saveContainingFiles) = 0;
@@ -166,15 +166,15 @@ namespace vm
 		virtual bool OpenSolution() = 0;
 		virtual bool SaveSolution(bool saveContainingProjects) = 0;
 		virtual bool NewSolution() = 0;
-		virtual bool AddProject(Ptr<vm::IProjectModel> project) = 0;
-		virtual bool RemoveProject(Ptr<vm::IProjectModel> project) = 0;
+		virtual bool AddProject(vl::Ptr<vm::IProjectModel> project) = 0;
+		virtual bool RemoveProject(vl::Ptr<vm::IProjectModel> project) = 0;
 	};
 
 	class IAddFileItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IAddFileItemAction>
 	{
 	public:
 
-		virtual bool AddFile(Ptr<vm::IFileModel> file) = 0;
+		virtual bool AddFile(vl::Ptr<vm::IFileModel> file) = 0;
 	};
 
 	class IOpenInEditorItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IOpenInEditorItemAction>
@@ -186,9 +186,9 @@ namespace vm
 	{
 	public:
 
-		virtual WString GetRenameablePart() = 0;
-		virtual WString PreviewRename(WString newName) = 0;
-		virtual bool Rename(WString newName) = 0;
+		virtual vl::WString GetRenameablePart() = 0;
+		virtual vl::WString PreviewRename(vl::WString newName) = 0;
+		virtual bool Rename(vl::WString newName) = 0;
 	};
 
 	class IRemoveItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRemoveItemAction>
@@ -202,45 +202,45 @@ namespace vm
 	{
 	public:
 
-		virtual collections::LazyList<Ptr<vm::IProjectFactoryModel>> GetProjectFactories() = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::IProjectFactoryModel>> GetProjectFactories() = 0;
 
-		virtual collections::LazyList<Ptr<vm::IFileFactoryModel>> GetFileFactories() = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::IFileFactoryModel>> GetFileFactories() = 0;
 
-		virtual collections::LazyList<Ptr<vm::IEditorFactoryModel>> GetEditorFactories() = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorFactoryModel>> GetEditorFactories() = 0;
 
-		virtual Ptr<vm::IProjectFactoryModel> GetFileFilters() = 0;
+		virtual vl::Ptr<vm::IProjectFactoryModel> GetFileFilters() = 0;
 
-		virtual Ptr<vm::IProjectFactoryModel> GetSelectedFileFilter() = 0;
-		virtual void SetSelectedFileFilter(Ptr<vm::IProjectFactoryModel> value) = 0;
+		virtual vl::Ptr<vm::IProjectFactoryModel> GetSelectedFileFilter() = 0;
+		virtual void SetSelectedFileFilter(vl::Ptr<vm::IProjectFactoryModel> value) = 0;
 
-		virtual Ptr<presentation::description::IValueObservableList> GetFilteredFileFactories() = 0;
+		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetFilteredFileFactories() = 0;
 
-		virtual Ptr<vm::ISolutionItemModel> GetRootSolutionItem() = 0;
+		virtual vl::Ptr<vm::ISolutionItemModel> GetRootSolutionItem() = 0;
 
-		virtual Ptr<vm::ISolutionModel> GetOpenedSolution() = 0;
+		virtual vl::Ptr<vm::ISolutionModel> GetOpenedSolution() = 0;
 		vl::Event<void()> OpenedSolutionChanged;
 
-		virtual Ptr<vm::ISolutionItemModel> GetWorkingItem() = 0;
+		virtual vl::Ptr<vm::ISolutionItemModel> GetWorkingItem() = 0;
 		vl::Event<void()> WorkingItemChanged;
 
-		virtual Ptr<vm::IProjectModel> GetWorkingProject() = 0;
+		virtual vl::Ptr<vm::IProjectModel> GetWorkingProject() = 0;
 		vl::Event<void()> WorkingProjectChanged;
 
-		virtual WString GetWorkingDirectory() = 0;
+		virtual vl::WString GetWorkingDirectory() = 0;
 		vl::Event<void()> WorkingDirectoryChanged;
 
-		virtual void NotifySelectedSolutionItem(Ptr<vm::ISolutionItemModel> solutionItem) = 0;
-		virtual Ptr<vm::IProjectFactoryModel> GetProjectFactory(WString id) = 0;
-		virtual Ptr<vm::IFileFactoryModel> GetFileFactory(WString id) = 0;
-		virtual Ptr<vm::IEditorFactoryModel> GetEditorFactory(WString id) = 0;
-		virtual bool OpenSolution(WString filePath) = 0;
+		virtual void NotifySelectedSolutionItem(vl::Ptr<vm::ISolutionItemModel> solutionItem) = 0;
+		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory(vl::WString id) = 0;
+		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory(vl::WString id) = 0;
+		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory(vl::WString id) = 0;
+		virtual bool OpenSolution(vl::WString filePath) = 0;
 		virtual bool SaveSolution() = 0;
-		virtual bool NewSolution(WString filePath) = 0;
+		virtual bool NewSolution(vl::WString filePath) = 0;
 		virtual bool CloseSolution() = 0;
-		virtual Ptr<vm::IProjectModel> CreateProjectModel(Ptr<vm::IProjectFactoryModel> projectFactory, WString filePath) = 0;
-		virtual Ptr<vm::IFileModel> CreateFileModel(Ptr<vm::IProjectModel> project, Ptr<vm::IFileFactoryModel> fileFactory, WString filePath) = 0;
-		virtual void OpenBrowser(WString url) = 0;
-		virtual void PromptError(WString message) = 0;
+		virtual vl::Ptr<vm::IProjectModel> CreateProjectModel(vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString filePath) = 0;
+		virtual vl::Ptr<vm::IFileModel> CreateFileModel(vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString filePath) = 0;
+		virtual void OpenBrowser(vl::WString url) = 0;
+		virtual void PromptError(vl::WString message) = 0;
 	};
 
 }

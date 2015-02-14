@@ -14,7 +14,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONCOMPOSITION_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONCOMPOSITION_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 External Functions
