@@ -15,6 +15,7 @@
 @	Schema加父类功能
 @	Instance支持ref.Property（函数+事件）
 @	Instance支持ref.State（脚本变量，附带C++函数读写）
-	GacGen.exe支持上述所有功能的预编译
+@	GacGen.exe支持上述所有功能的预编译
 	Editor.AutoComplete.Grammar 上下选中候选项崩溃，最小化恢复后不能渲染
 	Persistant.LoadFromXml.Controls DataWindow没有内容
+	GacGen.exe处理Persistant.LoadFromXml.ViewModel的XML资源文件失败
