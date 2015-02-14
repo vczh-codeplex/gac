@@ -15,7 +15,7 @@ namespace vl
 
 #ifndef VCZH_DEBUG_NO_REFLECTION
 
-			GUIREFLECTIONTEMPLATES_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONTEMPLATES_TYPELIST(IMPL_VL_TYPE_INFO)
 
 /***********************************************************************
 Type Declaration

@@ -22,7 +22,7 @@ namespace vl
 Type Declaration
 ***********************************************************************/
 
-			GUIREFLECTIONHELPERTYPES_TYPELIST(IMPL_TYPE_INFO)
+			GUIREFLECTIONHELPERTYPES_TYPELIST(IMPL_VL_TYPE_INFO)
 
 #define _ ,
 

@@ -269,12 +269,12 @@ namespace vl
 #ifndef VCZH_DEBUG_NO_REFLECTION
 			using namespace test::parser;
 
-			IMPL_TYPE_INFO_RENAME(CalExpression, System::CalExpression)
-			IMPL_TYPE_INFO_RENAME(CalNumberExpression, System::CalNumberExpression)
-			IMPL_TYPE_INFO_RENAME(CalBinaryExpression, System::CalBinaryExpression)
-			IMPL_TYPE_INFO_RENAME(CalBinaryExpression::CalBinaryOperator, System::CalBinaryExpression::CalBinaryOperator)
-			IMPL_TYPE_INFO_RENAME(CalFunctionExpression, System::CalFunctionExpression)
-			IMPL_TYPE_INFO_RENAME(CalExpression::IVisitor, System::CalExpression::IVisitor)
+			IMPL_TYPE_INFO_RENAME(test::parser::CalExpression, System::CalExpression)
+			IMPL_TYPE_INFO_RENAME(test::parser::CalNumberExpression, System::CalNumberExpression)
+			IMPL_TYPE_INFO_RENAME(test::parser::CalBinaryExpression, System::CalBinaryExpression)
+			IMPL_TYPE_INFO_RENAME(test::parser::CalBinaryExpression::CalBinaryOperator, System::CalBinaryExpression::CalBinaryOperator)
+			IMPL_TYPE_INFO_RENAME(test::parser::CalFunctionExpression, System::CalFunctionExpression)
+			IMPL_TYPE_INFO_RENAME(test::parser::CalExpression::IVisitor, System::CalExpression::IVisitor)
 
 			BEGIN_CLASS_MEMBER(CalExpression)
 				CLASS_MEMBER_METHOD(Accept, {L"visitor"})

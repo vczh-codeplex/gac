@@ -162,7 +162,7 @@ private:
 
 	public:
 		ClassTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceDataSchema> _schema)
-			:TypeDescriptorImpl(_schema->typeName)
+			:TypeDescriptorImpl(_schema->typeName, _schema->typeName)
 			, loader(_loader)
 			, schema(_schema)
 		{
@@ -246,7 +246,7 @@ private:
 
 	public:
 		StructTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceDataSchema> _schema)
-			:TypeDescriptorImpl(_schema->typeName)
+			:TypeDescriptorImpl(_schema->typeName, _schema->typeName)
 			, loader(_loader)
 			, schema(_schema)
 		{
@@ -329,7 +329,7 @@ private:
 
 	public:
 		InterfaceTypeDescriptor(ResourceMockTypeLoader* _loader, Ptr<GuiInstanceInterfaceSchema> _schema)
-			:TypeDescriptorImpl(_schema->typeName)
+			:TypeDescriptorImpl(_schema->typeName, _schema->typeName)
 			, loader(_loader)
 			, schema(_schema)
 		{
@@ -416,7 +416,7 @@ private:
 
 	public:
 		InstanceTypeDescriptor(ResourceMockTypeLoader* _loader, ITypeDescriptor* _baseType, Ptr<GuiInstanceContext> _context)
-			:TypeDescriptorImpl(_context->className.Value())
+			:TypeDescriptorImpl(_context->className.Value(), _context->className.Value())
 			, loader(_loader)
 			, baseType(_baseType)
 			, context(_context)

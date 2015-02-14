@@ -916,10 +916,10 @@ namespace vl
 		namespace description
 		{
 			#define _ ,
-			IMPL_TYPE_INFO(vm::FileItem)
-			IMPL_TYPE_INFO(vm::FolderItem)
-			IMPL_TYPE_INFO(vm::ProjectItem)
-			IMPL_TYPE_INFO(vm::SolutionItem)
+			IMPL_CPP_TYPE_INFO(vm::FileItem)
+			IMPL_CPP_TYPE_INFO(vm::FolderItem)
+			IMPL_CPP_TYPE_INFO(vm::ProjectItem)
+			IMPL_CPP_TYPE_INFO(vm::SolutionItem)
 
 			BEGIN_CLASS_MEMBER(vm::FileItem)
 				CLASS_MEMBER_BASE(vm::IFileModel)

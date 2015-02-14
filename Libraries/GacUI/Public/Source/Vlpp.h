@@ -7553,6 +7553,7 @@ ITypeDescriptor
 			{
 			public:
 				virtual const WString&			GetTypeName()=0;
+				virtual const WString&			GetCppFullTypeName()=0;
 				virtual IValueSerializer*		GetValueSerializer()=0;
 				virtual vint					GetBaseTypeDescriptorCount()=0;
 				virtual ITypeDescriptor*		GetBaseTypeDescriptor(vint index)=0;
@@ -9074,6 +9075,11 @@ namespace vl
 TypeInfo
 ***********************************************************************/
 
+#define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName; static const wchar_t* CppFullTypeName;};
+#define IMPL_VL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #TYPENAME; const wchar_t* TypeInfo<TYPENAME>::CppFullTypeName = L"vl::" L ## #TYPENAME;
+#define IMPL_CPP_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #TYPENAME; const wchar_t* TypeInfo<TYPENAME>::CppFullTypeName = L ## #TYPENAME;
+#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #EXPECTEDNAME; const wchar_t* TypeInfo<TYPENAME>::CppFullTypeName = L ## #TYPENAME;
+
 			template<typename T>
 			struct TypeInfo
 			{
@@ -9362,11 +9368,13 @@ SerializableTypeDescriptor
 			protected:
 				Ptr<IValueSerializer>						serializer;
 				WString										typeName;
+				WString										cppFullTypeName;
 			public:
-				SerializableTypeDescriptorBase(const WString& _typeName, Ptr<IValueSerializer> _serializer);
+				SerializableTypeDescriptorBase(const WString& _typeName, const WString& _cppFullTypeName, Ptr<IValueSerializer> _serializer);
 				~SerializableTypeDescriptorBase();
 
 				const WString&								GetTypeName()override;
+				const WString&								GetCppFullTypeName()override;
 				IValueSerializer*							GetValueSerializer()override;
 				vint										GetBaseTypeDescriptorCount()override;
 				ITypeDescriptor*							GetBaseTypeDescriptor(vint index)override;
@@ -9391,7 +9399,7 @@ SerializableTypeDescriptor
 			{
 			public:
 				SerializableTypeDescriptor()
-					:SerializableTypeDescriptorBase(TypeInfo<typename TSerializer::ValueType>::TypeName, 0)
+					:SerializableTypeDescriptorBase(TypeInfo<typename TSerializer::ValueType>::TypeName, TypeInfo<typename TSerializer::ValueType>::CppFullTypeName, 0)
 				{
 					serializer=new TSerializer(this);
 				}
@@ -9403,50 +9411,50 @@ Predefined Types
 
 			struct VoidValue{};
 			
-			template<>struct TypeInfo<void>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<VoidValue>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IDescriptable>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<DescriptableObject>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<Value>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vuint8_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vuint16_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vuint32_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vuint64_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vint8_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vint16_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vint32_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<vint64_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<float>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<double>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<bool>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<wchar_t>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<WString>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<DateTime>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<Locale>{static const wchar_t* TypeName;};
+			DECL_TYPE_INFO(void)
+			DECL_TYPE_INFO(VoidValue)
+			DECL_TYPE_INFO(IDescriptable)
+			DECL_TYPE_INFO(DescriptableObject)
+			DECL_TYPE_INFO(Value)
+			DECL_TYPE_INFO(vuint8_t)
+			DECL_TYPE_INFO(vuint16_t)
+			DECL_TYPE_INFO(vuint32_t)
+			DECL_TYPE_INFO(vuint64_t)
+			DECL_TYPE_INFO(vint8_t)
+			DECL_TYPE_INFO(vint16_t)
+			DECL_TYPE_INFO(vint32_t)
+			DECL_TYPE_INFO(vint64_t)
+			DECL_TYPE_INFO(float)
+			DECL_TYPE_INFO(double)
+			DECL_TYPE_INFO(bool)
+			DECL_TYPE_INFO(wchar_t)
+			DECL_TYPE_INFO(WString)
+			DECL_TYPE_INFO(DateTime)
+			DECL_TYPE_INFO(Locale)
 
-			template<>struct TypeInfo<IValueEnumerator>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueEnumerable>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueReadonlyList>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueList>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueObservableList>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueReadonlyDictionary>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueDictionary>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueInterfaceProxy>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueFunctionProxy>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueListener>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IValueSubscription>{static const wchar_t* TypeName;};
+			DECL_TYPE_INFO(IValueEnumerator)
+			DECL_TYPE_INFO(IValueEnumerable)
+			DECL_TYPE_INFO(IValueReadonlyList)
+			DECL_TYPE_INFO(IValueList)
+			DECL_TYPE_INFO(IValueObservableList)
+			DECL_TYPE_INFO(IValueReadonlyDictionary)
+			DECL_TYPE_INFO(IValueDictionary)
+			DECL_TYPE_INFO(IValueInterfaceProxy)
+			DECL_TYPE_INFO(IValueFunctionProxy)
+			DECL_TYPE_INFO(IValueListener)
+			DECL_TYPE_INFO(IValueSubscription)
 
-			template<>struct TypeInfo<IValueSerializer>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<ITypeInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<ITypeInfo::Decorator>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IMemberInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IEventHandler>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IEventInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IPropertyInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IParameterInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IMethodInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<IMethodGroupInfo>{static const wchar_t* TypeName;};
-			template<>struct TypeInfo<ITypeDescriptor>{static const wchar_t* TypeName;};
+			DECL_TYPE_INFO(IValueSerializer)
+			DECL_TYPE_INFO(ITypeInfo)
+			DECL_TYPE_INFO(ITypeInfo::Decorator)
+			DECL_TYPE_INFO(IMemberInfo)
+			DECL_TYPE_INFO(IEventHandler)
+			DECL_TYPE_INFO(IEventInfo)
+			DECL_TYPE_INFO(IPropertyInfo)
+			DECL_TYPE_INFO(IParameterInfo)
+			DECL_TYPE_INFO(IMethodInfo)
+			DECL_TYPE_INFO(IMethodGroupInfo)
+			DECL_TYPE_INFO(ITypeDescriptor)
 
 			template<>
 			struct TypedValueSerializerProvider<vuint8_t>
@@ -9816,6 +9824,7 @@ TypeDescriptorImpl
 			private:
 				bool														loaded;
 				WString														typeName;
+				WString														cppFullTypeName;
 				Ptr<IValueSerializer>										valueSerializer;
 				collections::List<ITypeDescriptor*>							baseTypeDescriptors;
 				collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
@@ -9835,10 +9844,11 @@ TypeDescriptorImpl
 				virtual void				LoadInternal()=0;
 				void						Load();
 			public:
-				TypeDescriptorImpl(const WString& _typeName);
+				TypeDescriptorImpl(const WString& _typeName, const WString& _cppFullTypeName);
 				~TypeDescriptorImpl();
 
 				const WString&				GetTypeName()override;
+				const WString&				GetCppFullTypeName()override;
 				IValueSerializer*			GetValueSerializer()override;
 				vint						GetBaseTypeDescriptorCount()override;
 				ITypeDescriptor*			GetBaseTypeDescriptor(vint index)override;
@@ -12063,9 +12073,6 @@ Type
 
 #define BEGIN_TYPE_INFO_NAMESPACE namespace vl{namespace reflection{namespace description{
 #define END_TYPE_INFO_NAMESPACE }}}
-#define DECL_TYPE_INFO(TYPENAME) template<>struct TypeInfo<TYPENAME>{static const wchar_t* TypeName;};
-#define IMPL_TYPE_INFO(TYPENAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #TYPENAME;
-#define IMPL_TYPE_INFO_RENAME(TYPENAME, EXPECTEDNAME) const wchar_t* TypeInfo<TYPENAME>::TypeName = L ## #EXPECTEDNAME;
 #define ADD_TYPE_INFO(TYPENAME)\
 			{\
 				Ptr<ITypeDescriptor> type=new CustomTypeDescriptorSelector<TYPENAME>::CustomTypeDescriptorImpl();\
@@ -12160,7 +12167,7 @@ Class
 					typedef TYPENAME ClassType;\
 				public:\
 					CustomTypeDescriptorImpl()\
-						:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName)\
+						:TypeDescriptorImpl(TypeInfo<TYPENAME>::TypeName, TypeInfo<TYPENAME>::CppFullTypeName)\
 					{\
 						Description<TYPENAME>::SetAssociatedTypeDescroptor(this);\
 					}\

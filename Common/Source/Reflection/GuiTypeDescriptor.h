@@ -340,6 +340,7 @@ ITypeDescriptor
 			{
 			public:
 				virtual const WString&			GetTypeName()=0;
+				virtual const WString&			GetCppFullTypeName()=0;
 				virtual IValueSerializer*		GetValueSerializer()=0;
 				virtual vint					GetBaseTypeDescriptorCount()=0;
 				virtual ITypeDescriptor*		GetBaseTypeDescriptor(vint index)=0;

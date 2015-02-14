@@ -249,6 +249,7 @@ TypeDescriptorImpl
 			private:
 				bool														loaded;
 				WString														typeName;
+				WString														cppFullTypeName;
 				Ptr<IValueSerializer>										valueSerializer;
 				collections::List<ITypeDescriptor*>							baseTypeDescriptors;
 				collections::Dictionary<WString, Ptr<IPropertyInfo>>		properties;
@@ -268,10 +269,11 @@ TypeDescriptorImpl
 				virtual void				LoadInternal()=0;
 				void						Load();
 			public:
-				TypeDescriptorImpl(const WString& _typeName);
+				TypeDescriptorImpl(const WString& _typeName, const WString& _cppFullTypeName);
 				~TypeDescriptorImpl();
 
 				const WString&				GetTypeName()override;
+				const WString&				GetCppFullTypeName()override;
 				IValueSerializer*			GetValueSerializer()override;
 				vint						GetBaseTypeDescriptorCount()override;
 				ITypeDescriptor*			GetBaseTypeDescriptor(vint index)override;

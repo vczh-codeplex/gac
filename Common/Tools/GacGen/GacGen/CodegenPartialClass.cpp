@@ -334,11 +334,11 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 	
 	FOREACH(Ptr<InstanceSchema>, instance, typeSchemas.Values())
 	{
-		writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
+		writer.WriteLine(prefix + L"IMPL_CPP_TYPE_INFO(" + instance->GetFullName() + L")");
 	}
 	FOREACH(Ptr<Instance>, instance, instances.Values())
 	{
-		writer.WriteLine(prefix + L"IMPL_TYPE_INFO(" + instance->GetFullName() + L")");
+		writer.WriteLine(prefix + L"IMPL_CPP_TYPE_INFO(" + instance->GetFullName() + L")");
 	}
 	writer.WriteLine(L"");
 
