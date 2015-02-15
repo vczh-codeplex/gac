@@ -7,6 +7,7 @@ GacUI::NewFileWindow
 ***********************************************************************/
 
 #include "GacStudioUI.h"
+#include "..\Studio\SolutionModel.h"
 
 using namespace vl::filesystem;
 using namespace vm;
@@ -29,9 +30,10 @@ namespace ui
 		if (!workingProject || !fileFactory)
 		{
 			model->PromptError(L"Failed to add a file.");
-			goto CLOSE;
+			Close();
 		}
 
+		try
 		{
 			auto fileFolder = Folder(textBoxLocation->GetText());
 			auto filePath = fileFolder.GetFilePath() / (textBoxFileName->GetText() + fileFactory->GetDefaultFileExt());
@@ -43,20 +45,16 @@ namespace ui
 			}
 
 			auto fileItem = model->CreateFileModel(workingProject, fileFactory, filePath.GetFullPath());
-			if (!fileItem || !GetAction()->AddFile(fileItem))
-			{
-				model->PromptError(L"Failed to add a file of \"" + fileFactory->GetName() + L"\" to project \"" + workingProject->GetName() + L"\".");
-				goto CLOSE;
-			}
-			if (!workingProject->SaveProject(false))
-			{
-				model->PromptError(L"Failed to save project \"" + workingProject->GetName() + L"\".");
-				goto CLOSE;
-			}
-
+			GetAction()->AddFile(fileItem);
+			workingProject->SaveProject(false);
 		}
-	CLOSE:
-		Close();
+		catch (const vm::StudioException& ex)
+		{
+			if (ex.IsNonConfigError())
+			{
+				Close();
+			}
+		}
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER

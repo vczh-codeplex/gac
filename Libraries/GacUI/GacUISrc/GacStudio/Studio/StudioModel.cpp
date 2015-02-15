@@ -481,40 +481,40 @@ StudioModel
 		.First(nullptr);
 	}
 
-	bool StudioModel::OpenSolution(WString filePath)
+	void StudioModel::OpenSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
 		auto solution = MakePtr<SolutionItem>(this, solutionProjectFactory, filePath);
-		if (!solution->OpenSolution()) return false;
+		solution->OpenSolution();
 		rootSolutionItem->SetSolution(solution);
 		OpenedSolutionChanged();
-		return true;
 	}
 
-	bool StudioModel::SaveSolution()
+	void StudioModel::SaveSolution()
 	{
 		// EnsureAllOpeningFilesSaved();
 		auto solution = rootSolutionItem->GetSolution();
-		if (!solution) return false;
+		if (!solution)
+		{
+			throw StudioException(L"Internal error: Solution does not exist.", true);
+		}
 		return solution->SaveSolution(true);
 	}
 
-	bool StudioModel::NewSolution(WString filePath)
+	void StudioModel::NewSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
 		auto solution = MakePtr<SolutionItem>(this, solutionProjectFactory, filePath);
-		if (!solution->NewSolution()) return false;
+		solution->NewSolution();
 		rootSolutionItem->SetSolution(solution);
 		OpenedSolutionChanged();
-		return true;
 	}
 
-	bool StudioModel::CloseSolution()
+	void StudioModel::CloseSolution()
 	{
 		// EnsureAllOpeningFilesSaved();
 		rootSolutionItem->SetSolution(0);
 		OpenedSolutionChanged();
-		return true;
 	}
 
 	Ptr<IProjectModel> StudioModel::CreateProjectModel(Ptr<IProjectFactoryModel> projectFactory, WString filePath)
@@ -522,7 +522,7 @@ StudioModel
 		auto solution = rootSolutionItem->GetSolution();
 		if (!solution) return nullptr;
 		auto project = MakePtr<ProjectItem>(this, projectFactory, filePath);
-		if (!project->NewProjectAndSave()) return nullptr;
+		project->NewProjectAndSave();
 		return project;
 	}
 
@@ -531,7 +531,7 @@ StudioModel
 		auto solution = rootSolutionItem->GetSolution();
 		if (!solution) return nullptr;
 		auto file = MakePtr<FileItem>(this, fileFactory, filePath);
-		if (!file->NewFileAndSave()) return nullptr;
+		file->NewFileAndSave();
 		return file;
 	}
 

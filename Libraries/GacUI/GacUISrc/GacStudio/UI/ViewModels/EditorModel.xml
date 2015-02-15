@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Schemas>
+  <Interface ref.Class="vm::IMacroEnvironment">
+    <Property Name="Parent" Type="vm::IMacroEnvironment*" Readonly="true"/>
+    <Method Name="HasMacro" Type="bool">
+      <Argument Name="name" Type="string"/>
+      <Argument Name="inherit" Type="bool"/>
+    </Method>
+    <Method Name="GetMacroValue" Type="string">
+      <Argument Name="name" Type="string"/>
+      <Argument Name="inherit" Type="bool"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::ITextTemplate">
+    <Method Name="Generate" Type="string">
+      <Argument Name="macroEnvironment" Type="vm::IMacroEnvironment^"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IEditorFactoryModel">
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+  </Interface>
+</Schemas>

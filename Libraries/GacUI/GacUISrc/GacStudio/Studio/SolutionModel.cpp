@@ -62,6 +62,25 @@ namespace vm
 	}
 
 /***********************************************************************
+StudioException
+***********************************************************************/
+	
+		StudioException::StudioException(const WString& message, bool _nonConfigError)
+			:Exception(message)
+			, nonConfigError(_nonConfigError)
+		{
+		}
+
+		StudioException::~StudioException()
+		{
+		}
+
+		bool StudioException::IsNonConfigError()const
+		{
+			return nonConfigError;
+		}
+
+/***********************************************************************
 FileMacroEnvironment
 ***********************************************************************/
 
@@ -165,18 +184,21 @@ FileItem
 		return GetDisplayNamePreviewFromFilePath(filePath, fileFactory->GetDefaultFileExt(), newName);
 	}
 
-	bool FileItem::Rename(WString newName)
+	void FileItem::Rename(WString newName)
 	{
 		throw 0;
 	}
 
-	bool FileItem::Remove()
+	void FileItem::Remove()
 	{
 		if (auto project = GetOwnerProject(this))
 		{
-			return project->RemoveFileItem(this);
+			project->RemoveFileItem(this);
 		}
-		return false;
+		else
+		{
+			throw StudioException(L"Internal error: File \"" + filePath + L"\" does not attach to a project.", true);
+		}
 	}
 
 	Ptr<IFileFactoryModel> FileItem::GetFileFactory()
@@ -184,32 +206,34 @@ FileItem
 		return fileFactory;
 	}
 
-	bool FileItem::OpenFile()
+	void FileItem::OpenFile()
 	{
 		throw 0;
 	}
 
-	bool FileItem::SaveFile()
+	void FileItem::SaveFile()
 	{
-		return true;
 	}
 
-	bool FileItem::NewFileAndSave()
+	void FileItem::NewFileAndSave()
 	{
-		if (fileFactory->GetTextTemplate())
+		if (!fileFactory->GetTextTemplate())
 		{
-			auto env = MakePtr<FileMacroEnvironment>(this);
-			WString text = fileFactory->GetTextTemplate()->Generate(env);
-
-			FileStream fileStream(filePath, FileStream::WriteOnly);
-			if (!fileStream.IsAvailable()) return false;
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-			writer.WriteString(text);
-			return true;
+			throw StudioException(L"Internal error: Cannot create content for file \"" + filePath + L"\" because there is not default file template.", false);
 		}
-		return false;
+
+		auto env = MakePtr<FileMacroEnvironment>(this);
+		WString text = fileFactory->GetTextTemplate()->Generate(env);
+
+		FileStream fileStream(filePath, FileStream::WriteOnly);
+		if (!fileStream.IsAvailable())
+		{
+			throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
+		}
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		writer.WriteString(text);
 	}
 
 	ISolutionItemModel* FileItem::GetParent()
@@ -263,7 +287,7 @@ FolderItemBase
 		fileNames.Clear();
 	}
 
-	bool FolderItemBase::AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
+	void FolderItemBase::AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
 	{
 		auto delimiter = wcschr(filePath, FilePath::Delimiter);
 		if (delimiter)
@@ -286,14 +310,14 @@ FolderItemBase
 				folder = children[index].Cast<FolderItem>();
 			}
 
-			return folder->AddFileItemInternal(delimiter + 1, fileItem);
+			folder->AddFileItemInternal(delimiter + 1, fileItem);
 		}
 		else
 		{
 			auto key = wupper(filePath);
 			if (fileNames.Contains(key))
 			{
-				return false;
+				throw StudioException(L"Internal error: File \"" + fileItem->GetFilePath() + L"\" already exists.", true);
 			}
 			auto index = fileNames.Add(key);
 			children.Insert(folderNames.Count() + index, fileItem);
@@ -302,7 +326,6 @@ FolderItemBase
 			{
 				file->parent = dynamic_cast<ISolutionItemModel*>(this);
 			}
-			return true;
 		}
 	}
 
@@ -316,7 +339,7 @@ FolderItemBase
 			auto index = folderNames.IndexOf(key);
 			if (index == -1)
 			{
-				return false;
+				throw StudioException(L"Internal error: File \"" + fileItem->GetFilePath() + L"\" does not exist.", true);
 			}
 
 			auto folder = children[index].Cast<FolderItem>();
@@ -367,13 +390,16 @@ FolderItem
 	{
 	}
 	
-	bool FolderItem::AddFile(Ptr<IFileModel> file)
+	void FolderItem::AddFile(Ptr<IFileModel> file)
 	{
 		if (auto project = GetOwnerProject(this))
 		{
-			return project->AddFileItem(file);
+			project->AddFileItem(file);
 		}
-		return false;
+		else
+		{
+			throw StudioException(L"Internal error: Folder \"" + filePath + L"\" does not attach to a project.", true);
+		}
 	}
 
 	WString FolderItem::GetRenameablePart()
@@ -386,17 +412,17 @@ FolderItem
 		return GetDisplayNamePreviewFromFilePath(filePath, L"", newName);
 	}
 
-	bool FolderItem::Rename(WString newName)
+	void FolderItem::Rename(WString newName)
 	{
 		throw 0;
 	}
 
-	bool FolderItem::Remove()
+	void FolderItem::Remove()
 	{
 		auto project = GetOwnerProject(this);
 		if (!project)
 		{
-			return false;
+			throw StudioException(L"Internal error: Folder \"" + filePath + L"\" does not attach to a project.", true);
 		}
 
 		List<Ptr<IFileModel>> files;
@@ -422,13 +448,8 @@ FolderItem
 
 		FOREACH(Ptr<IFileModel>, fileItem, files)
 		{
-			if (!project->RemoveFileItem(fileItem))
-			{
-				return false;
-			}
+			project->RemoveFileItem(fileItem);
 		}
-
-		return true;
 	}
 
 	ISolutionItemModel* FolderItem::GetParent()
@@ -490,29 +511,27 @@ ProjectItem
 		}
 	}
 
-	bool ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
+	void ProjectItem::AddFileItem(Ptr<IFileModel> fileItem)
 	{
-		if (fileItems.Contains(fileItem.Obj())) return false;
-		auto path = GetNormalizedRelativePath(fileItem);
-		if (!AddFileItemInternal(path.Buffer(), fileItem))
+		if (fileItems.Contains(fileItem.Obj()))
 		{
-			return false;
+			throw StudioException(L"Internal error: File \"" + fileItem->GetFilePath() + L"\" already exists.", true);
 		}
+		auto path = GetNormalizedRelativePath(fileItem);
+		AddFileItemInternal(path.Buffer(), fileItem);
 		fileItems.Add(fileItem);
-		return true;
 	}
 
-	bool ProjectItem::RemoveFileItem(Ptr<IFileModel> fileItem)
+	void ProjectItem::RemoveFileItem(Ptr<IFileModel> fileItem)
 	{
 		auto index = fileItems.IndexOf(fileItem.Obj());
 		if (index == -1)
 		{
-			return false;
+			throw StudioException(L"Internal error: File \"" + fileItem->GetFilePath() + L"\" does not exist.", true);
 		}
 		auto path = GetNormalizedRelativePath(fileItem);
 		RemoveFileItemInternal(path.Buffer(), fileItem);
 		fileItems.RemoveAt(index);
-		return true;
 	}
 
 	ProjectItem::ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)
@@ -531,9 +550,9 @@ ProjectItem
 	{
 	}
 
-	bool ProjectItem::AddFile(Ptr<IFileModel> file)
+	void ProjectItem::AddFile(Ptr<IFileModel> file)
 	{
-		return AddFileItem(file);
+		AddFileItem(file);
 	}
 
 	WString ProjectItem::GetRenameablePart()
@@ -546,14 +565,14 @@ ProjectItem
 		return GetDisplayNamePreviewFromFilePath(filePath, L".gacproj.xml", newName);
 	}
 
-	bool ProjectItem::Rename(WString newName)
+	void ProjectItem::Rename(WString newName)
 	{
 		throw 0;
 	}
 
-	bool ProjectItem::Remove()
+	void ProjectItem::Remove()
 	{
-		return studioModel->GetOpenedSolution()->RemoveProject(this);
+		studioModel->GetOpenedSolution()->RemoveProject(this);
 	}
 
 	Ptr<IProjectFactoryModel> ProjectItem::GetProjectFactory()
@@ -561,9 +580,12 @@ ProjectItem
 		return projectFactory;
 	}
 		
-	bool ProjectItem::OpenProject()
+	void ProjectItem::OpenProject()
 	{
-		if (unsupported) return false;
+		if (unsupported)
+		{
+			throw StudioException(projectFactory->GetName() + L" project \"" + filePath + L"\" is not supported.", true);
+		}
 		errors.Clear();
 
 		auto projectFolder = FilePath(filePath).GetFolder();
@@ -574,13 +596,17 @@ ProjectItem
 			{
 				errors.Add(L"Failed to read \"" + filePath + L"\".");
 				ErrorCountChanged();
+				throw StudioException(L"Cannot open file \"" + filePath + L"\" to read.", true);
 			}
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 
 			auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
-			if (!parser) return false;
+			if (!parser)
+			{
+				throw StudioException(L"Internal error: Cannot find XML parser.", true);
+			}
 
 			xml = parser->TypedParse(reader.ReadToEnd(), errors);
 		}
@@ -633,12 +659,14 @@ ProjectItem
 		}
 
 		ErrorCountChanged();
-		return true;
 	}
 
-	bool ProjectItem::SaveProject(bool saveContainingFiles)
+	void ProjectItem::SaveProject(bool saveContainingFiles)
 	{
-		if (unsupported) return false;
+		if (unsupported)
+		{
+			throw StudioException(projectFactory->GetName() + L" project \"" + filePath + L"\" is not supported.", true);
+		}
 		auto projectFolder = FilePath(filePath).GetFolder();
 		auto xml = MakePtr<XmlDocument>();
 		auto xmlSolution = MakePtr<XmlElement>();
@@ -663,7 +691,7 @@ ProjectItem
 			{
 				errors.Add(L"Failed to write \"" + filePath + L"\".");
 				ErrorCountChanged();
-				return false;
+				throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
 			}
 			BomEncoder encoder(BomEncoder::Utf16);
 			EncoderStream encoderStream(fileStream, encoder);
@@ -677,15 +705,17 @@ ProjectItem
 				fileItem->SaveFile();
 			}
 		}
-		return true;
 	}
 
-	bool ProjectItem::NewProjectAndSave()
+	void ProjectItem::NewProjectAndSave()
 	{
-		if (unsupported) return false;
+		if (unsupported)
+		{
+			throw StudioException(projectFactory->GetName() + L" project \"" + filePath + L"\" is not supported.", true);
+		}
 		ClearInternal();
 		fileItems.Clear();
-		return SaveProject(false);
+		SaveProject(false);
 	}
 
 	ISolutionItemModel* ProjectItem::GetParent()
@@ -743,7 +773,7 @@ SolutionItem
 	{
 	}
 		
-	bool SolutionItem::OpenSolution()
+	void SolutionItem::OpenSolution()
 	{
 		projects.Clear();
 		errors.Clear();
@@ -756,13 +786,17 @@ SolutionItem
 			{
 				errors.Add(L"Failed to read \"" + filePath + L"\".");
 				ErrorCountChanged();
+				throw StudioException(L"Cannot open file \"" + filePath + L"\" to read.", true);
 			}
 			BomDecoder decoder;
 			DecoderStream decoderStream(fileStream, decoder);
 			StreamReader reader(decoderStream);
 
 			auto parser = GetParserManager()->GetParser<XmlDocument>(L"XML");
-			if (!parser) return false;
+			if (!parser)
+			{
+				throw StudioException(L"Internal error: Cannot find XML parser.", true);
+			}
 
 			xml = parser->TypedParse(reader.ReadToEnd(), errors);
 		}
@@ -803,10 +837,9 @@ SolutionItem
 		}
 
 		ErrorCountChanged();
-		return true;
 	}
 
-	bool SolutionItem::SaveSolution(bool saveContainingProjects)
+	void SolutionItem::SaveSolution(bool saveContainingProjects)
 	{
 		auto solutionFolder = FilePath(filePath).GetFolder();
 		auto xml = MakePtr<XmlDocument>();
@@ -830,7 +863,7 @@ SolutionItem
 			{
 				errors.Add(L"Failed to write \"" + filePath + L"\".");
 				ErrorCountChanged();
-				return false;
+				throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
 			}
 			BomEncoder encoder(BomEncoder::Utf16);
 			EncoderStream encoderStream(fileStream, encoder);
@@ -844,28 +877,30 @@ SolutionItem
 				project->SaveProject(true);
 			}
 		}
-		return true;
 	}
 
-	bool SolutionItem::NewSolution()
+	void SolutionItem::NewSolution()
 	{
 		projects.Clear();
-		return true;
 	}
 
-	bool SolutionItem::AddProject(Ptr<IProjectModel> project)
+	void SolutionItem::AddProject(Ptr<IProjectModel> project)
 	{
-		if (projects.Contains(project.Obj())) return false;
+		if (projects.Contains(project.Obj()))
+		{
+			throw StudioException(L"Internal error: Project \"" + project->GetName() + L"\" already exists.", true);
+		}
 		projects.Add(project);
-		return true;
 	}
 
-	bool SolutionItem::RemoveProject(Ptr<IProjectModel> project)
+	void SolutionItem::RemoveProject(Ptr<IProjectModel> project)
 	{
 		auto index = projects.IndexOf(project.Obj());
-		if (index == -1) return false;
+		if (index == -1)
+		{
+			throw StudioException(L"Internal error: Project \"" + project->GetName() + L"\" does not exist.", true);
+		}
 		projects.RemoveAt(index);
-		return true;
 	}
 
 	ISolutionItemModel* SolutionItem::GetParent()

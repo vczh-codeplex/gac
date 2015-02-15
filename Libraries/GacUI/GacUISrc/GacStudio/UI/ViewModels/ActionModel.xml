@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Schemas>
+  <Interface ref.Class="vm::IAddFileItemAction">
+    <Method Name="AddFile" Type="void">
+      <Argument Name="file" Type="vm::IFileModel^"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IOpenInEditorItemAction">
+  </Interface>
+
+  <Interface ref.Class="vm::IRenameItemAction">
+    <Method Name="GetRenameablePart" Type="string"/>
+    <Method Name="PreviewRename" Type="string">
+      <Argument Name="newName" Type="string"/>
+    </Method>
+    <Method Name="Rename" Type="void">
+      <Argument Name="newName" Type="string"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IRemoveItemAction">
+    <Method Name="Remove" Type="void"/>
+  </Interface>
+</Schemas>
