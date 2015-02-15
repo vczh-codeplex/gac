@@ -7,6 +7,7 @@ GacUI::NewProjectWindow
 ***********************************************************************/
 
 #include "GacStudioUI.h"
+#include "..\Studio\SolutionModel.h"
 
 using namespace vl::filesystem;
 using namespace vm;
@@ -32,9 +33,10 @@ namespace ui
 		if (!projectFactory)
 		{
 			model->PromptError(L"Failed to add a project.");
-			goto CLOSE;
+			Close();
 		}
 
+		try
 		{
 			auto solutionFolder =
 				comboSolution->GetSelectedIndex() == 0
@@ -61,26 +63,20 @@ namespace ui
 
 			if (comboSolution->GetSelectedIndex() == 0)
 			{
-				if (!model->NewSolution(solutionPath.GetFullPath()))
-				{
-					goto CLOSE;
-				}
+				model->NewSolution(solutionPath.GetFullPath());
 			}
 
 			auto projectItem = model->CreateProjectModel(projectFactory, projectPath.GetFullPath());
-			if (!projectItem || !model->GetOpenedSolution()->AddProject(projectItem))
+			model->GetOpenedSolution()->AddProject(projectItem);
+			model->GetOpenedSolution()->SaveSolution(false);
+		}
+		catch (const vm::StudioException& ex)
+		{
+			if (ex.IsNonConfigError())
 			{
-				model->PromptError(L"Failed to add a project of \"" + projectFactory->GetName() + L"\".");
-				goto CLOSE;
-			}
-			if (!model->GetOpenedSolution()->SaveSolution(false))
-			{
-				model->PromptError(L"Failed to save the solution.");
-				goto CLOSE;
+				Close();
 			}
 		}
-	CLOSE:
-		Close();
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER

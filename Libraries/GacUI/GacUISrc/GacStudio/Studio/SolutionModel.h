@@ -15,6 +15,18 @@ using namespace vl::collections;
 
 namespace vm
 {
+	class StudioException : public Exception
+	{
+	protected:
+		bool											nonConfigError;
+
+	public:
+		StudioException(const WString& message, bool _nonConfigError);
+		~StudioException();
+
+		bool											IsNonConfigError()const;
+	};
+
 	class FileMacroEnvironment : public Object, public virtual IMacroEnvironment
 	{
 	protected:
@@ -51,14 +63,14 @@ namespace vm
 		// --------------------------- action
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		bool											Rename(WString newName)override;
-		bool											Remove()override;
+		void											Rename(WString newName)override;
+		void											Remove()override;
 
 		// --------------------------- feature
 		Ptr<IFileFactoryModel>							GetFileFactory()override;
-		bool											OpenFile()override;
-		bool											SaveFile()override;
-		bool											NewFileAndSave()override;
+		void											OpenFile()override;
+		void											SaveFile()override;
+		void											NewFileAndSave()override;
 
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -79,7 +91,7 @@ namespace vm
 		collections::SortedList<WString>				fileNames;
 
 		void											ClearInternal();
-		bool											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
+		void											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 		bool											RemoveFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 	public:
 		FolderItemBase();
@@ -101,11 +113,11 @@ namespace vm
 		~FolderItem();
 		
 		// --------------------------- action
-		bool											AddFile(Ptr<IFileModel> file)override;
+		void											AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		bool											Rename(WString newName)override;
-		bool											Remove()override;
+		void											Rename(WString newName)override;
+		void											Remove()override;
 		
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -134,24 +146,24 @@ namespace vm
 		bool											unsupported;
 
 		WString											GetNormalizedRelativePath(Ptr<IFileModel> fileItem);
-		bool											AddFileItem(Ptr<IFileModel> fileItem);
-		bool											RemoveFileItem(Ptr<IFileModel> fileItem);
+		void											AddFileItem(Ptr<IFileModel> fileItem);
+		void											RemoveFileItem(Ptr<IFileModel> fileItem);
 	public:
 		ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();
 		
 		// --------------------------- action
-		bool											AddFile(Ptr<IFileModel> file)override;
+		void											AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		bool											Rename(WString newName)override;
-		bool											Remove()override;
+		void											Rename(WString newName)override;
+		void											Remove()override;
 		
 		// --------------------------- feature
 		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
-		bool											OpenProject()override;
-		bool											SaveProject(bool saveContainingFiles)override;
-		bool											NewProjectAndSave()override;
+		void											OpenProject()override;
+		void											SaveProject(bool saveContainingFiles)override;
+		void											NewProjectAndSave()override;
 		
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -178,11 +190,11 @@ namespace vm
 		~SolutionItem();
 		
 		// --------------------------- action
-		bool											OpenSolution()override;
-		bool											SaveSolution(bool saveContainingProjects)override;
-		bool											NewSolution()override;
-		bool											AddProject(Ptr<IProjectModel> project)override;
-		bool											RemoveProject(Ptr<IProjectModel> project)override;
+		void											OpenSolution()override;
+		void											SaveSolution(bool saveContainingProjects)override;
+		void											NewSolution()override;
+		void											AddProject(Ptr<IProjectModel> project)override;
+		void											RemoveProject(Ptr<IProjectModel> project)override;
 		
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;

@@ -160,6 +160,15 @@
     <Xml Include="UI\UserInterfaces\RenameFileWindow.xml">
       <Filter>Resource Files\UserInterfaces</Filter>
     </Xml>
+    <Xml Include="UI\ViewModels\StudioModel.xml">
+      <Filter>Resource Files\ViewModels</Filter>
+    </Xml>
+    <Xml Include="UI\ViewModels\EditorModel.xml">
+      <Filter>Resource Files\ViewModels</Filter>
+    </Xml>
+    <Xml Include="UI\ViewModels\ActionModel.xml">
+      <Filter>Resource Files\ViewModels</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat">

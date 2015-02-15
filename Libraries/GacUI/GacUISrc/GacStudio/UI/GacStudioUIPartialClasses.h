@@ -15,20 +15,20 @@ DO NOT MODIFY
 
 namespace vm
 {
-	class ISolutionItemModel;
+	class IAddFileItemAction;
+	class IOpenInEditorItemAction;
+	class IRenameItemAction;
+	class IRemoveItemAction;
 	class IMacroEnvironment;
 	class ITextTemplate;
 	class IEditorFactoryModel;
+	class ISolutionItemModel;
 	class IFileFactoryModel;
 	class IProjectFactoryModel;
 	class IFileModel;
 	class IFolderModel;
 	class IProjectModel;
 	class ISolutionModel;
-	class IAddFileItemAction;
-	class IOpenInEditorItemAction;
-	class IRenameItemAction;
-	class IRemoveItemAction;
 	class IStudioModel;
 }
 namespace ui
@@ -42,30 +42,32 @@ namespace ui
 }
 namespace vm
 {
-	class ISolutionItemModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItemModel>
+	class IAddFileItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IAddFileItemAction>
 	{
 	public:
 
-		virtual vm::ISolutionItemModel* GetParent() = 0;
+		virtual void AddFile(vl::Ptr<vm::IFileModel> file) = 0;
+	};
 
-		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
-		vl::Event<void()> ImageChanged;
+	class IOpenInEditorItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IOpenInEditorItemAction>
+	{
+	public:
+	};
 
-		virtual vl::WString GetName() = 0;
-		vl::Event<void()> NameChanged;
+	class IRenameItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRenameItemAction>
+	{
+	public:
 
-		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetChildren() = 0;
+		virtual vl::WString GetRenameablePart() = 0;
+		virtual vl::WString PreviewRename(vl::WString newName) = 0;
+		virtual void Rename(vl::WString newName) = 0;
+	};
 
-		virtual vl::WString GetFilePath() = 0;
-		vl::Event<void()> FilePathChanged;
+	class IRemoveItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRemoveItemAction>
+	{
+	public:
 
-		virtual vl::WString GetFileDirectory() = 0;
-		vl::Event<void()> FileDirectoryChanged;
-
-		virtual vl::vint32_t GetErrorCount() = 0;
-		vl::Event<void()> ErrorCountChanged;
-
-		virtual vl::WString GetErrorText(vl::vint32_t index) = 0;
+		virtual void Remove() = 0;
 	};
 
 	class IMacroEnvironment : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IMacroEnvironment>
@@ -92,6 +94,32 @@ namespace vm
 		virtual vl::WString GetName() = 0;
 
 		virtual vl::WString GetId() = 0;
+	};
+
+	class ISolutionItemModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItemModel>
+	{
+	public:
+
+		virtual vm::ISolutionItemModel* GetParent() = 0;
+
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
+		vl::Event<void()> ImageChanged;
+
+		virtual vl::WString GetName() = 0;
+		vl::Event<void()> NameChanged;
+
+		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetChildren() = 0;
+
+		virtual vl::WString GetFilePath() = 0;
+		vl::Event<void()> FilePathChanged;
+
+		virtual vl::WString GetFileDirectory() = 0;
+		vl::Event<void()> FileDirectoryChanged;
+
+		virtual vl::vint32_t GetErrorCount() = 0;
+		vl::Event<void()> ErrorCountChanged;
+
+		virtual vl::WString GetErrorText(vl::vint32_t index) = 0;
 	};
 
 	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
@@ -138,9 +166,9 @@ namespace vm
 
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
 
-		virtual bool OpenFile() = 0;
-		virtual bool SaveFile() = 0;
-		virtual bool NewFileAndSave() = 0;
+		virtual void OpenFile() = 0;
+		virtual void SaveFile() = 0;
+		virtual void NewFileAndSave() = 0;
 	};
 
 	class IFolderModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFolderModel>
@@ -154,48 +182,20 @@ namespace vm
 
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
 
-		virtual bool OpenProject() = 0;
-		virtual bool SaveProject(bool saveContainingFiles) = 0;
-		virtual bool NewProjectAndSave() = 0;
+		virtual void OpenProject() = 0;
+		virtual void SaveProject(bool saveContainingFiles) = 0;
+		virtual void NewProjectAndSave() = 0;
 	};
 
 	class ISolutionModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<ISolutionModel>
 	{
 	public:
 
-		virtual bool OpenSolution() = 0;
-		virtual bool SaveSolution(bool saveContainingProjects) = 0;
-		virtual bool NewSolution() = 0;
-		virtual bool AddProject(vl::Ptr<vm::IProjectModel> project) = 0;
-		virtual bool RemoveProject(vl::Ptr<vm::IProjectModel> project) = 0;
-	};
-
-	class IAddFileItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IAddFileItemAction>
-	{
-	public:
-
-		virtual bool AddFile(vl::Ptr<vm::IFileModel> file) = 0;
-	};
-
-	class IOpenInEditorItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IOpenInEditorItemAction>
-	{
-	public:
-	};
-
-	class IRenameItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRenameItemAction>
-	{
-	public:
-
-		virtual vl::WString GetRenameablePart() = 0;
-		virtual vl::WString PreviewRename(vl::WString newName) = 0;
-		virtual bool Rename(vl::WString newName) = 0;
-	};
-
-	class IRemoveItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRemoveItemAction>
-	{
-	public:
-
-		virtual bool Remove() = 0;
+		virtual void OpenSolution() = 0;
+		virtual void SaveSolution(bool saveContainingProjects) = 0;
+		virtual void NewSolution() = 0;
+		virtual void AddProject(vl::Ptr<vm::IProjectModel> project) = 0;
+		virtual void RemoveProject(vl::Ptr<vm::IProjectModel> project) = 0;
 	};
 
 	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
@@ -233,10 +233,10 @@ namespace vm
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory(vl::WString id) = 0;
-		virtual bool OpenSolution(vl::WString filePath) = 0;
-		virtual bool SaveSolution() = 0;
-		virtual bool NewSolution(vl::WString filePath) = 0;
-		virtual bool CloseSolution() = 0;
+		virtual void OpenSolution(vl::WString filePath) = 0;
+		virtual void SaveSolution() = 0;
+		virtual void NewSolution(vl::WString filePath) = 0;
+		virtual void CloseSolution() = 0;
 		virtual vl::Ptr<vm::IProjectModel> CreateProjectModel(vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString filePath) = 0;
 		virtual vl::Ptr<vm::IFileModel> CreateFileModel(vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString filePath) = 0;
 		virtual void OpenBrowser(vl::WString url) = 0;

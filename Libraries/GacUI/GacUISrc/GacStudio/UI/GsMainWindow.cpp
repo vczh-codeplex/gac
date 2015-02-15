@@ -7,6 +7,7 @@ GacUI::MainWindow
 ***********************************************************************/
 
 #include "GacStudioUI.h"
+#include "..\Studio\SolutionModel.h"
 
 using namespace vl::collections;
 
@@ -118,31 +119,26 @@ namespace ui
 
 	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRemoveItemAction>();
-		if (!action) return;
-		if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
+		try
 		{
-			auto solutionItem = GetViewModel()->GetOpenedSolution();
-			if (action->Remove())
+			auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRemoveItemAction>();
+			if (!action) return;
+			if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
 			{
+				auto solutionItem = GetViewModel()->GetOpenedSolution();
+				action->Remove();
 				solutionItem->SaveSolution(false);
 			}
 			else
 			{
-				GetViewModel()->PromptError(L"Failed to delete project \"" + projectItem->GetName() + L"\".");
-			}
-		}
-		else
-		{
-			projectItem = GetViewModel()->GetWorkingProject();
-			if (action->Remove())
-			{
+				projectItem = GetViewModel()->GetWorkingProject();
+				action->Remove();
 				projectItem->SaveProject(false);
 			}
-			else
-			{
-				GetViewModel()->PromptError(L"Failed to delete file \"" + GetViewModel()->GetWorkingItem()->GetName() + L"\" in project \"" + projectItem->GetName() + L"\".");
-			}
+		}
+		catch (const vm::StudioException& ex)
+		{
+			GetViewModel()->PromptError(ex.Message());
 		}
 	}
 

@@ -152,10 +152,10 @@ namespace vm
 		Ptr<IFileFactoryModel>							GetFileFactory(WString id)override;
 		Ptr<IEditorFactoryModel>						GetEditorFactory(WString id)override;
 
-		bool											OpenSolution(WString filePath)override;
-		bool											SaveSolution()override;
-		bool											NewSolution(WString filePath)override;
-		bool											CloseSolution()override;
+		void											OpenSolution(WString filePath)override;
+		void											SaveSolution()override;
+		void											NewSolution(WString filePath)override;
+		void											CloseSolution()override;
 		Ptr<IProjectModel>								CreateProjectModel(Ptr<IProjectFactoryModel> projectFactory, WString filePath)override;
 		Ptr<IFileModel>									CreateFileModel(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)override;
 

@@ -217,7 +217,10 @@
     <Xml Include="UI\UserInterfaces\NewFileWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewProjectWindow.xml" />
     <Xml Include="UI\UserInterfaces\RenameFileWindow.xml" />
+    <Xml Include="UI\ViewModels\ActionModel.xml" />
+    <Xml Include="UI\ViewModels\EditorModel.xml" />
     <Xml Include="UI\ViewModels\SolutionModel.xml" />
+    <Xml Include="UI\ViewModels\StudioModel.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="UI\Codegen.bat" />
