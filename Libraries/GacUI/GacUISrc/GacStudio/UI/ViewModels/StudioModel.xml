@@ -58,17 +58,19 @@
     </Method>
     <Method Name="CloseSolution" Type="void">
     </Method>
-    <Method Name="CreateFileModel" Type="vm::IFileModel^">
-      <Argument Name="project" Type="vm::IProjectModel^"/>
-      <Argument Name="fileFactory" Type="vm::IFileFactoryModel^"/>
-      <Argument Name="filePath" Type="string"/>
-    </Method>
     <Method Name="AddNewProject" Type="vm::IProjectModel^">
       <Argument Name="createNewSolution" Type="bool"/>
       <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
       <Argument Name="projectName" Type="string"/>
       <Argument Name="solutionDirectory" Type="string"/>
       <Argument Name="solutionName" Type="string"/>
+    </Method>
+    <Method Name="AddNewFile" Type="vm::IFileModel^">
+      <Argument Name="action" Type="vm::IAddFileItemAction^"/>
+      <Argument Name="project" Type="vm::IProjectModel^"/>
+      <Argument Name="fileFactory" Type="vm::IFileFactoryModel^"/>
+      <Argument Name="fileDirectory" Type="string"/>
+      <Argument Name="fileName" Type="string"/>
     </Method>
 
     <Method Name="OpenBrowser" Type="void">

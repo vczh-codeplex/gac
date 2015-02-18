@@ -27,33 +27,18 @@ namespace ui
 		auto model = GetViewModel();
 		auto workingProject = model->GetWorkingProject();
 		auto fileFactory = UnboxValue<Ptr<IFileFactoryModel>>(listViewFileTemplate->GetSelectedItem());
-		if (!workingProject || !fileFactory)
+		if (model->SafeExecute([=]()
+			{
+				model->AddNewFile(
+					GetAction(),
+					workingProject,
+					fileFactory,
+					textBoxLocation->GetText(),
+					textBoxFileName->GetText()
+					);
+			}))
 		{
-			model->PromptError(L"Failed to add a file.");
 			Close();
-		}
-
-		try
-		{
-			auto fileFolder = Folder(textBoxLocation->GetText());
-			auto filePath = fileFolder.GetFilePath() / (textBoxFileName->GetText() + fileFactory->GetDefaultFileExt());
-
-			if (!fileFolder.Exists() && !fileFolder.Create(true))
-			{
-				model->PromptError(L"Failed to create folder \"" + fileFolder.GetFilePath().GetFullPath() + L"\".");
-				return;
-			}
-
-			auto fileItem = model->CreateFileModel(workingProject, fileFactory, filePath.GetFullPath());
-			GetAction()->AddFile(fileItem);
-			workingProject->SaveProject(false);
-		}
-		catch (const vm::StudioException& ex)
-		{
-			if (ex.IsNonConfigError())
-			{
-				Close();
-			}
 		}
 	}
 
