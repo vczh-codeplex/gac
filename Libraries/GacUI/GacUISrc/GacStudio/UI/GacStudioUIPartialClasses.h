@@ -23,12 +23,12 @@ namespace vm
 	class ITextTemplate;
 	class IEditorFactoryModel;
 	class ISolutionItemModel;
-	class IFileFactoryModel;
-	class IProjectFactoryModel;
 	class IFileModel;
 	class IFolderModel;
 	class IProjectModel;
 	class ISolutionModel;
+	class IFileFactoryModel;
+	class IProjectFactoryModel;
 	class IStudioModel;
 }
 namespace ui
@@ -122,44 +122,6 @@ namespace vm
 		virtual vl::WString GetErrorText(vl::vint32_t index) = 0;
 	};
 
-	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
-	{
-	public:
-
-		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
-
-		virtual vl::Ptr<vl::presentation::GuiImageData> GetSmallImage() = 0;
-
-		virtual vl::WString GetName() = 0;
-
-		virtual vl::WString GetCategory() = 0;
-
-		virtual vl::WString GetDescription() = 0;
-
-		virtual vl::WString GetId() = 0;
-
-		virtual vl::WString GetDefaultFileExt() = 0;
-
-		virtual vl::Ptr<vm::ITextTemplate> GetTextTemplate() = 0;
-	};
-
-	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
-	{
-	public:
-
-		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
-
-		virtual vl::Ptr<vl::presentation::GuiImageData> GetSmallImage() = 0;
-
-		virtual vl::WString GetName() = 0;
-
-		virtual vl::WString GetDescription() = 0;
-
-		virtual vl::WString GetId() = 0;
-
-		virtual vl::collections::LazyList<vl::Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
-	};
-
 	class IFileModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFileModel>
 	{
 	public:
@@ -196,6 +158,44 @@ namespace vm
 		virtual void NewSolution() = 0;
 		virtual void AddProject(vl::Ptr<vm::IProjectModel> project) = 0;
 		virtual void RemoveProject(vl::Ptr<vm::IProjectModel> project) = 0;
+	};
+
+	class IFileFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IFileFactoryModel>
+	{
+	public:
+
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
+
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetSmallImage() = 0;
+
+		virtual vl::WString GetName() = 0;
+
+		virtual vl::WString GetCategory() = 0;
+
+		virtual vl::WString GetDescription() = 0;
+
+		virtual vl::WString GetId() = 0;
+
+		virtual vl::WString GetDefaultFileExt() = 0;
+
+		virtual vl::Ptr<vm::ITextTemplate> GetTextTemplate() = 0;
+	};
+
+	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
+	{
+	public:
+
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetImage() = 0;
+
+		virtual vl::Ptr<vl::presentation::GuiImageData> GetSmallImage() = 0;
+
+		virtual vl::WString GetName() = 0;
+
+		virtual vl::WString GetDescription() = 0;
+
+		virtual vl::WString GetId() = 0;
+
+		virtual vl::collections::LazyList<vl::Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
 	};
 
 	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
@@ -237,10 +237,11 @@ namespace vm
 		virtual void SaveSolution() = 0;
 		virtual void NewSolution(vl::WString filePath) = 0;
 		virtual void CloseSolution() = 0;
-		virtual vl::Ptr<vm::IProjectModel> CreateProjectModel(vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString filePath) = 0;
 		virtual vl::Ptr<vm::IFileModel> CreateFileModel(vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString filePath) = 0;
+		virtual vl::Ptr<vm::IProjectModel> AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName) = 0;
 		virtual void OpenBrowser(vl::WString url) = 0;
 		virtual void PromptError(vl::WString message) = 0;
+		virtual bool SafeExecute(vl::Func<void()> procedure) = 0;
 	};
 
 }

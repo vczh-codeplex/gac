@@ -5,6 +5,7 @@
 using namespace vl::stream;
 using namespace vl::reflection::description;
 using namespace vl::parsing::xml;
+using namespace vl::filesystem;
 
 namespace vm
 {
@@ -517,15 +518,6 @@ StudioModel
 		OpenedSolutionChanged();
 	}
 
-	Ptr<IProjectModel> StudioModel::CreateProjectModel(Ptr<IProjectFactoryModel> projectFactory, WString filePath)
-	{
-		auto solution = rootSolutionItem->GetSolution();
-		if (!solution) return nullptr;
-		auto project = MakePtr<ProjectItem>(this, projectFactory, filePath);
-		project->NewProjectAndSave();
-		return project;
-	}
-
 	Ptr<IFileModel> StudioModel::CreateFileModel(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)
 	{
 		auto solution = rootSolutionItem->GetSolution();
@@ -533,6 +525,47 @@ StudioModel
 		auto file = MakePtr<FileItem>(this, fileFactory, filePath);
 		file->NewFileAndSave();
 		return file;
+	}
+
+	vl::Ptr<vm::IProjectModel> StudioModel::AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName)
+	{
+		if (!projectFactory)
+		{
+			throw StudioException(L"Failed to add a project.", true);
+		}
+
+		auto solutionFolder =
+			createNewSolution
+			? Folder(FilePath(solutionDirectory) / solutionName)
+			: Folder(FilePath(GetOpenedSolution()->GetFileDirectory()))
+			;
+		auto solutionPath = solutionFolder.GetFilePath() / (solutionName + L".gacsln.xml");
+		auto projectFolder = Folder(solutionFolder.GetFilePath() / projectName);
+		auto projectPath = projectFolder.GetFilePath() / (projectName + L".gacproj.xml");
+
+		if (createNewSolution)
+		{
+			if (!solutionFolder.Create(true))
+			{
+				throw StudioException(L"Failed to create empty folder \"" + solutionFolder.GetFilePath().GetFullPath() + L"\".", false);
+			}
+		}
+		if (!projectFolder.Create(true))
+		{
+			throw StudioException(L"Failed to create empty folder \"" + projectFolder.GetFilePath().GetFullPath() + L"\".", false);
+		}
+
+		if (createNewSolution)
+		{
+			NewSolution(solutionPath.GetFullPath());
+		}
+		
+		auto projectItem = MakePtr<ProjectItem>(this, projectFactory, projectPath.GetFullPath());
+		projectItem->NewProjectAndSave();
+		GetOpenedSolution()->AddProject(projectItem);
+		GetOpenedSolution()->SaveSolution(false);
+
+		return projectItem;
 	}
 
 	void StudioModel::OpenBrowser(WString url)
@@ -551,5 +584,19 @@ StudioModel
 			INativeDialogService::DefaultFirst,
 			INativeDialogService::IconError
 			);
+	}
+
+	bool StudioModel::SafeExecute(vl::Func<void()> procedure)
+	{
+		try
+		{
+			procedure();
+			return true;
+		}
+		catch (const vm::StudioException& ex)
+		{
+			PromptError(ex.Message());
+			return ex.IsNonConfigError();
+		}
 	}
 }

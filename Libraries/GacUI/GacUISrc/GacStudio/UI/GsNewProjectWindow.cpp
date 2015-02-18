@@ -30,52 +30,18 @@ namespace ui
 	{
 		auto model = GetViewModel();
 		auto projectFactory = UnboxValue<Ptr<IProjectFactoryModel>>(listViewProjectTemplate->GetSelectedItem());
-		if (!projectFactory)
+		if (model->SafeExecute([=]()
+			{
+				model->AddNewProject(
+					comboSolution->GetSelectedIndex() == 0,
+					projectFactory,
+					textBoxProjectName->GetText(),
+					textBoxLocation->GetText(),
+					textBoxSolutionName->GetText()
+					);
+			}))
 		{
-			model->PromptError(L"Failed to add a project.");
 			Close();
-		}
-
-		try
-		{
-			auto solutionFolder =
-				comboSolution->GetSelectedIndex() == 0
-				? Folder(FilePath(textBoxLocation->GetText()) / textBoxSolutionName->GetText())
-				: Folder(FilePath(model->GetOpenedSolution()->GetFileDirectory()))
-				;
-			auto solutionPath = solutionFolder.GetFilePath() / (textBoxSolutionName->GetText() + L".gacsln.xml");
-			auto projectFolder = Folder(solutionFolder.GetFilePath() / textBoxProjectName->GetText());
-			auto projectPath = projectFolder.GetFilePath() / (textBoxProjectName->GetText() + L".gacproj.xml");
-
-			if (comboSolution->GetSelectedIndex() == 0)
-			{
-				if (!solutionFolder.Create(true))
-				{
-					model->PromptError(L"Failed to create empty folder \"" + solutionFolder.GetFilePath().GetFullPath() + L"\".");
-					return;
-				}
-			}
-			if (!projectFolder.Create(true))
-			{
-				model->PromptError(L"Failed to create empty folder \"" + projectFolder.GetFilePath().GetFullPath() + L"\".");
-				return;
-			}
-
-			if (comboSolution->GetSelectedIndex() == 0)
-			{
-				model->NewSolution(solutionPath.GetFullPath());
-			}
-
-			auto projectItem = model->CreateProjectModel(projectFactory, projectPath.GetFullPath());
-			model->GetOpenedSolution()->AddProject(projectItem);
-			model->GetOpenedSolution()->SaveSolution(false);
-		}
-		catch (const vm::StudioException& ex)
-		{
-			if (ex.IsNonConfigError())
-			{
-				Close();
-			}
 		}
 	}
 

@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Schemas>
+  <Interface ref.Class="vm::IFileFactoryModel">
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="SmallImage" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Category" Type="string" Readonly="true"/>
+    <Property Name="Description" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+    <Property Name="DefaultFileExt" Type="string" Readonly="true"/>
+    <Property Name="TextTemplate" Type="vm::ITextTemplate^" Readonly="true"/>
+  </Interface>
+
+  <Interface ref.Class="vm::IProjectFactoryModel">
+    <Property Name="Image" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="SmallImage" Type="presentation::GuiImageData^" Readonly="true"/>
+    <Property Name="Name" Type="string" Readonly="true"/>
+    <Property Name="Description" Type="string" Readonly="true"/>
+    <Property Name="Id" Type="string" Readonly="true"/>
+    <Property Name="Children" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
+  </Interface>
+  
   <Interface ref.Class="vm::IStudioModel">
     <Property Name="ProjectFactories" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileFactories" Type="vm::IFileFactoryModel^{}" Readonly="true"/>
@@ -38,14 +58,17 @@
     </Method>
     <Method Name="CloseSolution" Type="void">
     </Method>
-    <Method Name="CreateProjectModel" Type="vm::IProjectModel^">
-      <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
-      <Argument Name="filePath" Type="string"/>
-    </Method>
     <Method Name="CreateFileModel" Type="vm::IFileModel^">
       <Argument Name="project" Type="vm::IProjectModel^"/>
       <Argument Name="fileFactory" Type="vm::IFileFactoryModel^"/>
       <Argument Name="filePath" Type="string"/>
+    </Method>
+    <Method Name="AddNewProject" Type="vm::IProjectModel^">
+      <Argument Name="createNewSolution" Type="bool"/>
+      <Argument Name="projectFactory" Type="vm::IProjectFactoryModel^"/>
+      <Argument Name="projectName" Type="string"/>
+      <Argument Name="solutionDirectory" Type="string"/>
+      <Argument Name="solutionName" Type="string"/>
     </Method>
 
     <Method Name="OpenBrowser" Type="void">
@@ -53,6 +76,9 @@
     </Method>
     <Method Name="PromptError" Type="void">
       <Argument Name="message" Type="string"/>
+    </Method>
+    <Method Name="SafeExecute" Type="bool">
+      <Argument Name="procedure" Type="func():void"/>
     </Method>
   </Interface>
 </Schemas>
