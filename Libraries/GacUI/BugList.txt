@@ -19,3 +19,4 @@
 	Editor.AutoComplete.Grammar 上下选中候选项崩溃，最小化恢复后不能渲染
 	Persistant.LoadFromXml.Controls DataWindow没有内容
 	GacGen.exe处理Persistant.LoadFromXml.ViewModel的XML资源文件失败
+	GacGen.exe处理GacStudio之后，NewFileWindow的TreeView起不到筛选作用
