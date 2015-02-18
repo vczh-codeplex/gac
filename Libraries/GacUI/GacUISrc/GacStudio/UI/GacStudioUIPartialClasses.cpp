@@ -165,10 +165,11 @@ namespace vl
 				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(CreateProjectModel, { L"projectFactory" _ L"filePath" });
 				CLASS_MEMBER_METHOD(CreateFileModel, { L"project" _ L"fileFactory" _ L"filePath" });
+				CLASS_MEMBER_METHOD(AddNewProject, { L"createNewSolution" _ L"projectFactory" _ L"projectName" _ L"solutionDirectory" _ L"solutionName" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
+				CLASS_MEMBER_METHOD(SafeExecute, { L"procedure" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
 			BEGIN_CLASS_MEMBER(vm::ITextTemplate)

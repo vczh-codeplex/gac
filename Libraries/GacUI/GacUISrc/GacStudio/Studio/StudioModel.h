@@ -156,11 +156,12 @@ namespace vm
 		void											SaveSolution()override;
 		void											NewSolution(WString filePath)override;
 		void											CloseSolution()override;
-		Ptr<IProjectModel>								CreateProjectModel(Ptr<IProjectFactoryModel> projectFactory, WString filePath)override;
 		Ptr<IFileModel>									CreateFileModel(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)override;
+		vl::Ptr<vm::IProjectModel>						AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName)override;
 
 		void											OpenBrowser(WString url)override;
 		void											PromptError(WString message)override;
+		bool											SafeExecute(vl::Func<void()> procedure)override;
 	};
 }
 
