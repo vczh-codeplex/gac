@@ -237,8 +237,8 @@ namespace vm
 		virtual void SaveSolution() = 0;
 		virtual void NewSolution(vl::WString filePath) = 0;
 		virtual void CloseSolution() = 0;
-		virtual vl::Ptr<vm::IFileModel> CreateFileModel(vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString filePath) = 0;
 		virtual vl::Ptr<vm::IProjectModel> AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName) = 0;
+		virtual vl::Ptr<vm::IFileModel> AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName) = 0;
 		virtual void OpenBrowser(vl::WString url) = 0;
 		virtual void PromptError(vl::WString message) = 0;
 		virtual bool SafeExecute(vl::Func<void()> procedure) = 0;

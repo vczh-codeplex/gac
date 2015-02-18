@@ -518,15 +518,6 @@ StudioModel
 		OpenedSolutionChanged();
 	}
 
-	Ptr<IFileModel> StudioModel::CreateFileModel(Ptr<IProjectModel> project, Ptr<IFileFactoryModel> fileFactory, WString filePath)
-	{
-		auto solution = rootSolutionItem->GetSolution();
-		if (!solution) return nullptr;
-		auto file = MakePtr<FileItem>(this, fileFactory, filePath);
-		file->NewFileAndSave();
-		return file;
-	}
-
 	vl::Ptr<vm::IProjectModel> StudioModel::AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName)
 	{
 		if (!projectFactory)
@@ -566,6 +557,29 @@ StudioModel
 		GetOpenedSolution()->SaveSolution(false);
 
 		return projectItem;
+	}
+
+	vl::Ptr<vm::IFileModel> StudioModel::AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName)
+	{
+		if (!project || !fileFactory)
+		{
+			throw StudioException(L"Failed to add a file.", true);
+		}
+		
+		auto fileFolder = Folder(fileDirectory);
+		auto filePath = fileFolder.GetFilePath() / (fileName + fileFactory->GetDefaultFileExt());
+
+		if (!fileFolder.Exists() && !fileFolder.Create(true))
+		{
+			throw StudioException(L"Failed to create folder \"" + fileFolder.GetFilePath().GetFullPath() + L"\".", true);
+		}
+		
+		auto fileItem = MakePtr<FileItem>(this, fileFactory, filePath.GetFullPath());
+		fileItem->NewFileAndSave();
+		action->AddFile(fileItem);
+		project->SaveProject(false);
+
+		return fileItem;
 	}
 
 	void StudioModel::OpenBrowser(WString url)
