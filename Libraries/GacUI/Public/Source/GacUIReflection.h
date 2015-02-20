@@ -592,10 +592,17 @@ Instance Loader
 				SupportSet,
 			};
 
+			enum PropertyScope
+			{
+				ViewModel,		// <ref.Parameter/>
+				Constructor,	// constructor parameter that is not ViewModel
+				Property,		// property of the class
+			};
+
 			Support									support;
 			bool									tryParent;
 			bool									required;
-			bool									constructorParameter;
+			PropertyScope							scope;
 			TypeDescriptorList						acceptableTypes;
 
 			GuiInstancePropertyInfo();
