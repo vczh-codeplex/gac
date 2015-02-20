@@ -263,9 +263,19 @@ LoadInstancePropertyValue
 			{
 				if (auto propertyInfo = propertyLoader->GetPropertyType(propertyValue))
 				{
-					if (propertyInfo->scope == GuiInstancePropertyInfo::Property)
+					if (constructorArgument)
 					{
-						return false;
+						if (propertyInfo->scope == GuiInstancePropertyInfo::Property)
+						{
+							return false;
+						}
+					}
+					else
+					{
+						if (propertyInfo->scope == GuiInstancePropertyInfo::Constructor)
+						{
+							return false;
+						}
 					}
 					if (propertyInfo->support == GuiInstancePropertyInfo::NotSupport)
 					{
@@ -423,7 +433,7 @@ LoadInstancePropertyValue
 														output.Add(Pair<Value, IGuiInstanceLoader*>(translatedValue, propertyLoader));
 													}
 												}
-												else
+												else if (propertyInfo->scope == GuiInstancePropertyInfo::Property)
 												{
 													FillInstanceBindingSetter bindingSetter;
 													bindingSetter.binder = binder;
