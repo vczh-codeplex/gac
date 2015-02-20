@@ -26,7 +26,7 @@ GuiInstancePropertyInfo
 			:support(NotSupport)
 			, tryParent(false)
 			, required(false)
-			, constructorParameter(false)
+			, scope(Property)
 		{
 		}
 
@@ -650,6 +650,27 @@ GuiDefaultInstanceLoader
 				}
 			}
 
+			bool ContainsViewModels(const TypeInfo& typeInfo)
+			{
+				if (auto ctors = typeInfo.typeDescriptor->GetConstructorGroup())
+				{
+					if (ctors->GetMethodCount() == 1)
+					{
+						IMethodInfo* method = ctors->GetMethod(0);
+						vint count = method->GetParameterCount();
+						for (vint i = 0; i < count; i++)
+						{
+							auto parameter = method->GetParameter(i);
+							auto prop = typeInfo.typeDescriptor->GetPropertyByName(parameter->GetName(), false);
+							if (!prop || !prop->GetGetter() || prop->GetSetter() || prop->GetValueChangedEvent()) return false;
+							if (parameter->GetType()->GetTypeFriendlyName() != prop->GetReturn()->GetTypeFriendlyName()) return false;
+						}
+						return true;
+					}
+				}
+				return false;
+			}
+
 			//***********************************************************************************
 
 			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
@@ -659,6 +680,15 @@ GuiDefaultInstanceLoader
 
 			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
 			{
+				if (ContainsViewModels(typeInfo))
+				{
+					IMethodInfo* method = typeInfo.typeDescriptor->GetConstructorGroup()->GetMethod(0);
+					vint count = method->GetParameterCount();
+					for (vint i = 0; i < count; i++)
+					{
+						propertyNames.Add(GlobalStringKey::Get(method->GetParameter(i)->GetName()));
+					}
+				}
 			}
 
 			PropertyType GetPropertyTypeCached(const PropertyInfo& propertyInfo)
@@ -672,6 +702,19 @@ GuiDefaultInstanceLoader
 					{
 						Ptr<GuiInstancePropertyInfo> result = new GuiInstancePropertyInfo;
 						result->support = support;
+
+						if (ContainsViewModels(propertyInfo.typeInfo))
+						{
+							IMethodInfo* method = propertyInfo.typeInfo.typeDescriptor->GetConstructorGroup()->GetMethod(0);
+							vint count = method->GetParameterCount();
+							for (vint i = 0; i < count; i++)
+							{
+								if (method->GetParameter(i)->GetName() == propertyInfo.propertyName.ToString())
+								{
+									result->scope = GuiInstancePropertyInfo::ViewModel;
+								}
+							}
+						}
 
 						if (FillPropertyInfo(result, propType))
 						{
@@ -1003,7 +1046,7 @@ GuiResourceInstanceLoader
 							{
 								auto info = GuiInstancePropertyInfo::Assign(td);
 								info->required = true;
-								info->constructorParameter = true;
+								info->scope = GuiInstancePropertyInfo::ViewModel;
 								return info;
 							}
 						}

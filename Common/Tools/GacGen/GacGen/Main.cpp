@@ -365,6 +365,12 @@ private:
 
 						auto parameterInfo = new ParameterInfoImpl(ctor, parameter->name.ToString(), pointerType);
 						ctor->AddParameter(parameterInfo);
+
+						auto getter = MakePtr<MethodInfo>(pointerType);
+						AddMethod(L"Get" + parameter->name.ToString(), getter);
+
+						auto propInfo = MakePtr<PropertyInfoImpl>(this, parameter->name.ToString(), getter.Obj(), nullptr, nullptr);
+						AddProperty(propInfo);
 					}
 				}
 				AddConstructor(ctor);

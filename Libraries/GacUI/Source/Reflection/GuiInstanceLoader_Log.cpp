@@ -142,13 +142,17 @@ LogInstanceLoaderManager_PrintProperties
 				}
 
 				LogInstanceLoaderManager_PrintFieldName(writer, (propertyName == GlobalStringKey::Empty? L"<DEFAULT-PROPERTY>" : propertyName.ToString()));
-				if (firstInfo->constructorParameter)
+				switch (firstInfo->scope)
 				{
+				case GuiInstancePropertyInfo::ViewModel:
+					writer.WriteString(L"#");
+					break;
+				case GuiInstancePropertyInfo::Constructor:
 					writer.WriteString(firstInfo->required ? L"+" : L"*");
-				}
-				else
-				{
+					break;
+				case GuiInstancePropertyInfo::Property:
 					writer.WriteString(L" ");
+					break;
 				}
 				switch (firstInfo->support)
 				{

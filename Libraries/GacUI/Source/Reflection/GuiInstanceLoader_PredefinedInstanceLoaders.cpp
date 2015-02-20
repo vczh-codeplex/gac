@@ -71,7 +71,7 @@ GuiVrtualTypeInstanceLoader
 				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return 0;
@@ -219,7 +219,7 @@ GuiTabInstanceLoader
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -363,7 +363,7 @@ GuiToolstripMenuInstanceLoader
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -448,7 +448,7 @@ GuiToolstripMenuBarInstanceLoader
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -533,7 +533,7 @@ GuiToolstripToolBarInstanceLoader
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -616,7 +616,7 @@ GuiToolstripButtonInstanceLoader
 				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				else if (propertyInfo.propertyName == _SubMenu)
@@ -927,19 +927,19 @@ GuiListViewInstanceLoader
 				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				else if (propertyInfo.propertyName == _View)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<ListViewViewType>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				else if (propertyInfo.propertyName == _IconSize)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				else if (propertyInfo.propertyName == _ItemSource)
@@ -947,7 +947,7 @@ GuiListViewInstanceLoader
 					if (bindable)
 					{
 						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
-						info->constructorParameter = true;
+						info->scope = GuiInstancePropertyInfo::Constructor;
 						info->required = true;
 						return info;
 					}
@@ -1079,7 +1079,7 @@ GuiTreeViewInstanceLoader
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				else if (propertyInfo.propertyName == _ItemSource)
@@ -1087,7 +1087,7 @@ GuiTreeViewInstanceLoader
 					if (bindable)
 					{
 						auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Value>());
-						info->constructorParameter = true;
+						info->scope = GuiInstancePropertyInfo::Constructor;
 						info->required = true;
 						return info;
 					}
@@ -1095,7 +1095,7 @@ GuiTreeViewInstanceLoader
 				else if (propertyInfo.propertyName == _IconSize)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Size>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -1197,14 +1197,14 @@ GuiComboBoxInstanceLoader
 				if (propertyInfo.propertyName == _ListControl)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<GuiSelectableListControl>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					info->required = true;
 					return info;
 				}
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
@@ -1288,13 +1288,13 @@ GuiBindableTextListInstanceLoader
 				if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				if (propertyInfo.propertyName == _ItemSource)
 				{
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
-					info->constructorParameter = true;
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					info->required = true;
 					return info;
 				}

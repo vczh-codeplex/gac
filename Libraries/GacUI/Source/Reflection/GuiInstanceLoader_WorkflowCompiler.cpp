@@ -724,7 +724,7 @@ Workflow_GetSharedManager
 							}
 							else if (setter->binding == GlobalStringKey::_Eval)
 							{
-								if (propertyInfo->constructorParameter)
+								if (propertyInfo->scope != GuiInstancePropertyInfo::Property)
 								{
 									WString cacheKey = L"<att.eval>" + expressionCode;
 									auto assembly = Workflow_CompileExpression(types, errors, expressionCode);

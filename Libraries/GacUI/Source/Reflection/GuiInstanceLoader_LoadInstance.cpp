@@ -263,7 +263,7 @@ LoadInstancePropertyValue
 			{
 				if (auto propertyInfo = propertyLoader->GetPropertyType(propertyValue))
 				{
-					if (propertyInfo->constructorParameter != constructorArgument)
+					if (propertyInfo->scope == GuiInstancePropertyInfo::Property)
 					{
 						return false;
 					}
@@ -728,7 +728,7 @@ CreateInstance
 								auto info = loader->GetPropertyType(propertyInfo);
 								vint index = ctor->setters.Keys().IndexOf(propertyName);
 
-								if (info->constructorParameter)
+								if (info->scope != GuiInstancePropertyInfo::Property)
 								{
 									if (info->required)
 									{

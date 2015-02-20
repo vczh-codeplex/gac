@@ -41957,13 +41957,16 @@ Image Type Resolver
 				if (auto obj = resource.Cast<GuiImageData>())
 				{
 					FileStream fileStream(obj->GetFilePath(), FileStream::ReadOnly);
-					auto xmlContent = MakePtr<XmlCData>();
-					xmlContent->content.value = BinaryToHex(fileStream);
+					if (fileStream.IsAvailable())
+					{
+						auto xmlContent = MakePtr<XmlCData>();
+						xmlContent->content.value = BinaryToHex(fileStream);
 
-					auto xmlImage = MakePtr<XmlElement>();
-					xmlImage->name.value = L"Image";
-					xmlImage->subNodes.Add(xmlContent);
-					return xmlImage;
+						auto xmlImage = MakePtr<XmlElement>();
+						xmlImage->name.value = L"Image";
+						xmlImage->subNodes.Add(xmlContent);
+						return xmlImage;
+					}
 				}
 				return 0;
 			}
