@@ -455,12 +455,17 @@ FolderItem
 
 		FilePath oldFolderPath = filePath;
 		FilePath newFolderPath = PreviewRename(newName);
+		auto project = GetOwnerProject(this);
+		FilePath projectFolder = project->GetFileDirectory();
+
 		FOREACH(Ptr<FileItem>, fileItem, fileItems)
 		{
 			FilePath oldFilePath = fileItem->GetFilePath();
-			auto relativeFilePath = oldFolderPath.GetRelativePathFor(oldFilePath);
-			oldRelativePaths.Add(relativeFilePath);
-			FilePath newFilePath = newFolderPath / relativeFilePath;
+			auto relativeFilePathToFolder = oldFolderPath.GetRelativePathFor(oldFilePath);
+			auto relativeFilePathToProject = project->GetNormalizedRelativePath(fileItem);
+			FilePath newFilePath = newFolderPath / relativeFilePathToFolder;
+
+			oldRelativePaths.Add(relativeFilePathToProject);
 			newFullPaths.Add(newFilePath.GetFullPath());
 		}
 
@@ -470,7 +475,6 @@ FolderItem
 			throw StudioException(L"Cannot rename folder from \"" + filePath + L"\" to \"" + newFolderPath.GetFullPath() + L"\".", true);
 		}
 
-		auto project = GetOwnerProject(this);
 		FOREACH_INDEXER(Ptr<FileItem>, fileItem, index, fileItems)
 		{
 			fileItem->UpdateFilePath(newFullPaths[index]);
