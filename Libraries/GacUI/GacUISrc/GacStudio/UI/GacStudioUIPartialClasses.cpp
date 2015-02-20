@@ -167,6 +167,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddNewProject, { L"createNewSolution" _ L"projectFactory" _ L"projectName" _ L"solutionDirectory" _ L"solutionName" });
 				CLASS_MEMBER_METHOD(AddNewFile, { L"action" _ L"project" _ L"fileFactory" _ L"fileDirectory" _ L"fileName" });
+				CLASS_MEMBER_METHOD(RenameFile, { L"action" _ L"solutionItem" _ L"newName" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
 				CLASS_MEMBER_METHOD(SafeExecute, { L"procedure" });
@@ -234,11 +235,12 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(ui::RenameFileWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(ui::RenameFileWindow*(Ptr<vm::ISolutionItemModel>, Ptr<vm::IRenameItemAction>), { L"SolutionItem" _ L"Action" })
+				CLASS_MEMBER_CONSTRUCTOR(ui::RenameFileWindow*(Ptr<vm::IStudioModel>, Ptr<vm::ISolutionItemModel>, Ptr<vm::IRenameItemAction>), { L"ViewModel" _ L"SolutionItem" _ L"Action" })
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonRename_Clicked, vl::presentation::compositions::GuiEventArgs)
 
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SolutionItem)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
 			END_CLASS_MEMBER(ui::RenameFileWindow)

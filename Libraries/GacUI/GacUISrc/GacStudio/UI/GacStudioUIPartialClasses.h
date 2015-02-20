@@ -239,6 +239,7 @@ namespace vm
 		virtual void CloseSolution() = 0;
 		virtual vl::Ptr<vm::IProjectModel> AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName) = 0;
 		virtual vl::Ptr<vm::IFileModel> AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName) = 0;
+		virtual void RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName) = 0;
 		virtual void OpenBrowser(vl::WString url) = 0;
 		virtual void PromptError(vl::WString message) = 0;
 		virtual bool SafeExecute(vl::Func<void()> procedure) = 0;
@@ -487,18 +488,20 @@ namespace ui
 	{
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
 	private:
+		Ptr<vm::IStudioModel> ViewModel_;
 		Ptr<vm::ISolutionItemModel> SolutionItem_;
 		Ptr<vm::IRenameItemAction> Action_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonCancel;
 		vl::presentation::controls::GuiButton* buttonRename;
 		vl::presentation::controls::GuiWindow* self;
-		vl::presentation::controls::GuiSinglelineTextBox* textName;
-		vl::presentation::controls::GuiSinglelineTextBox* textNew;
-		vl::presentation::controls::GuiSinglelineTextBox* textOriginal;
+		vl::presentation::controls::GuiSinglelineTextBox* textBoxName;
+		vl::presentation::controls::GuiSinglelineTextBox* textBoxNew;
+		vl::presentation::controls::GuiSinglelineTextBox* textBoxOriginal;
 
-		void InitializeComponents(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
 		{
+			ViewModel_ = ViewModel;
 			SolutionItem_ = SolutionItem;
 			Action_ = Action;
 			if (InitializeFromResource())
@@ -506,12 +509,13 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(buttonCancel);
 				GUI_INSTANCE_REFERENCE(buttonRename);
 				GUI_INSTANCE_REFERENCE(self);
-				GUI_INSTANCE_REFERENCE(textName);
-				GUI_INSTANCE_REFERENCE(textNew);
-				GUI_INSTANCE_REFERENCE(textOriginal);
+				GUI_INSTANCE_REFERENCE(textBoxName);
+				GUI_INSTANCE_REFERENCE(textBoxNew);
+				GUI_INSTANCE_REFERENCE(textBoxOriginal);
 			}
 			else
 			{
+				ViewModel_ = 0;
 				SolutionItem_ = 0;
 				Action_ = 0;
 			}
@@ -523,10 +527,15 @@ namespace ui
 			,buttonCancel(0)
 			,buttonRename(0)
 			,self(0)
-			,textName(0)
-			,textNew(0)
-			,textOriginal(0)
+			,textBoxName(0)
+			,textBoxNew(0)
+			,textBoxOriginal(0)
 		{
+		}
+
+		Ptr<vm::IStudioModel> GetViewModel()
+		{
+			return ViewModel_;
 		}
 
 		Ptr<vm::ISolutionItemModel> GetSolutionItem()
@@ -825,7 +834,7 @@ namespace ui
 		void buttonRename_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action);
+		RenameFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action);
 	};
 }
 
@@ -845,9 +854,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
+	RenameFileWindow::RenameFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
 	{
-		InitializeComponents(SolutionItem, Action);
+		InitializeComponents(ViewModel, SolutionItem, Action);
 	}
 }
 

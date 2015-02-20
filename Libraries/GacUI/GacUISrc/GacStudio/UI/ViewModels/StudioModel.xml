@@ -72,6 +72,11 @@
       <Argument Name="fileDirectory" Type="string"/>
       <Argument Name="fileName" Type="string"/>
     </Method>
+    <Method Name="RenameFile" Type="void">
+      <Argument Name="action" Type="vm::IRenameItemAction^"/>
+      <Argument Name="solutionItem" Type="vm::ISolutionItemModel^"/>
+      <Argument Name="newName" Type="string"/>
+    </Method>
 
     <Method Name="OpenBrowser" Type="void">
       <Argument Name="url" Type="string"/>

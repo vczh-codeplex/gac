@@ -40,13 +40,20 @@ namespace vm
 		WString											GetMacroValue(WString name, bool inherit)override;
 	};
 
+	class FileItem;
 	class FolderItemBase;
+	class FolderItem;
+	class ProjectItem;
+	class SolutionItem;
+
+	extern ProjectItem*									GetOwnerProject(ISolutionItemModel* item);
 
 	class FileItem : public Object, public virtual IFileModel, public Description<FileItem>
 		, public virtual IRenameItemAction
 		, public virtual IRemoveItemAction
 	{
 		friend class FolderItemBase;
+		friend class FolderItem;
 	protected:
 		IStudioModel*									studioModel;
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
@@ -56,6 +63,7 @@ namespace vm
 		bool											unsupported;
 		ISolutionItemModel*								parent;
 
+		void											RenameInternal(ProjectItem* project, const WString& newFullPath);
 	public:
 		FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported = false);
 		~FileItem();
@@ -91,6 +99,7 @@ namespace vm
 		collections::SortedList<WString>				fileNames;
 
 		void											ClearInternal();
+		void											FindFileItems(collections::List<Ptr<FileItem>>& fileItems);
 		void											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 		bool											RemoveFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 	public:
@@ -148,6 +157,7 @@ namespace vm
 		WString											GetNormalizedRelativePath(Ptr<IFileModel> fileItem);
 		void											AddFileItem(Ptr<IFileModel> fileItem);
 		void											RemoveFileItem(Ptr<IFileModel> fileItem);
+		void											RenameFileItem(Ptr<IFileModel> fileItem, const WString& oldPath);
 	public:
 		ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported = false);
 		~ProjectItem();

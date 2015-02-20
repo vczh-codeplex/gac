@@ -435,16 +435,7 @@ StudioModel
 
 	Ptr<IProjectModel> StudioModel::GetWorkingProject()
 	{
-		auto item = selectedSolutionItem.Obj();
-		while (item)
-		{
-			if (auto projectModel = dynamic_cast<IProjectModel*>(item))
-			{
-				return projectModel;
-			}
-			item = item->GetParent();
-		}
-		return nullptr;
+		return GetOwnerProject(selectedSolutionItem.Obj());
 	}
 
 	WString StudioModel::GetWorkingDirectory()
@@ -580,6 +571,19 @@ StudioModel
 		project->SaveProject(false);
 
 		return fileItem;
+	}
+
+	void StudioModel::RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName)
+	{
+		action->Rename(newName);
+		if (auto project = solutionItem.Cast<IProjectModel>())
+		{
+			GetOpenedSolution()->SaveSolution(false);
+		}
+		else
+		{
+			project->SaveProject(false);
+		}
 	}
 
 	void StudioModel::OpenBrowser(WString url)
