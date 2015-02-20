@@ -157,6 +157,24 @@ FileMacroEnvironment
 FileItem
 ***********************************************************************/
 
+	void FileItem::RenameInternal(ProjectItem* project, const WString& newFullPath)
+	{
+		Ptr<FileItem> fileItem = this;
+		auto oldRelativePath = project->GetNormalizedRelativePath(fileItem);
+
+		File oldFile = filePath;
+		if (!oldFile.Rename(newFullPath))
+		{
+			throw StudioException(L"Cannot rename file from \"" + filePath + L"\" to \"" + newFullPath + L"\".", true);
+		}
+
+		filePath = newFullPath;
+		project->RenameFileItem(fileItem, oldRelativePath);
+
+		NameChanged();
+		FilePathChanged();
+	}
+
 	FileItem::FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported)
 		:studioModel(_studioModel)
 		, fileFactory(_fileFactory)
@@ -186,7 +204,9 @@ FileItem
 
 	void FileItem::Rename(WString newName)
 	{
-		throw 0;
+		auto project = GetOwnerProject(this);
+		auto newFullPath = PreviewRename(newName);
+		RenameInternal(project, newFullPath);
 	}
 
 	void FileItem::Remove()
@@ -285,6 +305,21 @@ FolderItemBase
 		children.Clear();
 		folderNames.Clear();
 		fileNames.Clear();
+	}
+
+	void FolderItemBase::FindFileItems(collections::List<Ptr<FileItem>>& fileItems)
+	{
+		FOREACH(Ptr<ISolutionItemModel>, item, children)
+		{
+			if (auto fileItem = item.Cast<FileItem>())
+			{
+				fileItems.Add(fileItem);
+			}
+			else if (auto folder = item.Cast<FolderItemBase>())
+			{
+				folder->FindFileItems(fileItems);
+			}
+		}
 	}
 
 	void FolderItemBase::AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem)
@@ -414,7 +449,25 @@ FolderItem
 
 	void FolderItem::Rename(WString newName)
 	{
-		throw 0;
+		List<Ptr<FileItem>> fileItems;
+		List<WString> newFullPaths;
+		FindFileItems(fileItems);
+
+		FilePath oldFolderPath = filePath;
+		FilePath newFolderPath = PreviewRename(newName);
+		FOREACH(Ptr<FileItem>, fileItem, fileItems)
+		{
+			FilePath oldFilePath = fileItem->GetFilePath();
+			auto relativeFilePath = oldFolderPath.GetRelativePathFor(oldFilePath);
+			FilePath newFilePath = newFolderPath / relativeFilePath;
+			newFullPaths.Add(newFilePath.GetFullPath());
+		}
+
+		auto project = GetOwnerProject(this);
+		FOREACH_INDEXER(Ptr<FileItem>, fileItem, index, fileItems)
+		{
+			fileItem->RenameInternal(project, newFullPaths[index]);
+		}
 	}
 
 	void FolderItem::Remove()
@@ -532,6 +585,18 @@ ProjectItem
 		auto path = GetNormalizedRelativePath(fileItem);
 		RemoveFileItemInternal(path.Buffer(), fileItem);
 		fileItems.RemoveAt(index);
+	}
+
+	void ProjectItem::RenameFileItem(Ptr<IFileModel> fileItem, const WString& oldNormalizedRelativePath)
+	{
+		auto index = fileItems.IndexOf(fileItem.Obj());
+		if (index == -1)
+		{
+			throw StudioException(L"Internal error: File \"" + fileItem->GetFilePath() + L"\" does not exist.", true);
+		}
+		RemoveFileItemInternal(oldNormalizedRelativePath.Buffer(), fileItem);
+		auto path = GetNormalizedRelativePath(fileItem);
+		AddFileItemInternal(path.Buffer(), fileItem);
 	}
 
 	ProjectItem::ProjectItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath, bool _unsupported)

@@ -19,12 +19,24 @@ namespace ui
 
 	void RenameFileWindow::buttonRename_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		auto model = GetViewModel();
+		if (model->SafeExecute([=]()
+			{
+				model->RenameFile(
+					GetAction(),
+					GetSolutionItem(),
+					textBoxName->GetText()
+					);
+			}))
+		{
+			Close();
+		}
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	RenameFileWindow::RenameFileWindow(Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
+	RenameFileWindow::RenameFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::ISolutionItemModel> SolutionItem, Ptr<vm::IRenameItemAction> Action)
 	{
-		InitializeComponents(SolutionItem, Action);
+		InitializeComponents(ViewModel, SolutionItem, Action);
 	}
 }

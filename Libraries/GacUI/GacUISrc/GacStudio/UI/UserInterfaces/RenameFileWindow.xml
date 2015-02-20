@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Instance ref.Class="ui::RenameFileWindow">
+  <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
   <ref.Parameter Name="SolutionItem" Class="vm::ISolutionItemModel"/>
   <ref.Parameter Name="Action" Class="vm::IRenameItemAction"/>
   <Window ref.Name="self" Text="Rename File" ClientSize="x:480 y:160" MinimizedBox="false" MaximizedBox="true" SizeBox="true">
@@ -24,7 +25,7 @@
         <Label Text="Original Full Name:"/>
       </Cell>
       <Cell Site="row:0 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textOriginal" Readonly="true" Text-eval="SolutionItem.FilePath">
+        <SinglelineTextBox ref.Name="textBoxOriginal" Readonly="true" Text-eval="SolutionItem.FilePath">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
@@ -33,7 +34,7 @@
         <Label Text="New Full Name:"/>
       </Cell>
       <Cell Site="row:1 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textNew" Readonly="true" Text-bind="Action.PreviewRename(textName.Text)">
+        <SinglelineTextBox ref.Name="textBoxNew" Readonly="true" Text-bind="Action.PreviewRename(textBoxName.Text)">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
@@ -42,13 +43,13 @@
         <Label Text="Input the new file name:"/>
       </Cell>
       <Cell Site="row:2 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textName" Text-eval="SolutionItem.Name">
+        <SinglelineTextBox ref.Name="textBoxName" Text-eval="SolutionItem.Name">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>
 
       <Cell Site="row:4 column:2">
-        <Button ref.Name="buttonRename" Text="Rename" Alt="R" ev.Clicked="buttonRename_Clicked" Enabled-bind="textName.Text != ''">
+        <Button ref.Name="buttonRename" Text="Rename" Alt="R" ev.Clicked="buttonRename_Clicked" Enabled-bind="textBoxName.Text != ''">
           <att.BoundsComposition-set AlignmentToParent="left:-1 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
         </Button>
       </Cell>

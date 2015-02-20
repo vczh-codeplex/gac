@@ -24,7 +24,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return result;
 }
 
-#define GACSTUDIO_LOADBINARYRESOURCE
+//#define GACSTUDIO_LOADBINARYRESOURCE
 
 void GuiMain()
 {

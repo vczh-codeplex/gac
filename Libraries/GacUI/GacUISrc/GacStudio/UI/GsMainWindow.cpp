@@ -146,7 +146,7 @@ namespace ui
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRenameItemAction>();
 		if (!action) return;
-		auto window = new RenameFileWindow(GetViewModel()->GetWorkingItem(), action);
+		auto window = new RenameFileWindow(GetViewModel(), GetViewModel()->GetWorkingItem(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, [=]()
