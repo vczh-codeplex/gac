@@ -157,20 +157,9 @@ FileMacroEnvironment
 FileItem
 ***********************************************************************/
 
-	void FileItem::RenameInternal(ProjectItem* project, const WString& newFullPath)
+	void FileItem::UpdateFilePath(const WString& newFilePath)
 	{
-		Ptr<FileItem> fileItem = this;
-		auto oldRelativePath = project->GetNormalizedRelativePath(fileItem);
-
-		File oldFile = filePath;
-		if (!oldFile.Rename(newFullPath))
-		{
-			throw StudioException(L"Cannot rename file from \"" + filePath + L"\" to \"" + newFullPath + L"\".", true);
-		}
-
-		filePath = newFullPath;
-		project->RenameFileItem(fileItem, oldRelativePath);
-
+		filePath = newFilePath;
 		NameChanged();
 		FilePathChanged();
 	}
@@ -206,7 +195,18 @@ FileItem
 	{
 		auto project = GetOwnerProject(this);
 		auto newFullPath = PreviewRename(newName);
-		RenameInternal(project, newFullPath);
+
+		Ptr<FileItem> fileItem = this;
+		auto oldRelativePath = project->GetNormalizedRelativePath(fileItem);
+
+		File oldFile = filePath;
+		if (!oldFile.Rename(FilePath(newFullPath).GetName()))
+		{
+			throw StudioException(L"Cannot rename file from \"" + filePath + L"\" to \"" + newFullPath + L"\".", true);
+		}
+
+		UpdateFilePath(newFullPath);
+		project->RenameFileItem(fileItem, oldRelativePath);
 	}
 
 	void FileItem::Remove()
@@ -450,7 +450,7 @@ FolderItem
 	void FolderItem::Rename(WString newName)
 	{
 		List<Ptr<FileItem>> fileItems;
-		List<WString> newFullPaths;
+		List<WString> oldRelativePaths, newFullPaths;
 		FindFileItems(fileItems);
 
 		FilePath oldFolderPath = filePath;
@@ -459,14 +459,22 @@ FolderItem
 		{
 			FilePath oldFilePath = fileItem->GetFilePath();
 			auto relativeFilePath = oldFolderPath.GetRelativePathFor(oldFilePath);
+			oldRelativePaths.Add(relativeFilePath);
 			FilePath newFilePath = newFolderPath / relativeFilePath;
 			newFullPaths.Add(newFilePath.GetFullPath());
+		}
+
+		Folder oldFolder = filePath;
+		if (!oldFolder.Rename(newName))
+		{
+			throw StudioException(L"Cannot rename folder from \"" + filePath + L"\" to \"" + newFolderPath.GetFullPath() + L"\".", true);
 		}
 
 		auto project = GetOwnerProject(this);
 		FOREACH_INDEXER(Ptr<FileItem>, fileItem, index, fileItems)
 		{
-			fileItem->RenameInternal(project, newFullPaths[index]);
+			fileItem->UpdateFilePath(newFullPaths[index]);
+			project->RenameFileItem(fileItem, oldRelativePaths[index]);
 		}
 	}
 

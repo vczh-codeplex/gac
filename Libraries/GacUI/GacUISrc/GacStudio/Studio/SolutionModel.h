@@ -63,7 +63,7 @@ namespace vm
 		bool											unsupported;
 		ISolutionItemModel*								parent;
 
-		void											RenameInternal(ProjectItem* project, const WString& newFullPath);
+		void											UpdateFilePath(const WString& newFilePath);
 	public:
 		FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported = false);
 		~FileItem();

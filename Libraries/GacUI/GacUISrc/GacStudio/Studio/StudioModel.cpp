@@ -582,7 +582,7 @@ StudioModel
 		}
 		else
 		{
-			project->SaveProject(false);
+			GetOwnerProject(solutionItem.Obj())->SaveProject(false);
 		}
 	}
 
