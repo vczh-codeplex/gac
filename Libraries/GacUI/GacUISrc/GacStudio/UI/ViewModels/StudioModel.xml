@@ -89,5 +89,8 @@
     <Method Name="SafeExecute" Type="bool">
       <Argument Name="procedure" Type="func():void"/>
     </Method>
+    <Method Name="ExecuteSaveItems" Type="void">
+      <Argument Name="saveItems" Type="vm::ISaveItemAction^{}"/>
+    </Method>
   </Interface>
 </Schemas>

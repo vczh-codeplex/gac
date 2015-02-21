@@ -15,6 +15,7 @@ DO NOT MODIFY
 
 namespace vm
 {
+	class ISaveItemAction;
 	class IAddFileItemAction;
 	class IOpenInEditorItemAction;
 	class IRenameItemAction;
@@ -42,11 +43,18 @@ namespace ui
 }
 namespace vm
 {
+	class ISaveItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISaveItemAction>
+	{
+	public:
+
+		virtual void Save() = 0;
+	};
+
 	class IAddFileItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IAddFileItemAction>
 	{
 	public:
 
-		virtual void AddFile(vl::Ptr<vm::IFileModel> file) = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> AddFile(vl::Ptr<vm::IFileModel> file) = 0;
 	};
 
 	class IOpenInEditorItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IOpenInEditorItemAction>
@@ -60,14 +68,14 @@ namespace vm
 
 		virtual vl::WString GetRenameablePart() = 0;
 		virtual vl::WString PreviewRename(vl::WString newName) = 0;
-		virtual void Rename(vl::WString newName) = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> Rename(vl::WString newName) = 0;
 	};
 
 	class IRemoveItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRemoveItemAction>
 	{
 	public:
 
-		virtual void Remove() = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> Remove() = 0;
 	};
 
 	class IMacroEnvironment : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IMacroEnvironment>
@@ -129,8 +137,7 @@ namespace vm
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
 
 		virtual void OpenFile() = 0;
-		virtual void SaveFile() = 0;
-		virtual void NewFileAndSave() = 0;
+		virtual void InitializeFileAndSave() = 0;
 	};
 
 	class IFolderModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<IFolderModel>
@@ -145,8 +152,7 @@ namespace vm
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
 
 		virtual void OpenProject() = 0;
-		virtual void SaveProject() = 0;
-		virtual void NewProjectAndSave() = 0;
+		virtual void InitializeProjectAndSave() = 0;
 	};
 
 	class ISolutionModel : public virtual vm::ISolutionItemModel, public vl::reflection::Description<ISolutionModel>
@@ -154,7 +160,6 @@ namespace vm
 	public:
 
 		virtual void OpenSolution() = 0;
-		virtual void SaveSolution() = 0;
 		virtual void NewSolution() = 0;
 		virtual void AddProject(vl::Ptr<vm::IProjectModel> project) = 0;
 		virtual void RemoveProject(vl::Ptr<vm::IProjectModel> project) = 0;
@@ -243,6 +248,7 @@ namespace vm
 		virtual void OpenBrowser(vl::WString url) = 0;
 		virtual void PromptError(vl::WString message) = 0;
 		virtual bool SafeExecute(vl::Func<void()> procedure) = 0;
+		virtual void ExecuteSaveItems(vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> saveItems) = 0;
 	};
 
 }
@@ -567,6 +573,7 @@ namespace vl
 			DECL_TYPE_INFO(vm::IProjectModel)
 			DECL_TYPE_INFO(vm::IRemoveItemAction)
 			DECL_TYPE_INFO(vm::IRenameItemAction)
+			DECL_TYPE_INFO(vm::ISaveItemAction)
 			DECL_TYPE_INFO(vm::ISolutionItemModel)
 			DECL_TYPE_INFO(vm::ISolutionModel)
 			DECL_TYPE_INFO(vm::IStudioModel)

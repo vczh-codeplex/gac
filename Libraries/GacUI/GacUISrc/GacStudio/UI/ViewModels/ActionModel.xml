@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Schemas>
+  <Interface ref.Class="vm::ISaveItemAction">
+    <Method Name="Save" Type="void"/>
+  </Interface>
+  
   <Interface ref.Class="vm::IAddFileItemAction">
-    <Method Name="AddFile" Type="void">
+    <Method Name="AddFile" Type="vm::ISaveItemAction^{}">
       <Argument Name="file" Type="vm::IFileModel^"/>
     </Method>
   </Interface>
@@ -14,12 +18,12 @@
     <Method Name="PreviewRename" Type="string">
       <Argument Name="newName" Type="string"/>
     </Method>
-    <Method Name="Rename" Type="void">
+    <Method Name="Rename" Type="vm::ISaveItemAction^{}">
       <Argument Name="newName" Type="string"/>
     </Method>
   </Interface>
 
   <Interface ref.Class="vm::IRemoveItemAction">
-    <Method Name="Remove" Type="void"/>
+    <Method Name="Remove" Type="vm::ISaveItemAction^{}"/>
   </Interface>
 </Schemas>

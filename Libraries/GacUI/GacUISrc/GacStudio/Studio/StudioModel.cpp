@@ -532,9 +532,9 @@ StudioModel
 		}
 		
 		auto projectItem = MakePtr<ProjectItem>(this, projectFactory, projectPath.GetFullPath());
-		projectItem->NewProjectAndSave();
+		projectItem->InitializeProjectAndSave();
 		GetOpenedSolution()->AddProject(projectItem);
-		GetOpenedSolution()->SaveSolution();
+		GetOpenedSolution().Cast<ISaveItemAction>()->Save();
 
 		return projectItem;
 	}
@@ -555,39 +555,20 @@ StudioModel
 		}
 		
 		auto fileItem = MakePtr<FileItem>(this, fileFactory, filePath.GetFullPath());
-		fileItem->NewFileAndSave();
-		action->AddFile(fileItem);
-		project->SaveProject();
+		fileItem->InitializeFileAndSave();
+		ExecuteSaveItems(action->AddFile(fileItem));
 
 		return fileItem;
 	}
 
 	void StudioModel::RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName)
 	{
-		action->Rename(newName);
-		if (auto project = solutionItem.Cast<IProjectModel>())
-		{
-			GetOpenedSolution()->SaveSolution();
-		}
-		else
-		{
-			GetOwnerProject(solutionItem.Obj())->SaveProject();
-		}
+		ExecuteSaveItems(action->Rename(newName));
 	}
 
 	void StudioModel::RemoveFile(vl::Ptr<vm::IRemoveItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem)
 	{
-		if (auto projectItem = solutionItem.Cast<IProjectModel>())
-		{
-			action->Remove();
-			GetOpenedSolution()->SaveSolution();
-		}
-		else
-		{
-			projectItem = GetOwnerProject(solutionItem.Obj());
-			action->Remove();
-			projectItem->SaveProject();
-		}
+		ExecuteSaveItems(action->Remove());
 	}
 
 	void StudioModel::OpenBrowser(WString url)
@@ -619,6 +600,14 @@ StudioModel
 		{
 			PromptError(ex.Message());
 			return ex.IsNonConfigError();
+		}
+	}
+
+	void StudioModel::ExecuteSaveItems(vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> saveItems)
+	{
+		FOREACH(Ptr<ISaveItemAction>, saveItem, saveItems)
+		{
+			saveItem->Save();
 		}
 	}
 }

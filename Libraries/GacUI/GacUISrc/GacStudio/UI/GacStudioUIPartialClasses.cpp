@@ -28,6 +28,7 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(vm::IProjectModel)
 			IMPL_CPP_TYPE_INFO(vm::IRemoveItemAction)
 			IMPL_CPP_TYPE_INFO(vm::IRenameItemAction)
+			IMPL_CPP_TYPE_INFO(vm::ISaveItemAction)
 			IMPL_CPP_TYPE_INFO(vm::ISolutionItemModel)
 			IMPL_CPP_TYPE_INFO(vm::ISolutionModel)
 			IMPL_CPP_TYPE_INFO(vm::IStudioModel)
@@ -65,8 +66,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactory)
 				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(SaveFile, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(NewFileAndSave, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(InitializeFileAndSave, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFolderModel)
@@ -98,8 +98,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactory)
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(SaveProject, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(NewProjectAndSave, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(InitializeProjectAndSave, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IProjectModel)
 
 			BEGIN_CLASS_MEMBER(vm::IRemoveItemAction)
@@ -113,6 +112,11 @@ namespace vl
 				CLASS_MEMBER_METHOD(PreviewRename, { L"newName" });
 				CLASS_MEMBER_METHOD(Rename, { L"newName" });
 			END_CLASS_MEMBER(vm::IRenameItemAction)
+
+			BEGIN_CLASS_MEMBER(vm::ISaveItemAction)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(Save, NO_PARAMETER);
+			END_CLASS_MEMBER(vm::ISaveItemAction)
 
 			BEGIN_CLASS_MEMBER(vm::ISolutionItemModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -134,7 +138,6 @@ namespace vl
 			BEGIN_CLASS_MEMBER(vm::ISolutionModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_METHOD(OpenSolution, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddProject, { L"project" });
 				CLASS_MEMBER_METHOD(RemoveProject, { L"project" });
@@ -171,6 +174,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
 				CLASS_MEMBER_METHOD(SafeExecute, { L"procedure" });
+				CLASS_MEMBER_METHOD(ExecuteSaveItems, { L"saveItems" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
 			BEGIN_CLASS_MEMBER(vm::ITextTemplate)
@@ -263,6 +267,7 @@ namespace vl
 					ADD_TYPE_INFO(vm::IProjectModel)
 					ADD_TYPE_INFO(vm::IRemoveItemAction)
 					ADD_TYPE_INFO(vm::IRenameItemAction)
+					ADD_TYPE_INFO(vm::ISaveItemAction)
 					ADD_TYPE_INFO(vm::ISolutionItemModel)
 					ADD_TYPE_INFO(vm::ISolutionModel)
 					ADD_TYPE_INFO(vm::IStudioModel)
