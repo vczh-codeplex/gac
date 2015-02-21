@@ -738,7 +738,7 @@ ProjectItem
 		ErrorCountChanged();
 	}
 
-	void ProjectItem::SaveProject(bool saveContainingFiles)
+	void ProjectItem::SaveProject()
 	{
 		if (unsupported)
 		{
@@ -775,13 +775,6 @@ ProjectItem
 			StreamWriter writer(encoderStream);
 			XmlPrint(xml, writer);
 		}
-		if (saveContainingFiles)
-		{
-			FOREACH(Ptr<IFileModel>, fileItem, fileItems)
-			{
-				fileItem->SaveFile();
-			}
-		}
 	}
 
 	void ProjectItem::NewProjectAndSave()
@@ -792,7 +785,7 @@ ProjectItem
 		}
 		ClearInternal();
 		fileItems.Clear();
-		SaveProject(false);
+		SaveProject();
 	}
 
 	ISolutionItemModel* ProjectItem::GetParent()
@@ -916,7 +909,7 @@ SolutionItem
 		ErrorCountChanged();
 	}
 
-	void SolutionItem::SaveSolution(bool saveContainingProjects)
+	void SolutionItem::SaveSolution()
 	{
 		auto solutionFolder = FilePath(filePath).GetFolder();
 		auto xml = MakePtr<XmlDocument>();
@@ -946,13 +939,6 @@ SolutionItem
 			EncoderStream encoderStream(fileStream, encoder);
 			StreamWriter writer(encoderStream);
 			XmlPrint(xml, writer);
-		}
-		if (saveContainingProjects)
-		{
-			FOREACH(Ptr<ProjectItem>, project, From(projects).Cast<ProjectItem>())
-			{
-				project->SaveProject(true);
-			}
 		}
 	}
 

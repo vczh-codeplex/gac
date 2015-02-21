@@ -119,27 +119,14 @@ namespace ui
 
 	void MainWindow::commandFileRemove_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
-		try
+		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRemoveItemAction>();
+		if (!action) return;
+
+		auto model = GetViewModel();
+		model->SafeExecute([=]()
 		{
-			auto action = GetViewModel()->GetWorkingItem().Cast<vm::IRemoveItemAction>();
-			if (!action) return;
-			if (auto projectItem = GetViewModel()->GetWorkingItem().Cast<vm::IProjectModel>())
-			{
-				auto solutionItem = GetViewModel()->GetOpenedSolution();
-				action->Remove();
-				solutionItem->SaveSolution(false);
-			}
-			else
-			{
-				projectItem = GetViewModel()->GetWorkingProject();
-				action->Remove();
-				projectItem->SaveProject(false);
-			}
-		}
-		catch (const vm::StudioException& ex)
-		{
-			GetViewModel()->PromptError(ex.Message());
-		}
+			model->RemoveFile(action, model->GetWorkingItem());
+		});
 	}
 
 	void MainWindow::commandFileRename_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
