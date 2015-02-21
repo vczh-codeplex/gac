@@ -13566,7 +13566,7 @@ description::Value
 
 				if(methods.Count()==0)
 				{
-					throw ArgumentCountMismtatchException();
+					throw ArgumentCountMismtatchException(methodGroup);
 				}
 				else if(methods.Count()==1)
 				{
@@ -13602,7 +13602,7 @@ description::Value
 				if(!type) throw TypeNotExistsException(typeName);
 
 				IMethodGroupInfo* methodGroup=type->GetConstructorGroup();
-				if(!methodGroup) throw ConstructorNotExistsException();
+				if(!methodGroup) throw ConstructorNotExistsException(type);
 
 				IMethodInfo* method=SelectMethod(methodGroup, arguments);
 				return method->Invoke(Value(), arguments);
@@ -13620,7 +13620,7 @@ description::Value
 				if(!type) throw TypeNotExistsException(typeName);
 
 				IMethodGroupInfo* methodGroup=type->GetMethodGroupByName(name, true);
-				if(!methodGroup) throw MemberNotExistsException(name);
+				if(!methodGroup) throw MemberNotExistsException(name, type);
 
 				IMethodInfo* method=SelectMethod(methodGroup, arguments);
 				return method->Invoke(Value(), arguments);
@@ -13629,10 +13629,10 @@ description::Value
 			Value Value::GetProperty(const WString& name)const
 			{
 				ITypeDescriptor* type=GetTypeDescriptor();
-				if(!type) throw ArgumentNullException(L"thisObject");
+				if(!type) throw ArgumentNullException(L"thisObject", name);
 
 				IPropertyInfo* prop=type->GetPropertyByName(name, true);
-				if(!prop) throw MemberNotExistsException(name);
+				if(!prop) throw MemberNotExistsException(name, type);
 
 				return prop->GetValue(*this);
 			}
@@ -13640,10 +13640,10 @@ description::Value
 			void Value::SetProperty(const WString& name, const Value& newValue)
 			{
 				ITypeDescriptor* type=GetTypeDescriptor();
-				if(!type) throw ArgumentNullException(L"thisObject");
+				if(!type) throw ArgumentNullException(L"thisObject", name);
 
 				IPropertyInfo* prop=type->GetPropertyByName(name, true);
-				if(!prop) throw MemberNotExistsException(name);
+				if(!prop) throw MemberNotExistsException(name, type);
 
 				prop->SetValue(*this, newValue);
 			}
@@ -13657,10 +13657,10 @@ description::Value
 			Value Value::Invoke(const WString& name, collections::Array<Value>& arguments)const
 			{
 				ITypeDescriptor* type=GetTypeDescriptor();
-				if(!type) throw ArgumentNullException(L"thisObject");
+				if(!type) throw ArgumentNullException(L"thisObject", name);
 
 				IMethodGroupInfo* methodGroup=type->GetMethodGroupByName(name, true);
-				if(!methodGroup) throw MemberNotExistsException(name);
+				if(!methodGroup) throw MemberNotExistsException(name, type);
 
 				IMethodInfo* method=SelectMethod(methodGroup, arguments);
 				return method->Invoke(*this, arguments);
@@ -13669,10 +13669,10 @@ description::Value
 			Ptr<IEventHandler> Value::AttachEvent(const WString& name, const Value& function)const
 			{
 				ITypeDescriptor* type=GetTypeDescriptor();
-				if(!type) throw ArgumentNullException(L"thisObject");
+				if(!type) throw ArgumentNullException(L"thisObject", name);
 
 				IEventInfo* eventInfo=type->GetEventByName(name, true);
-				if(!eventInfo) throw MemberNotExistsException(name);
+				if(!eventInfo) throw MemberNotExistsException(name, type);
 
 				Ptr<IValueFunctionProxy> proxy=UnboxValue<Ptr<IValueFunctionProxy>>(function, Description<IValueFunctionProxy>::GetAssociatedTypeDescriptor(), L"function");
 				return eventInfo->Attach(*this, proxy);
@@ -14414,7 +14414,7 @@ MethodInfoImpl
 			{
 				if(arguments.Count()!=parameters.Count())
 				{
-					throw ArgumentCountMismtatchException();
+					throw ArgumentCountMismtatchException(ownerMethodGroup);
 				}
 				for(vint i=0;i<parameters.Count();i++)
 				{
@@ -14431,7 +14431,7 @@ MethodInfoImpl
 				{
 					if(!isStatic)
 					{
-						throw ArgumentNullException(L"thisObject");
+						throw ArgumentNullException(L"thisObject", this);
 					}
 				}
 				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
@@ -14448,7 +14448,7 @@ MethodInfoImpl
 				{
 					if(!isStatic)
 					{
-						throw ArgumentNullException(L"thisObject");
+						throw ArgumentNullException(L"thisObject", this);
 					}
 				}
 				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
@@ -14575,7 +14575,7 @@ EventInfoImpl::EventHandlerImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				Ptr<IValueList> eventArgs = IValueList::Create();
 				FOREACH(Value, argument, arguments)
@@ -14685,7 +14685,7 @@ EventInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
 				{
@@ -14709,7 +14709,7 @@ EventInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
 				{
@@ -14875,7 +14875,7 @@ FieldInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else
 				{
@@ -14893,7 +14893,7 @@ FieldInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else
 				{
