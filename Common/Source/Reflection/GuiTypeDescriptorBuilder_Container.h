@@ -570,7 +570,7 @@ ParameterAccessor<TContainer>
 
 				static void UnboxParameter(const Value& value, collections::LazyList<T>& result, ITypeDescriptor* typeDescriptor, const WString& valueName)
 				{
-					typedef typename T::ElementType ElementType;
+					typedef typename collections::LazyList<T>::ElementType ElementType;
 					Ptr<IValueEnumerable> listProxy=UnboxValue<Ptr<IValueEnumerable>>(value, typeDescriptor, valueName);
 					result=GetLazyList<T>(listProxy);
 				}
