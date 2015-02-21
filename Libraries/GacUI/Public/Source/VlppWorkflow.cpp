@@ -16849,7 +16849,6 @@ WfRuntimeThreadContext
 									EXECUTE(OpExp, F4)
 									EXECUTE(OpExp, F8)
 								END_TYPE
-								throw 0;
 							case WfInsCode::OpAdd:
 								BEGIN_TYPE
 									EXECUTE(OpAdd, I1)
