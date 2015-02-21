@@ -539,7 +539,7 @@ FolderItem
 
 	WString FolderItem::GetFilePath()
 	{
-		return L"";
+		return filePath;
 	}
 
 	WString FolderItem::GetFileDirectory()
