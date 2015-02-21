@@ -27,17 +27,13 @@
   <Interface ref.Class="vm::IProjectModel" Parent="vm::ISolutionItemModel">
     <Property Name="ProjectFactory" Type="vm::IProjectFactoryModel^" Readonly="true"/>
     <Method Name="OpenProject" Type="void"/>
-    <Method Name="SaveProject" Type="void">
-      <Argument Name="saveContainingFiles" Type="bool"/>
-    </Method>
+    <Method Name="SaveProject" Type="void"/>
     <Method Name="NewProjectAndSave" Type="void"/>
   </Interface>
 
   <Interface ref.Class="vm::ISolutionModel" Parent="vm::ISolutionItemModel">
     <Method Name="OpenSolution" Type="void"/>
-    <Method Name="SaveSolution" Type="void">
-      <Argument Name="saveContainingProjects" Type="bool"/>
-    </Method>
+    <Method Name="SaveSolution" Type="void"/>
     <Method Name="NewSolution" Type="void"/>
     <Method Name="AddProject" Type="void">
       <Argument Name="project" Type="vm::IProjectModel^"/>

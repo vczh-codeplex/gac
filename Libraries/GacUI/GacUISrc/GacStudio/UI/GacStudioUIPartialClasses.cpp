@@ -98,7 +98,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactory)
 				CLASS_MEMBER_METHOD(OpenProject, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(SaveProject, { L"saveContainingFiles" });
+				CLASS_MEMBER_METHOD(SaveProject, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewProjectAndSave, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IProjectModel)
 
@@ -134,7 +134,7 @@ namespace vl
 			BEGIN_CLASS_MEMBER(vm::ISolutionModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_METHOD(OpenSolution, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(SaveSolution, { L"saveContainingProjects" });
+				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddProject, { L"project" });
 				CLASS_MEMBER_METHOD(RemoveProject, { L"project" });
@@ -162,12 +162,12 @@ namespace vl
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetEditorFactory, { L"id" });
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
-				CLASS_MEMBER_METHOD(SaveSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddNewProject, { L"createNewSolution" _ L"projectFactory" _ L"projectName" _ L"solutionDirectory" _ L"solutionName" });
 				CLASS_MEMBER_METHOD(AddNewFile, { L"action" _ L"project" _ L"fileFactory" _ L"fileDirectory" _ L"fileName" });
 				CLASS_MEMBER_METHOD(RenameFile, { L"action" _ L"solutionItem" _ L"newName" });
+				CLASS_MEMBER_METHOD(RemoveFile, { L"action" _ L"solutionItem" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });
 				CLASS_MEMBER_METHOD(PromptError, { L"message" });
 				CLASS_MEMBER_METHOD(SafeExecute, { L"procedure" });

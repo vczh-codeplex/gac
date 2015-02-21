@@ -51,8 +51,6 @@
     <Method Name="OpenSolution" Type="void">
       <Argument Name="filePath" Type="string"/>
     </Method>
-    <Method Name="SaveSolution" Type="void">
-    </Method>
     <Method Name="NewSolution" Type="void">
       <Argument Name="filePath" Type="string"/>
     </Method>
@@ -76,6 +74,10 @@
       <Argument Name="action" Type="vm::IRenameItemAction^"/>
       <Argument Name="solutionItem" Type="vm::ISolutionItemModel^"/>
       <Argument Name="newName" Type="string"/>
+    </Method>
+    <Method Name="RemoveFile" Type="void">
+      <Argument Name="action" Type="vm::IRemoveItemAction^"/>
+      <Argument Name="solutionItem" Type="vm::ISolutionItemModel^"/>
     </Method>
 
     <Method Name="OpenBrowser" Type="void">

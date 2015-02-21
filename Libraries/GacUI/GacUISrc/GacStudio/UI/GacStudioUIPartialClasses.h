@@ -145,7 +145,7 @@ namespace vm
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory() = 0;
 
 		virtual void OpenProject() = 0;
-		virtual void SaveProject(bool saveContainingFiles) = 0;
+		virtual void SaveProject() = 0;
 		virtual void NewProjectAndSave() = 0;
 	};
 
@@ -154,7 +154,7 @@ namespace vm
 	public:
 
 		virtual void OpenSolution() = 0;
-		virtual void SaveSolution(bool saveContainingProjects) = 0;
+		virtual void SaveSolution() = 0;
 		virtual void NewSolution() = 0;
 		virtual void AddProject(vl::Ptr<vm::IProjectModel> project) = 0;
 		virtual void RemoveProject(vl::Ptr<vm::IProjectModel> project) = 0;
@@ -234,12 +234,12 @@ namespace vm
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory(vl::WString id) = 0;
 		virtual void OpenSolution(vl::WString filePath) = 0;
-		virtual void SaveSolution() = 0;
 		virtual void NewSolution(vl::WString filePath) = 0;
 		virtual void CloseSolution() = 0;
 		virtual vl::Ptr<vm::IProjectModel> AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName) = 0;
 		virtual vl::Ptr<vm::IFileModel> AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName) = 0;
 		virtual void RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName) = 0;
+		virtual void RemoveFile(vl::Ptr<vm::IRemoveItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem) = 0;
 		virtual void OpenBrowser(vl::WString url) = 0;
 		virtual void PromptError(vl::WString message) = 0;
 		virtual bool SafeExecute(vl::Func<void()> procedure) = 0;

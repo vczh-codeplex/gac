@@ -172,7 +172,7 @@ namespace vm
 		// --------------------------- feature
 		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
 		void											OpenProject()override;
-		void											SaveProject(bool saveContainingFiles)override;
+		void											SaveProject()override;
 		void											NewProjectAndSave()override;
 		
 		// --------------------------- solution item
@@ -201,7 +201,7 @@ namespace vm
 		
 		// --------------------------- action
 		void											OpenSolution()override;
-		void											SaveSolution(bool saveContainingProjects)override;
+		void											SaveSolution()override;
 		void											NewSolution()override;
 		void											AddProject(Ptr<IProjectModel> project)override;
 		void											RemoveProject(Ptr<IProjectModel> project)override;

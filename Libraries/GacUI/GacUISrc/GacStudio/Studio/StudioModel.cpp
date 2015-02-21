@@ -482,17 +482,6 @@ StudioModel
 		OpenedSolutionChanged();
 	}
 
-	void StudioModel::SaveSolution()
-	{
-		// EnsureAllOpeningFilesSaved();
-		auto solution = rootSolutionItem->GetSolution();
-		if (!solution)
-		{
-			throw StudioException(L"Internal error: Solution does not exist.", true);
-		}
-		return solution->SaveSolution(true);
-	}
-
 	void StudioModel::NewSolution(WString filePath)
 	{
 		// EnsureAllOpeningFilesSaved();
@@ -545,7 +534,7 @@ StudioModel
 		auto projectItem = MakePtr<ProjectItem>(this, projectFactory, projectPath.GetFullPath());
 		projectItem->NewProjectAndSave();
 		GetOpenedSolution()->AddProject(projectItem);
-		GetOpenedSolution()->SaveSolution(false);
+		GetOpenedSolution()->SaveSolution();
 
 		return projectItem;
 	}
@@ -568,7 +557,7 @@ StudioModel
 		auto fileItem = MakePtr<FileItem>(this, fileFactory, filePath.GetFullPath());
 		fileItem->NewFileAndSave();
 		action->AddFile(fileItem);
-		project->SaveProject(false);
+		project->SaveProject();
 
 		return fileItem;
 	}
@@ -578,11 +567,26 @@ StudioModel
 		action->Rename(newName);
 		if (auto project = solutionItem.Cast<IProjectModel>())
 		{
-			GetOpenedSolution()->SaveSolution(false);
+			GetOpenedSolution()->SaveSolution();
 		}
 		else
 		{
-			GetOwnerProject(solutionItem.Obj())->SaveProject(false);
+			GetOwnerProject(solutionItem.Obj())->SaveProject();
+		}
+	}
+
+	void StudioModel::RemoveFile(vl::Ptr<vm::IRemoveItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem)
+	{
+		if (auto projectItem = solutionItem.Cast<IProjectModel>())
+		{
+			action->Remove();
+			GetOpenedSolution()->SaveSolution();
+		}
+		else
+		{
+			projectItem = GetOwnerProject(solutionItem.Obj());
+			action->Remove();
+			projectItem->SaveProject();
 		}
 	}
 

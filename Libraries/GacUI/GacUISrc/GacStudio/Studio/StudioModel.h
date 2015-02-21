@@ -153,12 +153,12 @@ namespace vm
 		Ptr<IEditorFactoryModel>						GetEditorFactory(WString id)override;
 
 		void											OpenSolution(WString filePath)override;
-		void											SaveSolution()override;
 		void											NewSolution(WString filePath)override;
 		void											CloseSolution()override;
 		vl::Ptr<vm::IProjectModel>						AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName)override;
 		vl::Ptr<vm::IFileModel>							AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName)override;
 		void											RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName)override;
+		void											RemoveFile(vl::Ptr<vm::IRemoveItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem)override;
 
 		void											OpenBrowser(WString url)override;
 		void											PromptError(WString message)override;
