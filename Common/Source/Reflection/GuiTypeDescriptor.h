@@ -559,8 +559,8 @@ Exceptions
 			class ConstructorNotExistsException : public TypeDescriptorException
 			{
 			public:
-				ConstructorNotExistsException()
-					:TypeDescriptorException(L"Cannot find any constructor.")
+				ConstructorNotExistsException(ITypeDescriptor* type)
+					:TypeDescriptorException(L"Cannot find any constructor in type \"" + type->GetTypeName() + L"\".")
 				{
 				}
 			};
@@ -568,8 +568,8 @@ Exceptions
 			class MemberNotExistsException : public TypeDescriptorException
 			{
 			public:
-				MemberNotExistsException(const WString& name)
-					:TypeDescriptorException(L"Cannot find the member \""+name+L"\".")
+				MemberNotExistsException(const WString& name, ITypeDescriptor* type)
+					:TypeDescriptorException(L"Cannot find the member \"" + name + L"\" in type \"" + type->GetTypeName() + L"\".")
 				{
 				}
 			};
@@ -578,7 +578,7 @@ Exceptions
 			{
 			public:
 				PropertyIsNotReadableException(IPropertyInfo* propertyInfo)
-					:TypeDescriptorException(L"Cannot read value from a property \""+propertyInfo->GetName()+L"\" that is not readable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
+					:TypeDescriptorException(L"Cannot read value from a property \"" + propertyInfo->GetName() + L"\" that is not readable in type \"" + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
 				{
 				}
 			};
@@ -587,7 +587,7 @@ Exceptions
 			{
 			public:
 				PropertyIsNotWritableException(IPropertyInfo* propertyInfo)
-					:TypeDescriptorException(L"Cannot write value to a property \""+propertyInfo->GetName()+L"\" that is not writable in type \""+propertyInfo->GetOwnerTypeDescriptor()->GetTypeName()+L"\".")
+					:TypeDescriptorException(L"Cannot write value to a property \"" + propertyInfo->GetName() + L"\" that is not writable in type \"" + propertyInfo->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
 				{
 				}
 			};
@@ -595,8 +595,28 @@ Exceptions
 			class ArgumentNullException : public TypeDescriptorException
 			{
 			public:
-				ArgumentNullException(const WString& name)
-					:TypeDescriptorException(L"Argument \""+name+L"\" cannot be null.")
+				ArgumentNullException(const WString& name, const WString& member)
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot be null when accessing its member \"" + member + L"\".")
+				{
+				}
+
+				ArgumentNullException(const WString& name, IMethodInfo* target)
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot be null when invoking method \"" + target->GetName() + L"\" in type \"" + target->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
+				{
+				}
+
+				ArgumentNullException(const WString& name, IEventInfo* target)
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot be null when accessing event \"" + target->GetName() + L"\" in type \"" + target->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
+				{
+				}
+
+				ArgumentNullException(const WString& name, IEventHandler* target)
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot be null when invoking event \"" + target->GetOwnerEvent()->GetName() + L"\" in type \"" + target->GetOwnerEvent()->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
+				{
+				}
+
+				ArgumentNullException(const WString& name, IPropertyInfo* target)
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot be null when invoking property \"" + target->GetName() + L"\" in type \"" + target->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
 				{
 				}
 			};
@@ -605,14 +625,14 @@ Exceptions
 			{
 			public:
 				ArgumentTypeMismtatchException(const WString& name, ITypeInfo* expected, const Value& actual)
-					:TypeDescriptorException(L"Argument \""+name+L"\" cannot convert from \""+actual.GetTypeFriendlyName()+L"\" to \""+expected->GetTypeFriendlyName()+L"\".")
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot convert from \"" + actual.GetTypeFriendlyName() + L"\" to \"" + expected->GetTypeFriendlyName() + L"\".")
 				{
 				}
 
 				ArgumentTypeMismtatchException(const WString& name, ITypeDescriptor* type, Value::ValueType valueType, const Value& actual)
-					:TypeDescriptorException(L"Argument \""+name+L"\" cannot convert from \""+actual.GetTypeFriendlyName()+L"\" to \""+
-						(valueType==Value::SharedPtr?L"Ptr<":L"")+type->GetTypeName()+(valueType==Value::SharedPtr?L">":valueType==Value::RawPtr?L"*":L"")
-						+L"\".")
+					:TypeDescriptorException(L"Argument \"" + name + L"\" cannot convert from \"" + actual.GetTypeFriendlyName() + L"\" to \"" +
+						(valueType == Value::SharedPtr ? L"Ptr<" : L"") + type->GetTypeName() + (valueType == Value::SharedPtr ? L">" : valueType == Value::RawPtr ? L"*" : L"")
+						+ L"\".")
 				{
 				}
 			};
@@ -622,6 +642,11 @@ Exceptions
 			public:
 				ArgumentCountMismtatchException()
 					:TypeDescriptorException(L"Argument count does not match the definition.")
+				{
+				}
+
+				ArgumentCountMismtatchException(IMethodGroupInfo* target)
+					:TypeDescriptorException(L"Argument count does not match the definition when invoking method \"" + target->GetName() + L"\" in type \"" + target->GetOwnerTypeDescriptor()->GetTypeName() + L"\".")
 				{
 				}
 			};

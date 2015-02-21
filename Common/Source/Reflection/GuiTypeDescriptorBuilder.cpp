@@ -196,7 +196,7 @@ MethodInfoImpl
 			{
 				if(arguments.Count()!=parameters.Count())
 				{
-					throw ArgumentCountMismtatchException();
+					throw ArgumentCountMismtatchException(ownerMethodGroup);
 				}
 				for(vint i=0;i<parameters.Count();i++)
 				{
@@ -213,7 +213,7 @@ MethodInfoImpl
 				{
 					if(!isStatic)
 					{
-						throw ArgumentNullException(L"thisObject");
+						throw ArgumentNullException(L"thisObject", this);
 					}
 				}
 				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
@@ -230,7 +230,7 @@ MethodInfoImpl
 				{
 					if(!isStatic)
 					{
-						throw ArgumentNullException(L"thisObject");
+						throw ArgumentNullException(L"thisObject", this);
 					}
 				}
 				else if(!thisObject.CanConvertTo(ownerMethodGroup->GetOwnerTypeDescriptor(), Value::RawPtr))
@@ -357,7 +357,7 @@ EventInfoImpl::EventHandlerImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				Ptr<IValueList> eventArgs = IValueList::Create();
 				FOREACH(Value, argument, arguments)
@@ -467,7 +467,7 @@ EventInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
 				{
@@ -491,7 +491,7 @@ EventInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else if(!thisObject.CanConvertTo(ownerTypeDescriptor, Value::RawPtr))
 				{
@@ -657,7 +657,7 @@ FieldInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else
 				{
@@ -675,7 +675,7 @@ FieldInfoImpl
 			{
 				if(thisObject.IsNull())
 				{
-					throw ArgumentNullException(L"thisObject");
+					throw ArgumentNullException(L"thisObject", this);
 				}
 				else
 				{
