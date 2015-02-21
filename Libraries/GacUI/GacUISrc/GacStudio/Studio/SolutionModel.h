@@ -71,14 +71,13 @@ namespace vm
 		// --------------------------- action
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		void											Rename(WString newName)override;
-		void											Remove()override;
+		collections::LazyList<Ptr<ISaveItemAction>>		Rename(WString newName)override;
+		collections::LazyList<Ptr<ISaveItemAction>>		Remove()override;
 
 		// --------------------------- feature
 		Ptr<IFileFactoryModel>							GetFileFactory()override;
 		void											OpenFile()override;
-		void											SaveFile()override;
-		void											NewFileAndSave()override;
+		void											InitializeFileAndSave()override;
 
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -122,11 +121,11 @@ namespace vm
 		~FolderItem();
 		
 		// --------------------------- action
-		void											AddFile(Ptr<IFileModel> file)override;
+		collections::LazyList<Ptr<ISaveItemAction>>		AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		void											Rename(WString newName)override;
-		void											Remove()override;
+		collections::LazyList<Ptr<ISaveItemAction>>		Rename(WString newName)override;
+		collections::LazyList<Ptr<ISaveItemAction>>		Remove()override;
 		
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -143,6 +142,7 @@ namespace vm
 		, public virtual IAddFileItemAction
 		, public virtual IRenameItemAction
 		, public virtual IRemoveItemAction
+		, public virtual ISaveItemAction
 	{
 		friend class FileItem;
 		friend class FolderItem;
@@ -163,17 +163,17 @@ namespace vm
 		~ProjectItem();
 		
 		// --------------------------- action
-		void											AddFile(Ptr<IFileModel> file)override;
+		collections::LazyList<Ptr<ISaveItemAction>>		AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		void											Rename(WString newName)override;
-		void											Remove()override;
+		collections::LazyList<Ptr<ISaveItemAction>>		Rename(WString newName)override;
+		collections::LazyList<Ptr<ISaveItemAction>>		Remove()override;
+		void											Save()override;
 		
 		// --------------------------- feature
 		Ptr<IProjectFactoryModel>						GetProjectFactory()override;
 		void											OpenProject()override;
-		void											SaveProject()override;
-		void											NewProjectAndSave()override;
+		void											InitializeProjectAndSave()override;
 		
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -187,6 +187,7 @@ namespace vm
 	};
 
 	class SolutionItem : public Object, public virtual ISolutionModel, public Description<SolutionItem>
+		, public virtual ISaveItemAction
 	{
 	protected:
 		IStudioModel*									studioModel;
@@ -200,8 +201,10 @@ namespace vm
 		~SolutionItem();
 		
 		// --------------------------- action
+		void											Save()override;
+
+		// --------------------------- feature
 		void											OpenSolution()override;
-		void											SaveSolution()override;
 		void											NewSolution()override;
 		void											AddProject(Ptr<IProjectModel> project)override;
 		void											RemoveProject(Ptr<IProjectModel> project)override;

@@ -163,6 +163,7 @@ namespace vm
 		void											OpenBrowser(WString url)override;
 		void											PromptError(WString message)override;
 		bool											SafeExecute(vl::Func<void()> procedure)override;
+		void											ExecuteSaveItems(vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> saveItems)override;
 	};
 }
 

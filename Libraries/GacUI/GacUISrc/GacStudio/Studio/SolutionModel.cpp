@@ -61,6 +61,20 @@ namespace vm
 		return nullptr;
 	}
 
+	LazyList<Ptr<ISaveItemAction>> SingleSaveItem(Ptr<ISolutionItemModel> solutionItem)
+	{
+		if (auto save = solutionItem.Cast<ISaveItemAction>())
+		{
+			auto saves = MakePtr<List<Ptr<ISaveItemAction>>>();
+			saves->Add(save);
+			return saves;
+		}
+		else
+		{
+			return LazyList<Ptr<ISaveItemAction>>();
+		}
+	}
+
 /***********************************************************************
 StudioException
 ***********************************************************************/
@@ -191,7 +205,7 @@ FileItem
 		return GetDisplayNamePreviewFromFilePath(filePath, fileFactory->GetDefaultFileExt(), newName);
 	}
 
-	void FileItem::Rename(WString newName)
+	collections::LazyList<Ptr<ISaveItemAction>> FileItem::Rename(WString newName)
 	{
 		auto project = GetOwnerProject(this);
 		auto newFullPath = PreviewRename(newName);
@@ -207,13 +221,15 @@ FileItem
 
 		UpdateFilePath(newFullPath);
 		project->RenameFileItem(fileItem, oldRelativePath);
+		return SingleSaveItem(project);
 	}
 
-	void FileItem::Remove()
+	collections::LazyList<Ptr<ISaveItemAction>> FileItem::Remove()
 	{
 		if (auto project = GetOwnerProject(this))
 		{
 			project->RemoveFileItem(this);
+			return SingleSaveItem(project);
 		}
 		else
 		{
@@ -231,11 +247,7 @@ FileItem
 		throw 0;
 	}
 
-	void FileItem::SaveFile()
-	{
-	}
-
-	void FileItem::NewFileAndSave()
+	void FileItem::InitializeFileAndSave()
 	{
 		if (!fileFactory->GetTextTemplate())
 		{
@@ -425,11 +437,12 @@ FolderItem
 	{
 	}
 	
-	void FolderItem::AddFile(Ptr<IFileModel> file)
+	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::AddFile(Ptr<IFileModel> file)
 	{
 		if (auto project = GetOwnerProject(this))
 		{
 			project->AddFileItem(file);
+			return SingleSaveItem(project);
 		}
 		else
 		{
@@ -447,7 +460,7 @@ FolderItem
 		return GetDisplayNamePreviewFromFilePath(filePath, L"", newName);
 	}
 
-	void FolderItem::Rename(WString newName)
+	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::Rename(WString newName)
 	{
 		List<Ptr<FileItem>> fileItems;
 		List<WString> oldRelativePaths, newFullPaths;
@@ -480,9 +493,10 @@ FolderItem
 			fileItem->UpdateFilePath(newFullPaths[index]);
 			project->RenameFileItem(fileItem, oldRelativePaths[index]);
 		}
+		return SingleSaveItem(project);
 	}
 
-	void FolderItem::Remove()
+	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::Remove()
 	{
 		auto project = GetOwnerProject(this);
 		if (!project)
@@ -515,6 +529,7 @@ FolderItem
 		{
 			project->RemoveFileItem(fileItem);
 		}
+		return SingleSaveItem(project);
 	}
 
 	ISolutionItemModel* FolderItem::GetParent()
@@ -627,9 +642,10 @@ ProjectItem
 	{
 	}
 
-	void ProjectItem::AddFile(Ptr<IFileModel> file)
+	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::AddFile(Ptr<IFileModel> file)
 	{
 		AddFileItem(file);
+		return SingleSaveItem(this);
 	}
 
 	WString ProjectItem::GetRenameablePart()
@@ -642,14 +658,54 @@ ProjectItem
 		return GetDisplayNamePreviewFromFilePath(filePath, L".gacproj.xml", newName);
 	}
 
-	void ProjectItem::Rename(WString newName)
+	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Rename(WString newName)
 	{
 		throw 0;
 	}
 
-	void ProjectItem::Remove()
+	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Remove()
 	{
 		studioModel->GetOpenedSolution()->RemoveProject(this);
+		return SingleSaveItem(studioModel->GetOpenedSolution());
+	}
+
+	void ProjectItem::Save()
+	{
+		if (unsupported)
+		{
+			throw StudioException(projectFactory->GetName() + L" project \"" + filePath + L"\" is not supported.", true);
+		}
+		auto projectFolder = FilePath(filePath).GetFolder();
+		auto xml = MakePtr<XmlDocument>();
+		auto xmlSolution = MakePtr<XmlElement>();
+		xmlSolution->name.value = L"GacStudioProject";
+		xml->rootElement = xmlSolution;
+		{
+			XmlElementWriter xmlWriter(xmlSolution);
+			xmlWriter.Attribute(L"Factory", projectFactory->GetId());
+
+			FOREACH(Ptr<IFileModel>, fileItem, fileItems)
+			{
+				xmlWriter
+					.Element(L"GacStudioFile")
+					.Attribute(L"Factory", fileItem->GetFileFactory()->GetId())
+					.Attribute(L"FilePath", projectFolder.GetRelativePathFor(fileItem->GetFilePath()))
+					;
+			}
+		}
+		{
+			FileStream fileStream(filePath, FileStream::WriteOnly);
+			if (!fileStream.IsAvailable())
+			{
+				errors.Add(L"Failed to write \"" + filePath + L"\".");
+				ErrorCountChanged();
+				throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
+			}
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			XmlPrint(xml, writer);
+		}
 	}
 
 	Ptr<IProjectFactoryModel> ProjectItem::GetProjectFactory()
@@ -738,46 +794,7 @@ ProjectItem
 		ErrorCountChanged();
 	}
 
-	void ProjectItem::SaveProject()
-	{
-		if (unsupported)
-		{
-			throw StudioException(projectFactory->GetName() + L" project \"" + filePath + L"\" is not supported.", true);
-		}
-		auto projectFolder = FilePath(filePath).GetFolder();
-		auto xml = MakePtr<XmlDocument>();
-		auto xmlSolution = MakePtr<XmlElement>();
-		xmlSolution->name.value = L"GacStudioProject";
-		xml->rootElement = xmlSolution;
-		{
-			XmlElementWriter xmlWriter(xmlSolution);
-			xmlWriter.Attribute(L"Factory", projectFactory->GetId());
-
-			FOREACH(Ptr<IFileModel>, fileItem, fileItems)
-			{
-				xmlWriter
-					.Element(L"GacStudioFile")
-					.Attribute(L"Factory", fileItem->GetFileFactory()->GetId())
-					.Attribute(L"FilePath", projectFolder.GetRelativePathFor(fileItem->GetFilePath()))
-					;
-			}
-		}
-		{
-			FileStream fileStream(filePath, FileStream::WriteOnly);
-			if (!fileStream.IsAvailable())
-			{
-				errors.Add(L"Failed to write \"" + filePath + L"\".");
-				ErrorCountChanged();
-				throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
-			}
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-			XmlPrint(xml, writer);
-		}
-	}
-
-	void ProjectItem::NewProjectAndSave()
+	void ProjectItem::InitializeProjectAndSave()
 	{
 		if (unsupported)
 		{
@@ -785,7 +802,7 @@ ProjectItem
 		}
 		ClearInternal();
 		fileItems.Clear();
-		SaveProject();
+		Save();
 	}
 
 	ISolutionItemModel* ProjectItem::GetParent()
@@ -841,6 +858,39 @@ SolutionItem
 
 	SolutionItem::~SolutionItem()
 	{
+	}
+
+	void SolutionItem::Save()
+	{
+		auto solutionFolder = FilePath(filePath).GetFolder();
+		auto xml = MakePtr<XmlDocument>();
+		auto xmlSolution = MakePtr<XmlElement>();
+		xmlSolution->name.value = L"GacStudioSolution";
+		xml->rootElement = xmlSolution;
+		{
+			XmlElementWriter xmlWriter(xmlSolution);
+			FOREACH(Ptr<ProjectItem>, project, From(projects).Cast<ProjectItem>())
+			{
+				xmlWriter
+					.Element(L"GacStudioProject")
+					.Attribute(L"Factory", project->GetProjectFactory()->GetId())
+					.Attribute(L"FilePath", solutionFolder.GetRelativePathFor(project->GetFilePath()))
+					;
+			}
+		}
+		{
+			FileStream fileStream(filePath, FileStream::WriteOnly);
+			if (!fileStream.IsAvailable())
+			{
+				errors.Add(L"Failed to write \"" + filePath + L"\".");
+				ErrorCountChanged();
+				throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
+			}
+			BomEncoder encoder(BomEncoder::Utf16);
+			EncoderStream encoderStream(fileStream, encoder);
+			StreamWriter writer(encoderStream);
+			XmlPrint(xml, writer);
+		}
 	}
 		
 	void SolutionItem::OpenSolution()
@@ -907,39 +957,6 @@ SolutionItem
 		}
 
 		ErrorCountChanged();
-	}
-
-	void SolutionItem::SaveSolution()
-	{
-		auto solutionFolder = FilePath(filePath).GetFolder();
-		auto xml = MakePtr<XmlDocument>();
-		auto xmlSolution = MakePtr<XmlElement>();
-		xmlSolution->name.value = L"GacStudioSolution";
-		xml->rootElement = xmlSolution;
-		{
-			XmlElementWriter xmlWriter(xmlSolution);
-			FOREACH(Ptr<ProjectItem>, project, From(projects).Cast<ProjectItem>())
-			{
-				xmlWriter
-					.Element(L"GacStudioProject")
-					.Attribute(L"Factory", project->GetProjectFactory()->GetId())
-					.Attribute(L"FilePath", solutionFolder.GetRelativePathFor(project->GetFilePath()))
-					;
-			}
-		}
-		{
-			FileStream fileStream(filePath, FileStream::WriteOnly);
-			if (!fileStream.IsAvailable())
-			{
-				errors.Add(L"Failed to write \"" + filePath + L"\".");
-				ErrorCountChanged();
-				throw StudioException(L"Cannot open file \"" + filePath + L"\" to write.", true);
-			}
-			BomEncoder encoder(BomEncoder::Utf16);
-			EncoderStream encoderStream(fileStream, encoder);
-			StreamWriter writer(encoderStream);
-			XmlPrint(xml, writer);
-		}
 	}
 
 	void SolutionItem::NewSolution()
