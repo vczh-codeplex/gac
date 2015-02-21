@@ -127,7 +127,7 @@ private:
 
 	public:
 		MethodInfo(Ptr<ITypeInfo> _return)
-			:MethodInfoImpl(nullptr, _return, true)
+			:MethodInfoImpl(nullptr, _return, false)
 		{
 		}
 	};
