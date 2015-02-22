@@ -661,6 +661,10 @@ ProjectItem
 
 	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Rename(WString newName)
 	{
+		if (unsupported)
+		{
+			throw StudioException(projectFactory->GetName() + L" project \"" + filePath + L"\" is not supported.", true);
+		}
 		auto oldName = GetRenameablePart();
 		auto oldProjectFolder = FilePath(filePath).GetFolder();
 		auto solutionFolder = oldProjectFolder.GetFolder();
