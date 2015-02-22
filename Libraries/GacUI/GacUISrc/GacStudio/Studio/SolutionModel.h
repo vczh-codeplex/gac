@@ -54,6 +54,7 @@ namespace vm
 	{
 		friend class FolderItemBase;
 		friend class FolderItem;
+		friend class ProjectItem;
 	protected:
 		IStudioModel*									studioModel;
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;

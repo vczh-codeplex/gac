@@ -176,6 +176,7 @@ FileItem
 		filePath = newFilePath;
 		NameChanged();
 		FilePathChanged();
+		FileDirectoryChanged();
 	}
 
 	FileItem::FileItem(IStudioModel* _studioModel, Ptr<IFileFactoryModel> _fileFactory, WString _filePath, bool _unsupported)
@@ -655,12 +656,37 @@ ProjectItem
 
 	WString ProjectItem::PreviewRename(WString newName)
 	{
-		return GetDisplayNamePreviewFromFilePath(filePath, L".gacproj.xml", newName);
+		return (FilePath(filePath).GetFolder().GetFolder() / newName / (newName + L".gacproj.xml")).GetFullPath();
 	}
 
 	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Rename(WString newName)
 	{
-		throw 0;
+		auto oldName = GetRenameablePart();
+		auto oldProjectFolder = FilePath(filePath).GetFolder();
+		auto solutionFolder = oldProjectFolder.GetFolder();
+		auto newProjectFolder = solutionFolder / newName;
+		auto newProjectPath = newProjectFolder / (newName + L".gacproj.xml");
+
+		if (Folder(newProjectFolder).Exists())
+		{
+			throw StudioException(L"Folder \"" + newProjectFolder.GetFullPath() + L"\" already exists.", false);
+		}
+		if (!Folder(oldProjectFolder).Rename(newName))
+		{
+			throw StudioException(L"Cannot rename folder from \"" + oldProjectFolder.GetFullPath() + L"\" to \"" + newProjectFolder.GetFullPath() + L"\".", true);
+		}
+		if (!File(newProjectFolder / (oldName + L".gacproj.xml")).Rename(newName + L".gacproj.xml"))
+		{
+			throw StudioException(L"Cannot rename project file \"" + oldName + L".gacproj.xml\" to \"" + newName + L".gacproj.xml\".", true);
+		}
+
+		filePath = newProjectPath.GetFullPath();
+		NameChanged();
+		FilePathChanged();
+		FileDirectoryChanged();
+		OpenProject();
+
+		return SingleSaveItem(studioModel->GetOpenedSolution());
 	}
 
 	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Remove()
