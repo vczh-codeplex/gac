@@ -386,48 +386,51 @@ GuiBindableTreeView
 GuiBindableDataGrid
 ***********************************************************************/
 			
-			/// <summary>Column object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-			class GuiBindableDataColumn : public list::StructuredColummProviderBase
+			namespace list
 			{
-				friend class GuiBindableDataProvider;
-			protected:
-				Ptr<description::IValueReadonlyList>				itemSource;
+				/// <summary>Column object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
+				class GuiBindableDataColumn : public StructuredColummProviderBase
+				{
+					friend class GuiBindableDataProvider;
+				protected:
+					Ptr<description::IValueReadonlyList>			itemSource;
 
-				void												SetItemSource(Ptr<description::IValueReadonlyList> _itemSource);
-			public:
-				GuiBindableDataColumn();
-				~GuiBindableDataColumn();
+					void											SetItemSource(Ptr<description::IValueReadonlyList> _itemSource);
+				public:
+					GuiBindableDataColumn();
+					~GuiBindableDataColumn();
 
-				WString												GetCellText(vint row)override;
-				description::Value									GetCellValue(vint row);
-			};
+					WString											GetCellText(vint row)override;
+					description::Value								GetCellValue(vint row);
+				};
 			
-			/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-			class GuiBindableDataProvider :public list::StructuredDataProviderBase
-			{
-			protected:
-				Ptr<description::IValueReadonlyList>				itemSource;
-				Ptr<EventHandler>									itemChangedEventHandler;
+				/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
+				class GuiBindableDataProvider :public StructuredDataProviderBase
+				{
+				protected:
+					Ptr<description::IValueReadonlyList>			itemSource;
+					Ptr<EventHandler>								itemChangedEventHandler;
 
-			public:
-				GuiBindableDataProvider(Ptr<description::IValueEnumerable> _itemSource);
-				~GuiBindableDataProvider();
+				public:
+					GuiBindableDataProvider(Ptr<description::IValueEnumerable> _itemSource);
+					~GuiBindableDataProvider();
 
-				vint												GetRowCount()override;
-				description::Value									GetRowValue(vint row);
+					vint											GetRowCount()override;
+					description::Value								GetRowValue(vint row);
 
-				bool												InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column);
-				bool												AddBindableColumn(Ptr<GuiBindableDataColumn> column);
-				bool												RemoveBindableColumn(Ptr<GuiBindableDataColumn> column);
-				bool												ClearBindableColumns();
-				Ptr<GuiBindableDataColumn>							GetBindableColumn(vint index);
-			};
+					bool											InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column);
+					bool											AddBindableColumn(Ptr<GuiBindableDataColumn> column);
+					bool											RemoveBindableColumn(Ptr<GuiBindableDataColumn> column);
+					bool											ClearBindableColumns();
+					Ptr<GuiBindableDataColumn>						GetBindableColumn(vint index);
+				};
+			}
 			
 			/// <summary>A bindable Data grid control.</summary>
 			class GuiBindableDataGrid : public GuiVirtualDataGrid, public Description<GuiBindableDataGrid>
 			{
 			protected:
-				GuiBindableDataProvider*							bindableDataProvider;
+				list::GuiBindableDataProvider*						bindableDataProvider;
 
 			public:
 				/// <summary>Create a bindable Data grid control.</summary>
@@ -440,22 +443,22 @@ GuiBindableDataGrid
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The column index.</param>
 				/// <param name="column">The column.</param>
-				bool												InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column);
+				bool												InsertBindableColumn(vint index, Ptr<list::GuiBindableDataColumn> column);
 				/// <summary>Add a column.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="column">The column.</param>
-				bool												AddBindableColumn(Ptr<GuiBindableDataColumn> column);
+				bool												AddBindableColumn(Ptr<list::GuiBindableDataColumn> column);
 				/// <summary>Remove a column.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="column">The column.</param>
-				bool												RemoveBindableColumn(Ptr<GuiBindableDataColumn> column);
+				bool												RemoveBindableColumn(Ptr<list::GuiBindableDataColumn> column);
 				/// <summary>Clear all columns.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				bool												ClearBindableColumns();
 				/// <summary>Get a column.</summary>
 				/// <param name="index">The column index.</param>
 				/// <returns>Returns the column of a specified index.</returns>
-				Ptr<GuiBindableDataColumn>							GetBindableColumn(vint index);
+				Ptr<list::GuiBindableDataColumn>					GetBindableColumn(vint index);
 
 				/// <summary>Get the selected cell.</summary>
 				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
