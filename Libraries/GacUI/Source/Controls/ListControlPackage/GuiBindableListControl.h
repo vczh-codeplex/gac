@@ -399,6 +399,7 @@ GuiBindableDataGrid
 				~GuiBindableDataColumn();
 
 				WString												GetCellText(vint row)override;
+				description::Value									GetCellValue(vint row);
 			};
 			
 			/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
@@ -413,6 +414,7 @@ GuiBindableDataGrid
 				~GuiBindableDataProvider();
 
 				vint												GetRowCount()override;
+				description::Value									GetRowValue(vint row);
 
 				bool												InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column);
 				bool												AddBindableColumn(Ptr<GuiBindableDataColumn> column);
@@ -455,9 +457,13 @@ GuiBindableDataGrid
 				/// <returns>Returns the column of a specified index.</returns>
 				Ptr<GuiBindableDataColumn>							GetBindableColumn(vint index);
 
-				/// <summary>Get the selected item.</summary>
+				/// <summary>Get the selected cell.</summary>
 				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
-				description::Value									GetSelectedItem();
+				description::Value									GetSelectedRowValue();
+
+				/// <summary>Get the selected cell.</summary>
+				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
+				description::Value									GetSelectedCellValue();
 			};
 		}
 	}

@@ -1816,6 +1816,8 @@ Type Declaration
 			BEGIN_CLASS_MEMBER(GuiBindableDataColumn)
 				CLASS_MEMBER_BASE(StructuredColummProviderBase)
 				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataColumn*(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(GetCellValue, { L"row" })
 			END_CLASS_MEMBER(GuiBindableDataColumn)
 
 			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
@@ -1827,7 +1829,8 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveBindableColumn, { L"column" })
 				CLASS_MEMBER_METHOD(ClearBindableColumns, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetBindableColumn, { L"index" })
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedRowValue, SelectionCellChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedCellValue, SelectedCellChanged)
 			END_CLASS_MEMBER(GuiBindableDataGrid)
 
 #undef INTERFACE_IDENTIFIER
