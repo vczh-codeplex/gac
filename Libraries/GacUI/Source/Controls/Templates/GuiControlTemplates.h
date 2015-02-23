@@ -380,6 +380,29 @@ Item Template
 
 				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
+
+			class GuiGridVisualizerTemplate : public GuiControlTemplate , public Description<GuiGridVisualizerTemplate>
+			{
+			public:
+				GuiGridVisualizerTemplate();
+				~GuiGridVisualizerTemplate();
+
+#define GuiGridVisualizerTemplate_PROPERTIES(F)\
+				F(GuiGridVisualizerTemplate, description::Value, RowValue)\
+				F(GuiGridVisualizerTemplate, description::Value, CellValue)\
+				F(GuiGridVisualizerTemplate, bool, Selected)\
+
+				GuiGridVisualizerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiGridEditorTemplate : public GuiGridVisualizerTemplate , public Description<GuiGridEditorTemplate>
+			{
+			public:
+				GuiGridEditorTemplate();
+				~GuiGridEditorTemplate();
+
+				void									UpdateCellValue(description::Value value);
+			};
 		}
 	}
 }

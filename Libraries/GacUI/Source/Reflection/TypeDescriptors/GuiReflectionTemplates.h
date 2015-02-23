@@ -49,6 +49,8 @@ Type List
 			F(presentation::templates::GuiTabTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
+			F(presentation::templates::GuiGridVisualizerTemplate)\
+			F(presentation::templates::GuiGridEditorTemplate)\
 
 			GUIREFLECTIONTEMPLATES_TYPELIST(DECL_TYPE_INFO)
 

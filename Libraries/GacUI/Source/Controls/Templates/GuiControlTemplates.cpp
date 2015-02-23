@@ -436,6 +436,37 @@ GuiTreeItemTemplate
 			GuiTreeItemTemplate::~GuiTreeItemTemplate()
 			{
 			}
+
+/***********************************************************************
+GuiGridVisualizerTemplate
+***********************************************************************/
+
+			GuiGridVisualizerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiGridVisualizerTemplate::GuiGridVisualizerTemplate()
+			{
+				GuiGridVisualizerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiGridVisualizerTemplate::~GuiGridVisualizerTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiGridEditorTemplate
+***********************************************************************/
+
+			GuiGridEditorTemplate::GuiGridEditorTemplate()
+			{
+			}
+
+			GuiGridEditorTemplate::~GuiGridEditorTemplate()
+			{
+			}
+
+			void GuiGridEditorTemplate::UpdateCellValue(description::Value value)
+			{
+			}
 		}
 	}
 }
