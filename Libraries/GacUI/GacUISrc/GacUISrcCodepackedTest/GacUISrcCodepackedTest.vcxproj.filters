@@ -203,16 +203,7 @@
     <Xml Include="Resources\XmlDocComplexScript.xml">
       <Filter>Resource Files</Filter>
     </Xml>
-    <Xml Include="Resources\XmlDocDemo.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
     <Xml Include="Resources\XmlWindowResource.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
-    <Xml Include="Resources\XmlWindowResourceDataBinding.xml">
-      <Filter>Resource Files</Filter>
-    </Xml>
-    <Xml Include="Resources\XmlWindowResourceControlTemplates.xml">
       <Filter>Resource Files</Filter>
     </Xml>
   </ItemGroup>
@@ -256,9 +247,6 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\s_Underline.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\XmlDocDemo_TooltipWindow.jpg">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Resources\OfficeExcel.ico">

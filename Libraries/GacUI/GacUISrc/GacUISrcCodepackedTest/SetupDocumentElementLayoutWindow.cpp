@@ -166,7 +166,7 @@ void SetupDocumentViewerLayoutWindow(GuiControlHost* controlHost, GuiGraphicsCom
 
 	List<WString> errors;
 	Ptr<GuiResource> resource = GuiResource::LoadFromXml(L"Resources\\XmlResource.xml", errors);
-	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDoc.xml").Cast<DocumentModel>();
+	Ptr<DocumentModel> document=resource->GetValueByPath(L"XmlDocComplexScript.xml").Cast<DocumentModel>();
 	documentControl->SetDocument(document);
 }
 
