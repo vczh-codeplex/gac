@@ -416,7 +416,7 @@ GuiBindableDataGrid
 				};
 			
 				/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-				class BindableDataProvider :public StructuredDataProviderBase, public Description<BindableDataProvider>
+				class BindableDataProvider : public StructuredDataProviderBase, public Description<BindableDataProvider>
 				{
 				protected:
 					Ptr<description::IValueReadonlyList>			itemSource;

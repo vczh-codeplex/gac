@@ -1822,7 +1822,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(BindableDataColumn)
 				CLASS_MEMBER_BASE(StructuredColummProviderBase)
-				CLASS_MEMBER_CONSTRUCTOR(BindableDataColumn*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<BindableDataColumn>(), NO_PARAMETER)
 
 				CLASS_MEMBER_METHOD(GetCellValue, { L"row" })
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ValueProperty)

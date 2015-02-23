@@ -534,6 +534,48 @@ Item Template (GuiTreeItemTemplate)
 				controls::tree::INodeItemStyleProvider*				GetNodeStyleProvider()override;
 			};
 
+			/// <summary>Data visualizer object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
+			class GuiBindableDataVisualizer : public controls::list::DataVisualizerBase, public Description<GuiBindableDataVisualizer>
+			{
+			public:
+				class Factory : public controls::list::DataVisualizerFactory<GuiBindableDataVisualizer>
+				{
+				protected:
+					Ptr<GuiTemplate::IFactory>						templateFactory;
+
+				public:
+					Factory(Ptr<GuiTemplate::IFactory> _templateFactory);
+					~Factory();
+
+					Ptr<controls::list::IDataVisualizer>			CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)override;
+				};
+
+				class DecoratedFactory : public controls::list::DataDecoratableVisualizerFactory<GuiBindableDataVisualizer>
+				{
+				protected:
+					Ptr<GuiTemplate::IFactory>						templateFactory;
+
+				public:
+					DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, Ptr<IDataVisualizerFactory> _decoratedFactory);
+					~DecoratedFactory();
+
+					Ptr<controls::list::IDataVisualizer>			CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)override;
+				};
+
+			protected:
+				Ptr<GuiTemplate::IFactory>							templateFactory;
+				GuiGridVisualizerTemplate*							visualizerTemplate = nullptr;
+
+				compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
+			public:
+				GuiBindableDataVisualizer();
+				GuiBindableDataVisualizer(Ptr<controls::list::IDataVisualizer> _decoratedVisualizer);
+				~GuiBindableDataVisualizer();
+
+				void												BeforeVisualizeCell(controls::list::IDataProvider* dataProvider, vint row, vint column)override;
+				void												SetSelected(bool value)override;
+			};
+
 /***********************************************************************
 Helper Functions
 ***********************************************************************/
