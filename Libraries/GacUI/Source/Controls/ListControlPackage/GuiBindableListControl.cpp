@@ -955,12 +955,35 @@ GuiBindableDataColumn
 
 				WString BindableDataColumn::GetCellText(vint row)
 				{
-					throw 0;
+					return GetCellValue(row).GetText();
 				}
 
 				description::Value BindableDataColumn::GetCellValue(vint row)
 				{
-					throw 0;
+					if (0 <= row && row < itemSource->GetCount())
+					{
+						return ReadProperty(itemSource->Get(row), valueProperty);
+					}
+					return Value();
+				}
+
+				const WString& BindableDataColumn::GetValueProperty()
+				{
+					return valueProperty;
+				}
+
+				void BindableDataColumn::SetValueProperty(const WString& value)
+				{
+					if (valueProperty != value)
+					{
+						valueProperty = value;
+						if (commandExecutor)
+						{
+							commandExecutor->OnDataProviderColumnChanged();
+						}
+						compositions::GuiEventArgs arguments;
+						ValuePropertyChanged.Execute(arguments);
+					}
 				}
 
 /***********************************************************************
@@ -1015,21 +1038,49 @@ GuiBindableDataProvider
 
 				bool BindableDataProvider::InsertBindableColumn(vint index, Ptr<BindableDataColumn> column)
 				{
-					return InsertColumnInternal(index, column, true);
+					if (InsertColumnInternal(index, column, true))
+					{
+						column->itemSource = itemSource;
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 
 				bool BindableDataProvider::AddBindableColumn(Ptr<BindableDataColumn> column)
 				{
-					return AddColumnInternal(column, true);
+					if (AddColumnInternal(column, true))
+					{
+						column->itemSource = itemSource;
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 
 				bool BindableDataProvider::RemoveBindableColumn(Ptr<BindableDataColumn> column)
 				{
-					return RemoveColumnInternal(column, true);
+					if (RemoveColumnInternal(column, true))
+					{
+						column->itemSource = nullptr;
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 
 				bool BindableDataProvider::ClearBindableColumns()
 				{
+					FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
+					{
+						column.Cast<BindableDataColumn>()->itemSource = nullptr;
+					}
 					return ClearColumnsInternal(true);
 				}
 
