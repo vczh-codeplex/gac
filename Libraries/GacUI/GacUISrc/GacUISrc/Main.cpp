@@ -44,6 +44,116 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	return result;
 }
 
+#ifndef VCZH_DEBUG_NO_REFLECTION
+
+namespace demos
+{
+	class Data : public Object, public Description<Data>
+	{
+	public:
+		WString					name;
+		WString					organization;
+		WString					title;
+	};
+
+	template<typename TImpl>
+	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
+	{
+	protected:
+		Ptr<IValueEnumerable> ViewModel_;
+
+		void InitializeComponents(Ptr<IValueEnumerable> ViewModel)
+		{
+			ViewModel_ = ViewModel;
+			InitializeFromResource();
+		}
+	public:
+		MainWindow_()
+			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
+			,GuiInstancePartialClass<GuiWindow>(L"demos::MainWindow")
+		{
+		}
+
+		Ptr<IValueEnumerable> GetViewModel()
+		{
+			return ViewModel_;
+		}
+	};
+
+	class MainWindow : public MainWindow_<MainWindow>
+	{
+	public:
+		MainWindow(Ptr<IValueEnumerable> ViewModel)
+		{
+			InitializeComponents(ViewModel);
+		}
+	};
+}
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#define DEMO_TYPES(F)\
+			F(demos::Data)\
+			F(demos::MainWindow)\
+
+			DEMO_TYPES(DECL_TYPE_INFO)
+			DEMO_TYPES(IMPL_CPP_TYPE_INFO)
+
+			BEGIN_CLASS_MEMBER(demos::Data)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<demos::Data>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(name)
+				CLASS_MEMBER_FIELD(organization)
+				CLASS_MEMBER_FIELD(title)
+			END_CLASS_MEMBER(demos::Data)
+
+			BEGIN_CLASS_MEMBER(demos::MainWindow)
+				CLASS_MEMBER_BASE(GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<IValueEnumerable>), {L"ViewModel"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+			END_CLASS_MEMBER(demos::MainWindow)
+
+			class DemoResourceLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					DEMO_TYPES(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			class DemoResourcePlugin : public Object, public IGuiPlugin
+			{
+			public:
+				void Load()override
+				{
+					GetGlobalTypeManager()->AddTypeLoader(new DemoResourceLoader);
+				}
+
+				void AfterLoad()override
+				{
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(DemoResourcePlugin)
+		}
+	}
+}
+
+#endif
+
 extern void UnitTestInGuiMain();
 
 void GuiMain()
@@ -60,7 +170,9 @@ void GuiMain()
 	auto td = manager->GetTypeDescriptorForType(key);
 	IGuiInstanceLoader::TypeInfo typeInfo(key, td);
 
-	GuiWindow window(GetCurrentTheme()->CreateWindowStyle());
+	ObservableList<Ptr<demos::Data>> viewModel;
+
+	demos::MainWindow window(viewModel.GetWrapper());
 	auto loader = GetInstanceLoaderManager()->GetLoader(key);
 	auto scope = loader->InitializeInstance(typeInfo, Value::From(&window));
 	CHECK_ERROR(scope->errors.Count() == 0, L"");

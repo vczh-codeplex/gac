@@ -389,7 +389,7 @@ GuiBindableDataGrid
 			namespace list
 			{
 				/// <summary>Column object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-				class GuiBindableDataColumn : public StructuredColummProviderBase
+				class BindableDataColumn : public StructuredColummProviderBase
 				{
 					friend class GuiBindableDataProvider;
 				protected:
@@ -397,32 +397,32 @@ GuiBindableDataGrid
 
 					void											SetItemSource(Ptr<description::IValueReadonlyList> _itemSource);
 				public:
-					GuiBindableDataColumn();
-					~GuiBindableDataColumn();
+					BindableDataColumn();
+					~BindableDataColumn();
 
 					WString											GetCellText(vint row)override;
 					description::Value								GetCellValue(vint row);
 				};
 			
 				/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-				class GuiBindableDataProvider :public StructuredDataProviderBase
+				class BindableDataProvider :public StructuredDataProviderBase
 				{
 				protected:
 					Ptr<description::IValueReadonlyList>			itemSource;
 					Ptr<EventHandler>								itemChangedEventHandler;
 
 				public:
-					GuiBindableDataProvider(Ptr<description::IValueEnumerable> _itemSource);
-					~GuiBindableDataProvider();
+					BindableDataProvider(Ptr<description::IValueEnumerable> _itemSource);
+					~BindableDataProvider();
 
 					vint											GetRowCount()override;
 					description::Value								GetRowValue(vint row);
 
-					bool											InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column);
-					bool											AddBindableColumn(Ptr<GuiBindableDataColumn> column);
-					bool											RemoveBindableColumn(Ptr<GuiBindableDataColumn> column);
+					bool											InsertBindableColumn(vint index, Ptr<BindableDataColumn> column);
+					bool											AddBindableColumn(Ptr<BindableDataColumn> column);
+					bool											RemoveBindableColumn(Ptr<BindableDataColumn> column);
 					bool											ClearBindableColumns();
-					Ptr<GuiBindableDataColumn>						GetBindableColumn(vint index);
+					Ptr<BindableDataColumn>						GetBindableColumn(vint index);
 				};
 			}
 			
@@ -430,7 +430,7 @@ GuiBindableDataGrid
 			class GuiBindableDataGrid : public GuiVirtualDataGrid, public Description<GuiBindableDataGrid>
 			{
 			protected:
-				list::GuiBindableDataProvider*						bindableDataProvider;
+				list::BindableDataProvider*							bindableDataProvider;
 
 			public:
 				/// <summary>Create a bindable Data grid control.</summary>
@@ -443,22 +443,22 @@ GuiBindableDataGrid
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="index">The column index.</param>
 				/// <param name="column">The column.</param>
-				bool												InsertBindableColumn(vint index, Ptr<list::GuiBindableDataColumn> column);
+				bool												InsertBindableColumn(vint index, Ptr<list::BindableDataColumn> column);
 				/// <summary>Add a column.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="column">The column.</param>
-				bool												AddBindableColumn(Ptr<list::GuiBindableDataColumn> column);
+				bool												AddBindableColumn(Ptr<list::BindableDataColumn> column);
 				/// <summary>Remove a column.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="column">The column.</param>
-				bool												RemoveBindableColumn(Ptr<list::GuiBindableDataColumn> column);
+				bool												RemoveBindableColumn(Ptr<list::BindableDataColumn> column);
 				/// <summary>Clear all columns.</summary>
 				/// <returns>Returns true if this operation succeeded.</returns>
 				bool												ClearBindableColumns();
 				/// <summary>Get a column.</summary>
 				/// <param name="index">The column index.</param>
 				/// <returns>Returns the column of a specified index.</returns>
-				Ptr<list::GuiBindableDataColumn>					GetBindableColumn(vint index);
+				Ptr<list::BindableDataColumn>					GetBindableColumn(vint index);
 
 				/// <summary>Get the selected cell.</summary>
 				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>

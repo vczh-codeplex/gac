@@ -1820,12 +1820,12 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiBindableTreeView)
 
-			BEGIN_CLASS_MEMBER(GuiBindableDataColumn)
+			BEGIN_CLASS_MEMBER(BindableDataColumn)
 				CLASS_MEMBER_BASE(StructuredColummProviderBase)
-				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataColumn*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(BindableDataColumn*(), NO_PARAMETER)
 
 				CLASS_MEMBER_METHOD(GetCellValue, { L"row" })
-			END_CLASS_MEMBER(GuiBindableDataColumn)
+			END_CLASS_MEMBER(BindableDataColumn)
 
 			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
 				CLASS_MEMBER_BASE(GuiVirtualDataGrid)

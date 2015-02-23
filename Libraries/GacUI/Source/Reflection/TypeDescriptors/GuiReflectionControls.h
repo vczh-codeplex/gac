@@ -207,7 +207,7 @@ Type List
 			F(presentation::controls::GuiBindableTextList)\
 			F(presentation::controls::GuiBindableListView)\
 			F(presentation::controls::GuiBindableTreeView)\
-			F(presentation::controls::list::GuiBindableDataColumn)\
+			F(presentation::controls::list::BindableDataColumn)\
 			F(presentation::controls::GuiBindableDataGrid)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
