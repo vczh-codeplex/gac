@@ -9,6 +9,7 @@ namespace vl
 			using namespace compositions;
 			using namespace elements;
 			using namespace controls;
+			using namespace controls::list;
 			using namespace reflection::description;
 			using namespace collections;
 
@@ -1355,6 +1356,100 @@ GuiTreeItemTemplate_ItemStyleController
 			controls::tree::INodeItemStyleProvider* GuiTreeItemTemplate_ItemStyleController::GetNodeStyleProvider()
 			{
 				return nodeStyleProvider;
+			}
+
+/***********************************************************************
+GuiBindableDataVisualizer::Factory
+***********************************************************************/
+
+			GuiBindableDataVisualizer::Factory::Factory(Ptr<GuiTemplate::IFactory> _templateFactory)
+				:templateFactory(_templateFactory)
+			{
+			}
+
+			GuiBindableDataVisualizer::Factory::~Factory()
+			{
+			}
+
+			Ptr<controls::list::IDataVisualizer> GuiBindableDataVisualizer::Factory::CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)
+			{
+				auto visualizer = DataVisualizerFactory<GuiBindableDataVisualizer>::CreateVisualizer(font, styleProvider).Cast<GuiBindableDataVisualizer>();
+				if (visualizer)
+				{
+					visualizer->templateFactory = templateFactory;
+				}
+				return visualizer;
+			}
+
+/***********************************************************************
+GuiBindableDataVisualizer::DecoratedFactory
+***********************************************************************/
+
+			GuiBindableDataVisualizer::DecoratedFactory::DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, Ptr<IDataVisualizerFactory> _decoratedFactory)
+				:DataDecoratableVisualizerFactory<GuiBindableDataVisualizer>(_decoratedFactory)
+				, templateFactory(_templateFactory)
+			{
+			}
+
+			GuiBindableDataVisualizer::DecoratedFactory::~DecoratedFactory()
+			{
+			}
+
+			Ptr<controls::list::IDataVisualizer> GuiBindableDataVisualizer::DecoratedFactory::CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)
+			{
+				auto visualizer = DataDecoratableVisualizerFactory<GuiBindableDataVisualizer>::CreateVisualizer(font, styleProvider).Cast<GuiBindableDataVisualizer>();
+				if (visualizer)
+				{
+					visualizer->templateFactory = templateFactory;
+				}
+				return visualizer;
+			}
+
+/***********************************************************************
+GuiBindableDataVisualizer
+***********************************************************************/
+
+			compositions::GuiBoundsComposition* GuiBindableDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
+			{
+				GuiTemplate* itemTemplate = templateFactory->CreateTemplate(Value());
+				if (!(visualizerTemplate = dynamic_cast<GuiGridVisualizerTemplate*>(itemTemplate)))
+				{
+					delete itemTemplate;
+					CHECK_FAIL(L"GuiBindableDataVisualizer::CreateBoundsCompositionInternal(presentation::compositions::GuiBoundsComposition*)#An instance of GuiGridVisualizerTemplate is expected.");
+				}
+
+				if (decoratedComposition)
+				{
+					decoratedComposition->SetAlignmentToParent(Margin(0, 0, 0, 0));
+					visualizerTemplate->GetContainerComposition()->AddChild(decoratedComposition);
+				}
+				visualizerTemplate->SetFont(font);
+				return visualizerTemplate;
+			}
+
+			GuiBindableDataVisualizer::GuiBindableDataVisualizer()
+			{
+			}
+
+			GuiBindableDataVisualizer::GuiBindableDataVisualizer(Ptr<controls::list::IDataVisualizer> _decoratedVisualizer)
+				:DataVisualizerBase(_decoratedVisualizer)
+			{
+			}
+
+			GuiBindableDataVisualizer::~GuiBindableDataVisualizer()
+			{
+			}
+
+			void GuiBindableDataVisualizer::BeforeVisualizeCell(controls::list::IDataProvider* dataProvider, vint row, vint column)
+			{
+			}
+
+			void GuiBindableDataVisualizer::SetSelected(bool value)
+			{
+				if (visualizerTemplate)
+				{
+					visualizerTemplate->SetSelected(value);
+				}
 			}
 
 /***********************************************************************
