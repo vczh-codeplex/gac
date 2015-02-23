@@ -62,7 +62,8 @@ void GuiMain()
 
 	GuiWindow window(GetCurrentTheme()->CreateWindowStyle());
 	auto loader = GetInstanceLoaderManager()->GetLoader(key);
-	loader->InitializeInstance(typeInfo, Value::From(&window));
+	auto scope = loader->InitializeInstance(typeInfo, Value::From(&window));
+	CHECK_ERROR(scope->errors.Count() == 0, L"");
 
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();

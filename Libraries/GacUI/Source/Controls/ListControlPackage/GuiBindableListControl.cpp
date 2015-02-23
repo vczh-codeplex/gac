@@ -935,118 +935,95 @@ GuiBindableTreeView
 			}
 
 /***********************************************************************
-GuiBindableDataGrid::ItemSource
+GuiBindableDataColumn
 ***********************************************************************/
 
-			GuiBindableDataGrid::ItemSource::ItemSource(Ptr<description::IValueEnumerable> _itemSource)
+			void GuiBindableDataColumn::SetItemSource(Ptr<description::IValueReadonlyList> _itemSource)
+			{
+				itemSource = _itemSource;
+			}
+
+			GuiBindableDataColumn::GuiBindableDataColumn()
+			{
+			}
+
+			GuiBindableDataColumn::~GuiBindableDataColumn()
+			{
+			}
+
+			WString GuiBindableDataColumn::GetCellText(vint row)
 			{
 				throw 0;
 			}
 
-			GuiBindableDataGrid::ItemSource::~ItemSource()
+/***********************************************************************
+GuiBindableDataProvider
+***********************************************************************/
+
+			GuiBindableDataProvider::GuiBindableDataProvider(Ptr<description::IValueEnumerable> _itemSource)
 			{
+				if (auto ol = _itemSource.Cast<IValueObservableList>())
+				{
+					itemSource = ol;
+					itemChangedEventHandler = ol->ItemChanged.Add([this](vint start, vint oldCount, vint newCount)
+					{
+						commandExecutor->OnDataProviderItemModified(start, oldCount, newCount);
+					});
+				}
+				else if (auto rl = _itemSource.Cast<IValueReadonlyList>())
+				{
+					itemSource = rl;
+				}
+				else
+				{
+					itemSource = IValueList::Create(GetLazyList<Value>(_itemSource));
+				}
 			}
 
-			// ===================== list::IDataProvider =====================
+			GuiBindableDataProvider::~GuiBindableDataProvider()
+			{
+				if (itemChangedEventHandler)
+				{
+					auto ol = itemSource.Cast<IValueObservableList>();
+					ol->ItemChanged.Remove(itemChangedEventHandler);
+				}
+			}
 
-			void GuiBindableDataGrid::ItemSource::SetCommandExecutor(list::IDataProviderCommandExecutor* value)
+			vint GuiBindableDataProvider::GetRowCount()
 			{
 				throw 0;
 			}
 
-			vint GuiBindableDataGrid::ItemSource::GetColumnCount()
+			bool GuiBindableDataProvider::InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column)
 			{
-				throw 0;
+				return InsertColumnInternal(index, column, true);
 			}
 
-			WString GuiBindableDataGrid::ItemSource::GetColumnText(vint column)
+			bool GuiBindableDataProvider::AddBindableColumn(Ptr<GuiBindableDataColumn> column)
 			{
-				throw 0;
+				return AddColumnInternal(column, true);
 			}
 
-			vint GuiBindableDataGrid::ItemSource::GetColumnSize(vint column)
+			bool GuiBindableDataProvider::RemoveBindableColumn(Ptr<GuiBindableDataColumn> column)
 			{
-				throw 0;
+				return RemoveColumnInternal(column, true);
 			}
 
-			void GuiBindableDataGrid::ItemSource::SetColumnSize(vint column, vint value)
+			bool GuiBindableDataProvider::ClearBindableColumns()
 			{
-				throw 0;
+				return ClearColumnsInternal(true);
 			}
 
-			GuiMenu* GuiBindableDataGrid::ItemSource::GetColumnPopup(vint column)
+			Ptr<GuiBindableDataColumn> GuiBindableDataProvider::GetBindableColumn(vint index)
 			{
-				throw 0;
-			}
-
-			bool GuiBindableDataGrid::ItemSource::IsColumnSortable(vint column)
-			{
-				throw 0;
-			}
-
-			void GuiBindableDataGrid::ItemSource::SortByColumn(vint column, bool ascending)
-			{
-				throw 0;
-			}
-
-			vint GuiBindableDataGrid::ItemSource::GetSortedColumn()
-			{
-				throw 0;
-			}
-
-			bool GuiBindableDataGrid::ItemSource::IsSortOrderAscending()
-			{
-				throw 0;
-			}
-
-			vint GuiBindableDataGrid::ItemSource::GetRowCount()
-			{
-				throw 0;
-			}
-
-			Ptr<GuiImageData> GuiBindableDataGrid::ItemSource::GetRowLargeImage(vint row)
-			{
-				throw 0;
-			}
-
-			Ptr<GuiImageData> GuiBindableDataGrid::ItemSource::GetRowSmallImage(vint row)
-			{
-				throw 0;
-			}
-
-			vint GuiBindableDataGrid::ItemSource::GetCellSpan(vint row, vint column)
-			{
-				throw 0;
-			}
-
-			WString GuiBindableDataGrid::ItemSource::GetCellText(vint row, vint column)
-			{
-				throw 0;
-			}
-
-			list::IDataVisualizerFactory* GuiBindableDataGrid::ItemSource::GetCellDataVisualizerFactory(vint row, vint column)
-			{
-				throw 0;
-			}
-
-			void GuiBindableDataGrid::ItemSource::VisualizeCell(vint row, vint column, list::IDataVisualizer* dataVisualizer)
-			{
-				throw 0;
-			}
-
-			list::IDataEditorFactory* GuiBindableDataGrid::ItemSource::GetCellDataEditorFactory(vint row, vint column)
-			{
-				throw 0;
-			}
-
-			void GuiBindableDataGrid::ItemSource::BeforeEditCell(vint row, vint column, list::IDataEditor* dataEditor)
-			{
-				throw 0;
-			}
-
-			void GuiBindableDataGrid::ItemSource::SaveCellData(vint row, vint column, list::IDataEditor* dataEditor)
-			{
-				throw 0;
+				if (0 <= index && index < GetColumnCount())
+				{
+					return columns[index].Cast<GuiBindableDataColumn>();
+				}
+				else
+				{
+					return nullptr;
+				}
 			}
 
 /***********************************************************************
@@ -1054,13 +1031,38 @@ GuiBindableDataGrid
 ***********************************************************************/
 
 			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
-				:GuiVirtualDataGrid(_styleProvider, new ItemSource(_itemSource))
+				:GuiVirtualDataGrid(_styleProvider, new GuiBindableDataProvider(_itemSource))
 			{
-				itemSource = dynamic_cast<ItemSource*>(GetDataProvider());
+				bindableDataProvider = dynamic_cast<GuiBindableDataProvider*>(GetStructuredDataProvider());
 			}
 
 			GuiBindableDataGrid::~GuiBindableDataGrid()
 			{
+			}
+
+			bool GuiBindableDataGrid::InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column)
+			{
+				return bindableDataProvider->InsertBindableColumn(index, column);
+			}
+
+			bool GuiBindableDataGrid::AddBindableColumn(Ptr<GuiBindableDataColumn> column)
+			{
+				return bindableDataProvider->AddBindableColumn(column);
+			}
+
+			bool GuiBindableDataGrid::RemoveBindableColumn(Ptr<GuiBindableDataColumn> column)
+			{
+				return bindableDataProvider->RemoveBindableColumn(column);
+			}
+
+			bool GuiBindableDataGrid::ClearBindableColumns()
+			{
+				return bindableDataProvider->ClearBindableColumns();
+			}
+
+			Ptr<GuiBindableDataColumn> GuiBindableDataGrid::GetBindableColumn(vint index)
+			{
+				return bindableDataProvider->GetBindableColumn(index);
 			}
 		}
 	}

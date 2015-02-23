@@ -1618,6 +1618,14 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_FAST(AdditionalFilter)
 			END_CLASS_MEMBER(StructuredDataProvider)
 
+			BEGIN_CLASS_MEMBER(StructuredColummProviderBase)
+				CLASS_MEMBER_BASE(IStructuredColumnProvider)
+			END_CLASS_MEMBER(StructuredColummProviderBase)
+
+			BEGIN_CLASS_MEMBER(StructuredDataProviderBase)
+				CLASS_MEMBER_BASE(IStructuredDataProvider)
+			END_CLASS_MEMBER(StructuredDataProviderBase)
+
 			BEGIN_CLASS_MEMBER(ListViewMainColumnDataVisualizer)
 				CLASS_MEMBER_BASE(IDataVisualizer)
 
@@ -1805,9 +1813,21 @@ Type Declaration
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiBindableTreeView)
 
+			BEGIN_CLASS_MEMBER(GuiBindableDataColumn)
+				CLASS_MEMBER_BASE(StructuredColummProviderBase)
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataColumn*(), NO_PARAMETER)
+			END_CLASS_MEMBER(GuiBindableDataColumn)
+
 			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
 				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
 				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataGrid*(GuiBindableDataGrid::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+
+				CLASS_MEMBER_METHOD(InsertBindableColumn, { L"index" _ L"column" })
+				CLASS_MEMBER_METHOD(AddBindableColumn, { L"column" })
+				CLASS_MEMBER_METHOD(RemoveBindableColumn, { L"column" })
+				CLASS_MEMBER_METHOD(ClearBindableColumns, NO_PARAMETER)
+				CLASS_MEMBER_METHOD(GetBindableColumn, { L"index" })
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedItem, SelectionChanged)
 			END_CLASS_MEMBER(GuiBindableDataGrid)
 
 #undef INTERFACE_IDENTIFIER
