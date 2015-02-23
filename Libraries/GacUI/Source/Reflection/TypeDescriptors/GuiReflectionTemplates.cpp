@@ -195,6 +195,20 @@ Type Declaration
 				GuiTreeItemTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiTreeItemTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiGridVisualizerTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiGridVisualizerTemplate*(), NO_PARAMETER)
+
+				GuiGridVisualizerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiGridVisualizerTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiGridEditorTemplate)
+				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiGridEditorTemplate*(), NO_PARAMETER)
+
+				CLASS_MEMBER_METHOD(UpdateCellValue, { L"value" })
+			END_CLASS_MEMBER(GuiGridEditorTemplate)
+
 #undef INTERFACE_EXTERNALCTOR
 #undef _
 
