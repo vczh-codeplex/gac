@@ -391,17 +391,28 @@ GuiBindableDataGrid
 				/// <summary>Column object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
 				class BindableDataColumn : public StructuredColummProviderBase, public Description<BindableDataColumn>
 				{
-					friend class GuiBindableDataProvider;
+					friend class BindableDataProvider;
 				protected:
 					Ptr<description::IValueReadonlyList>			itemSource;
+					WString											valueProperty;
 
 					void											SetItemSource(Ptr<description::IValueReadonlyList> _itemSource);
 				public:
 					BindableDataColumn();
 					~BindableDataColumn();
+				
+					/// <summary>Value property name changed event.</summary>
+					compositions::GuiNotifyEvent					ValuePropertyChanged;
 
 					WString											GetCellText(vint row)override;
 					description::Value								GetCellValue(vint row);
+				
+					/// <summary>Get the value property name to get the cell value from an item.</summary>
+					/// <returns>The value property name.</returns>
+					const WString&									GetValueProperty();
+					/// <summary>Set the value property name to get the cell value from an item.</summary>
+					/// <param name="value">The value property name.</param>
+					void											SetValueProperty(const WString& value);
 				};
 			
 				/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>

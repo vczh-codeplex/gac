@@ -1825,6 +1825,7 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(BindableDataColumn*(), NO_PARAMETER)
 
 				CLASS_MEMBER_METHOD(GetCellValue, { L"row" })
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ValueProperty)
 			END_CLASS_MEMBER(BindableDataColumn)
 
 			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
