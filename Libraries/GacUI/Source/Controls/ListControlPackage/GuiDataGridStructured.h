@@ -238,10 +238,16 @@ Structured DataSource Extensions
 					/// <param name="value">The sorter.</param>
 					/// <returns>The current column provider itself.</returns>
 					StructuredColummProviderBase*						SetInherentSorter(Ptr<IStructuredDataSorter> value);
+					/// <summary>Get the visualizer factory for the column.</summary>
+					/// <returns>The the visualizer factory for the column.</returns>
+					Ptr<IDataVisualizerFactory>							GetVisualizerFactory();
 					/// <summary>Set the visualizer factory for the column.</summary>
 					/// <param name="value">The visualizer factory.</param>
 					/// <returns>The current column provider itself.</returns>
 					StructuredColummProviderBase*						SetVisualizerFactory(Ptr<IDataVisualizerFactory> value);
+					/// <summary>Get the editor factory for the column.</summary>
+					/// <returns>The the editor factory for the column.</returns>
+					Ptr<IDataEditorFactory>								GetEditorFactory();
 					/// <summary>Set the editor factory for the column.</summary>
 					/// <param name="value">The editor factory.</param>
 					/// <returns>The current column provider itself.</returns>

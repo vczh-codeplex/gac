@@ -1620,6 +1620,13 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(StructuredColummProviderBase)
 				CLASS_MEMBER_BASE(IStructuredColumnProvider)
+
+				CLASS_MEMBER_PROPERTY_FAST(Text)
+				CLASS_MEMBER_PROPERTY_FAST(Popup)
+				CLASS_MEMBER_PROPERTY_FAST(InherentFilter)
+				CLASS_MEMBER_PROPERTY_FAST(InherentSorter)
+				CLASS_MEMBER_PROPERTY_FAST(VisualizerFactory)
+				CLASS_MEMBER_PROPERTY_FAST(EditorFactory)
 			END_CLASS_MEMBER(StructuredColummProviderBase)
 
 			BEGIN_CLASS_MEMBER(StructuredDataProviderBase)

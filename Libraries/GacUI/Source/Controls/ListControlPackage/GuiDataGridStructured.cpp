@@ -557,10 +557,20 @@ StructuredColummProviderBase
 					return this;
 				}
 
+				Ptr<IDataVisualizerFactory> StructuredColummProviderBase::GetVisualizerFactory()
+				{
+					return visualizerFactory;
+				}
+
 				StructuredColummProviderBase* StructuredColummProviderBase::SetVisualizerFactory(Ptr<IDataVisualizerFactory> value)
 				{
 					visualizerFactory=value;
 					return this;
+				}
+
+				Ptr<IDataEditorFactory> StructuredColummProviderBase::GetEditorFactory()
+				{
+					return editorFactory;
 				}
 
 				StructuredColummProviderBase* StructuredColummProviderBase::SetEditorFactory(Ptr<IDataEditorFactory> value)
