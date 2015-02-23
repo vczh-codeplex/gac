@@ -54,6 +54,17 @@ namespace demos
 		WString					name;
 		WString					organization;
 		WString					title;
+
+		Data()
+		{
+		}
+
+		Data(const WString& _name, const WString& _organization, const WString& _title)
+			:name(_name)
+			, organization(_organization)
+			, title(_title)
+		{
+		}
 	};
 
 	template<typename TImpl>
@@ -171,6 +182,10 @@ void GuiMain()
 	IGuiInstanceLoader::TypeInfo typeInfo(key, td);
 
 	ObservableList<Ptr<demos::Data>> viewModel;
+	//viewModel.Add(new demos::Data(L"Kula", L"Opera", L"CAO (Chief Algorithm Officer)"));
+	//viewModel.Add(new demos::Data(L"JeffChen", L"Tencent", L"Principal Fisher"));
+	//viewModel.Add(new demos::Data(L"MiliMeow", L"Microsoft", L"Software Engineer"));
+	//viewModel.Add(new demos::Data(L"Skogkatt", L"360", L"Sponsor"));
 
 	demos::MainWindow window(viewModel.GetWrapper());
 	auto loader = GetInstanceLoaderManager()->GetLoader(key);
