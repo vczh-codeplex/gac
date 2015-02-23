@@ -956,6 +956,11 @@ GuiBindableDataColumn
 				throw 0;
 			}
 
+			description::Value GuiBindableDataColumn::GetCellValue(vint row)
+			{
+				throw 0;
+			}
+
 /***********************************************************************
 GuiBindableDataProvider
 ***********************************************************************/
@@ -991,7 +996,19 @@ GuiBindableDataProvider
 
 			vint GuiBindableDataProvider::GetRowCount()
 			{
-				throw 0;
+				return itemSource->GetCount();
+			}
+
+			description::Value GuiBindableDataProvider::GetRowValue(vint row)
+			{
+				if (0 <= row && row < itemSource->GetCount())
+				{
+					return itemSource->Get(row);
+				}
+				else
+				{
+					return Value();
+				}
 			}
 
 			bool GuiBindableDataProvider::InsertBindableColumn(vint index, Ptr<GuiBindableDataColumn> column)
@@ -1063,6 +1080,22 @@ GuiBindableDataGrid
 			Ptr<GuiBindableDataColumn> GuiBindableDataGrid::GetBindableColumn(vint index)
 			{
 				return bindableDataProvider->GetBindableColumn(index);
+			}
+
+			description::Value GuiBindableDataGrid::GetSelectedRowValue()
+			{
+				return bindableDataProvider->GetRowValue(GetSelectedCell().row);
+			}
+
+			description::Value GuiBindableDataGrid::GetSelectedCellValue()
+			{
+				auto cell = GetSelectedCell();
+				auto column = GetBindableColumn(cell.column);
+				if (column)
+				{
+					return column->GetCellValue(cell.row);
+				}
+				return Value();
 			}
 		}
 	}
