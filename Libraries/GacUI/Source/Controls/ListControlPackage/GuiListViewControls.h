@@ -99,6 +99,8 @@ ListView Base
 				GuiListViewColumnHeader(IStyleController* _styleController);
 				~GuiListViewColumnHeader();
 
+				bool											IsAltAvailable()override;
+
 				/// <summary>Get the column sorting state.</summary>
 				/// <returns>The column sorting state.</returns>
 				ColumnSortingState								GetColumnSortingState();

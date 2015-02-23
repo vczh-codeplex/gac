@@ -93,6 +93,11 @@ GuiListViewColumnHeader
 			{
 			}
 
+			bool GuiListViewColumnHeader::IsAltAvailable()
+			{
+				return false;
+			}
+
 			GuiListViewColumnHeader::ColumnSortingState GuiListViewColumnHeader::GetColumnSortingState()
 			{
 				return columnSortingState;
