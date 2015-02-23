@@ -1442,6 +1442,20 @@ GuiBindableDataVisualizer
 
 			void GuiBindableDataVisualizer::BeforeVisualizeCell(controls::list::IDataProvider* dataProvider, vint row, vint column)
 			{
+				if (!visualizerTemplate) return;
+				visualizerTemplate->SetText(dataProvider->GetCellText(row, column));
+
+				auto structuredDataProvider = dynamic_cast<list::StructuredDataProvider*>(dataProvider);
+				if (!structuredDataProvider) return;
+
+				auto bindableDataProvider = structuredDataProvider->GetStructuredDataProvider().Cast<list::BindableDataProvider>();
+				if (!bindableDataProvider) return;
+
+				auto columnProvider = bindableDataProvider->GetBindableColumn(column);
+				if (!columnProvider) return;
+
+				visualizerTemplate->SetRowValue(bindableDataProvider->GetRowValue(row));
+				visualizerTemplate->SetCellValue(columnProvider->GetCellValue(row));
 			}
 
 			void GuiBindableDataVisualizer::SetSelected(bool value)
