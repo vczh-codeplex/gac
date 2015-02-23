@@ -1053,7 +1053,7 @@ GuiBindableDataGrid
 			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
 				:GuiVirtualDataGrid(_styleProvider, new BindableDataProvider(_itemSource))
 			{
-				bindableDataProvider = dynamic_cast<BindableDataProvider*>(GetStructuredDataProvider());
+				bindableDataProvider = GetStructuredDataProvider()->GetStructuredDataProvider().Cast<BindableDataProvider>();
 			}
 
 			GuiBindableDataGrid::~GuiBindableDataGrid()

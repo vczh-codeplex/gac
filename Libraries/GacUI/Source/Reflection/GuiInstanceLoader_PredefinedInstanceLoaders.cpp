@@ -1192,7 +1192,7 @@ GuiBindableDataGridInstanceLoader
 			{
 				if (propertyInfo.propertyName == _Columns)
 				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::GuiBindableDataColumn>());
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::BindableDataColumn>());
 				}
 				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
 				{
@@ -1216,7 +1216,7 @@ GuiBindableDataGridInstanceLoader
 				{
 					if (propertyValue.propertyName == _Columns)
 					{
-						auto column = UnboxValue<Ptr<list::GuiBindableDataColumn>>(propertyValue.propertyValue);
+						auto column = UnboxValue<Ptr<list::BindableDataColumn>>(propertyValue.propertyValue);
 						container->AddBindableColumn(column);
 						return true;
 					}

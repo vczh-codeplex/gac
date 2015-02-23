@@ -389,7 +389,7 @@ GuiBindableDataGrid
 			namespace list
 			{
 				/// <summary>Column object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-				class BindableDataColumn : public StructuredColummProviderBase
+				class BindableDataColumn : public StructuredColummProviderBase, public Description<BindableDataColumn>
 				{
 					friend class GuiBindableDataProvider;
 				protected:
@@ -405,7 +405,7 @@ GuiBindableDataGrid
 				};
 			
 				/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
-				class BindableDataProvider :public StructuredDataProviderBase
+				class BindableDataProvider :public StructuredDataProviderBase, public Description<BindableDataProvider>
 				{
 				protected:
 					Ptr<description::IValueReadonlyList>			itemSource;
@@ -422,7 +422,7 @@ GuiBindableDataGrid
 					bool											AddBindableColumn(Ptr<BindableDataColumn> column);
 					bool											RemoveBindableColumn(Ptr<BindableDataColumn> column);
 					bool											ClearBindableColumns();
-					Ptr<BindableDataColumn>						GetBindableColumn(vint index);
+					Ptr<BindableDataColumn>							GetBindableColumn(vint index);
 				};
 			}
 			
@@ -430,7 +430,7 @@ GuiBindableDataGrid
 			class GuiBindableDataGrid : public GuiVirtualDataGrid, public Description<GuiBindableDataGrid>
 			{
 			protected:
-				list::BindableDataProvider*							bindableDataProvider;
+				Ptr<list::BindableDataProvider>						bindableDataProvider;
 
 			public:
 				/// <summary>Create a bindable Data grid control.</summary>
@@ -458,7 +458,7 @@ GuiBindableDataGrid
 				/// <summary>Get a column.</summary>
 				/// <param name="index">The column index.</param>
 				/// <returns>Returns the column of a specified index.</returns>
-				Ptr<list::BindableDataColumn>					GetBindableColumn(vint index);
+				Ptr<list::BindableDataColumn>						GetBindableColumn(vint index);
 
 				/// <summary>Get the selected cell.</summary>
 				/// <returns>Returns the selected item. If there are multiple selected items, or there is no selected item, null will be returned.</returns>
