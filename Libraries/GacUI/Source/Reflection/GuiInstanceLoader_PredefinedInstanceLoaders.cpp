@@ -1299,7 +1299,7 @@ GuiBindableDataColumnInstanceLoader
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 				}
-				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
+				else if (propertyInfo.propertyName == _EditorTemplate)
 				{
 					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
 				}
