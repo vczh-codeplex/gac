@@ -203,10 +203,10 @@ Type Declaration
 			END_CLASS_MEMBER(GuiGridVisualizerTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiGridEditorTemplate)
-				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiGridEditorTemplate*(), NO_PARAMETER)
 
-				CLASS_MEMBER_METHOD(UpdateCellValue, { L"value" })
+				GuiGridEditorTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiGridEditorTemplate)
 
 #undef INTERFACE_EXTERNALCTOR

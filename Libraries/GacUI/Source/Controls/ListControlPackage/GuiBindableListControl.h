@@ -404,6 +404,7 @@ GuiBindableDataGrid
 					/// <summary>Value property name changed event.</summary>
 					compositions::GuiNotifyEvent					ValuePropertyChanged;
 
+					void											SaveCellData(vint row, IDataEditor* dataEditor)override;
 					WString											GetCellText(vint row)override;
 					description::Value								GetCellValue(vint row);
 				

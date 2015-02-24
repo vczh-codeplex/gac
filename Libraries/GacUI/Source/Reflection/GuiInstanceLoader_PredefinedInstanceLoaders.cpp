@@ -1333,6 +1333,9 @@ GuiBindableDataColumnInstanceLoader
 					}
 					else if (propertyValue.propertyName == _EditorTemplate)
 					{
+						auto templateFactory = CreateTemplateFactory(propertyValue.propertyValue.GetText());
+						auto factory = new GuiBindableDataEditor::Factory(templateFactory);
+						container->SetEditorFactory(factory);
 						return true;
 					}
 				}

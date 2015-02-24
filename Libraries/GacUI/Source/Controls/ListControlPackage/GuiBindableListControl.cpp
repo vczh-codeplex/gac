@@ -953,6 +953,14 @@ GuiBindableDataColumn
 				{
 				}
 
+				void BindableDataColumn::SaveCellData(vint row, IDataEditor* dataEditor)
+				{
+					if (commandExecutor)
+					{
+						commandExecutor->OnDataProviderItemModified(row, 1, 1);
+					}
+				}
+
 				WString BindableDataColumn::GetCellText(vint row)
 				{
 					return GetCellValue(row).GetText();

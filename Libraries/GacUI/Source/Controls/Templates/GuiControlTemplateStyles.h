@@ -534,6 +534,10 @@ Item Template (GuiTreeItemTemplate)
 				controls::tree::INodeItemStyleProvider*				GetNodeStyleProvider()override;
 			};
 
+/***********************************************************************
+Item Template (GuiGridVisualizerTemplate)
+***********************************************************************/
+
 			/// <summary>Data visualizer object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
 			class GuiBindableDataVisualizer : public controls::list::DataVisualizerBase, public Description<GuiBindableDataVisualizer>
 			{
@@ -574,6 +578,38 @@ Item Template (GuiTreeItemTemplate)
 
 				void												BeforeVisualizeCell(controls::list::IDataProvider* dataProvider, vint row, vint column)override;
 				void												SetSelected(bool value)override;
+			};
+
+/***********************************************************************
+Item Template (GuiGridEditorTemplate)
+***********************************************************************/
+
+			class GuiBindableDataEditor : public controls::list::DataEditorBase, public Description<GuiBindableDataEditor>
+			{
+			public:
+				class Factory : public controls::list::DataEditorFactory<GuiBindableDataEditor>
+				{
+				protected:
+					Ptr<GuiTemplate::IFactory>						templateFactory;
+
+				public:
+					Factory(Ptr<GuiTemplate::IFactory> _templateFactory);
+					~Factory();
+
+					Ptr<IDataEditor>								CreateEditor(controls::list::IDataEditorCallback* callback)override;
+				};
+
+			protected:
+				Ptr<GuiTemplate::IFactory>							templateFactory;
+				GuiGridEditorTemplate*								editorTemplate = nullptr;
+
+				compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
+				void												editorTemplate_CellValueChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments);
+			public:
+				GuiBindableDataEditor();
+				~GuiBindableDataEditor();
+
+				void												BeforeEditCell(controls::list::IDataProvider* dataProvider, vint row, vint column)override;
 			};
 
 /***********************************************************************
