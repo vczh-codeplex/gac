@@ -1442,6 +1442,7 @@ GuiBindableDataVisualizer
 
 			void GuiBindableDataVisualizer::BeforeVisualizeCell(controls::list::IDataProvider* dataProvider, vint row, vint column)
 			{
+				DataVisualizerBase::BeforeVisualizeCell(dataProvider, row, column);
 				if (!visualizerTemplate) return;
 				visualizerTemplate->SetText(dataProvider->GetCellText(row, column));
 
@@ -1460,6 +1461,7 @@ GuiBindableDataVisualizer
 
 			void GuiBindableDataVisualizer::SetSelected(bool value)
 			{
+				DataVisualizerBase::SetSelected(value);
 				if (visualizerTemplate)
 				{
 					visualizerTemplate->SetSelected(value);

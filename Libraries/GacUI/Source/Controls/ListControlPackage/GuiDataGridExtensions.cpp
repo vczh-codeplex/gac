@@ -64,6 +64,10 @@ DataVisualizerBase
 
 				void DataVisualizerBase::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					if(decoratedDataVisualizer)
+					{
+						decoratedDataVisualizer->BeforeVisualizeCell(dataProvider, row, column);
+					}
 				}
 
 				IDataVisualizer* DataVisualizerBase::GetDecoratedDataVisualizer()
@@ -165,6 +169,8 @@ ListViewMainColumnDataVisualizer
 
 				void ListViewMainColumnDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					DataVisualizerBase::BeforeVisualizeCell(dataProvider, row, column);
+
 					Ptr<GuiImageData> imageData=dataProvider->GetRowSmallImage(row);
 					if(imageData)
 					{
@@ -210,6 +216,8 @@ ListViewSubColumnDataVisualizer
 
 				void ListViewSubColumnDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					DataVisualizerBase::BeforeVisualizeCell(dataProvider, row, column);
+
 					text->SetAlignments(Alignment::Left, Alignment::Center);
 					text->SetFont(font);
 					text->SetColor(styleProvider->GetSecondaryTextColor());
@@ -281,6 +289,8 @@ ImageDataVisualizer
 
 				void ImageDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
+					DataVisualizerBase::BeforeVisualizeCell(dataProvider, row, column);
+
 					image->SetImage(0, -1);
 					image->SetAlignments(Alignment::Center, Alignment::Center);
 					image->SetStretch(false);
@@ -331,14 +341,9 @@ CellBorderDataVisualizer
 					:DataVisualizerBase(decoratedDataVisualizer)
 				{
 				}
-
-				void CellBorderDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
-				{
-					decoratedDataVisualizer->BeforeVisualizeCell(dataProvider, row, column);
-				}
 				
 /***********************************************************************
-CellBorderDataVisualizer
+NotifyIconDataVisualizer
 ***********************************************************************/
 
 				compositions::GuiBoundsComposition* NotifyIconDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
@@ -388,7 +393,7 @@ CellBorderDataVisualizer
 
 				void NotifyIconDataVisualizer::BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)
 				{
-					decoratedDataVisualizer->BeforeVisualizeCell(dataProvider, row, column);
+					DataVisualizerBase::BeforeVisualizeCell(dataProvider, row, column);
 
 					leftImage->SetImage(0, -1);
 					leftImage->SetAlignments(Alignment::Center, Alignment::Center);
