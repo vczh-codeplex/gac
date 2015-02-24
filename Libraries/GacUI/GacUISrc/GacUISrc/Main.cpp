@@ -99,6 +99,48 @@ namespace demos
 			InitializeComponents(ViewModel);
 		}
 	};
+
+	template<typename TImpl>
+	class GridVisualizerTemplate_ : public GuiGridVisualizerTemplate, public GuiInstancePartialClass<GuiGridVisualizerTemplate>, public Description<TImpl>
+	{
+	protected:
+		void InitializeComponents()
+		{
+			InitializeFromResource();
+		}
+	public:
+		GridVisualizerTemplate_(const WString& className)
+			:GuiInstancePartialClass<GuiGridVisualizerTemplate>(className)
+		{
+		}
+	};
+
+	class BoldTextTemplate : public GridVisualizerTemplate_<BoldTextTemplate>
+	{
+	public:
+		BoldTextTemplate()
+			:GridVisualizerTemplate_<BoldTextTemplate>(L"demos::BoldTextTemplate")
+		{
+		}
+	};
+
+	class NormalTextTemplate : public GridVisualizerTemplate_<NormalTextTemplate>
+	{
+	public:
+		NormalTextTemplate()
+			:GridVisualizerTemplate_<NormalTextTemplate>(L"demos::NormalTextTemplate")
+		{
+		}
+	};
+
+	class CellBorderTemplate : public GridVisualizerTemplate_<CellBorderTemplate>
+	{
+	public:
+		CellBorderTemplate()
+			:GridVisualizerTemplate_<CellBorderTemplate>(L"demos::CellBorderTemplate")
+		{
+		}
+	};
 }
 
 namespace vl
@@ -110,6 +152,9 @@ namespace vl
 #define DEMO_TYPES(F)\
 			F(demos::Data)\
 			F(demos::MainWindow)\
+			F(demos::BoldTextTemplate)\
+			F(demos::NormalTextTemplate)\
+			F(demos::CellBorderTemplate)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_CPP_TYPE_INFO)
@@ -128,6 +173,21 @@ namespace vl
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::MainWindow)
+
+			BEGIN_CLASS_MEMBER(demos::BoldTextTemplate)
+				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(demos::BoldTextTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(demos::BoldTextTemplate)
+
+			BEGIN_CLASS_MEMBER(demos::NormalTextTemplate)
+				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(demos::NormalTextTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(demos::NormalTextTemplate)
+
+			BEGIN_CLASS_MEMBER(demos::CellBorderTemplate)
+				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(demos::CellBorderTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(demos::CellBorderTemplate)
 
 			class DemoResourceLoader : public Object, public ITypeLoader
 			{
