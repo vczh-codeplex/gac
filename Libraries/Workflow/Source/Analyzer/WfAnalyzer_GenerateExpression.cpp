@@ -345,7 +345,18 @@ GenerateInstructions(Expression)
 								mergedType = GetMergedType(firstType, secondType);
 								if (node->op == WfBinaryOperator::EQ || node->op == WfBinaryOperator::NE)
 								{
-									if (mergedType->GetTypeDescriptor()->GetValueSerializer())
+									if (mergedType->GetTypeDescriptor() == description::GetTypeDescriptor<Value>())
+									{
+										GenerateExpressionInstructions(context, node->first);
+										GenerateExpressionInstructions(context, node->second);
+										INSTRUCTION(Ins::CompareValue());
+										if (node->op == WfBinaryOperator::NE)
+										{
+											INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+										}
+										return;
+									}
+									else if (mergedType->GetTypeDescriptor()->GetValueSerializer())
 									{
 										auto structType = mergedType->GetDecorator() == ITypeInfo::Nullable ? CopyTypeInfo(mergedType->GetElementType()) : mergedType;
 										auto insType = GetInstructionTypeArgument(structType);
