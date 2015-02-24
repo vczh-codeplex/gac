@@ -144,6 +144,31 @@ namespace demos
 			InitializeComponents();
 		}
 	};
+
+	template<typename TImpl>
+	class GridEditorTemplate_ : public GuiGridEditorTemplate, public GuiInstancePartialClass<GuiGridEditorTemplate>, public Description<TImpl>
+	{
+	protected:
+		void InitializeComponents()
+		{
+			InitializeFromResource();
+		}
+	public:
+		GridEditorTemplate_(const WString& className)
+			:GuiInstancePartialClass<GuiGridEditorTemplate>(className)
+		{
+		}
+	};
+
+	class TitleEditor : public GridEditorTemplate_<TitleEditor>
+	{
+	public:
+		TitleEditor()
+			:GridEditorTemplate_<TitleEditor>(L"demos::TitleEditor")
+		{
+			InitializeComponents();
+		}
+	};
 }
 
 namespace vl
@@ -158,6 +183,7 @@ namespace vl
 			F(demos::BoldTextTemplate)\
 			F(demos::NormalTextTemplate)\
 			F(demos::CellBorderTemplate)\
+			F(demos::TitleEditor)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
 			DEMO_TYPES(IMPL_CPP_TYPE_INFO)
@@ -191,6 +217,11 @@ namespace vl
 				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(demos::CellBorderTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(demos::CellBorderTemplate)
+
+			BEGIN_CLASS_MEMBER(demos::TitleEditor)
+				CLASS_MEMBER_BASE(GuiGridEditorTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(demos::TitleEditor*(), NO_PARAMETER)
+			END_CLASS_MEMBER(demos::TitleEditor)
 
 			class DemoResourceLoader : public Object, public ITypeLoader
 			{
