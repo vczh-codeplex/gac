@@ -1825,6 +1825,7 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(Ptr<BindableDataColumn>(), NO_PARAMETER)
 
 				CLASS_MEMBER_METHOD(GetCellValue, { L"row" })
+				CLASS_MEMBER_METHOD(SetCellValue, { L"row" _ L"value" })
 				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(ValueProperty)
 			END_CLASS_MEMBER(BindableDataColumn)
 

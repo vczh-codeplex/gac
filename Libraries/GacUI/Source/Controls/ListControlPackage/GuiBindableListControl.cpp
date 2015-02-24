@@ -1,4 +1,5 @@
 #include "GuiBindableListControl.h"
+#include "../Templates/GuiControlTemplateStyles.h"
 
 namespace vl
 {
@@ -10,6 +11,7 @@ namespace vl
 			using namespace list;
 			using namespace tree;
 			using namespace reflection::description;
+			using namespace templates;
 
 			Value ReadProperty(const Value& thisObject, const WString& propertyName)
 			{
@@ -955,6 +957,10 @@ GuiBindableDataColumn
 
 				void BindableDataColumn::SaveCellData(vint row, IDataEditor* dataEditor)
 				{
+					if (auto editor = dynamic_cast<GuiBindableDataEditor*>(dataEditor))
+					{
+						SetCellValue(row, editor->GetEditedCellValue());
+					}
 					if (commandExecutor)
 					{
 						commandExecutor->OnDataProviderItemModified(row, 1, 1);
@@ -973,6 +979,14 @@ GuiBindableDataColumn
 						return ReadProperty(itemSource->Get(row), valueProperty);
 					}
 					return Value();
+				}
+
+				void BindableDataColumn::SetCellValue(vint row, description::Value value)
+				{
+					if (0 <= row && row < itemSource->GetCount())
+					{
+						return WriteProperty(itemSource->Get(row), valueProperty, value);
+					}
 				}
 
 				const WString& BindableDataColumn::GetValueProperty()
