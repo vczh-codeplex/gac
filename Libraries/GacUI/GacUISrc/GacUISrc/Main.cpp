@@ -121,6 +121,7 @@ namespace demos
 		BoldTextTemplate()
 			:GridVisualizerTemplate_<BoldTextTemplate>(L"demos::BoldTextTemplate")
 		{
+			InitializeComponents();
 		}
 	};
 
@@ -130,6 +131,7 @@ namespace demos
 		NormalTextTemplate()
 			:GridVisualizerTemplate_<NormalTextTemplate>(L"demos::NormalTextTemplate")
 		{
+			InitializeComponents();
 		}
 	};
 
@@ -139,6 +141,7 @@ namespace demos
 		CellBorderTemplate()
 			:GridVisualizerTemplate_<CellBorderTemplate>(L"demos::CellBorderTemplate")
 		{
+			InitializeComponents();
 		}
 	};
 }
@@ -236,11 +239,6 @@ void GuiMain()
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	}
 
-	auto manager = GetInstanceLoaderManager();
-	auto key = GlobalStringKey::Get(L"demos::MainWindow");
-	auto td = manager->GetTypeDescriptorForType(key);
-	IGuiInstanceLoader::TypeInfo typeInfo(key, td);
-
 	ObservableList<Ptr<demos::Data>> viewModel;
 	viewModel.Add(new demos::Data(L"Kula", L"Opera", L"CAO (Chief Algorithm Officer)"));
 	viewModel.Add(new demos::Data(L"JeffChen", L"Tencent", L"Principal Fisher"));
@@ -248,10 +246,6 @@ void GuiMain()
 	viewModel.Add(new demos::Data(L"Skogkatt", L"360", L"Sponsor"));
 
 	demos::MainWindow window(viewModel.GetWrapper());
-	auto loader = GetInstanceLoaderManager()->GetLoader(key);
-	auto scope = loader->InitializeInstance(typeInfo, Value::From(&window));
-	CHECK_ERROR(scope->errors.Count() == 0, L"");
-
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);

@@ -220,8 +220,6 @@ Visualizer Extensions
 					/// <summary>Create the data visualizer.</summary>
 					/// <param name="decoratedDataVisualizer">The decorated data visualizer.</param>
 					CellBorderDataVisualizer(Ptr<IDataVisualizer> decoratedDataVisualizer);
-
-					void												BeforeVisualizeCell(IDataProvider* dataProvider, vint row, vint column)override;
 				};
 
 				/// <summary>Data visualizer that display two icons (both optional) that beside another data visualizer. Use NotifyIconDataVisualizer::Factory as the factory class.</summary>

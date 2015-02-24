@@ -1078,175 +1078,6 @@ GuiTreeViewInstanceLoader
 		};
 
 /***********************************************************************
-GuiBindableDataColumnInstanceLoader
-***********************************************************************/
-
-		class GuiBindableDataColumnInstanceLoader : public Object, public IGuiInstanceLoader
-		{
-		protected:
-			GlobalStringKey		typeName;
-			GlobalStringKey		_VisualizerTemplates;
-			GlobalStringKey		_EditorTemplate;
-
-		public:
-			GuiBindableDataColumnInstanceLoader()
-			{
-				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<list::BindableDataColumn>()->GetTypeName());
-				_VisualizerTemplates = GlobalStringKey::Get(L"VisualizerTemplates");
-				_EditorTemplate = GlobalStringKey::Get(L"EditorTemplate");
-			}
-
-			GlobalStringKey GetTypeName()override
-			{
-				return typeName;
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
-			{
-				propertyNames.Add(_VisualizerTemplates);
-				propertyNames.Add(_EditorTemplate);
-			}
-
-			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
-			{
-				if (propertyInfo.propertyName == _VisualizerTemplates)
-				{
-					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-				}
-				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
-				{
-					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-				}
-				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
-			}
-
-			bool SetPropertyValue(PropertyValue& propertyValue)override
-			{
-				if (auto container = dynamic_cast<list::BindableDataColumn*>(propertyValue.instanceValue.GetRawPtr()))
-				{
-					if (propertyValue.propertyName == _VisualizerTemplates)
-					{
-						return true;
-					}
-					else if (propertyValue.propertyName == _EditorTemplate)
-					{
-						return true;
-					}
-				}
-				return false;
-			}
-		};
-
-/***********************************************************************
-GuiBindableDataGridInstanceLoader
-***********************************************************************/
-
-		class GuiBindableDataGridInstanceLoader : public Object, public IGuiInstanceLoader
-		{
-		protected:
-			GlobalStringKey		typeName;
-			GlobalStringKey		_ItemSource;
-			GlobalStringKey		_Columns;
-
-		public:
-			GuiBindableDataGridInstanceLoader()
-			{
-				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiBindableDataGrid>()->GetTypeName());
-				_ItemSource = GlobalStringKey::Get(L"ItemSource");
-				_Columns = GlobalStringKey::Get(L"Columns");
-			}
-
-			GlobalStringKey GetTypeName()override
-			{
-				return typeName;
-			}
-
-			bool IsCreatable(const TypeInfo& typeInfo)override
-			{
-				return typeInfo.typeName == GetTypeName();
-			}
-
-			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
-			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					vint indexItemSource = constructorArguments.Keys().IndexOf(_ItemSource);	
-					if (indexItemSource == -1)
-					{
-						return Value();
-					}
-
-					GuiBindableDataGrid::IStyleProvider* styleProvider = 0;
-					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
-					if (indexControlTemplate == -1)
-					{
-						styleProvider = GetCurrentTheme()->CreateListViewStyle();
-					}
-					else
-					{
-						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
-						styleProvider = new GuiListViewTemplate_StyleProvider(factory);
-					}
-					
-					auto itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(indexItemSource)[0]);
-					auto dataGrid = new GuiBindableDataGrid(styleProvider, itemSource);
-					return Value::From(dataGrid);
-				}
-				return Value();
-			}
-
-			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
-			{
-				propertyNames.Add(_Columns);
-			}
-
-			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
-			{
-				if (typeInfo.typeName == GetTypeName())
-				{
-					propertyNames.Add(GlobalStringKey::_ControlTemplate);
-					propertyNames.Add(_ItemSource);
-				}
-			}
-
-			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
-			{
-				if (propertyInfo.propertyName == _Columns)
-				{
-					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::BindableDataColumn>());
-				}
-				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
-				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
-					info->scope = GuiInstancePropertyInfo::Constructor;
-					return info;
-				}
-				else if (propertyInfo.propertyName == _ItemSource)
-				{
-					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
-					info->scope = GuiInstancePropertyInfo::Constructor;
-					info->required = true;
-					return info;
-				}
-				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
-			}
-
-			bool SetPropertyValue(PropertyValue& propertyValue)override
-			{
-				if (auto container = dynamic_cast<GuiBindableDataGrid*>(propertyValue.instanceValue.GetRawPtr()))
-				{
-					if (propertyValue.propertyName == _Columns)
-					{
-						auto column = UnboxValue<Ptr<list::BindableDataColumn>>(propertyValue.propertyValue);
-						container->AddBindableColumn(column);
-						return true;
-					}
-				}
-				return false;
-			}
-		};
-
-/***********************************************************************
 GuiComboBoxInstanceLoader
 ***********************************************************************/
 
@@ -1429,6 +1260,192 @@ GuiBindableTextListInstanceLoader
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+		};
+
+/***********************************************************************
+GuiBindableDataColumnInstanceLoader
+***********************************************************************/
+
+		class GuiBindableDataColumnInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		protected:
+			GlobalStringKey		typeName;
+			GlobalStringKey		_VisualizerTemplates;
+			GlobalStringKey		_EditorTemplate;
+
+		public:
+			GuiBindableDataColumnInstanceLoader()
+			{
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<list::BindableDataColumn>()->GetTypeName());
+				_VisualizerTemplates = GlobalStringKey::Get(L"VisualizerTemplates");
+				_EditorTemplate = GlobalStringKey::Get(L"EditorTemplate");
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(_VisualizerTemplates);
+				propertyNames.Add(_EditorTemplate);
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == _VisualizerTemplates)
+				{
+					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+				}
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
+				{
+					return GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (auto container = dynamic_cast<list::BindableDataColumn*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == _VisualizerTemplates)
+					{
+						List<WString> types;
+						SplitBySemicolon(propertyValue.propertyValue.GetText(), types);
+						Ptr<list::IDataVisualizerFactory> factory;
+						FOREACH(WString, type, types)
+						{
+							auto templateFactory = CreateTemplateFactory(type);
+							if (factory)
+							{
+								factory = new GuiBindableDataVisualizer::DecoratedFactory(templateFactory, factory);
+							}
+							else
+							{
+								factory = new GuiBindableDataVisualizer::Factory(templateFactory);
+							}
+						}
+
+						container->SetVisualizerFactory(factory);
+						return true;
+					}
+					else if (propertyValue.propertyName == _EditorTemplate)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+/***********************************************************************
+GuiBindableDataGridInstanceLoader
+***********************************************************************/
+
+		class GuiBindableDataGridInstanceLoader : public Object, public IGuiInstanceLoader
+		{
+		protected:
+			GlobalStringKey		typeName;
+			GlobalStringKey		_ItemSource;
+			GlobalStringKey		_Columns;
+
+		public:
+			GuiBindableDataGridInstanceLoader()
+			{
+				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiBindableDataGrid>()->GetTypeName());
+				_ItemSource = GlobalStringKey::Get(L"ItemSource");
+				_Columns = GlobalStringKey::Get(L"Columns");
+			}
+
+			GlobalStringKey GetTypeName()override
+			{
+				return typeName;
+			}
+
+			bool IsCreatable(const TypeInfo& typeInfo)override
+			{
+				return typeInfo.typeName == GetTypeName();
+			}
+
+			description::Value CreateInstance(Ptr<GuiInstanceEnvironment> env, const TypeInfo& typeInfo, collections::Group<GlobalStringKey, description::Value>& constructorArguments)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					vint indexItemSource = constructorArguments.Keys().IndexOf(_ItemSource);	
+					if (indexItemSource == -1)
+					{
+						return Value();
+					}
+
+					GuiBindableDataGrid::IStyleProvider* styleProvider = 0;
+					vint indexControlTemplate = constructorArguments.Keys().IndexOf(GlobalStringKey::_ControlTemplate);
+					if (indexControlTemplate == -1)
+					{
+						styleProvider = GetCurrentTheme()->CreateListViewStyle();
+					}
+					else
+					{
+						auto factory = CreateTemplateFactory(constructorArguments.GetByIndex(indexControlTemplate)[0].GetText());
+						styleProvider = new GuiListViewTemplate_StyleProvider(factory);
+					}
+					
+					auto itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(indexItemSource)[0]);
+					auto dataGrid = new GuiBindableDataGrid(styleProvider, itemSource);
+					return Value::From(dataGrid);
+				}
+				return Value();
+			}
+
+			void GetPropertyNames(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				propertyNames.Add(_Columns);
+			}
+
+			void GetConstructorParameters(const TypeInfo& typeInfo, collections::List<GlobalStringKey>& propertyNames)override
+			{
+				if (typeInfo.typeName == GetTypeName())
+				{
+					propertyNames.Add(GlobalStringKey::_ControlTemplate);
+					propertyNames.Add(_ItemSource);
+				}
+			}
+
+			Ptr<GuiInstancePropertyInfo> GetPropertyType(const PropertyInfo& propertyInfo)override
+			{
+				if (propertyInfo.propertyName == _Columns)
+				{
+					return GuiInstancePropertyInfo::Collection(description::GetTypeDescriptor<list::BindableDataColumn>());
+				}
+				else if (propertyInfo.propertyName == GlobalStringKey::_ControlTemplate)
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<WString>());
+					info->scope = GuiInstancePropertyInfo::Constructor;
+					return info;
+				}
+				else if (propertyInfo.propertyName == _ItemSource)
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
+					info->scope = GuiInstancePropertyInfo::Constructor;
+					info->required = true;
+					return info;
+				}
+				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
+			}
+
+			bool SetPropertyValue(PropertyValue& propertyValue)override
+			{
+				if (auto container = dynamic_cast<GuiBindableDataGrid*>(propertyValue.instanceValue.GetRawPtr()))
+				{
+					if (propertyValue.propertyName == _Columns)
+					{
+						auto column = UnboxValue<Ptr<list::BindableDataColumn>>(propertyValue.propertyValue);
+						container->AddBindableColumn(column);
+						return true;
+					}
+				}
+				return false;
 			}
 		};
 
