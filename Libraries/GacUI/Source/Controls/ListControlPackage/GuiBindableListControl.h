@@ -407,6 +407,7 @@ GuiBindableDataGrid
 					void											SaveCellData(vint row, IDataEditor* dataEditor)override;
 					WString											GetCellText(vint row)override;
 					description::Value								GetCellValue(vint row);
+					void											SetCellValue(vint row, description::Value value);
 				
 					/// <summary>Get the value property name to get the cell value from an item.</summary>
 					/// <returns>The value property name.</returns>

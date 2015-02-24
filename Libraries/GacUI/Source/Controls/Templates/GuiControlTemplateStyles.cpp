@@ -1543,6 +1543,18 @@ GuiBindableDataEditor
 				editorTemplate->SetCellValue(columnProvider->GetCellValue(row));
 			}
 
+			description::Value GuiBindableDataEditor::GetEditedCellValue()
+			{
+				if (editorTemplate)
+				{
+					return editorTemplate->GetCellValue();
+				}
+				else
+				{
+					return description::Value();
+				}
+			}
+
 /***********************************************************************
 Helper Functions
 ***********************************************************************/

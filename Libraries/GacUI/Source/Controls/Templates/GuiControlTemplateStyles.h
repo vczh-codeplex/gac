@@ -610,6 +610,7 @@ Item Template (GuiGridEditorTemplate)
 				~GuiBindableDataEditor();
 
 				void												BeforeEditCell(controls::list::IDataProvider* dataProvider, vint row, vint column)override;
+				description::Value									GetEditedCellValue();
 			};
 
 /***********************************************************************
