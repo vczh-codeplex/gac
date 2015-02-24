@@ -395,13 +395,17 @@ Item Template
 				GuiGridVisualizerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
-			class GuiGridEditorTemplate : public GuiGridVisualizerTemplate , public Description<GuiGridEditorTemplate>
+			class GuiGridEditorTemplate : public GuiControlTemplate , public Description<GuiGridEditorTemplate>
 			{
 			public:
 				GuiGridEditorTemplate();
 				~GuiGridEditorTemplate();
 
-				void									UpdateCellValue(description::Value value);
+#define GuiGridEditorTemplate_PROPERTIES(F)\
+				F(GuiGridEditorTemplate, description::Value, RowValue)\
+				F(GuiGridEditorTemplate, description::Value, CellValue)\
+
+				GuiGridEditorTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 		}
 	}

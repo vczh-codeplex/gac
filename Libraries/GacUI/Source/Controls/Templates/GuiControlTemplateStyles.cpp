@@ -1469,6 +1469,81 @@ GuiBindableDataVisualizer
 			}
 
 /***********************************************************************
+GuiBindableDataEditor::Factory
+***********************************************************************/
+
+			GuiBindableDataEditor::Factory::Factory(Ptr<GuiTemplate::IFactory> _templateFactory)
+				:templateFactory(_templateFactory)
+			{
+			}
+
+			GuiBindableDataEditor::Factory::~Factory()
+			{
+			}
+
+			Ptr<IDataEditor> GuiBindableDataEditor::Factory::CreateEditor(controls::list::IDataEditorCallback* callback)
+			{
+				auto editor = DataEditorFactory<GuiBindableDataEditor>::CreateEditor(callback).Cast<GuiBindableDataEditor>();
+				if (editor)
+				{
+					editor->templateFactory = templateFactory;
+				}
+				return editor;
+			}
+
+/***********************************************************************
+GuiBindableDataEditor
+***********************************************************************/
+
+			compositions::GuiBoundsComposition* GuiBindableDataEditor::CreateBoundsCompositionInternal()
+			{
+				GuiTemplate* itemTemplate = templateFactory->CreateTemplate(Value());
+				if (!(editorTemplate = dynamic_cast<GuiGridEditorTemplate*>(itemTemplate)))
+				{
+					delete itemTemplate;
+					CHECK_FAIL(L"GuiBindableDataEditor::CreateBoundsCompositionInternal()#An instance of GuiGridEditorTemplate is expected.");
+				}
+
+				editorTemplate->CellValueChanged.AttachMethod(this, &GuiBindableDataEditor::editorTemplate_CellValueChanged);
+				return editorTemplate;
+			}
+
+			void GuiBindableDataEditor::editorTemplate_CellValueChanged(compositions::GuiGraphicsComposition* sender, compositions::GuiEventArgs& arguments)
+			{
+				if (callback)
+				{
+					callback->RequestSaveData();
+				}
+			}
+
+			GuiBindableDataEditor::GuiBindableDataEditor()
+			{
+			}
+
+			GuiBindableDataEditor::~GuiBindableDataEditor()
+			{
+			}
+
+			void GuiBindableDataEditor::BeforeEditCell(controls::list::IDataProvider* dataProvider, vint row, vint column)
+			{
+				DataEditorBase::BeforeEditCell(dataProvider, row, column);
+				if (!editorTemplate) return;
+				editorTemplate->SetText(dataProvider->GetCellText(row, column));
+
+				auto structuredDataProvider = dynamic_cast<list::StructuredDataProvider*>(dataProvider);
+				if (!structuredDataProvider) return;
+
+				auto bindableDataProvider = structuredDataProvider->GetStructuredDataProvider().Cast<list::BindableDataProvider>();
+				if (!bindableDataProvider) return;
+
+				auto columnProvider = bindableDataProvider->GetBindableColumn(column);
+				if (!columnProvider) return;
+
+				editorTemplate->SetRowValue(bindableDataProvider->GetRowValue(row));
+				editorTemplate->SetCellValue(columnProvider->GetCellValue(row));
+			}
+
+/***********************************************************************
 Helper Functions
 ***********************************************************************/
 

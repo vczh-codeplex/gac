@@ -456,15 +456,14 @@ GuiGridVisualizerTemplate
 GuiGridEditorTemplate
 ***********************************************************************/
 
+			GuiGridEditorTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
 			GuiGridEditorTemplate::GuiGridEditorTemplate()
 			{
+				GuiGridEditorTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
 			}
 
 			GuiGridEditorTemplate::~GuiGridEditorTemplate()
-			{
-			}
-
-			void GuiGridEditorTemplate::UpdateCellValue(description::Value value)
 			{
 			}
 		}
