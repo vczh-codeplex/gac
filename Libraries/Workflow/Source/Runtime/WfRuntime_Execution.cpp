@@ -881,6 +881,39 @@ WfRuntimeThreadContext
 									PushValue(BoxValue(result));
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
+							case WfInsCode::CompareValue:
+								{
+									Value first, second;
+									CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+									CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+									switch (first.GetValueType())
+									{
+									case Value::RawPtr:
+									case Value::SharedPtr:
+										switch (first.GetValueType())
+										{
+										case Value::RawPtr:
+										case Value::SharedPtr:
+											PushValue(BoxValue(first.GetRawPtr() == second.GetRawPtr()));
+											break;
+										default:
+											PushValue(BoxValue(false));
+										}
+										break;
+									case Value::Text:
+										switch (first.GetValueType())
+										{
+										case Value::Text:
+											PushValue(BoxValue(first.GetText() == second.GetText()));
+										default:
+											PushValue(BoxValue(false));
+										}
+										break;
+									default:
+										PushValue(BoxValue(second.IsNull()));
+									}
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
 							case WfInsCode::OpNot:
 								BEGIN_TYPE
 									EXECUTE(OpNot_Bool, Bool)
