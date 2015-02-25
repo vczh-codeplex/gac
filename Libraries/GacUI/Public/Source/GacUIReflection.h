@@ -1502,6 +1502,8 @@ Type List
 			F(presentation::controls::list::StructuredDataMultipleSorter)\
 			F(presentation::controls::list::StructuredDataReverseSorter)\
 			F(presentation::controls::list::StructuredDataProvider)\
+			F(presentation::controls::list::StructuredColummProviderBase)\
+			F(presentation::controls::list::StructuredDataProviderBase)\
 			F(presentation::controls::list::ListViewMainColumnDataVisualizer)\
 			F(presentation::controls::list::ListViewMainColumnDataVisualizer::Factory)\
 			F(presentation::controls::list::ListViewSubColumnDataVisualizer)\
@@ -1528,6 +1530,7 @@ Type List
 			F(presentation::controls::GuiBindableTextList)\
 			F(presentation::controls::GuiBindableListView)\
 			F(presentation::controls::GuiBindableTreeView)\
+			F(presentation::controls::list::BindableDataColumn)\
 			F(presentation::controls::GuiBindableDataGrid)\
 
 			GUIREFLECTIONCONTROLS_TYPELIST(DECL_TYPE_INFO)
@@ -3849,6 +3852,8 @@ Type List
 			F(presentation::templates::GuiTabTemplate)\
 			F(presentation::templates::GuiListItemTemplate)\
 			F(presentation::templates::GuiTreeItemTemplate)\
+			F(presentation::templates::GuiGridVisualizerTemplate)\
+			F(presentation::templates::GuiGridEditorTemplate)\
 
 			GUIREFLECTIONTEMPLATES_TYPELIST(DECL_TYPE_INFO)
 
