@@ -1493,6 +1493,10 @@ GuiBindableDataEditor::Factory
 				{
 					editor->templateFactory = templateFactory;
 					editor->ownerColumn = ownerColumn;
+
+					// Invoke GuiBindableDataEditor::CreateBoundsCompositionInternal
+					// so that GuiBindableDataEditor::BeforeEditCell is able to set RowValue and CellValue to the editor
+					editor->GetBoundsComposition();
 				}
 				return editor;
 			}
