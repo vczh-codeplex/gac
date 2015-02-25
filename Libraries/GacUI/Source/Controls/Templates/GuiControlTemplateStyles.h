@@ -546,10 +546,10 @@ Item Template (GuiGridVisualizerTemplate)
 				{
 				protected:
 					Ptr<GuiTemplate::IFactory>						templateFactory;
-					description::Value								viewModelContext;
+					controls::list::BindableDataColumn*				ownerColumn;
 
 				public:
-					Factory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext);
+					Factory(Ptr<GuiTemplate::IFactory> _templateFactory, controls::list::BindableDataColumn* _ownerColumn);
 					~Factory();
 
 					Ptr<controls::list::IDataVisualizer>			CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)override;
@@ -559,10 +559,10 @@ Item Template (GuiGridVisualizerTemplate)
 				{
 				protected:
 					Ptr<GuiTemplate::IFactory>						templateFactory;
-					description::Value								viewModelContext;
+					controls::list::BindableDataColumn*				ownerColumn;
 
 				public:
-					DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext, Ptr<IDataVisualizerFactory> _decoratedFactory);
+					DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, controls::list::BindableDataColumn* _ownerColumn, Ptr<IDataVisualizerFactory> _decoratedFactory);
 					~DecoratedFactory();
 
 					Ptr<controls::list::IDataVisualizer>			CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)override;
@@ -570,7 +570,7 @@ Item Template (GuiGridVisualizerTemplate)
 
 			protected:
 				Ptr<GuiTemplate::IFactory>							templateFactory;
-				description::Value									viewModelContext;
+				controls::list::BindableDataColumn*					ownerColumn = nullptr;
 				GuiGridVisualizerTemplate*							visualizerTemplate = nullptr;
 
 				compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
@@ -594,10 +594,10 @@ Item Template (GuiGridEditorTemplate)
 				{
 				protected:
 					Ptr<GuiTemplate::IFactory>						templateFactory;
-					description::Value								viewModelContext;
+					controls::list::BindableDataColumn*				ownerColumn;
 
 				public:
-					Factory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext);
+					Factory(Ptr<GuiTemplate::IFactory> _templateFactory, controls::list::BindableDataColumn* _ownerColumn);
 					~Factory();
 
 					Ptr<IDataEditor>								CreateEditor(controls::list::IDataEditorCallback* callback)override;
@@ -605,7 +605,7 @@ Item Template (GuiGridEditorTemplate)
 
 			protected:
 				Ptr<GuiTemplate::IFactory>							templateFactory;
-				description::Value									viewModelContext;
+				controls::list::BindableDataColumn*					ownerColumn = nullptr;
 				GuiGridEditorTemplate*								editorTemplate = nullptr;
 
 				compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;
