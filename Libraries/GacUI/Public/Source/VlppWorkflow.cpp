@@ -4442,7 +4442,18 @@ GenerateInstructions(Expression)
 								mergedType = GetMergedType(firstType, secondType);
 								if (node->op == WfBinaryOperator::EQ || node->op == WfBinaryOperator::NE)
 								{
-									if (mergedType->GetTypeDescriptor()->GetValueSerializer())
+									if (mergedType->GetTypeDescriptor() == description::GetTypeDescriptor<Value>())
+									{
+										GenerateExpressionInstructions(context, node->first);
+										GenerateExpressionInstructions(context, node->second);
+										INSTRUCTION(Ins::CompareValue());
+										if (node->op == WfBinaryOperator::NE)
+										{
+											INSTRUCTION(Ins::OpNot(WfInsType::Bool));
+										}
+										return;
+									}
+									else if (mergedType->GetTypeDescriptor()->GetValueSerializer())
 									{
 										auto structType = mergedType->GetDecorator() == ITypeInfo::Nullable ? CopyTypeInfo(mergedType->GetElementType()) : mergedType;
 										auto insType = GetInstructionTypeArgument(structType);
@@ -16804,6 +16815,39 @@ WfRuntimeThreadContext
 									CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
 									bool result = first.GetValueType() != Value::Text && second.GetValueType() != Value::Text && first.GetRawPtr() == second.GetRawPtr();
 									PushValue(BoxValue(result));
+									return WfRuntimeExecutionAction::ExecuteInstruction;
+								}
+							case WfInsCode::CompareValue:
+								{
+									Value first, second;
+									CONTEXT_ACTION(PopValue(second), L"failed to pop a value from the stack.");
+									CONTEXT_ACTION(PopValue(first), L"failed to pop a value from the stack.");
+									switch (first.GetValueType())
+									{
+									case Value::RawPtr:
+									case Value::SharedPtr:
+										switch (first.GetValueType())
+										{
+										case Value::RawPtr:
+										case Value::SharedPtr:
+											PushValue(BoxValue(first.GetRawPtr() == second.GetRawPtr()));
+											break;
+										default:
+											PushValue(BoxValue(false));
+										}
+										break;
+									case Value::Text:
+										switch (first.GetValueType())
+										{
+										case Value::Text:
+											PushValue(BoxValue(first.GetText() == second.GetText()));
+										default:
+											PushValue(BoxValue(false));
+										}
+										break;
+									default:
+										PushValue(BoxValue(second.IsNull()));
+									}
 									return WfRuntimeExecutionAction::ExecuteInstruction;
 								}
 							case WfInsCode::OpNot:
