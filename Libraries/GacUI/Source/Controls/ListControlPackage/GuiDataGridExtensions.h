@@ -266,7 +266,6 @@ Editor Extensions
 					TextBoxDataEditor();
 
 					void												BeforeEditCell(IDataProvider* dataProvider, vint row, vint column)override;
-					void												ReinstallEditor()override;
 
 					/// <summary>Get the <see cref="GuiSinglelineTextBox"/> editor control.</summary>
 					/// <returns>The control.</returns>

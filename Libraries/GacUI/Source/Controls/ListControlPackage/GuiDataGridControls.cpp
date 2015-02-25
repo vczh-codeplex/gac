@@ -618,6 +618,18 @@ DataGridContentProvider
 				{
 					if(currentEditor && !currentEditorOpening)
 					{
+						GuiControl* focusedControl = nullptr;
+						if (auto controlHost = dataGrid->GetRelatedControlHost())
+						{
+							if (auto graphicsHost = controlHost->GetGraphicsHost())
+							{
+								if (auto focusComposition = graphicsHost->GetFocusedComposition())
+								{
+									focusedControl = focusComposition->GetRelatedControl();
+								}
+							}
+						}
+
 						currentEditorRequestingSaveData=true;
 						dataProvider->SaveCellData(currentCell.row, currentCell.column, currentEditor.Obj());
 						currentEditorRequestingSaveData=false;
@@ -631,6 +643,10 @@ DataGridContentProvider
 							if(!itemContent) return;
 							itemContent->ForceSetEditor(currentCell.column, currentEditor.Obj());
 							currentEditor->ReinstallEditor();
+							if (focusedControl)
+							{
+								focusedControl->SetFocus();
+							}
 						}
 					}
 				}

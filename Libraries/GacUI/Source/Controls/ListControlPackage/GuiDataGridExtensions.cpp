@@ -446,11 +446,6 @@ TextBoxDataEditor
 					});
 				}
 
-				void TextBoxDataEditor::ReinstallEditor()
-				{
-					textBox->SetFocus();
-				}
-
 				GuiSinglelineTextBox* TextBoxDataEditor::GetTextBox()
 				{
 					return textBox;

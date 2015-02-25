@@ -175,6 +175,16 @@ namespace demos
 		}
 	};
 
+	class NameEditor : public GridEditorTemplate_<NameEditor>
+	{
+	public:
+		NameEditor(Ptr<DataViewModel> ViewModel)
+			:GridEditorTemplate_<NameEditor>(L"demos::NameEditor")
+		{
+			InitializeComponents(ViewModel);
+		}
+	};
+
 	class TitleEditor : public GridEditorTemplate_<TitleEditor>
 	{
 	public:
@@ -199,6 +209,7 @@ namespace vl
 			F(demos::BoldTextTemplate)\
 			F(demos::NormalTextTemplate)\
 			F(demos::CellBorderTemplate)\
+			F(demos::NameEditor)\
 			F(demos::TitleEditor)\
 
 			DEMO_TYPES(DECL_TYPE_INFO)
@@ -240,6 +251,13 @@ namespace vl
 				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(demos::CellBorderTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(demos::CellBorderTemplate)
+
+			BEGIN_CLASS_MEMBER(demos::NameEditor)
+				CLASS_MEMBER_BASE(GuiGridEditorTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(demos::NameEditor*(Ptr<demos::DataViewModel>), {L"ViewModel"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+			END_CLASS_MEMBER(demos::NameEditor)
 
 			BEGIN_CLASS_MEMBER(demos::TitleEditor)
 				CLASS_MEMBER_BASE(GuiGridEditorTemplate)
