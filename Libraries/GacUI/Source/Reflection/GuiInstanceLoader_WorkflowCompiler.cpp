@@ -43,7 +43,14 @@ Variable
 			FOREACH_INDEXER(GlobalStringKey, name, index, env->scope->referenceValues.Keys())
 			{
 				auto value = env->scope->referenceValues.Values()[index];
-				types.Add(name, value.GetTypeDescriptor());
+				if (value.GetTypeDescriptor())
+				{
+					types.Add(name, value.GetTypeDescriptor());
+				}
+				else
+				{
+					types.Add(name, GetTypeDescriptor<Value>());
+				}
 			}
 		}
 		

@@ -393,6 +393,7 @@ GuiBindableDataGrid
 				{
 					friend class BindableDataProvider;
 				protected:
+					description::Value								viewModelContext;
 					Ptr<description::IValueReadonlyList>			itemSource;
 					WString											valueProperty;
 
@@ -421,11 +422,12 @@ GuiBindableDataGrid
 				class BindableDataProvider : public StructuredDataProviderBase, public Description<BindableDataProvider>
 				{
 				protected:
+					description::Value								viewModelContext;
 					Ptr<description::IValueReadonlyList>			itemSource;
 					Ptr<EventHandler>								itemChangedEventHandler;
 
 				public:
-					BindableDataProvider(Ptr<description::IValueEnumerable> _itemSource);
+					BindableDataProvider(Ptr<description::IValueEnumerable> _itemSource, const description::Value& _viewModelContext);
 					~BindableDataProvider();
 
 					vint											GetRowCount()override;
@@ -449,7 +451,7 @@ GuiBindableDataGrid
 				/// <summary>Create a bindable Data grid control.</summary>
 				/// <param name="_styleProvider">The style provider for this control.</param>
 				/// <param name="_itemSource">The item source.</param>
-				GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource);
+				GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource, const description::Value& _viewModelContext = description::Value());
 				~GuiBindableDataGrid();
 				
 				/// <summary>Insert a column.</summary>

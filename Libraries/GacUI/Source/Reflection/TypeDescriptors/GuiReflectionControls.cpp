@@ -1831,7 +1831,7 @@ Type Declaration
 
 			BEGIN_CLASS_MEMBER(GuiBindableDataGrid)
 				CLASS_MEMBER_BASE(GuiVirtualDataGrid)
-				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataGrid*(GuiBindableDataGrid::IStyleProvider*, Ptr<IValueEnumerable>), {L"styleProvider" _ L"itemSource"})
+				CLASS_MEMBER_CONSTRUCTOR(GuiBindableDataGrid*(GuiBindableDataGrid::IStyleProvider*, Ptr<IValueEnumerable>, const Value&), {L"styleProvider" _ L"itemSource" _ L"viewModelContext"})
 
 				CLASS_MEMBER_METHOD(InsertBindableColumn, { L"index" _ L"column" })
 				CLASS_MEMBER_METHOD(AddBindableColumn, { L"column" })

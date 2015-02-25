@@ -1352,6 +1352,7 @@ GuiBindableDataGridInstanceLoader
 		protected:
 			GlobalStringKey		typeName;
 			GlobalStringKey		_ItemSource;
+			GlobalStringKey		_ViewModelContext;
 			GlobalStringKey		_Columns;
 
 		public:
@@ -1359,6 +1360,7 @@ GuiBindableDataGridInstanceLoader
 			{
 				typeName = GlobalStringKey::Get(description::GetTypeDescriptor<GuiBindableDataGrid>()->GetTypeName());
 				_ItemSource = GlobalStringKey::Get(L"ItemSource");
+				_ViewModelContext = GlobalStringKey::Get(L"ViewModelContext");
 				_Columns = GlobalStringKey::Get(L"Columns");
 			}
 
@@ -1395,7 +1397,15 @@ GuiBindableDataGridInstanceLoader
 					}
 					
 					auto itemSource = UnboxValue<Ptr<IValueEnumerable>>(constructorArguments.GetByIndex(indexItemSource)[0]);
-					auto dataGrid = new GuiBindableDataGrid(styleProvider, itemSource);
+
+					Value viewModelContext;
+					vint indexViewModelContext = constructorArguments.Keys().IndexOf(_ViewModelContext);
+					if (indexViewModelContext != -1)
+					{
+						viewModelContext = constructorArguments.GetByIndex(indexViewModelContext)[0];
+					}
+
+					auto dataGrid = new GuiBindableDataGrid(styleProvider, itemSource, viewModelContext);
 					return Value::From(dataGrid);
 				}
 				return Value();
@@ -1432,6 +1442,12 @@ GuiBindableDataGridInstanceLoader
 					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<IValueEnumerable>());
 					info->scope = GuiInstancePropertyInfo::Constructor;
 					info->required = true;
+					return info;
+				}
+				else if (propertyInfo.propertyName == _ViewModelContext)
+				{
+					auto info = GuiInstancePropertyInfo::Assign(description::GetTypeDescriptor<Value>());
+					info->scope = GuiInstancePropertyInfo::Constructor;
 					return info;
 				}
 				return IGuiInstanceLoader::GetPropertyType(propertyInfo);
