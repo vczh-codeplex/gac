@@ -546,9 +546,10 @@ Item Template (GuiGridVisualizerTemplate)
 				{
 				protected:
 					Ptr<GuiTemplate::IFactory>						templateFactory;
+					description::Value								viewModelContext;
 
 				public:
-					Factory(Ptr<GuiTemplate::IFactory> _templateFactory);
+					Factory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext);
 					~Factory();
 
 					Ptr<controls::list::IDataVisualizer>			CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)override;
@@ -558,9 +559,10 @@ Item Template (GuiGridVisualizerTemplate)
 				{
 				protected:
 					Ptr<GuiTemplate::IFactory>						templateFactory;
+					description::Value								viewModelContext;
 
 				public:
-					DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, Ptr<IDataVisualizerFactory> _decoratedFactory);
+					DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext, Ptr<IDataVisualizerFactory> _decoratedFactory);
 					~DecoratedFactory();
 
 					Ptr<controls::list::IDataVisualizer>			CreateVisualizer(const FontProperties& font, controls::GuiListViewBase::IStyleProvider* styleProvider)override;
@@ -568,6 +570,7 @@ Item Template (GuiGridVisualizerTemplate)
 
 			protected:
 				Ptr<GuiTemplate::IFactory>							templateFactory;
+				description::Value									viewModelContext;
 				GuiGridVisualizerTemplate*							visualizerTemplate = nullptr;
 
 				compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)override;
@@ -591,9 +594,10 @@ Item Template (GuiGridEditorTemplate)
 				{
 				protected:
 					Ptr<GuiTemplate::IFactory>						templateFactory;
+					description::Value								viewModelContext;
 
 				public:
-					Factory(Ptr<GuiTemplate::IFactory> _templateFactory);
+					Factory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext);
 					~Factory();
 
 					Ptr<IDataEditor>								CreateEditor(controls::list::IDataEditorCallback* callback)override;
@@ -601,6 +605,7 @@ Item Template (GuiGridEditorTemplate)
 
 			protected:
 				Ptr<GuiTemplate::IFactory>							templateFactory;
+				description::Value									viewModelContext;
 				GuiGridEditorTemplate*								editorTemplate = nullptr;
 
 				compositions::GuiBoundsComposition*					CreateBoundsCompositionInternal()override;

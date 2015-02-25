@@ -1008,6 +1008,11 @@ GuiBindableDataColumn
 					}
 				}
 
+				const description::Value& BindableDataColumn::GetViewModelContext()
+				{
+					return viewModelContext;
+				}
+
 /***********************************************************************
 GuiBindableDataProvider
 ***********************************************************************/
@@ -1121,6 +1126,11 @@ GuiBindableDataProvider
 					{
 						return nullptr;
 					}
+				}
+
+				const description::Value& BindableDataProvider::GetViewModelContext()
+				{
+					return viewModelContext;
 				}
 			}
 

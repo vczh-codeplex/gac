@@ -407,15 +407,26 @@ GuiBindableDataGrid
 
 					void											SaveCellData(vint row, IDataEditor* dataEditor)override;
 					WString											GetCellText(vint row)override;
+					
+					/// <summary>Get the cell value from an item.</summary>
+					/// <returns>The cell value.</returns>
+					/// <param name="row">The row index of the item.</param>
 					description::Value								GetCellValue(vint row);
+					/// <summary>Set the cell value to an item.</summary>
+					/// <param name="row">The row index of the item.</param>
+					/// <param name="value">The value property name.</param>
 					void											SetCellValue(vint row, description::Value value);
 				
 					/// <summary>Get the value property name to get the cell value from an item.</summary>
 					/// <returns>The value property name.</returns>
 					const WString&									GetValueProperty();
-					/// <summary>Set the value property name to get the cell value from an item.</summary>
+					/// <summary>Set the value property name to get the cell value to an item.</summary>
 					/// <param name="value">The value property name.</param>
 					void											SetValueProperty(const WString& value);
+					
+					/// <summary>Get the view model context which will be used as a view model to create visualizers and editors.</summary>
+					/// <returns>The value model context.</returns>
+					const description::Value&						GetViewModelContext();
 				};
 			
 				/// <summary>Data provider object for [T:vl.presentation.controls.GuiBindableDataGrid].</summary>
@@ -433,6 +444,7 @@ GuiBindableDataGrid
 					vint											GetRowCount()override;
 					description::Value								GetRowValue(vint row);
 
+					const description::Value&						GetViewModelContext();
 					bool											InsertBindableColumn(vint index, Ptr<BindableDataColumn> column);
 					bool											AddBindableColumn(Ptr<BindableDataColumn> column);
 					bool											RemoveBindableColumn(Ptr<BindableDataColumn> column);
