@@ -1320,11 +1320,11 @@ GuiBindableDataColumnInstanceLoader
 							auto templateFactory = CreateTemplateFactory(type);
 							if (factory)
 							{
-								factory = new GuiBindableDataVisualizer::DecoratedFactory(templateFactory, factory);
+								factory = new GuiBindableDataVisualizer::DecoratedFactory(templateFactory, container->GetViewModelContext(), factory);
 							}
 							else
 							{
-								factory = new GuiBindableDataVisualizer::Factory(templateFactory);
+								factory = new GuiBindableDataVisualizer::Factory(templateFactory, container->GetViewModelContext());
 							}
 						}
 
@@ -1334,7 +1334,7 @@ GuiBindableDataColumnInstanceLoader
 					else if (propertyValue.propertyName == _EditorTemplate)
 					{
 						auto templateFactory = CreateTemplateFactory(propertyValue.propertyValue.GetText());
-						auto factory = new GuiBindableDataEditor::Factory(templateFactory);
+						auto factory = new GuiBindableDataEditor::Factory(templateFactory, container->GetViewModelContext());
 						container->SetEditorFactory(factory);
 						return true;
 					}

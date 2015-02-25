@@ -1362,8 +1362,9 @@ GuiTreeItemTemplate_ItemStyleController
 GuiBindableDataVisualizer::Factory
 ***********************************************************************/
 
-			GuiBindableDataVisualizer::Factory::Factory(Ptr<GuiTemplate::IFactory> _templateFactory)
+			GuiBindableDataVisualizer::Factory::Factory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext)
 				:templateFactory(_templateFactory)
+				, viewModelContext(_viewModelContext)
 			{
 			}
 
@@ -1377,6 +1378,7 @@ GuiBindableDataVisualizer::Factory
 				if (visualizer)
 				{
 					visualizer->templateFactory = templateFactory;
+					visualizer->viewModelContext = viewModelContext;
 				}
 				return visualizer;
 			}
@@ -1385,9 +1387,10 @@ GuiBindableDataVisualizer::Factory
 GuiBindableDataVisualizer::DecoratedFactory
 ***********************************************************************/
 
-			GuiBindableDataVisualizer::DecoratedFactory::DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, Ptr<IDataVisualizerFactory> _decoratedFactory)
+			GuiBindableDataVisualizer::DecoratedFactory::DecoratedFactory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext, Ptr<IDataVisualizerFactory> _decoratedFactory)
 				:DataDecoratableVisualizerFactory<GuiBindableDataVisualizer>(_decoratedFactory)
 				, templateFactory(_templateFactory)
+				, viewModelContext(_viewModelContext)
 			{
 			}
 
@@ -1401,6 +1404,7 @@ GuiBindableDataVisualizer::DecoratedFactory
 				if (visualizer)
 				{
 					visualizer->templateFactory = templateFactory;
+					visualizer->viewModelContext = viewModelContext;
 				}
 				return visualizer;
 			}
@@ -1411,7 +1415,7 @@ GuiBindableDataVisualizer
 
 			compositions::GuiBoundsComposition* GuiBindableDataVisualizer::CreateBoundsCompositionInternal(compositions::GuiBoundsComposition* decoratedComposition)
 			{
-				GuiTemplate* itemTemplate = templateFactory->CreateTemplate(Value());
+				GuiTemplate* itemTemplate = templateFactory->CreateTemplate(viewModelContext);
 				if (!(visualizerTemplate = dynamic_cast<GuiGridVisualizerTemplate*>(itemTemplate)))
 				{
 					delete itemTemplate;
@@ -1472,8 +1476,9 @@ GuiBindableDataVisualizer
 GuiBindableDataEditor::Factory
 ***********************************************************************/
 
-			GuiBindableDataEditor::Factory::Factory(Ptr<GuiTemplate::IFactory> _templateFactory)
+			GuiBindableDataEditor::Factory::Factory(Ptr<GuiTemplate::IFactory> _templateFactory, const description::Value& _viewModelContext)
 				:templateFactory(_templateFactory)
+				, viewModelContext(_viewModelContext)
 			{
 			}
 
@@ -1487,6 +1492,7 @@ GuiBindableDataEditor::Factory
 				if (editor)
 				{
 					editor->templateFactory = templateFactory;
+					editor->viewModelContext = viewModelContext;
 				}
 				return editor;
 			}
@@ -1497,7 +1503,7 @@ GuiBindableDataEditor
 
 			compositions::GuiBoundsComposition* GuiBindableDataEditor::CreateBoundsCompositionInternal()
 			{
-				GuiTemplate* itemTemplate = templateFactory->CreateTemplate(Value());
+				GuiTemplate* itemTemplate = templateFactory->CreateTemplate(viewModelContext);
 				if (!(editorTemplate = dynamic_cast<GuiGridEditorTemplate*>(itemTemplate)))
 				{
 					delete itemTemplate;
