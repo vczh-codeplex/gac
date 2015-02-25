@@ -925,7 +925,7 @@ ExecuteBindingSetters
 				}
 
 				auto value = info->GetValue(env->scope->rootInstance);
-				if (parameterTd && !value.GetTypeDescriptor()->CanConvertTo(parameterTd))
+				if (parameterTd && (!value.GetTypeDescriptor() || !value.GetTypeDescriptor()->CanConvertTo(parameterTd)))
 				{
 					env->scope->errors.Add(L"Value of parameter \"" + parameter->name.ToString() + L"\" is not \"" + parameterTd->GetTypeName() + L"\" which is required.");
 				}

@@ -67,13 +67,20 @@ namespace demos
 		}
 	};
 
+	class DataViewModel : public Object, public Description<DataViewModel>
+	{
+	public:
+		ObservableList<Ptr<Data>>			people;
+		ObservableList<WString>				titles;
+	};
+
 	template<typename TImpl>
 	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
 	{
 	protected:
-		Ptr<IValueEnumerable> ViewModel_;
+		Ptr<DataViewModel>					ViewModel_;
 
-		void InitializeComponents(Ptr<IValueEnumerable> ViewModel)
+		void InitializeComponents(Ptr<DataViewModel> ViewModel)
 		{
 			ViewModel_ = ViewModel;
 			InitializeFromResource();
@@ -85,7 +92,7 @@ namespace demos
 		{
 		}
 
-		Ptr<IValueEnumerable> GetViewModel()
+		Ptr<DataViewModel> GetViewModel()
 		{
 			return ViewModel_;
 		}
@@ -94,7 +101,7 @@ namespace demos
 	class MainWindow : public MainWindow_<MainWindow>
 	{
 	public:
-		MainWindow(Ptr<IValueEnumerable> ViewModel)
+		MainWindow(Ptr<DataViewModel> ViewModel)
 		{
 			InitializeComponents(ViewModel);
 		}
@@ -149,8 +156,11 @@ namespace demos
 	class GridEditorTemplate_ : public GuiGridEditorTemplate, public GuiInstancePartialClass<GuiGridEditorTemplate>, public Description<TImpl>
 	{
 	protected:
-		void InitializeComponents()
+		Ptr<DataViewModel>					ViewModel_;
+
+		void InitializeComponents(Ptr<DataViewModel> ViewModel)
 		{
+			ViewModel_ = ViewModel;
 			InitializeFromResource();
 		}
 	public:
@@ -158,15 +168,20 @@ namespace demos
 			:GuiInstancePartialClass<GuiGridEditorTemplate>(className)
 		{
 		}
+
+		Ptr<DataViewModel> GetViewModel()
+		{
+			return ViewModel_;
+		}
 	};
 
 	class TitleEditor : public GridEditorTemplate_<TitleEditor>
 	{
 	public:
-		TitleEditor()
+		TitleEditor(Ptr<DataViewModel> ViewModel)
 			:GridEditorTemplate_<TitleEditor>(L"demos::TitleEditor")
 		{
-			InitializeComponents();
+			InitializeComponents(ViewModel);
 		}
 	};
 }
@@ -179,6 +194,7 @@ namespace vl
 		{
 #define DEMO_TYPES(F)\
 			F(demos::Data)\
+			F(demos::DataViewModel)\
 			F(demos::MainWindow)\
 			F(demos::BoldTextTemplate)\
 			F(demos::NormalTextTemplate)\
@@ -196,9 +212,16 @@ namespace vl
 				CLASS_MEMBER_FIELD(title)
 			END_CLASS_MEMBER(demos::Data)
 
+			BEGIN_CLASS_MEMBER(demos::DataViewModel)
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<demos::DataViewModel>(), NO_PARAMETER)
+
+				CLASS_MEMBER_FIELD(people)
+				CLASS_MEMBER_FIELD(titles)
+			END_CLASS_MEMBER(demos::DataViewModel)
+
 			BEGIN_CLASS_MEMBER(demos::MainWindow)
 				CLASS_MEMBER_BASE(GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<IValueEnumerable>), {L"ViewModel"})
+				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<demos::DataViewModel>), {L"ViewModel"})
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::MainWindow)
@@ -220,7 +243,9 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(demos::TitleEditor)
 				CLASS_MEMBER_BASE(GuiGridEditorTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::TitleEditor*(), NO_PARAMETER)
+				CLASS_MEMBER_CONSTRUCTOR(demos::TitleEditor*(Ptr<demos::DataViewModel>), {L"ViewModel"})
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(demos::TitleEditor)
 
 			class DemoResourceLoader : public Object, public ITypeLoader
@@ -270,13 +295,17 @@ void GuiMain()
 		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
 	}
 
-	ObservableList<Ptr<demos::Data>> viewModel;
-	viewModel.Add(new demos::Data(L"Kula", L"Opera", L"CAO (Chief Algorithm Officer)"));
-	viewModel.Add(new demos::Data(L"JeffChen", L"Tencent", L"Principal Fisher"));
-	viewModel.Add(new demos::Data(L"MiliMeow", L"Microsoft", L"Software Engineer"));
-	viewModel.Add(new demos::Data(L"Skogkatt", L"360", L"Sponsor"));
+	auto viewModel = MakePtr<demos::DataViewModel>();
+	viewModel->titles.Add(L"CAO (Chief Algorithm Officer)");
+	viewModel->titles.Add(L"Principal Fisher");
+	viewModel->titles.Add(L"Software Engineer");
+	viewModel->titles.Add(L"Sponsor");
+	viewModel->people.Add(new demos::Data(L"Kula", L"Opera", L"CAO (Chief Algorithm Officer)"));
+	viewModel->people.Add(new demos::Data(L"JeffChen", L"Tencent", L"Principal Fisher"));
+	viewModel->people.Add(new demos::Data(L"MiliMeow", L"Microsoft", L"Software Engineer"));
+	viewModel->people.Add(new demos::Data(L"Skogkatt", L"360", L"Sponsor"));
 
-	demos::MainWindow window(viewModel.GetWrapper());
+	demos::MainWindow window(viewModel);
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);

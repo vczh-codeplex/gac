@@ -1012,7 +1012,8 @@ GuiBindableDataColumn
 GuiBindableDataProvider
 ***********************************************************************/
 
-				BindableDataProvider::BindableDataProvider(Ptr<description::IValueEnumerable> _itemSource)
+				BindableDataProvider::BindableDataProvider(Ptr<description::IValueEnumerable> _itemSource, const description::Value& _viewModelContext)
+					:viewModelContext(_viewModelContext)
 				{
 					if (auto ol = _itemSource.Cast<IValueObservableList>())
 					{
@@ -1062,6 +1063,7 @@ GuiBindableDataProvider
 				{
 					if (InsertColumnInternal(index, column, true))
 					{
+						column->viewModelContext = viewModelContext;
 						column->itemSource = itemSource;
 						return true;
 					}
@@ -1075,6 +1077,7 @@ GuiBindableDataProvider
 				{
 					if (AddColumnInternal(column, true))
 					{
+						column->viewModelContext = viewModelContext;
 						column->itemSource = itemSource;
 						return true;
 					}
@@ -1088,6 +1091,7 @@ GuiBindableDataProvider
 				{
 					if (RemoveColumnInternal(column, true))
 					{
+						column->viewModelContext = Value();
 						column->itemSource = nullptr;
 						return true;
 					}
@@ -1101,6 +1105,7 @@ GuiBindableDataProvider
 				{
 					FOREACH(Ptr<StructuredColummProviderBase>, column, columns)
 					{
+						column.Cast<BindableDataColumn>()->viewModelContext = Value();
 						column.Cast<BindableDataColumn>()->itemSource = nullptr;
 					}
 					return ClearColumnsInternal(true);
@@ -1123,8 +1128,8 @@ GuiBindableDataProvider
 GuiBindableDataGrid
 ***********************************************************************/
 
-			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource)
-				:GuiVirtualDataGrid(_styleProvider, new BindableDataProvider(_itemSource))
+			GuiBindableDataGrid::GuiBindableDataGrid(IStyleProvider* _styleProvider, Ptr<description::IValueEnumerable> _itemSource, const description::Value& _viewModelContext)
+				:GuiVirtualDataGrid(_styleProvider, new BindableDataProvider(_itemSource, _viewModelContext))
 			{
 				bindableDataProvider = GetStructuredDataProvider()->GetStructuredDataProvider().Cast<BindableDataProvider>();
 			}
