@@ -985,7 +985,8 @@ GuiBindableDataColumn
 				{
 					if (0 <= row && row < itemSource->GetCount())
 					{
-						return WriteProperty(itemSource->Get(row), valueProperty, value);
+						auto rowValue = itemSource->Get(row);
+						return WriteProperty(rowValue, valueProperty, value);
 					}
 				}
 
