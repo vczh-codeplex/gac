@@ -22,6 +22,8 @@ namespace vl
 
 				void RebuildCanvas(Size size)
 				{
+					if (size.x <= 1) size.x = 1;
+					if (size.y <= 1) size.y = 1;
 					if(!d2dRenderTarget)
 					{
 						ID2D1HwndRenderTarget* renderTarget=0;
@@ -134,7 +136,7 @@ namespace vl
 			void RecreateNativeWindowDirect2DRenderTarget(INativeWindow* window)
 			{
 				vint index=direct2DListener->nativeWindowListeners.Keys().IndexOf(window);
-				if (index == -1)
+				if (index != -1)
 				{
 					direct2DListener->nativeWindowListeners.Values().Get(index)->RecreateRenderTarget();
 				}
