@@ -727,6 +727,8 @@ Dialogs
 				GuiColorDialog();
 				~GuiColorDialog();
 
+				compositions::GuiNotifyEvent						SelectedColorChanged;
+
 				bool												GetEnabledCustomColor();
 				void												SetEnabledCustomColor(bool value);
 				bool												GetOpenedCustomColor();
@@ -750,6 +752,9 @@ Dialogs
 			public:
 				GuiFontDialog();
 				~GuiFontDialog();
+
+				compositions::GuiNotifyEvent						SelectedFontChanged;
+				compositions::GuiNotifyEvent						SelectedColorChanged;
 
 				const FontProperties&								GetSelectedFont();
 				void												SetSelectedFont(const FontProperties& value);
@@ -780,6 +785,8 @@ Dialogs
 			public:
 				GuiFileDialogBase();
 				~GuiFileDialogBase();
+
+				compositions::GuiNotifyEvent						FileNameChanged;
 
 				const WString&										GetFilter();
 				void												SetFilter(const WString& value);
