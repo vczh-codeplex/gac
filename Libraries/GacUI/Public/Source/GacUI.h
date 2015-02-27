@@ -4838,6 +4838,189 @@ Scrolls
 				vint									GetMinPosition();
 				vint									GetMaxPosition();
 			};
+
+/***********************************************************************
+Dialogs
+***********************************************************************/
+
+			class GuiDialogBase abstract : public GuiComponent, public Description<GuiDialogBase>
+			{
+			protected:
+				GuiInstanceRootObject*								rootObject = nullptr;
+
+				GuiWindow*											GetHostWindow();
+			public:
+				GuiDialogBase();
+				~GuiDialogBase();
+
+				void												Attach(GuiInstanceRootObject* _rootObject);
+				void												Detach(GuiInstanceRootObject* _rootObject);
+			};
+			
+			class GuiMessageDialog : public GuiDialogBase, public Description<GuiMessageDialog>
+			{
+			protected:
+				INativeDialogService::MessageBoxButtonsInput		input = INativeDialogService::DisplayOK;
+				INativeDialogService::MessageBoxDefaultButton		defaultButton = INativeDialogService::DefaultFirst;
+				INativeDialogService::MessageBoxIcons				icon = INativeDialogService::IconNone;
+				INativeDialogService::MessageBoxModalOptions		modalOption = INativeDialogService::ModalWindow;
+				WString												text;
+				WString												title;
+
+			public:
+				GuiMessageDialog();
+				~GuiMessageDialog();
+
+				INativeDialogService::MessageBoxButtonsInput		GetInput();
+				void												SetInput(INativeDialogService::MessageBoxButtonsInput value);
+				
+				INativeDialogService::MessageBoxDefaultButton		GetDefaultButton();
+				void												SetDefaultButton(INativeDialogService::MessageBoxDefaultButton value);
+
+				INativeDialogService::MessageBoxIcons				GetIcon();
+				void												SetIcon(INativeDialogService::MessageBoxIcons value);
+
+				INativeDialogService::MessageBoxModalOptions		GetModalOption();
+				void												SetModalOption(INativeDialogService::MessageBoxModalOptions value);
+
+				const WString&										GetText();
+				void												SetText(const WString& value);
+
+				const WString&										GetTitle();
+				void												SetTitle(const WString& value);
+				
+				INativeDialogService::MessageBoxButtonsOutput		ShowDialog();
+			};
+			
+			class GuiColorDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			{
+			protected:
+				bool												enabledCustomColor = true;
+				bool												openedCustomColor = false;
+				Color												selectedColor;
+				bool												showSelection = true;
+				collections::List<Color>							customColors;
+
+			public:
+				GuiColorDialog();
+				~GuiColorDialog();
+
+				compositions::GuiNotifyEvent						SelectedColorChanged;
+				
+				bool												GetEnabledCustomColor();
+				void												SetEnabledCustomColor(bool value);
+				
+				bool												GetOpenedCustomColor();
+				void												SetOpenedCustomColor(bool value);
+				
+				Color												GetSelectedColor();
+				void												SetSelectedColor(Color value);
+				
+				collections::List<Color>&							GetCustomColors();
+				
+				bool												ShowDialog();
+			};
+			
+			class GuiFontDialog : public GuiDialogBase, public Description<GuiFontDialog>
+			{
+			protected:
+				FontProperties										selectedFont;
+				Color												selectedColor;
+				bool												showSelection = true;
+				bool												showEffect = true;
+				bool												forceFontExist = true;
+
+			public:
+				GuiFontDialog();
+				~GuiFontDialog();
+
+				compositions::GuiNotifyEvent						SelectedFontChanged;
+				compositions::GuiNotifyEvent						SelectedColorChanged;
+				
+				const FontProperties&								GetSelectedFont();
+				void												SetSelectedFont(const FontProperties& value);
+				
+				Color												GetSelectedColor();
+				void												SetSelectedColor(Color value);
+				
+				bool												GetShowSelection();
+				void												SetShowSelection(bool value);
+				
+				bool												GetShowEffect();
+				void												SetShowEffect(bool value);
+				
+				bool												GetForceFontExist();
+				void												SetForceFontExist(bool value);
+				
+				bool												ShowDialog();
+			};
+			
+			class GuiFileDialogBase abstract : public GuiDialogBase, public Description<GuiFileDialogBase>
+			{
+			protected:
+				WString												filter = L"All Files (*.*)|*.*";
+				vint												filterIndex = 0;
+				bool												enabledPreview = false;
+				WString												title;
+				WString												fileName;
+				WString												directory;
+				WString												defaultExtension;
+				INativeDialogService::FileDialogOptions				options;
+
+			public:
+				GuiFileDialogBase();
+				~GuiFileDialogBase();
+
+				compositions::GuiNotifyEvent						FileNameChanged;
+				compositions::GuiNotifyEvent						FilterIndexChanged;
+				
+				const WString&										GetFilter();
+				void												SetFilter(const WString& value);
+				
+				vint												GetFilterIndex();
+				void												SetFilterIndex(vint value);
+				
+				bool												GetEnabledPreview();
+				void												SetEnabledPreview(bool value);
+				
+				WString												GetTitle();
+				void												SetTitle(const WString& value);
+				
+				WString												GetFileName();
+				void												SetFileName(const WString& value);
+				
+				WString												GetDirectory();
+				void												SetDirectory(const WString& value);
+				
+				WString												GetDefaultExtension();
+				void												SetDefaultExtension(const WString& value);
+				
+				INativeDialogService::FileDialogOptions				GetOptions();
+				void												SetOptions(INativeDialogService::FileDialogOptions value);
+			};
+			
+			class GuiOpenFileDialog : public GuiFileDialogBase, public Description<GuiOpenFileDialog>
+			{
+			protected:
+				collections::List<WString>							fileNames;
+
+			public:
+				GuiOpenFileDialog();
+				~GuiOpenFileDialog();
+				
+				collections::List<WString>&							GetFileNames();
+				
+				bool												ShowDialog();
+			};
+			
+			class GuiSaveFileDialog : public GuiFileDialogBase, public Description<GuiSaveFileDialog>
+			{
+			public:
+				GuiSaveFileDialog();
+				~GuiSaveFileDialog();
+
+				bool												ShowDialog();
+			};
 			
 			namespace list
 			{

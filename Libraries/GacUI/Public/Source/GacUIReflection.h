@@ -990,6 +990,14 @@ Type List
 			F(presentation::INativeClipboardService)\
 			F(presentation::INativeScreenService)\
 			F(presentation::INativeInputService)\
+			F(presentation::INativeDialogService::MessageBoxButtonsInput)\
+			F(presentation::INativeDialogService::MessageBoxButtonsOutput)\
+			F(presentation::INativeDialogService::MessageBoxDefaultButton)\
+			F(presentation::INativeDialogService::MessageBoxIcons)\
+			F(presentation::INativeDialogService::MessageBoxModalOptions)\
+			F(presentation::INativeDialogService::ColorDialogCustomColorOptions)\
+			F(presentation::INativeDialogService::FileDialogTypes)\
+			F(presentation::INativeDialogService::FileDialogOptions)\
 			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
 			F(presentation::GuiTextData)\
@@ -1352,6 +1360,13 @@ Type List
 			F(presentation::controls::GuiApplication)\
 			F(presentation::theme::ITheme)\
 			F(presentation::controls::GuiInstanceRootObject)\
+			F(presentation::controls::GuiDialogBase)\
+			F(presentation::controls::GuiMessageDialog)\
+			F(presentation::controls::GuiColorDialog)\
+			F(presentation::controls::GuiFontDialog)\
+			F(presentation::controls::GuiFileDialogBase)\
+			F(presentation::controls::GuiOpenFileDialog)\
+			F(presentation::controls::GuiSaveFileDialog)\
 			F(presentation::controls::GuiCustomControl)\
 			F(presentation::controls::GuiLabel)\
 			F(presentation::controls::GuiLabel::IStyleController)\
