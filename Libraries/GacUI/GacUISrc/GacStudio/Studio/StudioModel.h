@@ -138,6 +138,9 @@ namespace vm
 	{
 	protected:
 		IStudioModel*									studioModel;
+		WString											currentFileName;
+		list::ObservableList<Ptr<StudioFileReference>>	selectedFiles;
+		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 
 	public:
 		StudioAddExistingFilesModel(IStudioModel* _studioModel);
@@ -145,7 +148,7 @@ namespace vm
 
 		Ptr<description::IValueObservableList>			GetSelectedFiles()override;
 		WString											GetCurrentFileName()override;
-		void											SetCurrentFileName(WString)override;
+		void											SetCurrentFileName(WString value)override;
 		Ptr<description::IValueObservableList>			GetFilteredFileFactories()override;
 	};
 

@@ -35,6 +35,7 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(vm::IStudioModel)
 			IMPL_CPP_TYPE_INFO(vm::IStudioNewFileModel)
 			IMPL_CPP_TYPE_INFO(vm::ITextTemplate)
+			IMPL_CPP_TYPE_INFO(vm::StudioFileReference)
 			IMPL_CPP_TYPE_INFO(ui::AboutWindow)
 			IMPL_CPP_TYPE_INFO(ui::AddExistingFilesWindow)
 			IMPL_CPP_TYPE_INFO(ui::MainWindow)
@@ -198,6 +199,12 @@ namespace vl
 				CLASS_MEMBER_METHOD(Generate, { L"macroEnvironment" });
 			END_CLASS_MEMBER(vm::ITextTemplate)
 
+			BEGIN_CLASS_MEMBER(vm::StudioFileReference)
+				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<vm::StudioFileReference>(), NO_PARAMETER)
+				CLASS_MEMBER_FIELD(fileName)
+				CLASS_MEMBER_FIELD(fileFactory)
+			END_CLASS_MEMBER(vm::StudioFileReference)
+
 			BEGIN_CLASS_MEMBER(ui::AboutWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(ui::AboutWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
@@ -305,6 +312,7 @@ namespace vl
 					ADD_TYPE_INFO(vm::IStudioModel)
 					ADD_TYPE_INFO(vm::IStudioNewFileModel)
 					ADD_TYPE_INFO(vm::ITextTemplate)
+					ADD_TYPE_INFO(vm::StudioFileReference)
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::AddExistingFilesWindow)
 					ADD_TYPE_INFO(ui::MainWindow)

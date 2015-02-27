@@ -359,22 +359,22 @@ StudioAddExistingFilesModel
 
 	Ptr<description::IValueObservableList> StudioAddExistingFilesModel::GetSelectedFiles()
 	{
-		throw 0;
+		return selectedFiles.GetWrapper();
 	}
 
 	WString StudioAddExistingFilesModel::GetCurrentFileName()
 	{
-		throw 0;
+		return currentFileName;
 	}
 
-	void StudioAddExistingFilesModel::SetCurrentFileName(WString)
+	void StudioAddExistingFilesModel::SetCurrentFileName(WString value)
 	{
-		throw 0;
+		currentFileName = value;
 	}
 
 	Ptr<description::IValueObservableList> StudioAddExistingFilesModel::GetFilteredFileFactories()
 	{
-		throw 0;
+		return filteredFileFactories.GetWrapper();
 	}
 
 /***********************************************************************
