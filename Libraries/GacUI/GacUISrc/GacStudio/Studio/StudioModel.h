@@ -116,15 +116,45 @@ namespace vm
 		void											SetSolution(Ptr<ISolutionModel> solution);
 	};
 
+	class StudioNewFileModel : public Object, public virtual IStudioNewFileModel
+	{
+	protected:
+		IStudioModel*									studioModel;
+		Ptr<FileFactoryFilterModel>						fileFilters;
+		Ptr<IProjectFactoryModel>						selectedFileFilter;
+		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
+
+	public:
+		StudioNewFileModel(IStudioModel* _studioModel, Ptr<ProjectFactoryModel> solutionProjectFactory);
+		~StudioNewFileModel();
+		
+		Ptr<IProjectFactoryModel>						GetFileFilters()override;
+		Ptr<IProjectFactoryModel>						GetSelectedFileFilter()override;
+		void											SetSelectedFileFilter(Ptr<IProjectFactoryModel> value)override;
+		Ptr<description::IValueObservableList>			GetFilteredFileFactories()override;
+	};
+
+	class StudioAddExistingFilesModel : public Object, public virtual IStudioAddExistingFilesModel
+	{
+	protected:
+		IStudioModel*									studioModel;
+
+	public:
+		StudioAddExistingFilesModel(IStudioModel* _studioModel);
+		~StudioAddExistingFilesModel();
+
+		Ptr<description::IValueObservableList>			GetSelectedFiles()override;
+		WString											GetCurrentFileName()override;
+		void											SetCurrentFileName(WString)override;
+		Ptr<description::IValueObservableList>			GetFilteredFileFactories()override;
+	};
+
 	class StudioModel : public Object, public virtual IStudioModel
 	{
 	protected:
 		Ptr<FileFactoryFilterModel>						solutionProjectFactory;
-		Ptr<FileFactoryFilterModel>						fileFilters;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		List<Ptr<IEditorFactoryModel>>					editorFactories;
-		Ptr<IProjectFactoryModel>						selectedFileFilter;
-		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 		Ptr<RootSolutionItemModel>						rootSolutionItem;
 		Ptr<ISolutionItemModel>							selectedSolutionItem;
 
@@ -135,11 +165,9 @@ namespace vm
 		LazyList<Ptr<IProjectFactoryModel>>				GetProjectFactories()override;
 		LazyList<Ptr<IFileFactoryModel>>				GetFileFactories()override;
 		LazyList<Ptr<IEditorFactoryModel>>				GetEditorFactories()override;
-		
-		Ptr<IProjectFactoryModel>						GetFileFilters()override;
-		Ptr<IProjectFactoryModel>						GetSelectedFileFilter()override;
-		void											SetSelectedFileFilter(Ptr<IProjectFactoryModel> value)override;
-		Ptr<description::IValueObservableList>			GetFilteredFileFactories()override;
+
+		Ptr<IStudioNewFileModel>						CreateNewFileModel()override;
+		Ptr<IStudioAddExistingFilesModel>				CreateAddExistingFilesModel()override;
 
 		Ptr<ISolutionItemModel>							GetRootSolutionItem()override;
 		Ptr<ISolutionModel>								GetOpenedSolution()override;

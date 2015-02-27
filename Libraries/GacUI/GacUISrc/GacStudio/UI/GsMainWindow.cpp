@@ -44,7 +44,7 @@ namespace ui
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
 		if (!action) return;
-		auto window = new AddExistingFilesWindow(GetViewModel(), action);
+		auto window = new AddExistingFilesWindow(GetViewModel(), GetViewModel()->CreateAddExistingFilesModel(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, [](){});
@@ -54,7 +54,7 @@ namespace ui
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
 		if (!action) return;
-		auto window = new NewFileWindow(GetViewModel(), action);
+		auto window = new NewFileWindow(GetViewModel(), GetViewModel()->CreateNewFileModel(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
 		window->ShowModalAndDelete(this, [](){});

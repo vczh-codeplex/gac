@@ -295,6 +295,89 @@ RootSolutionItemModel
 	}
 
 /***********************************************************************
+StudioNewFileModel
+***********************************************************************/
+
+	StudioNewFileModel::StudioNewFileModel(IStudioModel* _studioModel, Ptr<ProjectFactoryModel> solutionProjectFactory)
+		:studioModel(_studioModel)
+	{
+		fileFilters = new FileFactoryFilterModel;
+		fileFilters->AddChild(solutionProjectFactory);
+		CopyFrom(filteredFileFactories, studioModel->GetFileFactories());
+	}
+
+	StudioNewFileModel::~StudioNewFileModel()
+	{
+	}
+
+	Ptr<IProjectFactoryModel> StudioNewFileModel::GetFileFilters()
+	{
+		return fileFilters;
+	}
+
+	Ptr<IProjectFactoryModel> StudioNewFileModel::GetSelectedFileFilter()
+	{
+		return selectedFileFilter;
+	}
+
+	void StudioNewFileModel::SetSelectedFileFilter(Ptr<IProjectFactoryModel> value)
+	{
+		selectedFileFilter = value;
+		LazyList<Ptr<IFileFactoryModel>> source;
+		if (!selectedFileFilter || selectedFileFilter->GetId() == L"")
+		{
+			source = studioModel->GetFileFactories();
+		}
+		else
+		{
+			source = From(studioModel->GetFileFactories())
+				.Where([=](Ptr<IFileFactoryModel> model)
+				{
+					return model->GetCategory() == selectedFileFilter->GetId();
+				});
+		}
+		CopyFrom(filteredFileFactories, source);
+	}
+
+	Ptr<IValueObservableList> StudioNewFileModel::GetFilteredFileFactories()
+	{
+		return filteredFileFactories.GetWrapper();
+	}
+
+/***********************************************************************
+StudioAddExistingFilesModel
+***********************************************************************/
+
+	StudioAddExistingFilesModel::StudioAddExistingFilesModel(IStudioModel* _studioModel)
+		:studioModel(_studioModel)
+	{
+	}
+
+	StudioAddExistingFilesModel::~StudioAddExistingFilesModel()
+	{
+	}
+
+	Ptr<description::IValueObservableList> StudioAddExistingFilesModel::GetSelectedFiles()
+	{
+		throw 0;
+	}
+
+	WString StudioAddExistingFilesModel::GetCurrentFileName()
+	{
+		throw 0;
+	}
+
+	void StudioAddExistingFilesModel::SetCurrentFileName(WString)
+	{
+		throw 0;
+	}
+
+	Ptr<description::IValueObservableList> StudioAddExistingFilesModel::GetFilteredFileFactories()
+	{
+		throw 0;
+	}
+
+/***********************************************************************
 StudioModel
 ***********************************************************************/
 
@@ -345,15 +428,11 @@ StudioModel
 			solutionProjectFactory->AddChild(project);
 		}
 
-		fileFilters = new FileFactoryFilterModel;
-		fileFilters->AddChild(solutionProjectFactory);
-
 		rootSolutionItem = new RootSolutionItemModel;
 		
 		FOREACH(Ptr<FileFactoryModel>, file, configFiles.Values())
 		{
 			fileFactories.Add(file);
-			filteredFileFactories.Add(file);
 		}
 	}
 
@@ -363,7 +442,7 @@ StudioModel
 
 	LazyList<Ptr<IProjectFactoryModel>> StudioModel::GetProjectFactories()
 	{
-		return fileFilters->GetChildren().First()->GetChildren();
+		return solutionProjectFactory->GetChildren();
 	}
 
 	LazyList<Ptr<IFileFactoryModel>> StudioModel::GetFileFactories()
@@ -376,38 +455,14 @@ StudioModel
 		return From(editorFactories);
 	}
 
-	Ptr<IProjectFactoryModel> StudioModel::GetFileFilters()
+	Ptr<IStudioNewFileModel> StudioModel::CreateNewFileModel()
 	{
-		return fileFilters;
+		return new StudioNewFileModel(this, solutionProjectFactory);
 	}
 
-	Ptr<IProjectFactoryModel> StudioModel::GetSelectedFileFilter()
+	Ptr<IStudioAddExistingFilesModel> StudioModel::CreateAddExistingFilesModel()
 	{
-		return selectedFileFilter;
-	}
-
-	void StudioModel::SetSelectedFileFilter(Ptr<IProjectFactoryModel> value)
-	{
-		selectedFileFilter = value;
-		LazyList<Ptr<IFileFactoryModel>> source;
-		if (!selectedFileFilter || selectedFileFilter->GetId() == L"")
-		{
-			source = fileFactories;
-		}
-		else
-		{
-			source = From(fileFactories)
-				.Where([=](Ptr<IFileFactoryModel> model)
-				{
-					return model->GetCategory() == selectedFileFilter->GetId();
-				});
-		}
-		CopyFrom(filteredFileFactories, source);
-	}
-
-	Ptr<IValueObservableList> StudioModel::GetFilteredFileFactories()
-	{
-		return filteredFileFactories.GetWrapper();
+		return new StudioAddExistingFilesModel(this);
 	}
 
 	Ptr<ISolutionItemModel> StudioModel::GetRootSolutionItem()

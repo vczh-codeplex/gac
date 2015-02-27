@@ -19,15 +19,26 @@
     <Property Name="Id" Type="string" Readonly="true"/>
     <Property Name="Children" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
   </Interface>
+
+  <Interface ref.Class="vm::IStudioNewFileModel">
+    <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
+    <Property Name="SelectedFileFilter" Type="vm::IProjectFactoryModel^"/>
+    <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
+  </Interface>
+
+  <Interface ref.Class="vm::IStudioAddExistingFilesModel">
+    <Property Name="SelectedFiles" Type="system::ObservableList^" Readonly="true"/>
+    <Property Name="CurrentFileName" Type="string"/>
+    <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
+  </Interface>
   
   <Interface ref.Class="vm::IStudioModel">
     <Property Name="ProjectFactories" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileFactories" Type="vm::IFileFactoryModel^{}" Readonly="true"/>
     <Property Name="EditorFactories" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
 
-    <Property Name="FileFilters" Type="vm::IProjectFactoryModel^" Readonly="true"/>
-    <Property Name="SelectedFileFilter" Type="vm::IProjectFactoryModel^"/>
-    <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
+    <Method Name="CreateNewFileModel" Type="vm::IStudioNewFileModel^"/>
+    <Method Name="CreateAddExistingFilesModel" Type="vm::IStudioAddExistingFilesModel^"/>
 
     <Property Name="RootSolutionItem" Type="vm::ISolutionItemModel^" Readonly="true"/>
     <Property Name="OpenedSolution" Type="vm::ISolutionModel^" Readonly="true" Observable="true"/>
