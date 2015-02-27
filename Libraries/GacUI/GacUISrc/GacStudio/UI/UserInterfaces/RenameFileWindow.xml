@@ -43,7 +43,7 @@
         <Label Text="Input the new file name:"/>
       </Cell>
       <Cell Site="row:2 column:1 rowSpan:1 columnSpan:3">
-        <SinglelineTextBox ref.Name="textBoxName" Text-eval="SolutionItem.Name">
+        <SinglelineTextBox ref.Name="textBoxName" Alt="N" Text-eval="SolutionItem.Name">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
         </SinglelineTextBox>
       </Cell>

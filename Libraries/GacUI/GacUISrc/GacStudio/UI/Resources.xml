@@ -19,6 +19,7 @@
     <Instance content="File">UserInterfaces\NewFileWindow.xml</Instance>
     <Instance content="File">UserInterfaces\AboutWindow.xml</Instance>
     <Instance content="File">UserInterfaces\RenameFileWindow.xml</Instance>
+    <Instance content="File">UserInterfaces\AddExistingFilesWindow.xml</Instance>
   </Folder>
   <Folder name="Config" content="Link">Config.xml</Folder>
   <Folder name="Documents">

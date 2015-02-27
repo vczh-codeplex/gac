@@ -44,7 +44,10 @@ namespace ui
 	{
 		auto action = GetViewModel()->GetWorkingItem().Cast<vm::IAddFileItemAction>();
 		if (!action) return;
-		// todo
+		auto window = new AddExistingFilesWindow(GetViewModel(), action);
+		window->ForceCalculateSizeImmediately();
+		window->MoveToScreenCenter();
+		window->ShowModalAndDelete(this, [](){});
 	}
 
 	void MainWindow::commandFileAddNewFile_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -54,9 +57,7 @@ namespace ui
 		auto window = new NewFileWindow(GetViewModel(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
-		window->ShowModalAndDelete(this, []()
-		{
-		});
+		window->ShowModalAndDelete(this, [](){});
 	}
 
 	void MainWindow::commandFileCloseSolution_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -74,9 +75,7 @@ namespace ui
 		auto window = new NewProjectWindow(GetViewModel());
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
-		window->ShowModalAndDelete(this, []()
-		{
-		});
+		window->ShowModalAndDelete(this, [](){});
 	}
 
 	void MainWindow::commandFileOpenProject_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -136,9 +135,7 @@ namespace ui
 		auto window = new RenameFileWindow(GetViewModel(), GetViewModel()->GetWorkingItem(), action);
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
-		window->ShowModalAndDelete(this, [=]()
-		{
-		});
+		window->ShowModalAndDelete(this, [](){});
 	}
 
 	void MainWindow::commandFileSaveAll_Executed(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -156,9 +153,7 @@ namespace ui
 		auto window = new AboutWindow(GetViewModel());
 		window->ForceCalculateSizeImmediately();
 		window->MoveToScreenCenter();
-		window->ShowModalAndDelete(this, []()
-		{
-		});
+		window->ShowModalAndDelete(this, [](){});
 	}
 
 	void MainWindow::treeViewSolutionItem_NodeRightButtonUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiNodeMouseEventArgs& arguments)
