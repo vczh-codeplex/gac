@@ -31,6 +31,7 @@ namespace vm
 	class IFileFactoryModel;
 	class IProjectFactoryModel;
 	class IStudioNewFileModel;
+	class StudioFileReference;
 	class IStudioAddExistingFilesModel;
 	class IStudioModel;
 }
@@ -216,6 +217,13 @@ namespace vm
 		virtual void SetSelectedFileFilter(vl::Ptr<vm::IProjectFactoryModel> value) = 0;
 
 		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetFilteredFileFactories() = 0;
+	};
+
+	class StudioFileReference : public vl::Object, public vl::reflection::Description<StudioFileReference>
+	{
+	public:
+		vl::WString fileName;
+		vl::Ptr<vm::IFileFactoryModel> fileFactory;
 	};
 
 	class IStudioAddExistingFilesModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioAddExistingFilesModel>
@@ -673,6 +681,7 @@ namespace vl
 			DECL_TYPE_INFO(vm::IStudioModel)
 			DECL_TYPE_INFO(vm::IStudioNewFileModel)
 			DECL_TYPE_INFO(vm::ITextTemplate)
+			DECL_TYPE_INFO(vm::StudioFileReference)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::AddExistingFilesWindow)
 			DECL_TYPE_INFO(ui::MainWindow)

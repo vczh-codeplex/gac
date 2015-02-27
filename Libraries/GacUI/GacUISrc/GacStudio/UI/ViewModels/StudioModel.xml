@@ -25,6 +25,11 @@
     <Property Name="SelectedFileFilter" Type="vm::IProjectFactoryModel^"/>
     <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
   </Interface>
+  
+  <Class ref.Class="vm::StudioFileReference">
+    <Property Name="fileName" Type="string"/>
+    <Property Name="fileFactory" Type="vm::IFileFactoryModel^"/>
+  </Class>
 
   <Interface ref.Class="vm::IStudioAddExistingFilesModel">
     <Property Name="SelectedFiles" Type="system::ObservableList^" Readonly="true"/>
