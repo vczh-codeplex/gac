@@ -1302,12 +1302,135 @@ GuiFontDialog
 			}
 
 /***********************************************************************
+GuiFileDialogBase
+***********************************************************************/
+
+			GuiFileDialogBase::GuiFileDialogBase()
+			{
+			}
+
+			GuiFileDialogBase::~GuiFileDialogBase()
+			{
+			}
+
+			const WString& GuiFileDialogBase::GetFilter()
+			{
+				return filter;
+			}
+
+			void GuiFileDialogBase::SetFilter(const WString& value)
+			{
+				filter = value;
+			}
+
+			vint GuiFileDialogBase::GetFilterIndex()
+			{
+				return filterIndex;
+			}
+
+			void GuiFileDialogBase::SetFilterIndex(vint value)
+			{
+				filterIndex = value;
+			}
+
+			bool GuiFileDialogBase::GetEnabledPreview()
+			{
+				return enabledPreview;
+			}
+
+			void GuiFileDialogBase::SetEnabledPreview(bool value)
+			{
+				enabledPreview = value;
+			}
+
+			WString GuiFileDialogBase::GetTitle()
+			{
+				return title;
+			}
+
+			void GuiFileDialogBase::SetTitle(const WString& value)
+			{
+				title = value;
+			}
+
+			WString GuiFileDialogBase::GetFileName()
+			{
+				return fileName;
+			}
+
+			void GuiFileDialogBase::SetFileName(const WString& value)				
+			{
+				fileName = value;
+			}
+
+			WString GuiFileDialogBase::GetDirectory()
+			{
+				return directory;
+			}
+
+			void GuiFileDialogBase::SetDirectory(const WString& value)
+			{
+				directory = value;
+			}
+
+			WString GuiFileDialogBase::GetDefaultExtension()
+			{
+				return defaultExtension;
+			}
+
+			void GuiFileDialogBase::SetDefaultExtension(const WString& value)
+			{
+				defaultExtension = value;
+			}
+
+			INativeDialogService::FileDialogOptions GuiFileDialogBase::GetOptions()
+			{
+				return options;
+			}
+
+			void GuiFileDialogBase::SetOptions(INativeDialogService::FileDialogOptions value)
+			{
+				options = value;
+			}
+
+/***********************************************************************
 GuiOpenFileDialog
 ***********************************************************************/
+
+			GuiOpenFileDialog::GuiOpenFileDialog()
+			{
+			}
+
+			GuiOpenFileDialog::~GuiOpenFileDialog()
+			{
+			}
+
+			collections::List<WString>& GuiOpenFileDialog::GetFileNames()
+			{
+				return fileNames;
+			}
+
+			bool GuiOpenFileDialog::ShowDialog()
+			{
+				throw 0;
+			}
 
 /***********************************************************************
 GuiSaveFileDialog
 ***********************************************************************/
+
+			GuiSaveFileDialog::GuiSaveFileDialog()
+			{
+			}
+
+			GuiSaveFileDialog::~GuiSaveFileDialog()
+			{
+			}
+
+			bool GuiSaveFileDialog::ShowDialog()
+			{
+				throw 0;
+			}
 		}
 	}
 }
