@@ -1145,12 +1145,12 @@ GuiMessageDialog
 
 			INativeDialogService::MessageBoxModalOptions GuiMessageDialog::GetModalOption()
 			{
-				return modelOption;
+				return modalOption;
 			}
 
 			void GuiMessageDialog::SetModalOption(INativeDialogService::MessageBoxModalOptions value)
 			{
-				modelOption = value;
+				modalOption = value;
 			}
 
 			const WString& GuiMessageDialog::GetText()
@@ -1175,7 +1175,8 @@ GuiMessageDialog
 
 			INativeDialogService::MessageBoxButtonsOutput GuiMessageDialog::ShowDialog()
 			{
-				throw 0;
+				auto service = GetCurrentController()->DialogService();
+				return service->ShowMessageBox(GetHostWindow()->GetNativeWindow(), text, title, input, defaultButton, icon, modalOption);
 			}
 
 /***********************************************************************
@@ -1221,7 +1222,11 @@ GuiColorDialog
 
 			void GuiColorDialog::SetSelectedColor(Color value)
 			{
-				selectedColor = value;
+				if (selectedColor != value)
+				{
+					selectedColor = value;
+					SelectedColorChanged.Execute(GuiEventArgs());
+				}
 			}
 
 			collections::List<Color>& GuiColorDialog::GetCustomColors()
@@ -1231,7 +1236,24 @@ GuiColorDialog
 
 			bool GuiColorDialog::ShowDialog()
 			{
-				throw 0;
+				Array<Color> colors;
+				CopyFrom(colors, customColors);
+				colors.Resize(16);
+
+				INativeDialogService::ColorDialogCustomColorOptions options =
+					!enabledCustomColor ? INativeDialogService::CustomColorDisabled :
+					!openedCustomColor ? INativeDialogService::CustomColorEnabled :
+					INativeDialogService::CustomColorOpened;
+
+				auto service = GetCurrentController()->DialogService();
+				if (!service->ShowColorDialog(GetHostWindow()->GetNativeWindow(), selectedColor, showSelection, options, &colors[0]))
+				{
+					return false;
+				}
+
+				CopyFrom(customColors, colors);
+				SelectedColorChanged.Execute(GuiEventArgs());
+				return true;
 			}
 
 /***********************************************************************
@@ -1253,7 +1275,11 @@ GuiFontDialog
 
 			void GuiFontDialog::SetSelectedFont(const FontProperties& value)
 			{
-				selectedFont = value;
+				if (selectedFont != value)
+				{
+					selectedFont = value;
+					SelectedFontChanged.Execute(GuiEventArgs());
+				}
 			}
 
 			Color GuiFontDialog::GetSelectedColor()
@@ -1263,7 +1289,11 @@ GuiFontDialog
 
 			void GuiFontDialog::SetSelectedColor(Color value)
 			{
-				selectedColor = value;
+				if (selectedColor != value)
+				{
+					selectedColor = value;
+					SelectedColorChanged.Execute(GuiEventArgs());
+				}
 			}
 
 			bool GuiFontDialog::GetShowSelection()
@@ -1298,7 +1328,15 @@ GuiFontDialog
 
 			bool GuiFontDialog::ShowDialog()
 			{
-				throw 0;
+				auto service = GetCurrentController()->DialogService();
+				if (!service->ShowFontDialog(GetHostWindow()->GetNativeWindow(), selectedFont, selectedColor, showSelection, showEffect, forceFontExist))
+				{
+					return false;
+				}
+
+				SelectedColorChanged.Execute(GuiEventArgs());
+				SelectedFontChanged.Execute(GuiEventArgs());
+				return true;
 			}
 
 /***********************************************************************
@@ -1330,7 +1368,11 @@ GuiFileDialogBase
 
 			void GuiFileDialogBase::SetFilterIndex(vint value)
 			{
-				filterIndex = value;
+				if (filterIndex != value)
+				{
+					filterIndex = value;
+					FilterIndexChanged.Execute(GuiEventArgs());
+				}
 			}
 
 			bool GuiFileDialogBase::GetEnabledPreview()
@@ -1360,7 +1402,10 @@ GuiFileDialogBase
 
 			void GuiFileDialogBase::SetFileName(const WString& value)				
 			{
-				fileName = value;
+				if (fileName != value)
+				{
+					FileNameChanged.Execute(GuiEventArgs());
+				}
 			}
 
 			WString GuiFileDialogBase::GetDirectory()
@@ -1412,7 +1457,30 @@ GuiOpenFileDialog
 
 			bool GuiOpenFileDialog::ShowDialog()
 			{
-				throw 0;
+				fileNames.Clear();
+				auto service = GetCurrentController()->DialogService();
+				if (!service->ShowFileDialog(
+					GetHostWindow()->GetNativeWindow(),
+					fileNames,
+					filterIndex,
+					(enabledPreview ? INativeDialogService::FileDialogOpenPreview : INativeDialogService::FileDialogOpen),
+					title,
+					fileName,
+					directory,
+					defaultExtension,
+					filter,
+					options))
+				{
+					return false;
+				}
+
+				if (fileNames.Count() > 0)
+				{
+					fileName = fileNames[0];
+					FileNameChanged.Execute(GuiEventArgs());
+					FilterIndexChanged.Execute(GuiEventArgs());
+				}
+				return true;
 			}
 
 /***********************************************************************
@@ -1429,7 +1497,30 @@ GuiSaveFileDialog
 
 			bool GuiSaveFileDialog::ShowDialog()
 			{
-				throw 0;
+				List<WString> fileNames;
+				auto service = GetCurrentController()->DialogService();
+				if (!service->ShowFileDialog(
+					GetHostWindow()->GetNativeWindow(),
+					fileNames,
+					filterIndex,
+					(enabledPreview ? INativeDialogService::FileDialogOpenPreview : INativeDialogService::FileDialogOpen),
+					title,
+					fileName,
+					directory,
+					defaultExtension,
+					filter,
+					options))
+				{
+					return false;
+				}
+
+				if (fileNames.Count() > 0)
+				{
+					fileName = fileNames[0];
+					FileNameChanged.Execute(GuiEventArgs());
+					FilterIndexChanged.Execute(GuiEventArgs());
+				}
+				return true;
 			}
 		}
 	}
