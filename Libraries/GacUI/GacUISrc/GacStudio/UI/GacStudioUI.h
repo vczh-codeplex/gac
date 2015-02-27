@@ -12,6 +12,7 @@ DO NOT MODIFY
 #define VCZH_GACUI_RESOURCE_CODE_GENERATOR_GacStudioUI
 
 #include "GsAboutWindow.h"
+#include "GsAddExistingFilesWindow.h"
 #include "GsMainWindow.h"
 #include "GsNewFileWindow.h"
 #include "GsNewProjectWindow.h"

@@ -35,6 +35,7 @@ namespace vm
 namespace ui
 {
 	class AboutWindow;
+	class AddExistingFilesWindow;
 	class MainWindow;
 	class NewFileWindow;
 	class NewProjectWindow;
@@ -289,6 +290,61 @@ namespace ui
 		Ptr<vm::IStudioModel> GetViewModel()
 		{
 			return ViewModel_;
+		}
+	};
+
+	template<typename TImpl>
+	class AddExistingFilesWindow_ : public vl::presentation::controls::GuiWindow, public vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>, public vl::reflection::Description<TImpl>
+	{
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
+	private:
+		Ptr<vm::IStudioModel> ViewModel_;
+		Ptr<vm::IAddFileItemAction> Action_;
+	protected:
+		vl::presentation::controls::GuiButton* buttonAdd;
+		vl::presentation::controls::GuiButton* buttonCancel;
+		vl::presentation::controls::GuiButton* buttonOK;
+		vl::presentation::controls::GuiButton* buttonRemove;
+		vl::presentation::controls::GuiBindableDataGrid* dataGridFiles;
+
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+		{
+			ViewModel_ = ViewModel;
+			Action_ = Action;
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(buttonAdd);
+				GUI_INSTANCE_REFERENCE(buttonCancel);
+				GUI_INSTANCE_REFERENCE(buttonOK);
+				GUI_INSTANCE_REFERENCE(buttonRemove);
+				GUI_INSTANCE_REFERENCE(dataGridFiles);
+			}
+			else
+			{
+				ViewModel_ = 0;
+				Action_ = 0;
+			}
+		}
+	public:
+		AddExistingFilesWindow_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::controls::GuiWindow>(L"ui::AddExistingFilesWindow")
+			,vl::presentation::controls::GuiWindow(vl::presentation::theme::GetCurrentTheme()->CreateWindowStyle())
+			,buttonAdd(0)
+			,buttonCancel(0)
+			,buttonOK(0)
+			,buttonRemove(0)
+			,dataGridFiles(0)
+		{
+		}
+
+		Ptr<vm::IStudioModel> GetViewModel()
+		{
+			return ViewModel_;
+		}
+
+		Ptr<vm::IAddFileItemAction> GetAction()
+		{
+			return Action_;
 		}
 	};
 
@@ -579,6 +635,7 @@ namespace vl
 			DECL_TYPE_INFO(vm::IStudioModel)
 			DECL_TYPE_INFO(vm::ITextTemplate)
 			DECL_TYPE_INFO(ui::AboutWindow)
+			DECL_TYPE_INFO(ui::AddExistingFilesWindow)
 			DECL_TYPE_INFO(ui::MainWindow)
 			DECL_TYPE_INFO(ui::NewFileWindow)
 			DECL_TYPE_INFO(ui::NewProjectWindow)
@@ -615,6 +672,57 @@ namespace ui
 	AboutWindow::AboutWindow(Ptr<vm::IStudioModel> ViewModel)
 	{
 		InitializeComponents(ViewModel);
+	}
+}
+
+
+GsAddExistingFilesWindow.h :
+namespace ui
+{
+	class AddExistingFilesWindow : public ui::AddExistingFilesWindow_<ui::AddExistingFilesWindow>
+	{
+		friend class ui::AddExistingFilesWindow_<ui::AddExistingFilesWindow>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::AddExistingFilesWindow>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		void buttonAdd_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonOK_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		void buttonRemove_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action);
+	};
+}
+
+
+GsAddExistingFilesWindow.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	void AddExistingFilesWindow::buttonAdd_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void AddExistingFilesWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void AddExistingFilesWindow::buttonOK_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	void AddExistingFilesWindow::buttonRemove_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
+	{
+	}
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	AddExistingFilesWindow::AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+	{
+		InitializeComponents(ViewModel, Action);
 	}
 }
 

@@ -34,6 +34,7 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(vm::IStudioModel)
 			IMPL_CPP_TYPE_INFO(vm::ITextTemplate)
 			IMPL_CPP_TYPE_INFO(ui::AboutWindow)
+			IMPL_CPP_TYPE_INFO(ui::AddExistingFilesWindow)
 			IMPL_CPP_TYPE_INFO(ui::MainWindow)
 			IMPL_CPP_TYPE_INFO(ui::NewFileWindow)
 			IMPL_CPP_TYPE_INFO(ui::NewProjectWindow)
@@ -189,6 +190,19 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
 			END_CLASS_MEMBER(ui::AboutWindow)
 
+			BEGIN_CLASS_MEMBER(ui::AddExistingFilesWindow)
+				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
+				CLASS_MEMBER_CONSTRUCTOR(ui::AddExistingFilesWindow*(Ptr<vm::IStudioModel>, Ptr<vm::IAddFileItemAction>), { L"ViewModel" _ L"Action" })
+
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonAdd_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonOK_Clicked, vl::presentation::compositions::GuiEventArgs)
+				CLASS_MEMBER_GUIEVENT_HANDLER(buttonRemove_Clicked, vl::presentation::compositions::GuiEventArgs)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
+			END_CLASS_MEMBER(ui::AddExistingFilesWindow)
+
 			BEGIN_CLASS_MEMBER(ui::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
 				CLASS_MEMBER_CONSTRUCTOR(ui::MainWindow*(Ptr<vm::IStudioModel>), { L"ViewModel" })
@@ -273,6 +287,7 @@ namespace vl
 					ADD_TYPE_INFO(vm::IStudioModel)
 					ADD_TYPE_INFO(vm::ITextTemplate)
 					ADD_TYPE_INFO(ui::AboutWindow)
+					ADD_TYPE_INFO(ui::AddExistingFilesWindow)
 					ADD_TYPE_INFO(ui::MainWindow)
 					ADD_TYPE_INFO(ui::NewFileWindow)
 					ADD_TYPE_INFO(ui::NewProjectWindow)

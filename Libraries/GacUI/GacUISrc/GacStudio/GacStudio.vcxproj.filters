@@ -78,6 +78,9 @@
     <ClCompile Include="UI\GsRenameFileWindow.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GsAddExistingFilesWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -120,6 +123,9 @@
       <Filter>Studio</Filter>
     </ClInclude>
     <ClInclude Include="UI\GsRenameFileWindow.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsAddExistingFilesWindow.h">
       <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
@@ -168,6 +174,9 @@
     </Xml>
     <Xml Include="UI\ViewModels\ActionModel.xml">
       <Filter>Resource Files\ViewModels</Filter>
+    </Xml>
+    <Xml Include="UI\UserInterfaces\AddExistingFilesWindow.xml">
+      <Filter>Resource Files\UserInterfaces</Filter>
     </Xml>
   </ItemGroup>
   <ItemGroup>

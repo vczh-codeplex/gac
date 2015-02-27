@@ -182,6 +182,7 @@
     <ClCompile Include="Studio\StudioModel.cpp" />
     <ClCompile Include="UI\GacStudioUIPartialClasses.cpp" />
     <ClCompile Include="UI\GsAboutWindow.cpp" />
+    <ClCompile Include="UI\GsAddExistingFilesWindow.cpp" />
     <ClCompile Include="UI\GsMainWindow.cpp" />
     <ClCompile Include="UI\GsNewFileWindow.cpp" />
     <ClCompile Include="UI\GsNewProjectWindow.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="UI\GacStudioUI.h" />
     <ClInclude Include="UI\GacStudioUIPartialClasses.h" />
     <ClInclude Include="UI\GsAboutWindow.h" />
+    <ClInclude Include="UI\GsAddExistingFilesWindow.h" />
     <ClInclude Include="UI\GsMainWindow.h" />
     <ClInclude Include="UI\GsNewFileWindow.h" />
     <ClInclude Include="UI\GsNewProjectWindow.h" />
@@ -213,6 +215,7 @@
       <SubType>Designer</SubType>
     </Xml>
     <Xml Include="UI\UserInterfaces\AboutWindow.xml" />
+    <Xml Include="UI\UserInterfaces\AddExistingFilesWindow.xml" />
     <Xml Include="UI\UserInterfaces\MainWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewFileWindow.xml" />
     <Xml Include="UI\UserInterfaces\NewProjectWindow.xml" />
