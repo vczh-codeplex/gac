@@ -738,7 +738,7 @@ Dialogs
 				bool												ShowDialog();
 			};
 
-			class GuiFontDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			class GuiFontDialog : public GuiDialogBase, public Description<GuiFontDialog>
 			{
 			protected:
 				FontProperties										selectedFont;
@@ -765,18 +765,61 @@ Dialogs
 				bool												ShowDialog();
 			};
 
-			class GuiOpenFileDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			class GuiFileDialogBase : public GuiDialogBase, public Description<GuiFileDialogBase>
 			{
+			protected:
+				WString												filter = L"All Files (*.*)|*.*";
+				vint												filterIndex = 0;
+				bool												enabledPreview = false;
+				WString												title;
+				WString												fileName;
+				WString												directory;
+				WString												defaultExtension;
+				INativeDialogService::FileDialogOptions				options;
+
+			public:
+				GuiFileDialogBase();
+				~GuiFileDialogBase();
+
+				const WString&										GetFilter();
+				void												SetFilter(const WString& value);
+				vint												GetFilterIndex();
+				void												SetFilterIndex(vint value);
+				bool												GetEnabledPreview();
+				void												SetEnabledPreview(bool value);
+				WString												GetTitle();
+				void												SetTitle(const WString& value);
+				WString												GetFileName();
+				void												SetFileName(const WString& value);
+				WString												GetDirectory();
+				void												SetDirectory(const WString& value);
+				WString												GetDefaultExtension();
+				void												SetDefaultExtension(const WString& value);
+				INativeDialogService::FileDialogOptions				GetOptions();
+				void												SetOptions(INativeDialogService::FileDialogOptions value);
+			};
+
+			class GuiOpenFileDialog : public GuiFileDialogBase, public Description<GuiOpenFileDialog>
+			{
+			protected:
+				collections::List<WString>							fileNames;
+
 			public:
 				GuiOpenFileDialog();
 				~GuiOpenFileDialog();
+
+				collections::List<WString>&							GetFileNames();
+
+				bool												ShowDialog();
 			};
 
-			class GuiSaveFileDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			class GuiSaveFileDialog : public GuiFileDialogBase, public Description<GuiSaveFileDialog>
 			{
 			public:
 				GuiSaveFileDialog();
 				~GuiSaveFileDialog();
+
+				bool												ShowDialog();
 			};
 			
 			namespace list

@@ -379,7 +379,7 @@ Type Declaration
 				ENUM_NAMESPACE_ITEM(FileDialogSavePreview)
 			END_ENUM_ITEM(INativeDialogService::FileDialogTypes)
 
-			BEGIN_ENUM_ITEM(INativeDialogService::FileDialogOptions)
+			BEGIN_ENUM_ITEM_MERGABLE(INativeDialogService::FileDialogOptions)
 				ENUM_ITEM_NAMESPACE(INativeDialogService)
 				ENUM_NAMESPACE_ITEM(FileDialogAllowMultipleSelection)
 				ENUM_NAMESPACE_ITEM(FileDialogFileMustExist)

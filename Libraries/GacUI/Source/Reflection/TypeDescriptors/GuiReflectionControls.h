@@ -33,6 +33,7 @@ Type List
 			F(presentation::controls::GuiMessageDialog)\
 			F(presentation::controls::GuiColorDialog)\
 			F(presentation::controls::GuiFontDialog)\
+			F(presentation::controls::GuiFileDialogBase)\
 			F(presentation::controls::GuiOpenFileDialog)\
 			F(presentation::controls::GuiSaveFileDialog)\
 			F(presentation::controls::GuiCustomControl)\
