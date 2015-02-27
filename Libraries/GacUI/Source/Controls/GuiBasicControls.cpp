@@ -1063,6 +1063,251 @@ GuiScroll
 			{
 				return totalSize-pageSize;
 			}
+
+/***********************************************************************
+GuiDialogBase
+***********************************************************************/
+
+			GuiWindow* GuiDialogBase::GetHostWindow()
+			{
+				if (rootObject)
+				{
+					if (auto control = dynamic_cast<GuiControl*>(rootObject))
+					{
+						if (auto host = control->GetRelatedControlHost())
+						{
+							return dynamic_cast<GuiWindow*>(host);
+						}
+					}
+				}
+				return nullptr;
+			}
+
+			GuiDialogBase::GuiDialogBase()
+			{
+			}
+
+			GuiDialogBase::~GuiDialogBase()
+			{
+			}
+
+			void GuiDialogBase::Attach(GuiInstanceRootObject* _rootObject)
+			{
+				rootObject = _rootObject;
+			}
+
+			void GuiDialogBase::Detach(GuiInstanceRootObject* _rootObject)
+			{
+				rootObject = nullptr;
+			}
+
+/***********************************************************************
+GuiMessageDialog
+***********************************************************************/
+
+			GuiMessageDialog::GuiMessageDialog()
+			{
+			}
+
+			GuiMessageDialog::~GuiMessageDialog()
+			{
+			}
+
+			INativeDialogService::MessageBoxButtonsInput GuiMessageDialog::GetInput()
+			{
+				return input;
+			}
+
+			void GuiMessageDialog::SetInput(INativeDialogService::MessageBoxButtonsInput value)
+			{
+				input = value;
+			}
+
+			INativeDialogService::MessageBoxDefaultButton GuiMessageDialog::GetDefaultButton()
+			{
+				return defaultButton;
+			}
+
+			void GuiMessageDialog::SetDefaultButton(INativeDialogService::MessageBoxDefaultButton value)
+			{
+				defaultButton = value;
+			}
+
+			INativeDialogService::MessageBoxIcons GuiMessageDialog::GetIcon()
+			{
+				return icon;
+			}
+
+			void GuiMessageDialog::SetIcon(INativeDialogService::MessageBoxIcons value)
+			{
+				icon = value;
+			}
+
+			INativeDialogService::MessageBoxModalOptions GuiMessageDialog::GetModalOption()
+			{
+				return modelOption;
+			}
+
+			void GuiMessageDialog::SetModalOption(INativeDialogService::MessageBoxModalOptions value)
+			{
+				modelOption = value;
+			}
+
+			const WString& GuiMessageDialog::GetText()
+			{
+				return text;
+			}
+
+			void GuiMessageDialog::SetText(const WString& value)
+			{
+				text = value;
+			}
+
+			const WString& GuiMessageDialog::GetTitle()
+			{
+				return title;
+			}
+
+			void GuiMessageDialog::SetTitle(const WString& value)
+			{
+				title = value;
+			}
+
+			INativeDialogService::MessageBoxButtonsOutput GuiMessageDialog::ShowDialog()
+			{
+				throw 0;
+			}
+
+/***********************************************************************
+GuiColorDialog
+***********************************************************************/
+
+			GuiColorDialog::GuiColorDialog()
+			{
+				for (vint i = 0; i < 16; i++)
+				{
+					customColors.Add(Color());
+				}
+			}
+
+			GuiColorDialog::~GuiColorDialog()
+			{
+			}
+
+			bool GuiColorDialog::GetEnabledCustomColor()
+			{
+				return enabledCustomColor;
+			}
+
+			void GuiColorDialog::SetEnabledCustomColor(bool value)
+			{
+				enabledCustomColor = value;
+			}
+
+			bool GuiColorDialog::GetOpenedCustomColor()
+			{
+				return openedCustomColor;
+			}
+
+			void GuiColorDialog::SetOpenedCustomColor(bool value)
+			{
+				openedCustomColor = value;
+			}
+
+			Color GuiColorDialog::GetSelectedColor()
+			{
+				return selectedColor;
+			}
+
+			void GuiColorDialog::SetSelectedColor(Color value)
+			{
+				selectedColor = value;
+			}
+
+			collections::List<Color>& GuiColorDialog::GetCustomColors()
+			{
+				return customColors;
+			}
+
+			bool GuiColorDialog::ShowDialog()
+			{
+				throw 0;
+			}
+
+/***********************************************************************
+GuiFontDialog
+***********************************************************************/
+
+			GuiFontDialog::GuiFontDialog()
+			{
+			}
+
+			GuiFontDialog::~GuiFontDialog()
+			{
+			}
+
+			const FontProperties& GuiFontDialog::GetSelectedFont()
+			{
+				return selectedFont;
+			}
+
+			void GuiFontDialog::SetSelectedFont(const FontProperties& value)
+			{
+				selectedFont = value;
+			}
+
+			Color GuiFontDialog::GetSelectedColor()
+			{
+				return selectedColor;
+			}
+
+			void GuiFontDialog::SetSelectedColor(Color value)
+			{
+				selectedColor = value;
+			}
+
+			bool GuiFontDialog::GetShowSelection()
+			{
+				return showSelection;
+			}
+
+			void GuiFontDialog::SetShowSelection(bool value)
+			{
+				showSelection = value;
+			}
+
+			bool GuiFontDialog::GetShowEffect()
+			{
+				return showEffect;
+			}
+
+			void GuiFontDialog::SetShowEffect(bool value)
+			{
+				showEffect = value;
+			}
+
+			bool GuiFontDialog::GetForceFontExist()
+			{
+				return forceFontExist;
+			}
+
+			void GuiFontDialog::SetForceFontExist(bool value)
+			{
+				forceFontExist = value;
+			}
+
+			bool GuiFontDialog::ShowDialog()
+			{
+				throw 0;
+			}
+
+/***********************************************************************
+GuiOpenFileDialog
+***********************************************************************/
+
+/***********************************************************************
+GuiSaveFileDialog
+***********************************************************************/
 		}
 	}
 }

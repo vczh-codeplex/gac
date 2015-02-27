@@ -51,6 +51,14 @@ Type List
 			F(presentation::INativeClipboardService)\
 			F(presentation::INativeScreenService)\
 			F(presentation::INativeInputService)\
+			F(presentation::INativeDialogService::MessageBoxButtonsInput)\
+			F(presentation::INativeDialogService::MessageBoxButtonsOutput)\
+			F(presentation::INativeDialogService::MessageBoxDefaultButton)\
+			F(presentation::INativeDialogService::MessageBoxIcons)\
+			F(presentation::INativeDialogService::MessageBoxModalOptions)\
+			F(presentation::INativeDialogService::ColorDialogCustomColorOptions)\
+			F(presentation::INativeDialogService::FileDialogTypes)\
+			F(presentation::INativeDialogService::FileDialogOptions)\
 			F(presentation::INativeController)\
 			F(presentation::GuiImageData)\
 			F(presentation::GuiTextData)\

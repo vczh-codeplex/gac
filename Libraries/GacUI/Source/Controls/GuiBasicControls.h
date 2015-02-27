@@ -665,6 +665,119 @@ Scrolls
 				/// <returns>The maximum possible position.</returns>
 				vint									GetMaxPosition();
 			};
+
+/***********************************************************************
+Dialogs
+***********************************************************************/
+
+			class GuiDialogBase : public GuiComponent, public Description<GuiDialogBase>
+			{
+			protected:
+				GuiInstanceRootObject*								rootObject = nullptr;
+
+				GuiWindow*											GetHostWindow();
+			public:
+				GuiDialogBase();
+				~GuiDialogBase();
+
+				void												Attach(GuiInstanceRootObject* _rootObject);
+				void												Detach(GuiInstanceRootObject* _rootObject);
+			};
+
+			class GuiMessageDialog : public GuiDialogBase, public Description<GuiMessageDialog>
+			{
+			protected:
+				INativeDialogService::MessageBoxButtonsInput		input = INativeDialogService::DisplayOK;
+				INativeDialogService::MessageBoxDefaultButton		defaultButton = INativeDialogService::DefaultFirst;
+				INativeDialogService::MessageBoxIcons				icon = INativeDialogService::IconNone;
+				INativeDialogService::MessageBoxModalOptions		modelOption = INativeDialogService::ModalWindow;
+				WString												text;
+				WString												title;
+
+			public:
+				GuiMessageDialog();
+				~GuiMessageDialog();
+
+				INativeDialogService::MessageBoxButtonsInput		GetInput();
+				void												SetInput(INativeDialogService::MessageBoxButtonsInput value);
+				INativeDialogService::MessageBoxDefaultButton		GetDefaultButton();
+				void												SetDefaultButton(INativeDialogService::MessageBoxDefaultButton value);
+				INativeDialogService::MessageBoxIcons				GetIcon();
+				void												SetIcon(INativeDialogService::MessageBoxIcons value);
+				INativeDialogService::MessageBoxModalOptions		GetModalOption();
+				void												SetModalOption(INativeDialogService::MessageBoxModalOptions value);
+				const WString&										GetText();
+				void												SetText(const WString& value);
+				const WString&										GetTitle();
+				void												SetTitle(const WString& value);
+
+				INativeDialogService::MessageBoxButtonsOutput		ShowDialog();
+			};
+
+			class GuiColorDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			{
+			protected:
+				bool												enabledCustomColor = true;
+				bool												openedCustomColor = false;
+				Color												selectedColor;
+				bool												showSelection = true;
+				collections::List<Color>							customColors;
+
+			public:
+				GuiColorDialog();
+				~GuiColorDialog();
+
+				bool												GetEnabledCustomColor();
+				void												SetEnabledCustomColor(bool value);
+				bool												GetOpenedCustomColor();
+				void												SetOpenedCustomColor(bool value);
+				Color												GetSelectedColor();
+				void												SetSelectedColor(Color value);
+				collections::List<Color>&							GetCustomColors();
+
+				bool												ShowDialog();
+			};
+
+			class GuiFontDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			{
+			protected:
+				FontProperties										selectedFont;
+				Color												selectedColor;
+				bool												showSelection = true;
+				bool												showEffect = true;
+				bool												forceFontExist = true;
+
+			public:
+				GuiFontDialog();
+				~GuiFontDialog();
+
+				const FontProperties&								GetSelectedFont();
+				void												SetSelectedFont(const FontProperties& value);
+				Color												GetSelectedColor();
+				void												SetSelectedColor(Color value);
+				bool												GetShowSelection();
+				void												SetShowSelection(bool value);
+				bool												GetShowEffect();
+				void												SetShowEffect(bool value);
+				bool												GetForceFontExist();
+				void												SetForceFontExist(bool value);
+
+				bool												ShowDialog();
+			};
+
+			class GuiOpenFileDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			{
+			public:
+				GuiOpenFileDialog();
+				~GuiOpenFileDialog();
+			};
+
+			class GuiSaveFileDialog : public GuiDialogBase, public Description<GuiColorDialog>
+			{
+			public:
+				GuiSaveFileDialog();
+				~GuiSaveFileDialog();
+			};
 			
 			namespace list
 			{
