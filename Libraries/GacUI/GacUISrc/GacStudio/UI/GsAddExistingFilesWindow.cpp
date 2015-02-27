@@ -30,9 +30,8 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	AddExistingFilesWindow::AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+	AddExistingFilesWindow::AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 	{
-		InitializeComponents(ViewModel, Action);
+		InitializeComponents(ViewModel, OperationModel, Action);
 	}
 }
-

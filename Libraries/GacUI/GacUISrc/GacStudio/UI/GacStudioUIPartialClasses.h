@@ -30,6 +30,8 @@ namespace vm
 	class ISolutionModel;
 	class IFileFactoryModel;
 	class IProjectFactoryModel;
+	class IStudioNewFileModel;
+	class IStudioAddExistingFilesModel;
 	class IStudioModel;
 }
 namespace ui
@@ -204,6 +206,30 @@ namespace vm
 		virtual vl::collections::LazyList<vl::Ptr<vm::IProjectFactoryModel>> GetChildren() = 0;
 	};
 
+	class IStudioNewFileModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioNewFileModel>
+	{
+	public:
+
+		virtual vl::Ptr<vm::IProjectFactoryModel> GetFileFilters() = 0;
+
+		virtual vl::Ptr<vm::IProjectFactoryModel> GetSelectedFileFilter() = 0;
+		virtual void SetSelectedFileFilter(vl::Ptr<vm::IProjectFactoryModel> value) = 0;
+
+		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetFilteredFileFactories() = 0;
+	};
+
+	class IStudioAddExistingFilesModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioAddExistingFilesModel>
+	{
+	public:
+
+		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetSelectedFiles() = 0;
+
+		virtual vl::WString GetCurrentFileName() = 0;
+		virtual void SetCurrentFileName(vl::WString value) = 0;
+
+		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetFilteredFileFactories() = 0;
+	};
+
 	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
 	{
 	public:
@@ -213,13 +239,6 @@ namespace vm
 		virtual vl::collections::LazyList<vl::Ptr<vm::IFileFactoryModel>> GetFileFactories() = 0;
 
 		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorFactoryModel>> GetEditorFactories() = 0;
-
-		virtual vl::Ptr<vm::IProjectFactoryModel> GetFileFilters() = 0;
-
-		virtual vl::Ptr<vm::IProjectFactoryModel> GetSelectedFileFilter() = 0;
-		virtual void SetSelectedFileFilter(vl::Ptr<vm::IProjectFactoryModel> value) = 0;
-
-		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetFilteredFileFactories() = 0;
 
 		virtual vl::Ptr<vm::ISolutionItemModel> GetRootSolutionItem() = 0;
 
@@ -235,6 +254,8 @@ namespace vm
 		virtual vl::WString GetWorkingDirectory() = 0;
 		vl::Event<void()> WorkingDirectoryChanged;
 
+		virtual vl::Ptr<vm::IStudioNewFileModel> CreateNewFileModel() = 0;
+		virtual vl::Ptr<vm::IStudioAddExistingFilesModel> CreateAddExistingFilesModel() = 0;
 		virtual void NotifySelectedSolutionItem(vl::Ptr<vm::ISolutionItemModel> solutionItem) = 0;
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory(vl::WString id) = 0;
@@ -299,6 +320,7 @@ namespace ui
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
 	private:
 		Ptr<vm::IStudioModel> ViewModel_;
+		Ptr<vm::IStudioAddExistingFilesModel> OperationModel_;
 		Ptr<vm::IAddFileItemAction> Action_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonAdd;
@@ -307,9 +329,10 @@ namespace ui
 		vl::presentation::controls::GuiButton* buttonRemove;
 		vl::presentation::controls::GuiBindableDataGrid* dataGridFiles;
 
-		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 		{
 			ViewModel_ = ViewModel;
+			OperationModel_ = OperationModel;
 			Action_ = Action;
 			if (InitializeFromResource())
 			{
@@ -322,6 +345,7 @@ namespace ui
 			else
 			{
 				ViewModel_ = 0;
+				OperationModel_ = 0;
 				Action_ = 0;
 			}
 		}
@@ -340,6 +364,11 @@ namespace ui
 		Ptr<vm::IStudioModel> GetViewModel()
 		{
 			return ViewModel_;
+		}
+
+		Ptr<vm::IStudioAddExistingFilesModel> GetOperationModel()
+		{
+			return OperationModel_;
 		}
 
 		Ptr<vm::IAddFileItemAction> GetAction()
@@ -437,6 +466,7 @@ namespace ui
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
 	private:
 		Ptr<vm::IStudioModel> ViewModel_;
+		Ptr<vm::IStudioNewFileModel> OperationModel_;
 		Ptr<vm::IAddFileItemAction> Action_;
 	protected:
 		vl::presentation::controls::GuiButton* buttonCancel;
@@ -446,9 +476,10 @@ namespace ui
 		vl::presentation::controls::GuiSinglelineTextBox* textBoxLocation;
 		vl::presentation::controls::GuiBindableTreeView* treeViewProjectTemplate;
 
-		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioNewFileModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 		{
 			ViewModel_ = ViewModel;
+			OperationModel_ = OperationModel;
 			Action_ = Action;
 			if (InitializeFromResource())
 			{
@@ -462,6 +493,7 @@ namespace ui
 			else
 			{
 				ViewModel_ = 0;
+				OperationModel_ = 0;
 				Action_ = 0;
 			}
 		}
@@ -481,6 +513,11 @@ namespace ui
 		Ptr<vm::IStudioModel> GetViewModel()
 		{
 			return ViewModel_;
+		}
+
+		Ptr<vm::IStudioNewFileModel> GetOperationModel()
+		{
+			return OperationModel_;
 		}
 
 		Ptr<vm::IAddFileItemAction> GetAction()
@@ -632,7 +669,9 @@ namespace vl
 			DECL_TYPE_INFO(vm::ISaveItemAction)
 			DECL_TYPE_INFO(vm::ISolutionItemModel)
 			DECL_TYPE_INFO(vm::ISolutionModel)
+			DECL_TYPE_INFO(vm::IStudioAddExistingFilesModel)
 			DECL_TYPE_INFO(vm::IStudioModel)
+			DECL_TYPE_INFO(vm::IStudioNewFileModel)
 			DECL_TYPE_INFO(vm::ITextTemplate)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::AddExistingFilesWindow)
@@ -692,7 +731,7 @@ namespace ui
 		void buttonRemove_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action);
+		AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action);
 	};
 }
 
@@ -720,9 +759,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	AddExistingFilesWindow::AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+	AddExistingFilesWindow::AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 	{
-		InitializeComponents(ViewModel, Action);
+		InitializeComponents(ViewModel, OperationModel, Action);
 	}
 }
 
@@ -862,7 +901,7 @@ namespace ui
 		void buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action);
+		NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioNewFileModel> OperationModel, Ptr<vm::IAddFileItemAction> Action);
 	};
 }
 
@@ -882,9 +921,9 @@ namespace ui
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
-	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action)
+	NewFileWindow::NewFileWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioNewFileModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 	{
-		InitializeComponents(ViewModel, Action);
+		InitializeComponents(ViewModel, OperationModel, Action);
 	}
 }
 

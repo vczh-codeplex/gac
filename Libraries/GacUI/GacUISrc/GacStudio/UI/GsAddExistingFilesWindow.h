@@ -26,7 +26,7 @@ namespace ui
 		void buttonRemove_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments);
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
-		AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IAddFileItemAction> Action);
+		AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action);
 	};
 }
 

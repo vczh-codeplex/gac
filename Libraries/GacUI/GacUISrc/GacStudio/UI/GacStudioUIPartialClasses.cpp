@@ -31,7 +31,9 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(vm::ISaveItemAction)
 			IMPL_CPP_TYPE_INFO(vm::ISolutionItemModel)
 			IMPL_CPP_TYPE_INFO(vm::ISolutionModel)
+			IMPL_CPP_TYPE_INFO(vm::IStudioAddExistingFilesModel)
 			IMPL_CPP_TYPE_INFO(vm::IStudioModel)
+			IMPL_CPP_TYPE_INFO(vm::IStudioNewFileModel)
 			IMPL_CPP_TYPE_INFO(vm::ITextTemplate)
 			IMPL_CPP_TYPE_INFO(ui::AboutWindow)
 			IMPL_CPP_TYPE_INFO(ui::AddExistingFilesWindow)
@@ -144,14 +146,18 @@ namespace vl
 				CLASS_MEMBER_METHOD(RemoveProject, { L"project" });
 			END_CLASS_MEMBER(vm::ISolutionModel)
 
+			BEGIN_CLASS_MEMBER(vm::IStudioAddExistingFilesModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectedFiles)
+				CLASS_MEMBER_PROPERTY_FAST(CurrentFileName)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FilteredFileFactories)
+			END_CLASS_MEMBER(vm::IStudioAddExistingFilesModel)
+
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorFactories)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFilters)
-				CLASS_MEMBER_PROPERTY_FAST(SelectedFileFilter)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(FilteredFileFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootSolutionItem)
 				CLASS_MEMBER_EVENT(OpenedSolutionChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(OpenedSolution, OpenedSolutionChanged)
@@ -161,6 +167,8 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(WorkingProject, WorkingProjectChanged)
 				CLASS_MEMBER_EVENT(WorkingDirectoryChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(WorkingDirectory, WorkingDirectoryChanged)
+				CLASS_MEMBER_METHOD(CreateNewFileModel, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(CreateAddExistingFilesModel, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(NotifySelectedSolutionItem, { L"solutionItem" });
 				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
@@ -178,6 +186,13 @@ namespace vl
 				CLASS_MEMBER_METHOD(ExecuteSaveItems, { L"saveItems" });
 			END_CLASS_MEMBER(vm::IStudioModel)
 
+			BEGIN_CLASS_MEMBER(vm::IStudioNewFileModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFilters)
+				CLASS_MEMBER_PROPERTY_FAST(SelectedFileFilter)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FilteredFileFactories)
+			END_CLASS_MEMBER(vm::IStudioNewFileModel)
+
 			BEGIN_CLASS_MEMBER(vm::ITextTemplate)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_METHOD(Generate, { L"macroEnvironment" });
@@ -192,7 +207,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(ui::AddExistingFilesWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(ui::AddExistingFilesWindow*(Ptr<vm::IStudioModel>, Ptr<vm::IAddFileItemAction>), { L"ViewModel" _ L"Action" })
+				CLASS_MEMBER_CONSTRUCTOR(ui::AddExistingFilesWindow*(Ptr<vm::IStudioModel>, Ptr<vm::IStudioAddExistingFilesModel>, Ptr<vm::IAddFileItemAction>), { L"ViewModel" _ L"OperationModel" _ L"Action" })
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonAdd_Clicked, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
@@ -200,6 +215,7 @@ namespace vl
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonRemove_Clicked, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OperationModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
 			END_CLASS_MEMBER(ui::AddExistingFilesWindow)
 
@@ -231,12 +247,13 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(ui::NewFileWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(ui::NewFileWindow*(Ptr<vm::IStudioModel>, Ptr<vm::IAddFileItemAction>), { L"ViewModel" _ L"Action" })
+				CLASS_MEMBER_CONSTRUCTOR(ui::NewFileWindow*(Ptr<vm::IStudioModel>, Ptr<vm::IStudioNewFileModel>, Ptr<vm::IAddFileItemAction>), { L"ViewModel" _ L"OperationModel" _ L"Action" })
 
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCancel_Clicked, vl::presentation::compositions::GuiEventArgs)
 				CLASS_MEMBER_GUIEVENT_HANDLER(buttonCreate_Clicked, vl::presentation::compositions::GuiEventArgs)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OperationModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
 			END_CLASS_MEMBER(ui::NewFileWindow)
 
@@ -284,7 +301,9 @@ namespace vl
 					ADD_TYPE_INFO(vm::ISaveItemAction)
 					ADD_TYPE_INFO(vm::ISolutionItemModel)
 					ADD_TYPE_INFO(vm::ISolutionModel)
+					ADD_TYPE_INFO(vm::IStudioAddExistingFilesModel)
 					ADD_TYPE_INFO(vm::IStudioModel)
+					ADD_TYPE_INFO(vm::IStudioNewFileModel)
 					ADD_TYPE_INFO(vm::ITextTemplate)
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::AddExistingFilesWindow)
