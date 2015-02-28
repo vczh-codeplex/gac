@@ -6,6 +6,10 @@
   <Window Text="Add Existing Files" ClientSize="x:480 y:320">
     <att.BoundsComposition-set PreferredMinSize="x:480 y:320"/>
 
+    <OpenFileDialog ref.Name="dialogOpen" Title="Add Existing Files">
+      <att.Options>FileDialogAllowMultipleSelection|FileDialogFileMustExist|FileDialogDereferenceLinks|FileDialogDirectoryMustExist</att.Options>
+    </OpenFileDialog>
+
     <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
       <att.Rows>
         <CellOption>composeType:MinSize</CellOption>
@@ -25,7 +29,7 @@
       </Cell>
 
       <Cell Site="row:1 column:0 columnSpan:5">
-        <BindableDataGrid ref.Name="dataGridFiles" Alt="F" HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false" ItemSource-eval="OperationModel.SelectedFiles">
+        <BindableDataGrid ref.Name="dataGridFiles" Alt="F" HorizontalAlwaysVisible="false" MultiSelect="true" VerticalAlwaysVisible="false" ItemSource-eval="OperationModel.SelectedFiles">
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
 
           <att.Columns>
@@ -42,6 +46,7 @@
       </Cell>
       <Cell Site="row:2 column:1">
         <Button ref.Name="buttonRemove" Text="Remove Selected Files" Alt="R" ev.Clicked="buttonRemove_Clicked">
+          <att.Enabled-bind><![CDATA[dataGridFiles.SelectedItems.Count > 0]]></att.Enabled-bind>
           <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
         </Button>
       </Cell>
