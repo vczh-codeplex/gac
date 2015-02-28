@@ -150,6 +150,9 @@ namespace vm
 		WString											GetCurrentFileName()override;
 		void											SetCurrentFileName(WString value)override;
 		Ptr<description::IValueObservableList>			GetFilteredFileFactories()override;
+
+		void											AddFiles(LazyList<WString> fileNames)override;
+		void											RemoveFiles(LazyList<vint32_t> indices)override;
 	};
 
 	class StudioModel : public Object, public virtual IStudioModel

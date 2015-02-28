@@ -236,6 +236,9 @@ namespace vm
 		virtual void SetCurrentFileName(vl::WString value) = 0;
 
 		virtual vl::Ptr<vl::reflection::description::IValueObservableList> GetFilteredFileFactories() = 0;
+
+		virtual void AddFiles(vl::collections::LazyList<vl::WString> fileNames) = 0;
+		virtual void RemoveFiles(vl::collections::LazyList<vl::vint32_t> indices) = 0;
 	};
 
 	class IStudioModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IStudioModel>
@@ -336,6 +339,7 @@ namespace ui
 		vl::presentation::controls::GuiButton* buttonOK;
 		vl::presentation::controls::GuiButton* buttonRemove;
 		vl::presentation::controls::GuiBindableDataGrid* dataGridFiles;
+		vl::presentation::controls::GuiOpenFileDialog* dialogOpen;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 		{
@@ -349,6 +353,7 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(buttonOK);
 				GUI_INSTANCE_REFERENCE(buttonRemove);
 				GUI_INSTANCE_REFERENCE(dataGridFiles);
+				GUI_INSTANCE_REFERENCE(dialogOpen);
 			}
 			else
 			{
@@ -366,6 +371,7 @@ namespace ui
 			,buttonOK(0)
 			,buttonRemove(0)
 			,dataGridFiles(0)
+			,dialogOpen(0)
 		{
 		}
 

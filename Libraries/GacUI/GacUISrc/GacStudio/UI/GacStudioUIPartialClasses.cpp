@@ -152,6 +152,8 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectedFiles)
 				CLASS_MEMBER_PROPERTY_FAST(CurrentFileName)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FilteredFileFactories)
+				CLASS_MEMBER_METHOD(AddFiles, { L"fileNames" });
+				CLASS_MEMBER_METHOD(RemoveFiles, { L"indices" });
 			END_CLASS_MEMBER(vm::IStudioAddExistingFilesModel)
 
 			BEGIN_CLASS_MEMBER(vm::IStudioModel)

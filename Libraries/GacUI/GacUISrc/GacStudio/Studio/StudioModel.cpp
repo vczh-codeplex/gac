@@ -377,6 +377,24 @@ StudioAddExistingFilesModel
 		return filteredFileFactories.GetWrapper();
 	}
 
+	void StudioAddExistingFilesModel::AddFiles(LazyList<WString> fileNames)
+	{
+		FOREACH(WString, fileName, fileNames)
+		{
+			auto fileRef = MakePtr<StudioFileReference>();
+			fileRef->fileName = fileName;
+			selectedFiles.Add(fileRef);
+		}
+	}
+
+	void StudioAddExistingFilesModel::RemoveFiles(LazyList<vint32_t> indices)
+	{
+		FOREACH(vint, index, From(indices).OrderBy([](int a, int b){return b - a;}))
+		{
+			selectedFiles.RemoveAt(index);
+		}
+	}
+
 /***********************************************************************
 StudioModel
 ***********************************************************************/

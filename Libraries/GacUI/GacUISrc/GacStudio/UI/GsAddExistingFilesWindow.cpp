@@ -14,6 +14,10 @@ namespace ui
 
 	void AddExistingFilesWindow::buttonAdd_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		if (dialogOpen->ShowDialog())
+		{
+			GetOperationModel()->AddFiles(dialogOpen->GetFileNames());
+		}
 	}
 
 	void AddExistingFilesWindow::buttonCancel_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
@@ -26,6 +30,7 @@ namespace ui
 
 	void AddExistingFilesWindow::buttonRemove_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
+		GetOperationModel()->RemoveFiles(dataGridFiles->GetSelectedItems());
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER

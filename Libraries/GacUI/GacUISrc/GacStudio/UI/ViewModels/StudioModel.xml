@@ -35,6 +35,13 @@
     <Property Name="SelectedFiles" Type="system::ObservableList^" Readonly="true"/>
     <Property Name="CurrentFileName" Type="string"/>
     <Property Name="FilteredFileFactories" Type="system::ObservableList^" Readonly="true"/>
+
+    <Method Name="AddFiles" Type="void">
+      <Argument Name="fileNames" Type="string{}"/>
+    </Method>
+    <Method Name="RemoveFiles" Type="void">
+      <Argument Name="indices" Type="int{}"/>
+    </Method>
   </Interface>
   
   <Interface ref.Class="vm::IStudioModel">
