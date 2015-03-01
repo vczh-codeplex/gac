@@ -1633,7 +1633,7 @@ Type Declaration
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IDataProvider*), {L"styleProvider" _ L"dataProvider"})
 				CLASS_MEMBER_CONSTRUCTOR(GuiVirtualDataGrid*(GuiVirtualListView::IStyleProvider* _ list::IStructuredDataProvider*), {L"styleProvider" _ L"dataProvider"})
 
-				CLASS_MEMBER_PROPERTY_EVENT_FAST(SelectedCell, SelectedCellChanged)
+				CLASS_MEMBER_PROPERTY_GUIEVENT_FAST(SelectedCell)
 
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DataProvider)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(StructuredDataProvider)
