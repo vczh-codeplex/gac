@@ -25,13 +25,11 @@ namespace ui
 	void NewFileWindow::buttonCreate_Clicked(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiEventArgs& arguments)
 	{
 		auto model = GetViewModel();
-		auto workingProject = model->GetWorkingProject();
 		auto fileFactory = UnboxValue<Ptr<IFileFactoryModel>>(listViewFileTemplate->GetSelectedItem());
 		if (model->SafeExecute([=]()
 			{
 				model->AddNewFile(
 					GetAction(),
-					workingProject,
 					fileFactory,
 					textBoxLocation->GetText(),
 					textBoxFileName->GetText()

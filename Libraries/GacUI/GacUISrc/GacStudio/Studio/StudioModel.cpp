@@ -642,9 +642,9 @@ StudioModel
 		return projectItem;
 	}
 
-	vl::Ptr<vm::IFileModel> StudioModel::AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName)
+	vl::Ptr<vm::IFileModel> StudioModel::AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName)
 	{
-		if (!project || !fileFactory)
+		if (!fileFactory)
 		{
 			throw StudioException(L"Failed to add a file.", true);
 		}
@@ -666,6 +666,10 @@ StudioModel
 		ExecuteSaveItems(action->AddFile(fileItem));
 
 		return fileItem;
+	}
+
+	void StudioModel::AddExistingFiles(vl::Ptr<vm::IAddFileItemAction> action, vl::collections::LazyList<vl::Ptr<vm::StudioFileReference>> files)
+	{
 	}
 
 	void StudioModel::RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName)

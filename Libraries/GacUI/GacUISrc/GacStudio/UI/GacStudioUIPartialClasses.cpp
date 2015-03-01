@@ -185,7 +185,8 @@ namespace vl
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(AddNewProject, { L"createNewSolution" _ L"projectFactory" _ L"projectName" _ L"solutionDirectory" _ L"solutionName" });
-				CLASS_MEMBER_METHOD(AddNewFile, { L"action" _ L"project" _ L"fileFactory" _ L"fileDirectory" _ L"fileName" });
+				CLASS_MEMBER_METHOD(AddNewFile, { L"action" _ L"fileFactory" _ L"fileDirectory" _ L"fileName" });
+				CLASS_MEMBER_METHOD(AddExistingFiles, { L"action" _ L"files" });
 				CLASS_MEMBER_METHOD(RenameFile, { L"action" _ L"solutionItem" _ L"newName" });
 				CLASS_MEMBER_METHOD(RemoveFile, { L"action" _ L"solutionItem" });
 				CLASS_MEMBER_METHOD(OpenBrowser, { L"url" });

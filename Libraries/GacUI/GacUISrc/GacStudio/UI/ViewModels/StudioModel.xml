@@ -91,10 +91,13 @@
     </Method>
     <Method Name="AddNewFile" Type="vm::IFileModel^">
       <Argument Name="action" Type="vm::IAddFileItemAction^"/>
-      <Argument Name="project" Type="vm::IProjectModel^"/>
       <Argument Name="fileFactory" Type="vm::IFileFactoryModel^"/>
       <Argument Name="fileDirectory" Type="string"/>
       <Argument Name="fileName" Type="string"/>
+    </Method>
+    <Method Name="AddExistingFiles" Type="void">
+      <Argument Name="action" Type="vm::IAddFileItemAction^"/>
+      <Argument Name="files" Type="vm::StudioFileReference^{}"/>
     </Method>
     <Method Name="RenameFile" Type="void">
       <Argument Name="action" Type="vm::IRenameItemAction^"/>

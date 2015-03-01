@@ -192,7 +192,8 @@ namespace vm
 		void											NewSolution(WString filePath)override;
 		void											CloseSolution()override;
 		vl::Ptr<vm::IProjectModel>						AddNewProject(bool createNewSolution, vl::Ptr<vm::IProjectFactoryModel> projectFactory, vl::WString projectName, vl::WString solutionDirectory, vl::WString solutionName)override;
-		vl::Ptr<vm::IFileModel>							AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IProjectModel> project, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName)override;
+		vl::Ptr<vm::IFileModel>							AddNewFile(vl::Ptr<vm::IAddFileItemAction> action, vl::Ptr<vm::IFileFactoryModel> fileFactory, vl::WString fileDirectory, vl::WString fileName)override;
+		void											AddExistingFiles(vl::Ptr<vm::IAddFileItemAction> action, vl::collections::LazyList<vl::Ptr<vm::StudioFileReference>> files)override;
 		void											RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName)override;
 		void											RemoveFile(vl::Ptr<vm::IRemoveItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem)override;
 
