@@ -11512,6 +11512,12 @@ Enumerable Wrappers
 				return GetLazyList<T>(Ptr<IValueReadonlyList>(value));
 			}
 
+			template<typename T>
+			collections::LazyList<T> GetLazyList(Ptr<IValueObservableList> value)
+			{
+				return GetLazyList<T>(Ptr<IValueReadonlyList>(value));
+			}
+
 			template<typename K, typename V>
 			collections::LazyList<collections::Pair<K, V>> GetLazyList(Ptr<IValueReadonlyDictionary> value)
 			{
