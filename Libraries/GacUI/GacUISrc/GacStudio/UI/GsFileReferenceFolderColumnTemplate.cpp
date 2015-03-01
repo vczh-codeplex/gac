@@ -19,4 +19,3 @@ namespace ui
 		InitializeComponents();
 	}
 }
-

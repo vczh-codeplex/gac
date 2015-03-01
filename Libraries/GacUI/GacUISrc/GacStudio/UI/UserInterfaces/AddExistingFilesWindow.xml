@@ -3,9 +3,29 @@
   <Instance name="FileReferenceNameColumnTemplateResource">
     <Instance ref.Class="ui::FileReferenceNameColumnTemplate">
       <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
-        <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
-          <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        </BoundsComposition>
+        <Table MinSizeLimitation="LimitToElementAndChildren" AlignmentToParent="left:5 top:2 right:5 bottom:2">
+          <att.Rows>
+            <CellOption>composeType:Percentage percentage:0.5</CellOption>
+            <CellOption>composeType:MinSize</CellOption>
+            <CellOption>composeType:Percentage percentage:0.5</CellOption>
+          </att.Rows>
+
+          <att.Columns>
+            <CellOption>composeType:MinSize</CellOption>
+            <CellOption>composeType:Percentage percentage:1.0</CellOption>
+          </att.Columns>
+
+          <Cell Site="row:1 column:0" PreferredMinSize="x:24">
+            <ImageFrame>
+              <att.Image-bind>(cast (vm::StudioFileReference^) self.RowValue).fileFactory.SmallImage.Image ?? null</att.Image-bind>
+              <att.FrameIndex-bind>(cast (vm::StudioFileReference^) self.RowValue).fileFactory.SmallImage.FrameIndex ?? 0</att.FrameIndex-bind>
+            </ImageFrame>
+          </Cell>
+
+          <Cell Site="row:0 column:1 rowSpan:3">
+            <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+          </Cell>
+        </Table>
       </GridVisualizerTemplate>
     </Instance>
   </Instance>
@@ -68,8 +88,8 @@
               <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
 
               <att.Columns>
-                <BindableDataColumn Text="File Name" Size="120" ValueProperty="name" VisualizerTemplates="ui::FileReferenceNameColumnTemplate"/>
-                <BindableDataColumn Text="File Name" Size="180" ValueProperty="folder" VisualizerTemplates="ui::FileReferenceFolderColumnTemplate"/>
+                <BindableDataColumn Text="File Name" Size="160" ValueProperty="name" VisualizerTemplates="ui::FileReferenceNameColumnTemplate"/>
+                <BindableDataColumn Text="Folder" Size="180" ValueProperty="folder" VisualizerTemplates="ui::FileReferenceFolderColumnTemplate"/>
                 <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory" VisualizerTemplates="ui::FileReferenceFactoryColumnTemplate"/>
               </att.Columns>
             </BindableDataGrid>
