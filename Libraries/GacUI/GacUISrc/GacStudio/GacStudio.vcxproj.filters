@@ -93,6 +93,9 @@
     <ClCompile Include="UI\GsFileReferenceFolderColumnTemplate.cpp">
       <Filter>UITemplates</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GsFileReferenceFactoryEditorTemplate.cpp">
+      <Filter>UITemplates</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -147,6 +150,9 @@
       <Filter>UITemplates</Filter>
     </ClInclude>
     <ClInclude Include="UI\GsFileReferenceFolderColumnTemplate.h">
+      <Filter>UITemplates</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsFileReferenceFactoryEditorTemplate.h">
       <Filter>UITemplates</Filter>
     </ClInclude>
   </ItemGroup>

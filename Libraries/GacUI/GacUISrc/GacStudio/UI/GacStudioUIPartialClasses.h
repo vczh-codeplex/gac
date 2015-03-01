@@ -40,6 +40,7 @@ namespace ui
 	class AboutWindow;
 	class AddExistingFilesWindow;
 	class FileReferenceFactoryColumnTemplate;
+	class FileReferenceFactoryEditorTemplate;
 	class FileReferenceFolderColumnTemplate;
 	class FileReferenceNameColumnTemplate;
 	class MainWindow;
@@ -344,6 +345,7 @@ namespace ui
 		vl::presentation::controls::GuiButton* buttonRemove;
 		vl::presentation::controls::GuiBindableDataGrid* dataGridFiles;
 		vl::presentation::controls::GuiOpenFileDialog* dialogOpen;
+		vl::presentation::controls::GuiWindow* self;
 
 		void InitializeComponents(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 		{
@@ -358,6 +360,7 @@ namespace ui
 				GUI_INSTANCE_REFERENCE(buttonRemove);
 				GUI_INSTANCE_REFERENCE(dataGridFiles);
 				GUI_INSTANCE_REFERENCE(dialogOpen);
+				GUI_INSTANCE_REFERENCE(self);
 			}
 			else
 			{
@@ -376,6 +379,7 @@ namespace ui
 			,buttonRemove(0)
 			,dataGridFiles(0)
 			,dialogOpen(0)
+			,self(0)
 		{
 		}
 
@@ -418,6 +422,43 @@ namespace ui
 			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>(L"ui::FileReferenceFactoryColumnTemplate")
 			,self(0)
 		{
+		}
+	};
+
+	template<typename TImpl>
+	class FileReferenceFactoryEditorTemplate_ : public vl::presentation::templates::GuiGridEditorTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridEditorTemplate>, public vl::reflection::Description<TImpl>
+	{
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
+	private:
+		Ptr<vm::IStudioAddExistingFilesModel> OperationModel_;
+	protected:
+		vl::presentation::controls::GuiComboBoxListControl* comboBoxFactory;
+		vl::presentation::templates::GuiGridEditorTemplate* self;
+
+		void InitializeComponents(Ptr<vm::IStudioAddExistingFilesModel> OperationModel)
+		{
+			OperationModel_ = OperationModel;
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(comboBoxFactory);
+				GUI_INSTANCE_REFERENCE(self);
+			}
+			else
+			{
+				OperationModel_ = 0;
+			}
+		}
+	public:
+		FileReferenceFactoryEditorTemplate_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridEditorTemplate>(L"ui::FileReferenceFactoryEditorTemplate")
+			,comboBoxFactory(0)
+			,self(0)
+		{
+		}
+
+		Ptr<vm::IStudioAddExistingFilesModel> GetOperationModel()
+		{
+			return OperationModel_;
 		}
 	};
 
@@ -773,6 +814,7 @@ namespace vl
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::AddExistingFilesWindow)
 			DECL_TYPE_INFO(ui::FileReferenceFactoryColumnTemplate)
+			DECL_TYPE_INFO(ui::FileReferenceFactoryEditorTemplate)
 			DECL_TYPE_INFO(ui::FileReferenceFolderColumnTemplate)
 			DECL_TYPE_INFO(ui::FileReferenceNameColumnTemplate)
 			DECL_TYPE_INFO(ui::MainWindow)
@@ -893,6 +935,37 @@ namespace ui
 	FileReferenceFactoryColumnTemplate::FileReferenceFactoryColumnTemplate()
 	{
 		InitializeComponents();
+	}
+}
+
+
+GsFileReferenceFactoryEditorTemplate.h :
+namespace ui
+{
+	class FileReferenceFactoryEditorTemplate : public ui::FileReferenceFactoryEditorTemplate_<ui::FileReferenceFactoryEditorTemplate>
+	{
+		friend class ui::FileReferenceFactoryEditorTemplate_<ui::FileReferenceFactoryEditorTemplate>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::FileReferenceFactoryEditorTemplate>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		FileReferenceFactoryEditorTemplate(Ptr<vm::IStudioAddExistingFilesModel> OperationModel);
+	};
+}
+
+
+GsFileReferenceFactoryEditorTemplate.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceFactoryEditorTemplate::FileReferenceFactoryEditorTemplate(Ptr<vm::IStudioAddExistingFilesModel> OperationModel)
+	{
+		InitializeComponents(OperationModel);
 	}
 }
 

@@ -179,13 +179,29 @@ GuiWorkflowGlobalContext
 				{
 					globalContext = new WfRuntimeGlobalContext(assembly);
 				
-					LoadFunction<void()>(globalContext, L"<initialize>")();
+					try
+					{
+						LoadFunction<void()>(globalContext, L"<initialize>")();
+					}
+					catch (const TypeDescriptorException& ex)
+					{
+						env->scope->errors.Add(L"Workflow Script Exception: " + ex.Message());
+					}
+
 					Workflow_SetVariablesForReferenceValues(globalContext, env);
 					{
 						vint index = assembly->variableNames.IndexOf(L"<this>");
 						globalContext->globalVariables->variables[index] = env->scope->rootInstance;
 					}
-					LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
+
+					try
+					{
+						LoadFunction<void()>(globalContext, L"<initialize-data-binding>")();
+					}
+					catch (const TypeDescriptorException& ex)
+					{
+						env->scope->errors.Add(L"Workflow Script Exception: " + ex.Message());
+					}
 				}
 			}
 		};
@@ -300,7 +316,15 @@ GuiEvalInstanceBinder
 					{
 						auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
-						LoadFunction<void()>(globalContext, L"<initialize>")();
+						try
+						{
+							LoadFunction<void()>(globalContext, L"<initialize>")();
+						}
+						catch (const TypeDescriptorException& ex)
+						{
+							env->scope->errors.Add(L"Workflow Script Exception: " + ex.Message());
+						}
+
 						Workflow_SetVariablesForReferenceValues(globalContext, env);
 						vint variableIndex = assembly->variableNames.IndexOf(L"<initialize-data-binding>");
 						auto variable = globalContext->globalVariables->variables[variableIndex];
@@ -368,7 +392,15 @@ GuiEvalInstanceEventBinder
 					{
 						auto globalContext = MakePtr<WfRuntimeGlobalContext>(assembly);
 				
-						LoadFunction<void()>(globalContext, L"<initialize>")();
+						try
+						{
+							LoadFunction<void()>(globalContext, L"<initialize>")();
+						}
+						catch (const TypeDescriptorException& ex)
+						{
+							env->scope->errors.Add(L"Workflow Script Exception: " + ex.Message());
+						}
+
 						Workflow_SetVariablesForReferenceValues(globalContext, env);
 						auto eventHandler = LoadFunction(globalContext, L"<event-handler>");
 						handler = BoxValue(eventHandler);

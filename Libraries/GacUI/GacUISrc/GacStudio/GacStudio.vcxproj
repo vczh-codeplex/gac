@@ -184,6 +184,7 @@
     <ClCompile Include="UI\GsAboutWindow.cpp" />
     <ClCompile Include="UI\GsAddExistingFilesWindow.cpp" />
     <ClCompile Include="UI\GsFileReferenceFactoryColumnTemplate.cpp" />
+    <ClCompile Include="UI\GsFileReferenceFactoryEditorTemplate.cpp" />
     <ClCompile Include="UI\GsFileReferenceFolderColumnTemplate.cpp" />
     <ClCompile Include="UI\GsFileReferenceNameColumnTemplate.cpp" />
     <ClCompile Include="UI\GsMainWindow.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="UI\GsAboutWindow.h" />
     <ClInclude Include="UI\GsAddExistingFilesWindow.h" />
     <ClInclude Include="UI\GsFileReferenceFactoryColumnTemplate.h" />
+    <ClInclude Include="UI\GsFileReferenceFactoryEditorTemplate.h" />
     <ClInclude Include="UI\GsFileReferenceFolderColumnTemplate.h" />
     <ClInclude Include="UI\GsFileReferenceNameColumnTemplate.h" />
     <ClInclude Include="UI\GsMainWindow.h" />
