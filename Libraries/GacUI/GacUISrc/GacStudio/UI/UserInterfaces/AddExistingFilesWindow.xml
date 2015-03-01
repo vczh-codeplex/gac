@@ -1,65 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Instance ref.Class="ui::AddExistingFilesWindow">
-  <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
-  <ref.Parameter Name="OperationModel" Class="vm::IStudioAddExistingFilesModel"/>
-  <ref.Parameter Name="Action" Class="vm::IAddFileItemAction"/>
-  <Window Text="Add Existing Files" ClientSize="x:480 y:320">
-    <att.BoundsComposition-set PreferredMinSize="x:480 y:320"/>
+<Folder>
+  <Instance name="AddExistingFilesWindowResource">
+    <Instance ref.Class="ui::AddExistingFilesWindow">
+      <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
+      <ref.Parameter Name="OperationModel" Class="vm::IStudioAddExistingFilesModel"/>
+      <ref.Parameter Name="Action" Class="vm::IAddFileItemAction"/>
+      <Window Text="Add Existing Files" ClientSize="x:480 y:320">
+        <att.BoundsComposition-set PreferredMinSize="x:480 y:320"/>
 
-    <OpenFileDialog ref.Name="dialogOpen" Title="Add Existing Files">
-      <att.Options>FileDialogAllowMultipleSelection|FileDialogFileMustExist|FileDialogDereferenceLinks|FileDialogDirectoryMustExist</att.Options>
-    </OpenFileDialog>
+        <OpenFileDialog ref.Name="dialogOpen" Title="Add Existing Files">
+          <att.Options>FileDialogAllowMultipleSelection|FileDialogFileMustExist|FileDialogDereferenceLinks|FileDialogDirectoryMustExist</att.Options>
+        </OpenFileDialog>
 
-    <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
-      <att.Rows>
-        <CellOption>composeType:MinSize</CellOption>
-        <CellOption>composeType:Percentage percentage:1.0</CellOption>
-        <CellOption>composeType:MinSize</CellOption>
-      </att.Rows>
-      <att.Columns>
-        <CellOption>composeType:MinSize</CellOption>
-        <CellOption>composeType:MinSize</CellOption>
-        <CellOption>composeType:Percentage percentage:1.0</CellOption>
-        <CellOption>composeType:MinSize</CellOption>
-        <CellOption>composeType:MinSize</CellOption>
-      </att.Columns>
-
-      <Cell Site="row:0 column:0" Margin="left:4 top:4 right:4 bottom:4">
-        <Label Text="Select Files to Add:"/>
-      </Cell>
-
-      <Cell Site="row:1 column:0 columnSpan:5">
-        <BindableDataGrid ref.Name="dataGridFiles" Alt="F" HorizontalAlwaysVisible="false" MultiSelect="true" VerticalAlwaysVisible="false" ItemSource-eval="OperationModel.SelectedFiles">
-          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
-
+        <Table AlignmentToParent="left:0 top:0 right:0 bottom:0" CellPadding="5">
+          <att.Rows>
+            <CellOption>composeType:MinSize</CellOption>
+            <CellOption>composeType:Percentage percentage:1.0</CellOption>
+            <CellOption>composeType:MinSize</CellOption>
+          </att.Rows>
           <att.Columns>
-            <BindableDataColumn Text="File Name" Size="300" ValueProperty="fileName"/>
-            <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory"/>
+            <CellOption>composeType:MinSize</CellOption>
+            <CellOption>composeType:MinSize</CellOption>
+            <CellOption>composeType:Percentage percentage:1.0</CellOption>
+            <CellOption>composeType:MinSize</CellOption>
+            <CellOption>composeType:MinSize</CellOption>
           </att.Columns>
-        </BindableDataGrid>
-      </Cell>
 
-      <Cell Site="row:2 column:0">
-        <Button ref.Name="buttonAdd" Text="Add Files ..." Alt="A" ev.Clicked="buttonAdd_Clicked">
-          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
-        </Button>
-      </Cell>
-      <Cell Site="row:2 column:1">
-        <Button ref.Name="buttonRemove" Text="Remove Selected Files" Alt="R" ev.Clicked="buttonRemove_Clicked">
-          <att.Enabled-bind><![CDATA[dataGridFiles.SelectedItems.Count > 0]]></att.Enabled-bind>
-          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
-        </Button>
-      </Cell>
-      <Cell Site="row:2 column:3">
-        <Button ref.Name="buttonOK" Text="OK" Alt="O" ev.Clicked="buttonOK_Clicked">
-          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
-        </Button>
-      </Cell>
-      <Cell Site="row:2 column:4">
-        <Button ref.Name="buttonCancel" Text="Cancel" Alt="X" ev.Clicked="buttonCancel_Clicked">
-          <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
-        </Button>
-      </Cell>
-    </Table>
-  </Window>
-</Instance>
+          <Cell Site="row:0 column:0" Margin="left:4 top:4 right:4 bottom:4">
+            <Label Text="Select Files to Add:"/>
+          </Cell>
+
+          <Cell Site="row:1 column:0 columnSpan:5">
+            <BindableDataGrid ref.Name="dataGridFiles" Alt="F" HorizontalAlwaysVisible="false" MultiSelect="true" VerticalAlwaysVisible="false" ItemSource-eval="OperationModel.SelectedFiles">
+              <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
+
+              <att.Columns>
+                <BindableDataColumn Text="File Name" Size="300" ValueProperty="fileName"/>
+                <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory"/>
+              </att.Columns>
+            </BindableDataGrid>
+          </Cell>
+
+          <Cell Site="row:2 column:0">
+            <Button ref.Name="buttonAdd" Text="Add Files ..." Alt="A" ev.Clicked="buttonAdd_Clicked">
+              <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+            </Button>
+          </Cell>
+          <Cell Site="row:2 column:1">
+            <Button ref.Name="buttonRemove" Text="Remove Selected Files" Alt="R" ev.Clicked="buttonRemove_Clicked">
+              <att.Enabled-bind><![CDATA[dataGridFiles.SelectedItems.Count > 0]]></att.Enabled-bind>
+              <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+            </Button>
+          </Cell>
+          <Cell Site="row:2 column:3">
+            <Button ref.Name="buttonOK" Text="OK" Alt="O" ev.Clicked="buttonOK_Clicked">
+              <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+            </Button>
+          </Cell>
+          <Cell Site="row:2 column:4">
+            <Button ref.Name="buttonCancel" Text="Cancel" Alt="X" ev.Clicked="buttonCancel_Clicked">
+              <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0" PreferredMinSize="x:100 y:24"/>
+            </Button>
+          </Cell>
+        </Table>
+      </Window>
+    </Instance>
+  </Instance>
+
+</Folder>
