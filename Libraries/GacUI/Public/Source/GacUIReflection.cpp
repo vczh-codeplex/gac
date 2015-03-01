@@ -12259,7 +12259,7 @@ Type Declaration
 				CLASS_MEMBER_METHOD(RemoveBindableColumn, { L"column" })
 				CLASS_MEMBER_METHOD(ClearBindableColumns, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(GetBindableColumn, { L"index" })
-				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedRowValue, SelectionCellChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedRowValue, SelectedCellChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(SelectedCellValue, SelectedCellChanged)
 			END_CLASS_MEMBER(GuiBindableDataGrid)
 
