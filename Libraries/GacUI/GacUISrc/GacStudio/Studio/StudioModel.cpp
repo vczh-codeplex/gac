@@ -670,6 +670,21 @@ StudioModel
 
 	void StudioModel::AddExistingFiles(vl::Ptr<vm::IAddFileItemAction> action, vl::collections::LazyList<vl::Ptr<vm::StudioFileReference>> files)
 	{
+		ExecuteSaveItems(
+			From(files)
+				.Where([=](Ptr<StudioFileReference> fileRef)
+				{
+					return fileRef->fileFactory;
+				})
+				.Select([=](Ptr<StudioFileReference> fileRef)
+				{
+					return MakePtr<FileItem>(this, fileRef->fileFactory, (FilePath(fileRef->folder) / fileRef->name).GetFullPath());
+				})
+				.SelectMany([=](Ptr<FileItem> fileItem)
+				{
+					return action->AddFile(fileItem);
+				})
+				.Distinct());
 	}
 
 	void StudioModel::RenameFile(vl::Ptr<vm::IRenameItemAction> action, vl::Ptr<vm::ISolutionItemModel> solutionItem, vl::WString newName)
