@@ -348,6 +348,24 @@ StudioNewFileModel
 StudioAddExistingFilesModel
 ***********************************************************************/
 
+	void StudioAddExistingFilesModel::GetAcceptableFileFactories(const WString& fileName, list::ObservableList<Ptr<IFileFactoryModel>>& fileFactories)
+	{
+		auto normalized = wupper(fileName);
+		CopyFrom(
+			fileFactories,
+			From(studioModel->GetFileFactories())
+				.Where([=](Ptr<IFileFactoryModel> factory)
+				{
+					auto ext = wupper(factory->GetDefaultFileExt());
+					return normalized.Length() >= ext.Length() && normalized.Right(ext.Length()) == ext;
+				})
+				.OrderBy([](Ptr<IFileFactoryModel> a, Ptr<IFileFactoryModel> b)
+				{
+					return b->GetDefaultFileExt().Length() - a->GetDefaultFileExt().Length();
+				})
+			);
+	}
+
 	StudioAddExistingFilesModel::StudioAddExistingFilesModel(IStudioModel* _studioModel)
 		:studioModel(_studioModel)
 	{
@@ -370,6 +388,7 @@ StudioAddExistingFilesModel
 	void StudioAddExistingFilesModel::SetCurrentFileName(WString value)
 	{
 		currentFileName = value;
+		GetAcceptableFileFactories(currentFileName, filteredFileFactories);
 	}
 
 	Ptr<description::IValueObservableList> StudioAddExistingFilesModel::GetFilteredFileFactories()
@@ -381,8 +400,15 @@ StudioAddExistingFilesModel
 	{
 		FOREACH(WString, fileName, fileNames)
 		{
+			list::ObservableList<Ptr<IFileFactoryModel>> fileFactories;
+			GetAcceptableFileFactories(fileName, fileFactories);
+			FilePath filePath = fileName;
+
 			auto fileRef = MakePtr<StudioFileReference>();
-			fileRef->fileName = fileName;
+			fileRef->name = filePath.GetName();
+			fileRef->folder = filePath.GetFolder().GetFullPath();
+			fileRef->fileFactory = From(fileFactories).First(nullptr);
+
 			selectedFiles.Add(fileRef);
 		}
 	}

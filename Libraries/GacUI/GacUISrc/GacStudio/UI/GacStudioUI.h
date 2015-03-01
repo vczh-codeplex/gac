@@ -13,6 +13,9 @@ DO NOT MODIFY
 
 #include "GsAboutWindow.h"
 #include "GsAddExistingFilesWindow.h"
+#include "GsFileReferenceFactoryColumnTemplate.h"
+#include "GsFileReferenceFolderColumnTemplate.h"
+#include "GsFileReferenceNameColumnTemplate.h"
 #include "GsMainWindow.h"
 #include "GsNewFileWindow.h"
 #include "GsNewProjectWindow.h"

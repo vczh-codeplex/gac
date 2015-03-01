@@ -1,5 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Folder>
+  <Instance name="FileReferenceNameColumnTemplateResource">
+    <Instance ref.Class="ui::FileReferenceNameColumnTemplate">
+      <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
+        <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
+          <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        </BoundsComposition>
+      </GridVisualizerTemplate>
+    </Instance>
+  </Instance>
+  
+  <Instance name="FileReferenceFolderColumnTemplateResource">
+    <Instance ref.Class="ui::FileReferenceFolderColumnTemplate">
+      <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
+        <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
+          <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        </BoundsComposition>
+      </GridVisualizerTemplate>
+    </Instance>
+  </Instance>
+  
+  <Instance name="FileReferenceFactoryColumnTemplateResource">
+    <Instance ref.Class="ui::FileReferenceFactoryColumnTemplate">
+      <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
+        <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
+          <SolidLabel Ellipse="true" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <att.Text-bind>(cast (vm::IFileFactoryModel^) self.CellValue).Name ?? "Not Recognized"</att.Text-bind>
+            <att.Color-bind>cast (presentation::Color) ((cast (vm::IFileFactoryModel^) self.CellValue) is null ? "#AAAAAA" : "#000000")</att.Color-bind>
+          </SolidLabel>
+        </BoundsComposition>
+      </GridVisualizerTemplate>
+    </Instance>
+  </Instance>
+  
   <Instance name="AddExistingFilesWindowResource">
     <Instance ref.Class="ui::AddExistingFilesWindow">
       <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
@@ -35,8 +68,9 @@
               <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
 
               <att.Columns>
-                <BindableDataColumn Text="File Name" Size="300" ValueProperty="fileName"/>
-                <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory"/>
+                <BindableDataColumn Text="File Name" Size="120" ValueProperty="name" VisualizerTemplates="ui::FileReferenceNameColumnTemplate"/>
+                <BindableDataColumn Text="File Name" Size="180" ValueProperty="folder" VisualizerTemplates="ui::FileReferenceFolderColumnTemplate"/>
+                <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory" VisualizerTemplates="ui::FileReferenceFactoryColumnTemplate"/>
               </att.Columns>
             </BindableDataGrid>
           </Cell>
@@ -66,5 +100,4 @@
       </Window>
     </Instance>
   </Instance>
-
 </Folder>

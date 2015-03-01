@@ -27,7 +27,8 @@
   </Interface>
   
   <Class ref.Class="vm::StudioFileReference">
-    <Property Name="fileName" Type="string"/>
+    <Property Name="name" Type="string"/>
+    <Property Name="folder" Type="string"/>
     <Property Name="fileFactory" Type="vm::IFileFactoryModel^"/>
   </Class>
 

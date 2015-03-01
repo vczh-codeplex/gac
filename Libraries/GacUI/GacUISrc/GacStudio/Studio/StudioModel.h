@@ -142,6 +142,7 @@ namespace vm
 		list::ObservableList<Ptr<StudioFileReference>>	selectedFiles;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 
+		void											GetAcceptableFileFactories(const WString& fileName, list::ObservableList<Ptr<IFileFactoryModel>>& fileFactories);
 	public:
 		StudioAddExistingFilesModel(IStudioModel* _studioModel);
 		~StudioAddExistingFilesModel();
