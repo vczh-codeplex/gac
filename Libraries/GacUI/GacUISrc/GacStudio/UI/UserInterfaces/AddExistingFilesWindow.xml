@@ -105,12 +105,12 @@
               <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
 
               <att.ItemSource-eval>OperationModel.SelectedFiles</att.ItemSource-eval>
-              <att.ViewModelContext-eval>self.OperationModel</att.ViewModelContext-eval>
+              <att.ViewModelContext-eval>OperationModel</att.ViewModelContext-eval>
 
               <att.Columns>
                 <BindableDataColumn Text="File Name" Size="160" ValueProperty="name" VisualizerTemplates="ui::FileReferenceNameColumnTemplate"/>
                 <BindableDataColumn Text="Folder" Size="180" ValueProperty="folder" VisualizerTemplates="ui::FileReferenceFolderColumnTemplate"/>
-                <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory" VisualizerTemplates="ui::FileReferenceFactoryColumnTemplate" EditorTemplate="FileReferenceFactoryEditorTemplate"/>
+                <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory" VisualizerTemplates="ui::FileReferenceFactoryColumnTemplate" EditorTemplate="ui::FileReferenceFactoryEditorTemplate"/>
               </att.Columns>
             </BindableDataGrid>
           </Cell>

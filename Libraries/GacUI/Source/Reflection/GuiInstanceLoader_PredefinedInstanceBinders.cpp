@@ -329,7 +329,16 @@ GuiEvalInstanceBinder
 						vint variableIndex = assembly->variableNames.IndexOf(L"<initialize-data-binding>");
 						auto variable = globalContext->globalVariables->variables[variableIndex];
 						auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(variable);
-						auto translated = proxy->Invoke(IValueList::Create());
+
+						Value translated;
+						try
+						{
+							translated = proxy->Invoke(IValueList::Create());
+						}
+						catch (const TypeDescriptorException& ex)
+						{
+							env->scope->errors.Add(L"Workflow Script Exception: " + ex.Message());
+						}
 
 						// the global context contains a closure variable <initialize-data-binding> which captured the context
 						// clear all variables to break the circle references
