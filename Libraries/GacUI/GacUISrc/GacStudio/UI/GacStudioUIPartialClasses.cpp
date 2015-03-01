@@ -49,6 +49,7 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IAddFileItemAction)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(HasFile, { L"fileName" });
 				CLASS_MEMBER_METHOD(AddFile, { L"file" });
 			END_CLASS_MEMBER(vm::IAddFileItemAction)
 
@@ -175,7 +176,7 @@ namespace vl
 				CLASS_MEMBER_EVENT(WorkingDirectoryChanged)
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(WorkingDirectory, WorkingDirectoryChanged)
 				CLASS_MEMBER_METHOD(CreateNewFileModel, NO_PARAMETER);
-				CLASS_MEMBER_METHOD(CreateAddExistingFilesModel, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(CreateAddExistingFilesModel, { L"action" });
 				CLASS_MEMBER_METHOD(NotifySelectedSolutionItem, { L"solutionItem" });
 				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });

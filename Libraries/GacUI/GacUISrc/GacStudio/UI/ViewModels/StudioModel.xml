@@ -51,7 +51,9 @@
     <Property Name="EditorFactories" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
 
     <Method Name="CreateNewFileModel" Type="vm::IStudioNewFileModel^"/>
-    <Method Name="CreateAddExistingFilesModel" Type="vm::IStudioAddExistingFilesModel^"/>
+    <Method Name="CreateAddExistingFilesModel" Type="vm::IStudioAddExistingFilesModel^">
+      <Argument Name="action" Type="vm::IAddFileItemAction^"/>
+    </Method>
 
     <Property Name="RootSolutionItem" Type="vm::ISolutionItemModel^" Readonly="true"/>
     <Property Name="OpenedSolution" Type="vm::ISolutionModel^" Readonly="true" Observable="true"/>

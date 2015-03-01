@@ -366,8 +366,9 @@ StudioAddExistingFilesModel
 			);
 	}
 
-	StudioAddExistingFilesModel::StudioAddExistingFilesModel(IStudioModel* _studioModel)
+	StudioAddExistingFilesModel::StudioAddExistingFilesModel(IStudioModel* _studioModel, Ptr<IAddFileItemAction> _action)
 		:studioModel(_studioModel)
+		, action(_action)
 	{
 	}
 
@@ -400,16 +401,19 @@ StudioAddExistingFilesModel
 	{
 		FOREACH(WString, fileName, fileNames)
 		{
-			list::ObservableList<Ptr<IFileFactoryModel>> fileFactories;
-			GetAcceptableFileFactories(fileName, fileFactories);
-			FilePath filePath = fileName;
+			if (!action->HasFile(fileName))
+			{
+				list::ObservableList<Ptr<IFileFactoryModel>> fileFactories;
+				GetAcceptableFileFactories(fileName, fileFactories);
+				FilePath filePath = fileName;
 
-			auto fileRef = MakePtr<StudioFileReference>();
-			fileRef->name = filePath.GetName();
-			fileRef->folder = filePath.GetFolder().GetFullPath();
-			fileRef->fileFactory = From(fileFactories).First(nullptr);
+				auto fileRef = MakePtr<StudioFileReference>();
+				fileRef->name = filePath.GetName();
+				fileRef->folder = filePath.GetFolder().GetFullPath();
+				fileRef->fileFactory = From(fileFactories).First(nullptr);
 
-			selectedFiles.Add(fileRef);
+				selectedFiles.Add(fileRef);
+			}
 		}
 	}
 
@@ -504,9 +508,9 @@ StudioModel
 		return new StudioNewFileModel(this, solutionProjectFactory);
 	}
 
-	Ptr<IStudioAddExistingFilesModel> StudioModel::CreateAddExistingFilesModel()
+	Ptr<IStudioAddExistingFilesModel> StudioModel::CreateAddExistingFilesModel(Ptr<IAddFileItemAction> action)
 	{
-		return new StudioAddExistingFilesModel(this);
+		return new StudioAddExistingFilesModel(this, action);
 	}
 
 	Ptr<ISolutionItemModel> StudioModel::GetRootSolutionItem()
@@ -646,11 +650,15 @@ StudioModel
 		}
 		
 		auto fileFolder = Folder(fileDirectory);
-		auto filePath = fileFolder.GetFilePath() / (fileName + fileFactory->GetDefaultFileExt());
-
 		if (!fileFolder.Exists() && !fileFolder.Create(true))
 		{
 			throw StudioException(L"Failed to create folder \"" + fileFolder.GetFilePath().GetFullPath() + L"\".", true);
+		}
+
+		auto filePath = fileFolder.GetFilePath() / (fileName + fileFactory->GetDefaultFileExt());
+		if (File(filePath).Exists())
+		{
+			throw StudioException(L"File \"" + filePath .GetFullPath() + L"\" already exists.", true);
 		}
 		
 		auto fileItem = MakePtr<FileItem>(this, fileFactory, filePath.GetFullPath());

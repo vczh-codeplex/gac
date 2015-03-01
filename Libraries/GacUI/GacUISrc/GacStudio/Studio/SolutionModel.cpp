@@ -437,6 +437,18 @@ FolderItem
 	FolderItem::~FolderItem()
 	{
 	}
+
+	bool FolderItem::HasFile(WString fileName)
+	{
+		if (auto project = GetOwnerProject(this))
+		{
+			return project->HasFile(fileName);
+		}
+		else
+		{
+			throw StudioException(L"Internal error: Folder \"" + filePath + L"\" does not attach to a project.", true);
+		}
+	}
 	
 	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::AddFile(Ptr<IFileModel> file)
 	{
@@ -641,6 +653,20 @@ ProjectItem
 
 	ProjectItem::~ProjectItem()
 	{
+	}
+
+	bool ProjectItem::HasFile(WString fileName)
+	{
+		auto key = wupper(fileName);
+		if (key == wupper(filePath))
+		{
+			return true;
+		}
+		return From(fileItems)
+			.Any([=](Ptr<IFileModel> fileItem)
+			{
+				return wupper(fileItem->GetFilePath()) == key;
+			});
 	}
 
 	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::AddFile(Ptr<IFileModel> file)

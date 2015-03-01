@@ -5,6 +5,9 @@
   </Interface>
   
   <Interface ref.Class="vm::IAddFileItemAction">
+    <Method Name="HasFile" Type="bool">
+      <Argument Name="fileName" Type="string"/>
+    </Method>
     <Method Name="AddFile" Type="vm::ISaveItemAction^{}">
       <Argument Name="file" Type="vm::IFileModel^"/>
     </Method>

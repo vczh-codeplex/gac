@@ -138,13 +138,14 @@ namespace vm
 	{
 	protected:
 		IStudioModel*									studioModel;
+		Ptr<IAddFileItemAction>							action;
 		WString											currentFileName;
 		list::ObservableList<Ptr<StudioFileReference>>	selectedFiles;
 		list::ObservableList<Ptr<IFileFactoryModel>>	filteredFileFactories;
 
 		void											GetAcceptableFileFactories(const WString& fileName, list::ObservableList<Ptr<IFileFactoryModel>>& fileFactories);
 	public:
-		StudioAddExistingFilesModel(IStudioModel* _studioModel);
+		StudioAddExistingFilesModel(IStudioModel* _studioModel, Ptr<IAddFileItemAction> _action);
 		~StudioAddExistingFilesModel();
 
 		Ptr<description::IValueObservableList>			GetSelectedFiles()override;
@@ -174,7 +175,7 @@ namespace vm
 		LazyList<Ptr<IEditorFactoryModel>>				GetEditorFactories()override;
 
 		Ptr<IStudioNewFileModel>						CreateNewFileModel()override;
-		Ptr<IStudioAddExistingFilesModel>				CreateAddExistingFilesModel()override;
+		Ptr<IStudioAddExistingFilesModel>				CreateAddExistingFilesModel(Ptr<IAddFileItemAction> action)override;
 
 		Ptr<ISolutionItemModel>							GetRootSolutionItem()override;
 		Ptr<ISolutionModel>								GetOpenedSolution()override;

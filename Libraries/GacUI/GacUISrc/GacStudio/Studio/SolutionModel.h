@@ -122,6 +122,7 @@ namespace vm
 		~FolderItem();
 		
 		// --------------------------- action
+		bool											HasFile(WString fileName)override;
 		collections::LazyList<Ptr<ISaveItemAction>>		AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
@@ -164,6 +165,7 @@ namespace vm
 		~ProjectItem();
 		
 		// --------------------------- action
+		bool											HasFile(WString fileName)override;
 		collections::LazyList<Ptr<ISaveItemAction>>		AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
