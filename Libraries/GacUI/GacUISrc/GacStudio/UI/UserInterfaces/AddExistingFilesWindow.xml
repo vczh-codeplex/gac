@@ -61,7 +61,7 @@
           <ComboBox ref.Name="comboBoxFactory" SelectedIndex-bind="OperationModel.FilteredFileFactories.IndexOf(self.CellValue)">
             <att.BoundsComposition-set AlignmentToParent="left:0 top:0 right:0 bottom:0"/>
             <att.ListControl>
-              <BindableTextList HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false" ItemSource-eval="OperationModel.FilteredFileFactories"/>
+              <BindableTextList HorizontalAlwaysVisible="false" VerticalAlwaysVisible="false" ItemSource-eval="OperationModel.FilteredFileFactories" TextProperty="Name"/>
             </att.ListControl>
           </ComboBox>
         </BoundsComposition>
