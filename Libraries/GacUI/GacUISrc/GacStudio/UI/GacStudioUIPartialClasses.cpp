@@ -39,6 +39,7 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(ui::AboutWindow)
 			IMPL_CPP_TYPE_INFO(ui::AddExistingFilesWindow)
 			IMPL_CPP_TYPE_INFO(ui::FileReferenceFactoryColumnTemplate)
+			IMPL_CPP_TYPE_INFO(ui::FileReferenceFactoryEditorTemplate)
 			IMPL_CPP_TYPE_INFO(ui::FileReferenceFolderColumnTemplate)
 			IMPL_CPP_TYPE_INFO(ui::FileReferenceNameColumnTemplate)
 			IMPL_CPP_TYPE_INFO(ui::MainWindow)
@@ -237,6 +238,13 @@ namespace vl
 				CLASS_MEMBER_CONSTRUCTOR(ui::FileReferenceFactoryColumnTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(ui::FileReferenceFactoryColumnTemplate)
 
+			BEGIN_CLASS_MEMBER(ui::FileReferenceFactoryEditorTemplate)
+				CLASS_MEMBER_BASE(vl::presentation::templates::GuiGridEditorTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(ui::FileReferenceFactoryEditorTemplate*(Ptr<vm::IStudioAddExistingFilesModel>), { L"OperationModel" })
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(OperationModel)
+			END_CLASS_MEMBER(ui::FileReferenceFactoryEditorTemplate)
+
 			BEGIN_CLASS_MEMBER(ui::FileReferenceFolderColumnTemplate)
 				CLASS_MEMBER_BASE(vl::presentation::templates::GuiGridVisualizerTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(ui::FileReferenceFolderColumnTemplate*(), NO_PARAMETER)
@@ -337,6 +345,7 @@ namespace vl
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::AddExistingFilesWindow)
 					ADD_TYPE_INFO(ui::FileReferenceFactoryColumnTemplate)
+					ADD_TYPE_INFO(ui::FileReferenceFactoryEditorTemplate)
 					ADD_TYPE_INFO(ui::FileReferenceFolderColumnTemplate)
 					ADD_TYPE_INFO(ui::FileReferenceNameColumnTemplate)
 					ADD_TYPE_INFO(ui::MainWindow)
