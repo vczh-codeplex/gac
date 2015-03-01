@@ -62,6 +62,7 @@ namespace vm
 	{
 	public:
 
+		virtual bool HasFile(vl::WString fileName) = 0;
 		virtual vl::collections::LazyList<vl::Ptr<vm::ISaveItemAction>> AddFile(vl::Ptr<vm::IFileModel> file) = 0;
 	};
 
@@ -271,7 +272,7 @@ namespace vm
 		vl::Event<void()> WorkingDirectoryChanged;
 
 		virtual vl::Ptr<vm::IStudioNewFileModel> CreateNewFileModel() = 0;
-		virtual vl::Ptr<vm::IStudioAddExistingFilesModel> CreateAddExistingFilesModel() = 0;
+		virtual vl::Ptr<vm::IStudioAddExistingFilesModel> CreateAddExistingFilesModel(vl::Ptr<vm::IAddFileItemAction> action) = 0;
 		virtual void NotifySelectedSolutionItem(vl::Ptr<vm::ISolutionItemModel> solutionItem) = 0;
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory(vl::WString id) = 0;
