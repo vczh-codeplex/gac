@@ -38,6 +38,9 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(vm::StudioFileReference)
 			IMPL_CPP_TYPE_INFO(ui::AboutWindow)
 			IMPL_CPP_TYPE_INFO(ui::AddExistingFilesWindow)
+			IMPL_CPP_TYPE_INFO(ui::FileReferenceFactoryColumnTemplate)
+			IMPL_CPP_TYPE_INFO(ui::FileReferenceFolderColumnTemplate)
+			IMPL_CPP_TYPE_INFO(ui::FileReferenceNameColumnTemplate)
 			IMPL_CPP_TYPE_INFO(ui::MainWindow)
 			IMPL_CPP_TYPE_INFO(ui::NewFileWindow)
 			IMPL_CPP_TYPE_INFO(ui::NewProjectWindow)
@@ -203,7 +206,8 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::StudioFileReference)
 				CLASS_MEMBER_CONSTRUCTOR(vl::Ptr<vm::StudioFileReference>(), NO_PARAMETER)
-				CLASS_MEMBER_FIELD(fileName)
+				CLASS_MEMBER_FIELD(name)
+				CLASS_MEMBER_FIELD(folder)
 				CLASS_MEMBER_FIELD(fileFactory)
 			END_CLASS_MEMBER(vm::StudioFileReference)
 
@@ -227,6 +231,21 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(OperationModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Action)
 			END_CLASS_MEMBER(ui::AddExistingFilesWindow)
+
+			BEGIN_CLASS_MEMBER(ui::FileReferenceFactoryColumnTemplate)
+				CLASS_MEMBER_BASE(vl::presentation::templates::GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(ui::FileReferenceFactoryColumnTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(ui::FileReferenceFactoryColumnTemplate)
+
+			BEGIN_CLASS_MEMBER(ui::FileReferenceFolderColumnTemplate)
+				CLASS_MEMBER_BASE(vl::presentation::templates::GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(ui::FileReferenceFolderColumnTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(ui::FileReferenceFolderColumnTemplate)
+
+			BEGIN_CLASS_MEMBER(ui::FileReferenceNameColumnTemplate)
+				CLASS_MEMBER_BASE(vl::presentation::templates::GuiGridVisualizerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(ui::FileReferenceNameColumnTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(ui::FileReferenceNameColumnTemplate)
 
 			BEGIN_CLASS_MEMBER(ui::MainWindow)
 				CLASS_MEMBER_BASE(vl::presentation::controls::GuiWindow)
@@ -317,6 +336,9 @@ namespace vl
 					ADD_TYPE_INFO(vm::StudioFileReference)
 					ADD_TYPE_INFO(ui::AboutWindow)
 					ADD_TYPE_INFO(ui::AddExistingFilesWindow)
+					ADD_TYPE_INFO(ui::FileReferenceFactoryColumnTemplate)
+					ADD_TYPE_INFO(ui::FileReferenceFolderColumnTemplate)
+					ADD_TYPE_INFO(ui::FileReferenceNameColumnTemplate)
 					ADD_TYPE_INFO(ui::MainWindow)
 					ADD_TYPE_INFO(ui::NewFileWindow)
 					ADD_TYPE_INFO(ui::NewProjectWindow)

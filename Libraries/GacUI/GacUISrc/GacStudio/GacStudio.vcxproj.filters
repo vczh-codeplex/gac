@@ -34,6 +34,9 @@
     <Filter Include="Resource Files\ViewModels">
       <UniqueIdentifier>{e3bad062-1f39-4ddc-b4bf-5ac80ef5ddec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UITemplates">
+      <UniqueIdentifier>{d8f02417-09c1-44f5-a23f-5068037e8191}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -81,6 +84,15 @@
     <ClCompile Include="UI\GsAddExistingFilesWindow.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="UI\GsFileReferenceFactoryColumnTemplate.cpp">
+      <Filter>UITemplates</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\GsFileReferenceNameColumnTemplate.cpp">
+      <Filter>UITemplates</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\GsFileReferenceFolderColumnTemplate.cpp">
+      <Filter>UITemplates</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Public\Source\GacUI.h">
@@ -127,6 +139,15 @@
     </ClInclude>
     <ClInclude Include="UI\GsAddExistingFilesWindow.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsFileReferenceNameColumnTemplate.h">
+      <Filter>UITemplates</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsFileReferenceFactoryColumnTemplate.h">
+      <Filter>UITemplates</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\GsFileReferenceFolderColumnTemplate.h">
+      <Filter>UITemplates</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

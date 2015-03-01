@@ -39,6 +39,9 @@ namespace ui
 {
 	class AboutWindow;
 	class AddExistingFilesWindow;
+	class FileReferenceFactoryColumnTemplate;
+	class FileReferenceFolderColumnTemplate;
+	class FileReferenceNameColumnTemplate;
 	class MainWindow;
 	class NewFileWindow;
 	class NewProjectWindow;
@@ -222,7 +225,8 @@ namespace vm
 	class StudioFileReference : public vl::Object, public vl::reflection::Description<StudioFileReference>
 	{
 	public:
-		vl::WString fileName;
+		vl::WString name;
+		vl::WString folder;
 		vl::Ptr<vm::IFileFactoryModel> fileFactory;
 	};
 
@@ -388,6 +392,84 @@ namespace ui
 		Ptr<vm::IAddFileItemAction> GetAction()
 		{
 			return Action_;
+		}
+	};
+
+	template<typename TImpl>
+	class FileReferenceFactoryColumnTemplate_ : public vl::presentation::templates::GuiGridVisualizerTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>, public vl::reflection::Description<TImpl>
+	{
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
+	private:
+	protected:
+		vl::presentation::templates::GuiGridVisualizerTemplate* self;
+
+		void InitializeComponents()
+		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(self);
+			}
+			else
+			{
+			}
+		}
+	public:
+		FileReferenceFactoryColumnTemplate_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>(L"ui::FileReferenceFactoryColumnTemplate")
+			,self(0)
+		{
+		}
+	};
+
+	template<typename TImpl>
+	class FileReferenceFolderColumnTemplate_ : public vl::presentation::templates::GuiGridVisualizerTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>, public vl::reflection::Description<TImpl>
+	{
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
+	private:
+	protected:
+		vl::presentation::templates::GuiGridVisualizerTemplate* self;
+
+		void InitializeComponents()
+		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(self);
+			}
+			else
+			{
+			}
+		}
+	public:
+		FileReferenceFolderColumnTemplate_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>(L"ui::FileReferenceFolderColumnTemplate")
+			,self(0)
+		{
+		}
+	};
+
+	template<typename TImpl>
+	class FileReferenceNameColumnTemplate_ : public vl::presentation::templates::GuiGridVisualizerTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>, public vl::reflection::Description<TImpl>
+	{
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
+	private:
+	protected:
+		vl::presentation::templates::GuiGridVisualizerTemplate* self;
+
+		void InitializeComponents()
+		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(self);
+			}
+			else
+			{
+			}
+		}
+	public:
+		FileReferenceNameColumnTemplate_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiGridVisualizerTemplate>(L"ui::FileReferenceNameColumnTemplate")
+			,self(0)
+		{
 		}
 	};
 
@@ -690,6 +772,9 @@ namespace vl
 			DECL_TYPE_INFO(vm::StudioFileReference)
 			DECL_TYPE_INFO(ui::AboutWindow)
 			DECL_TYPE_INFO(ui::AddExistingFilesWindow)
+			DECL_TYPE_INFO(ui::FileReferenceFactoryColumnTemplate)
+			DECL_TYPE_INFO(ui::FileReferenceFolderColumnTemplate)
+			DECL_TYPE_INFO(ui::FileReferenceNameColumnTemplate)
 			DECL_TYPE_INFO(ui::MainWindow)
 			DECL_TYPE_INFO(ui::NewFileWindow)
 			DECL_TYPE_INFO(ui::NewProjectWindow)
@@ -777,6 +862,99 @@ namespace ui
 	AddExistingFilesWindow::AddExistingFilesWindow(Ptr<vm::IStudioModel> ViewModel, Ptr<vm::IStudioAddExistingFilesModel> OperationModel, Ptr<vm::IAddFileItemAction> Action)
 	{
 		InitializeComponents(ViewModel, OperationModel, Action);
+	}
+}
+
+
+GsFileReferenceFactoryColumnTemplate.h :
+namespace ui
+{
+	class FileReferenceFactoryColumnTemplate : public ui::FileReferenceFactoryColumnTemplate_<ui::FileReferenceFactoryColumnTemplate>
+	{
+		friend class ui::FileReferenceFactoryColumnTemplate_<ui::FileReferenceFactoryColumnTemplate>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::FileReferenceFactoryColumnTemplate>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		FileReferenceFactoryColumnTemplate();
+	};
+}
+
+
+GsFileReferenceFactoryColumnTemplate.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceFactoryColumnTemplate::FileReferenceFactoryColumnTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+GsFileReferenceFolderColumnTemplate.h :
+namespace ui
+{
+	class FileReferenceFolderColumnTemplate : public ui::FileReferenceFolderColumnTemplate_<ui::FileReferenceFolderColumnTemplate>
+	{
+		friend class ui::FileReferenceFolderColumnTemplate_<ui::FileReferenceFolderColumnTemplate>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::FileReferenceFolderColumnTemplate>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		FileReferenceFolderColumnTemplate();
+	};
+}
+
+
+GsFileReferenceFolderColumnTemplate.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceFolderColumnTemplate::FileReferenceFolderColumnTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+GsFileReferenceNameColumnTemplate.h :
+namespace ui
+{
+	class FileReferenceNameColumnTemplate : public ui::FileReferenceNameColumnTemplate_<ui::FileReferenceNameColumnTemplate>
+	{
+		friend class ui::FileReferenceNameColumnTemplate_<ui::FileReferenceNameColumnTemplate>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<ui::FileReferenceNameColumnTemplate>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		FileReferenceNameColumnTemplate();
+	};
+}
+
+
+GsFileReferenceNameColumnTemplate.cpp :
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceNameColumnTemplate::FileReferenceNameColumnTemplate()
+	{
+		InitializeComponents();
 	}
 }
 
