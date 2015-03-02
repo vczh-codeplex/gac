@@ -151,6 +151,11 @@ FileFactoryModel
 		return textTemplate;
 	}
 
+	Ptr<IEditorContentFactoryModel> FileFactoryModel::GetContentFactory()
+	{
+		return nullptr;
+	}
+
 /***********************************************************************
 ProjectFactoryModel
 ***********************************************************************/
@@ -496,6 +501,11 @@ StudioModel
 	LazyList<Ptr<IFileFactoryModel>> StudioModel::GetFileFactories()
 	{
 		return From(fileFactories);
+	}
+
+	LazyList<Ptr<IEditorContentFactoryModel>> StudioModel::GetContentFactories()
+	{
+		return From(contentFactories);
 	}
 
 	LazyList<Ptr<IEditorFactoryModel>> StudioModel::GetEditorFactories()

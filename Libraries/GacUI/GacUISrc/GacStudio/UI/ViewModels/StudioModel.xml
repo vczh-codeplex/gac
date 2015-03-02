@@ -9,6 +9,7 @@
     <Property Name="Id" Type="string" Readonly="true"/>
     <Property Name="DefaultFileExt" Type="string" Readonly="true"/>
     <Property Name="TextTemplate" Type="vm::ITextTemplate^" Readonly="true"/>
+    <Property Name="ContentFactory" Type="vm::IEditorContentFactoryModel^" Readonly="true"/>
   </Interface>
 
   <Interface ref.Class="vm::IProjectFactoryModel">
@@ -48,6 +49,7 @@
   <Interface ref.Class="vm::IStudioModel">
     <Property Name="ProjectFactories" Type="vm::IProjectFactoryModel^{}" Readonly="true"/>
     <Property Name="FileFactories" Type="vm::IFileFactoryModel^{}" Readonly="true"/>
+    <Property Name="ContentFactories" Type="vm::IEditorContentFactoryModel^{}" Readonly="true"/>
     <Property Name="EditorFactories" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
 
     <Method Name="CreateNewFileModel" Type="vm::IStudioNewFileModel^"/>

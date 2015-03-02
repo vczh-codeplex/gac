@@ -14,6 +14,15 @@
   </Interface>
 
   <Interface ref.Class="vm::IOpenInEditorItemAction">
+    <Parameter Name="SupportedContents" Type="vm::IEditorContentModel^{}" Readonly="true"/>
+    <Parameter Name="SupportedEditors" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
+    <Parameter Name="DefaultEditor" Type="vm::IEditorFactoryModel^" Readonly="true"/>
+    <Parameter Name="CurrentEditor" Type="vm::IEditorModel*" Readonly="true"/>
+
+    <Method Name="OpenEditor" Type="vm::IEditorModel^">
+      <Argument Name="editorFactory" Type="vm::IEditorFactoryModel^"/>
+    </Method>
+    <Method Name="CloseEditor" Type="void"/>
   </Interface>
 
   <Interface ref.Class="vm::IRenameItemAction">
