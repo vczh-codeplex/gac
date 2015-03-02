@@ -26,6 +26,90 @@
       </Project>
     </Xml>
   </Folder>
+
+  <Folder name="Contents">
+    <Xml name="GACUI_TEXT_CONTENT">
+      <Content>
+        <Display>Text Content</Display>
+      </Content>
+    </Xml>
+    <Xml name="GACUI_XML_CONTENT">
+      <Content>
+        <Display>XML Content</Display>
+        <BaseContent>GACUI_TEXT_CONTENT</BaseContent>
+      </Content>
+    </Xml>
+    <Xml name="GACUI_RICHTEXT_CONTENT">
+      <Content>
+        <Display>Rich Document Content</Display>
+        <BaseContent>GACUI_XML_CONTENT</BaseContent>
+      </Content>
+    </Xml>
+    <Xml name="GACUI_STYLE_CONTENT">
+      <Content>
+        <Display>Style Content</Display>
+        <BaseContent>GACUI_XML_CONTENT</BaseContent>
+      </Content>
+    </Xml>
+    <Xml name="GACUI_SCHEMA_CONTENT">
+      <Content>
+        <Display>Schema Content</Display>
+        <BaseContent>GACUI_XML_CONTENT</BaseContent>
+      </Content>
+    </Xml>
+    <Xml name="GACUI_Instance_CONTENT">
+      <Content>
+        <Display>GacUI Instance Content</Display>
+        <BaseContent>GACUI_XML_CONTENT</BaseContent>
+      </Content>
+    </Xml>
+  </Folder>
+
+  <Folder name="Editors">
+    <Xml name="GACUI_TEXT_EDITOR">
+      <Editor>
+        <Display>Text Editor</Display>
+        <Required>GACUI_TEXT_CONTENT</Required>
+        <Editing>GACUI_TEXT_CONTENT</Editing>
+      </Editor>
+    </Xml>
+    <Xml name="GACUI_XML_EDITOR">
+      <Editor>
+        <Display>XML Editor</Display>
+        <Required>GACUI_XML_CONTENT</Required>
+        <Editing>GACUI_TEXT_CONTENT</Editing>
+      </Editor>
+    </Xml>
+    <Xml name="GACUI_RICHTEXT_EDITOR">
+      <Editor>
+        <Display>Rich Document Editor</Display>
+        <Required>GACUI_RICHTEXT_CONTENT</Required>
+        <Editing>GACUI_RICHTEXT_CONTENT</Editing>
+      </Editor>
+    </Xml>
+    <Xml name="GACUI_STYLE_EDITOR">
+      <Editor>
+        <Display>Style Editor</Display>
+        <Required>GACUI_STYLE_CONTENT</Required>
+        <Editing>GACUI_STYLE_CONTENT</Editing>
+      </Editor>
+    </Xml>
+    <Xml name="GACUI_SCHEMA_EDITOR">
+      <Editor>
+        <Display>Schema Editor</Display>
+        <Required>GACUI_SCHEMA_CONTENT</Required>
+        <Editing>GACUI_SCHEMA_CONTENT</Editing>
+      </Editor>
+    </Xml>
+    <Xml name="GACUI_INSTANCE_EDITOR">
+      <Editor>
+        <Display>GacUI Instance Editor</Display>
+        <Required>GACUI_INSTANCE_CONTENT</Required>
+        <Editing>GACUI_INSTANCE_CONTENT</Editing>
+      </Editor>
+    </Xml>
+  </Folder>
+  
   <Folder name="Files">
     <Xml name="GACUI_WINDOW_RESOURCE_FILE">
       <File>
@@ -42,6 +126,7 @@
   </Window>
 </Instance>]]>
         </TextTemplate>
+        <Content>GACUI_INSTANCE_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="GACUI_CONTROL_RESOURCE_FILE">
@@ -59,6 +144,7 @@
   </CustomControl>
 </Instance>]]>
         </TextTemplate>
+        <Content>GACUI_INSTANCE_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="GACUI_CONTROL_TEMPLATE_RESOURCE_FILE">
@@ -69,6 +155,7 @@
         <Description>Create a control template for your GacUI program.</Description>
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.template.xml</DefaultFileExt>
+        <Content>GACUI_INSTANCE_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="GACUI_STYLE_RESOURCE_FILE">
@@ -87,6 +174,7 @@
   </Style>
 </InstanceStyle>]]>
         </TextTemplate>
+        <Content>GACUI_STYLE_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="GACUI_SCHEMA_RESOURCE_FILE">
@@ -108,6 +196,7 @@
   </Interface>
 </Schemas>]]>
         </TextTemplate>
+        <Content>GACUI_SCHEMA_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="GACUI_IMAGE_RESOURCE_FILE">
@@ -129,6 +218,7 @@
         <Category>GACUI_RESOURCE_PROJECT</Category>
         <DefaultFileExt>.txt</DefaultFileExt>
         <TextTemplate/>
+        <Content>GACUI_TEXT_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="GACUI_RICHTEXT_RESOURCE_FILE">
@@ -162,6 +252,7 @@
 <Resource>
 </Resource>]]>
         </TextTemplate>
+        <Content>GACUI_RICHTEXT_CONTENT</Content>
       </File>
     </Xml>
     <Xml name="PARSER_FILE">
