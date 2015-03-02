@@ -431,6 +431,81 @@ StudioAddExistingFilesModel
 	}
 
 /***********************************************************************
+EditorContentFactory
+***********************************************************************/
+
+	EditorContentFactory::EditorContentFactory(const WString& _name, const WString& _id)
+		:name(_name)
+		, id(_id)
+	{
+	}
+
+	EditorContentFactory::~EditorContentFactory()
+	{
+	}
+
+	WString EditorContentFactory::GetName()
+	{
+		return name;
+	}
+
+	WString EditorContentFactory::GetId()
+	{
+		return id;
+	}
+
+	IEditorContentFactoryModel* EditorContentFactory::GetBaseContentFactory()
+	{
+		return baseContentFactory;
+	}
+
+	Ptr<IEditorContentModel> EditorContentFactory::CreateContent()
+	{
+		throw 0;
+	}
+
+/***********************************************************************
+EditorFactory
+***********************************************************************/
+
+	EditorFactory::EditorFactory(const WString& _name, const WString& _id, Ptr<IEditorContentFactoryModel> _required, Ptr<IEditorContentFactoryModel> _editing)
+		:name(_name)
+		, id(_id)
+		, required(_required)
+		, editing(_editing)
+	{
+	}
+
+	EditorFactory::~EditorFactory()
+	{
+	}
+
+	WString EditorFactory::GetName()
+	{
+		return name;
+	}
+
+	WString EditorFactory::GetId()
+	{
+		return id;
+	}
+
+	Ptr<IEditorContentFactoryModel> EditorFactory::GetRequiredContentFactory()
+	{
+		return required;
+	}
+
+	Ptr<IEditorContentFactoryModel> EditorFactory::GetEditingContentFactory()
+	{
+		return editing;
+	}
+
+	Ptr<IEditorModel> EditorFactory::CreateEditor()
+	{
+		throw 0;
+	}
+
+/***********************************************************************
 StudioModel
 ***********************************************************************/
 

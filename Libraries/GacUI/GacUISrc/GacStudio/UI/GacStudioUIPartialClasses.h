@@ -24,6 +24,7 @@ namespace vm
 	class ITextTemplate;
 	class IEditorContentFactoryModel;
 	class IEditorContentModel;
+	class IEditorFileContentModel;
 	class IEditorFactoryModel;
 	class IEditorModel;
 	class ISolutionItemModel;
@@ -119,6 +120,8 @@ namespace vm
 		virtual vl::WString GetId() = 0;
 
 		virtual vm::IEditorContentFactoryModel* GetBaseContentFactory() = 0;
+
+		virtual vl::Ptr<vm::IEditorContentModel> CreateContent() = 0;
 	};
 
 	class IEditorContentModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorContentModel>
@@ -142,6 +145,16 @@ namespace vm
 		virtual void Persist(vl::reflection::description::Value content) = 0;
 		virtual void BeginEdit(vm::IEditorModel* editor) = 0;
 		virtual void EndEdit(vm::IEditorModel* editor) = 0;
+	};
+
+	class IEditorFileContentModel : public virtual vm::IEditorContentModel, public vl::reflection::Description<IEditorFileContentModel>
+	{
+	public:
+
+		virtual vl::WString GetFileName() = 0;
+
+		virtual void LoadFile(vl::WString fileName) = 0;
+		virtual void RenameFile(vl::WString fileName) = 0;
 	};
 
 	class IEditorFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorFactoryModel>
@@ -861,6 +874,7 @@ namespace vl
 			DECL_TYPE_INFO(vm::IEditorContentFactoryModel)
 			DECL_TYPE_INFO(vm::IEditorContentModel)
 			DECL_TYPE_INFO(vm::IEditorFactoryModel)
+			DECL_TYPE_INFO(vm::IEditorFileContentModel)
 			DECL_TYPE_INFO(vm::IEditorModel)
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IFileModel)
