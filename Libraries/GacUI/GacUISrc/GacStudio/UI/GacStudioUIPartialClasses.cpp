@@ -18,7 +18,10 @@ namespace vl
 		{
 			#define _ ,
 			IMPL_CPP_TYPE_INFO(vm::IAddFileItemAction)
+			IMPL_CPP_TYPE_INFO(vm::IEditorContentFactoryModel)
+			IMPL_CPP_TYPE_INFO(vm::IEditorContentModel)
 			IMPL_CPP_TYPE_INFO(vm::IEditorFactoryModel)
+			IMPL_CPP_TYPE_INFO(vm::IEditorModel)
 			IMPL_CPP_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_CPP_TYPE_INFO(vm::IFileModel)
 			IMPL_CPP_TYPE_INFO(vm::IFolderModel)
@@ -53,11 +56,45 @@ namespace vl
 				CLASS_MEMBER_METHOD(AddFile, { L"file" });
 			END_CLASS_MEMBER(vm::IAddFileItemAction)
 
+			BEGIN_CLASS_MEMBER(vm::IEditorContentFactoryModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaseContentFactory)
+			END_CLASS_MEMBER(vm::IEditorContentFactoryModel)
+
+			BEGIN_CLASS_MEMBER(vm::IEditorContentModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContentFactory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaseContent)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SubContent)
+				CLASS_MEMBER_EVENT(PersistedContentChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(PersistedContent, PersistedContentChanged)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditingContent)
+				CLASS_MEMBER_EVENT(CurrentEditorChanged)
+				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(CurrentEditor, CurrentEditorChanged)
+				CLASS_MEMBER_METHOD(Persist, { L"content" });
+				CLASS_MEMBER_METHOD(BeginEdit, { L"editor" });
+				CLASS_MEMBER_METHOD(EndEdit, { L"editor" });
+			END_CLASS_MEMBER(vm::IEditorContentModel)
+
 			BEGIN_CLASS_MEMBER(vm::IEditorFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RequiredContentFactory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditingContentFactory)
+				CLASS_MEMBER_METHOD(CreateEditor, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IEditorFactoryModel)
+
+			BEGIN_CLASS_MEMBER(vm::IEditorModel)
+				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorFactory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorControl)
+				CLASS_MEMBER_METHOD(Open, { L"content" });
+				CLASS_MEMBER_METHOD(Save, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(Close, NO_PARAMETER);
+			END_CLASS_MEMBER(vm::IEditorModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFileFactoryModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -69,6 +106,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(DefaultFileExt)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(TextTemplate)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContentFactory)
 			END_CLASS_MEMBER(vm::IFileFactoryModel)
 
 			BEGIN_CLASS_MEMBER(vm::IFileModel)
@@ -91,6 +129,8 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IOpenInEditorItemAction)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_METHOD(OpenEditor, { L"editorFactory" });
+				CLASS_MEMBER_METHOD(CloseEditor, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IOpenInEditorItemAction)
 
 			BEGIN_CLASS_MEMBER(vm::IProjectFactoryModel)
@@ -165,6 +205,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ProjectFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactories)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContentFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorFactories)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(RootSolutionItem)
 				CLASS_MEMBER_EVENT(OpenedSolutionChanged)
@@ -326,7 +367,10 @@ namespace vl
 				void Load(ITypeManager* manager)
 				{
 					ADD_TYPE_INFO(vm::IAddFileItemAction)
+					ADD_TYPE_INFO(vm::IEditorContentFactoryModel)
+					ADD_TYPE_INFO(vm::IEditorContentModel)
 					ADD_TYPE_INFO(vm::IEditorFactoryModel)
+					ADD_TYPE_INFO(vm::IEditorModel)
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IFileModel)
 					ADD_TYPE_INFO(vm::IFolderModel)

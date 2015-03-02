@@ -22,7 +22,10 @@ namespace vm
 	class IRemoveItemAction;
 	class IMacroEnvironment;
 	class ITextTemplate;
+	class IEditorContentFactoryModel;
+	class IEditorContentModel;
 	class IEditorFactoryModel;
+	class IEditorModel;
 	class ISolutionItemModel;
 	class IFileModel;
 	class IFolderModel;
@@ -69,6 +72,9 @@ namespace vm
 	class IOpenInEditorItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IOpenInEditorItemAction>
 	{
 	public:
+
+		virtual vl::Ptr<vm::IEditorModel> OpenEditor(vl::Ptr<vm::IEditorFactoryModel> editorFactory) = 0;
+		virtual void CloseEditor() = 0;
 	};
 
 	class IRenameItemAction : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IRenameItemAction>
@@ -104,6 +110,40 @@ namespace vm
 		virtual vl::WString Generate(vl::Ptr<vm::IMacroEnvironment> macroEnvironment) = 0;
 	};
 
+	class IEditorContentFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorContentFactoryModel>
+	{
+	public:
+
+		virtual vl::WString GetName() = 0;
+
+		virtual vl::WString GetId() = 0;
+
+		virtual vm::IEditorContentFactoryModel* GetBaseContentFactory() = 0;
+	};
+
+	class IEditorContentModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorContentModel>
+	{
+	public:
+
+		virtual vl::Ptr<vm::IEditorContentFactoryModel> GetContentFactory() = 0;
+
+		virtual vm::IEditorContentModel* GetBaseContent() = 0;
+
+		virtual vm::IEditorContentModel* GetSubContent() = 0;
+
+		virtual vl::reflection::description::Value GetPersistedContent() = 0;
+		vl::Event<void()> PersistedContentChanged;
+
+		virtual vl::reflection::description::Value GetEditingContent() = 0;
+
+		virtual vm::IEditorModel* GetCurrentEditor() = 0;
+		vl::Event<void()> CurrentEditorChanged;
+
+		virtual void Persist(vl::reflection::description::Value content) = 0;
+		virtual void BeginEdit(vm::IEditorModel* editor) = 0;
+		virtual void EndEdit(vm::IEditorModel* editor) = 0;
+	};
+
 	class IEditorFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorFactoryModel>
 	{
 	public:
@@ -111,6 +151,25 @@ namespace vm
 		virtual vl::WString GetName() = 0;
 
 		virtual vl::WString GetId() = 0;
+
+		virtual vl::Ptr<vm::IEditorContentFactoryModel> GetRequiredContentFactory() = 0;
+
+		virtual vl::Ptr<vm::IEditorContentFactoryModel> GetEditingContentFactory() = 0;
+
+		virtual vl::Ptr<vm::IEditorModel> CreateEditor() = 0;
+	};
+
+	class IEditorModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorModel>
+	{
+	public:
+
+		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory() = 0;
+
+		virtual vl::presentation::controls::GuiControl* GetEditorControl() = 0;
+
+		virtual void Open(vl::Ptr<vm::IEditorContentModel> content) = 0;
+		virtual void Save() = 0;
+		virtual void Close() = 0;
 	};
 
 	class ISolutionItemModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<ISolutionItemModel>
@@ -193,6 +252,8 @@ namespace vm
 		virtual vl::WString GetDefaultFileExt() = 0;
 
 		virtual vl::Ptr<vm::ITextTemplate> GetTextTemplate() = 0;
+
+		virtual vl::Ptr<vm::IEditorContentFactoryModel> GetContentFactory() = 0;
 	};
 
 	class IProjectFactoryModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IProjectFactoryModel>
@@ -254,6 +315,8 @@ namespace vm
 		virtual vl::collections::LazyList<vl::Ptr<vm::IProjectFactoryModel>> GetProjectFactories() = 0;
 
 		virtual vl::collections::LazyList<vl::Ptr<vm::IFileFactoryModel>> GetFileFactories() = 0;
+
+		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorContentFactoryModel>> GetContentFactories() = 0;
 
 		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorFactoryModel>> GetEditorFactories() = 0;
 
@@ -795,7 +858,10 @@ namespace vl
 		namespace description
 		{
 			DECL_TYPE_INFO(vm::IAddFileItemAction)
+			DECL_TYPE_INFO(vm::IEditorContentFactoryModel)
+			DECL_TYPE_INFO(vm::IEditorContentModel)
 			DECL_TYPE_INFO(vm::IEditorFactoryModel)
+			DECL_TYPE_INFO(vm::IEditorModel)
 			DECL_TYPE_INFO(vm::IFileFactoryModel)
 			DECL_TYPE_INFO(vm::IFileModel)
 			DECL_TYPE_INFO(vm::IFolderModel)

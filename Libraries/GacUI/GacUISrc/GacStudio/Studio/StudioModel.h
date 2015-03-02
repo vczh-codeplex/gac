@@ -59,6 +59,7 @@ namespace vm
 		WString											GetId()override;
 		WString											GetDefaultFileExt()override;
 		Ptr<ITextTemplate>								GetTextTemplate()override;
+		Ptr<IEditorContentFactoryModel>					GetContentFactory()override;
 	};
 
 	class ProjectFactoryModel : public Object, public virtual IProjectFactoryModel
@@ -162,6 +163,7 @@ namespace vm
 	protected:
 		Ptr<FileFactoryFilterModel>						solutionProjectFactory;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
+		List<Ptr<IEditorContentFactoryModel>>			contentFactories;
 		List<Ptr<IEditorFactoryModel>>					editorFactories;
 		Ptr<RootSolutionItemModel>						rootSolutionItem;
 		Ptr<ISolutionItemModel>							selectedSolutionItem;
@@ -172,6 +174,7 @@ namespace vm
 
 		LazyList<Ptr<IProjectFactoryModel>>				GetProjectFactories()override;
 		LazyList<Ptr<IFileFactoryModel>>				GetFileFactories()override;
+		LazyList<Ptr<IEditorContentFactoryModel>>		GetContentFactories()override;
 		LazyList<Ptr<IEditorFactoryModel>>				GetEditorFactories()override;
 
 		Ptr<IStudioNewFileModel>						CreateNewFileModel()override;
