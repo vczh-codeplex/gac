@@ -158,6 +158,42 @@ namespace vm
 		void											RemoveFiles(LazyList<vint32_t> indices)override;
 	};
 
+	class EditorContentFactory : public Object, public virtual IEditorContentFactoryModel
+	{
+	protected:
+		WString											name;
+		WString											id;
+		IEditorContentFactoryModel*						baseContentFactory = nullptr;
+
+	public:
+		EditorContentFactory(const WString& _name, const WString& _id);
+		~EditorContentFactory();
+
+		WString											GetName()override;
+		WString											GetId()override;
+		IEditorContentFactoryModel*						GetBaseContentFactory()override;
+		Ptr<IEditorContentModel>						CreateContent()override;
+	};
+
+	class EditorFactory : public Object, public virtual IEditorFactoryModel
+	{
+	protected:
+		WString											name;
+		WString											id;
+		Ptr<IEditorContentFactoryModel>					required;
+		Ptr<IEditorContentFactoryModel>					editing;
+
+	public:
+		EditorFactory(const WString& _name, const WString& _id, Ptr<IEditorContentFactoryModel> _required, Ptr<IEditorContentFactoryModel> _editing);
+		~EditorFactory();
+
+		WString											GetName()override;
+		WString											GetId()override;
+		Ptr<IEditorContentFactoryModel>					GetRequiredContentFactory()override;
+		Ptr<IEditorContentFactoryModel>					GetEditingContentFactory()override;
+		Ptr<IEditorModel>								CreateEditor()override;
+	};
+
 	class StudioModel : public Object, public virtual IStudioModel
 	{
 	protected:

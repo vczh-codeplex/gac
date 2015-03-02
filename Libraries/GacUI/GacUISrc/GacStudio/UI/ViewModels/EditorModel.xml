@@ -22,6 +22,8 @@
     <Property Name="Name" Type="string" Readonly="true"/>
     <Property Name="Id" Type="string" Readonly="true"/>
     <Property Name="BaseContentFactory" Type="vm::IEditorContentFactoryModel*" Readonly="true"/>
+
+    <Method Name="CreateContent" Type="vm::IEditorContentModel^"/>
   </Interface>
   
   <Interface ref.Class="vm::IEditorContentModel">
@@ -40,6 +42,17 @@
     </Method>
     <Method Name="EndEdit" Type="void">
       <Argument Name="editor" Type="vm::IEditorModel*"/>
+    </Method>
+  </Interface>
+
+  <Interface ref.Class="vm::IEditorFileContentModel" Parent="vm::IEditorContentModel">
+    <Property Name="FileName" Type="string" Readonly="true"/>
+
+    <Method Name="LoadFile" Type="void">
+      <Argument Name="fileName" Type="string"/>
+    </Method>
+    <Method Name="RenameFile" Type="void">
+      <Argument Name="fileName" Type="string"/>
     </Method>
   </Interface>
 

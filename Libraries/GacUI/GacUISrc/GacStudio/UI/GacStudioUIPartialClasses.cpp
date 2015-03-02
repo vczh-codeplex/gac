@@ -21,6 +21,7 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(vm::IEditorContentFactoryModel)
 			IMPL_CPP_TYPE_INFO(vm::IEditorContentModel)
 			IMPL_CPP_TYPE_INFO(vm::IEditorFactoryModel)
+			IMPL_CPP_TYPE_INFO(vm::IEditorFileContentModel)
 			IMPL_CPP_TYPE_INFO(vm::IEditorModel)
 			IMPL_CPP_TYPE_INFO(vm::IFileFactoryModel)
 			IMPL_CPP_TYPE_INFO(vm::IFileModel)
@@ -61,6 +62,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaseContentFactory)
+				CLASS_MEMBER_METHOD(CreateContent, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IEditorContentFactoryModel)
 
 			BEGIN_CLASS_MEMBER(vm::IEditorContentModel)
@@ -86,6 +88,13 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditingContentFactory)
 				CLASS_MEMBER_METHOD(CreateEditor, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IEditorFactoryModel)
+
+			BEGIN_CLASS_MEMBER(vm::IEditorFileContentModel)
+				CLASS_MEMBER_BASE(vm::IEditorContentModel)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileName)
+				CLASS_MEMBER_METHOD(LoadFile, { L"fileName" });
+				CLASS_MEMBER_METHOD(RenameFile, { L"fileName" });
+			END_CLASS_MEMBER(vm::IEditorFileContentModel)
 
 			BEGIN_CLASS_MEMBER(vm::IEditorModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
@@ -370,6 +379,7 @@ namespace vl
 					ADD_TYPE_INFO(vm::IEditorContentFactoryModel)
 					ADD_TYPE_INFO(vm::IEditorContentModel)
 					ADD_TYPE_INFO(vm::IEditorFactoryModel)
+					ADD_TYPE_INFO(vm::IEditorFileContentModel)
 					ADD_TYPE_INFO(vm::IEditorModel)
 					ADD_TYPE_INFO(vm::IFileFactoryModel)
 					ADD_TYPE_INFO(vm::IFileModel)
