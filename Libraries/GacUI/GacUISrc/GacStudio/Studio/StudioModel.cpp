@@ -435,9 +435,10 @@ StudioAddExistingFilesModel
 EditorContentFactoryModel
 ***********************************************************************/
 
-	EditorContentFactoryModel::EditorContentFactoryModel(const WString& _name, const WString& _id)
+	EditorContentFactoryModel::EditorContentFactoryModel(const WString& _name, const WString& _id, description::ITypeDescriptor* _contentType)
 		:name(_name)
 		, id(_id)
+		, contentType(_contentType)
 	{
 	}
 
@@ -464,11 +465,25 @@ EditorContentFactoryModel
 	{
 		if (baseContentFactory)
 		{
-			return new UnsupportedEditorContentModel(this, dynamic_cast<EditorContentModelBase*>(baseContent.Obj()));
+			if (contentType)
+			{
+				return UnboxValue<Ptr<IEditorContentModel>>(Value::Create(contentType, (Value_xs(), BoxValue(this), baseContent)));
+			}
+			else
+			{
+				return new UnsupportedEditorContentModel(this, dynamic_cast<EditorContentModelBase*>(baseContent.Obj()));
+			}
 		}
 		else
 		{
-			return new UnsupportedEditorFileContentModel(this);
+			if (contentType)
+			{
+				return UnboxValue<Ptr<IEditorContentModel>>(Value::Create(contentType, (Value_xs(), BoxValue(this))));
+			}
+			else
+			{
+				return new UnsupportedEditorFileContentModel(this);
+			}
 		}
 	}
 
@@ -570,7 +585,18 @@ StudioModel
 			auto xml = item->AsXml()->rootElement;
 			auto id = item->GetName();
 			auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
-			configContents.Add(id, new EditorContentFactoryModel(display, id));
+			
+			ITypeDescriptor* contentType = nullptr;
+			if (auto element = XmlGetElement(xml, L"Class"))
+			{
+				auto className = XmlGetValue(element);
+				contentType = description::GetTypeDescriptor(className);
+				if (!contentType)
+				{
+					throw StudioException(L"Internal error: Cannot find content class \"" + className + L"\"", true);
+				}
+			}
+			configContents.Add(id, new EditorContentFactoryModel(display, id, contentType));
 		}
 
 		FOREACH(Ptr<GuiResourceItem>, item, editors->GetItems())
