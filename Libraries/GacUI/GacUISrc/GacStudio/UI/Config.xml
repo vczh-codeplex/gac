@@ -57,7 +57,7 @@
         <BaseContent>GACUI_XML_CONTENT</BaseContent>
       </Content>
     </Xml>
-    <Xml name="GACUI_Instance_CONTENT">
+    <Xml name="GACUI_INSTANCE_CONTENT">
       <Content>
         <Display>GacUI Instance Content</Display>
         <BaseContent>GACUI_XML_CONTENT</BaseContent>

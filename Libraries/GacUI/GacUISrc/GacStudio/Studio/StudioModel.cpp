@@ -431,44 +431,44 @@ StudioAddExistingFilesModel
 	}
 
 /***********************************************************************
-EditorContentFactory
+EditorContentFactoryModel
 ***********************************************************************/
 
-	EditorContentFactory::EditorContentFactory(const WString& _name, const WString& _id)
+	EditorContentFactoryModel::EditorContentFactoryModel(const WString& _name, const WString& _id)
 		:name(_name)
 		, id(_id)
 	{
 	}
 
-	EditorContentFactory::~EditorContentFactory()
+	EditorContentFactoryModel::~EditorContentFactoryModel()
 	{
 	}
 
-	WString EditorContentFactory::GetName()
+	WString EditorContentFactoryModel::GetName()
 	{
 		return name;
 	}
 
-	WString EditorContentFactory::GetId()
+	WString EditorContentFactoryModel::GetId()
 	{
 		return id;
 	}
 
-	IEditorContentFactoryModel* EditorContentFactory::GetBaseContentFactory()
+	IEditorContentFactoryModel* EditorContentFactoryModel::GetBaseContentFactory()
 	{
 		return baseContentFactory;
 	}
 
-	Ptr<IEditorContentModel> EditorContentFactory::CreateContent()
+	Ptr<IEditorContentModel> EditorContentFactoryModel::CreateContent()
 	{
 		throw 0;
 	}
 
 /***********************************************************************
-EditorFactory
+EditorFactoryModel
 ***********************************************************************/
 
-	EditorFactory::EditorFactory(const WString& _name, const WString& _id, Ptr<IEditorContentFactoryModel> _required, Ptr<IEditorContentFactoryModel> _editing)
+	EditorFactoryModel::EditorFactoryModel(const WString& _name, const WString& _id, Ptr<IEditorContentFactoryModel> _required, Ptr<IEditorContentFactoryModel> _editing)
 		:name(_name)
 		, id(_id)
 		, required(_required)
@@ -476,31 +476,31 @@ EditorFactory
 	{
 	}
 
-	EditorFactory::~EditorFactory()
+	EditorFactoryModel::~EditorFactoryModel()
 	{
 	}
 
-	WString EditorFactory::GetName()
+	WString EditorFactoryModel::GetName()
 	{
 		return name;
 	}
 
-	WString EditorFactory::GetId()
+	WString EditorFactoryModel::GetId()
 	{
 		return id;
 	}
 
-	Ptr<IEditorContentFactoryModel> EditorFactory::GetRequiredContentFactory()
+	Ptr<IEditorContentFactoryModel> EditorFactoryModel::GetRequiredContentFactory()
 	{
 		return required;
 	}
 
-	Ptr<IEditorContentFactoryModel> EditorFactory::GetEditingContentFactory()
+	Ptr<IEditorContentFactoryModel> EditorFactoryModel::GetEditingContentFactory()
 	{
 		return editing;
 	}
 
-	Ptr<IEditorModel> EditorFactory::CreateEditor()
+	Ptr<IEditorModel> EditorFactoryModel::CreateEditor()
 	{
 		throw 0;
 	}
@@ -513,41 +513,71 @@ StudioModel
 	{
 		Dictionary<WString, Ptr<ProjectFactoryModel>> configProjects;
 		Dictionary<WString, Ptr<FileFactoryModel>> configFiles;
+		Dictionary<WString, Ptr<EditorContentFactoryModel>> configContents;
+		Dictionary<WString, Ptr<EditorFactoryModel>> configEditors;
+
+		auto resources = GetInstanceLoaderManager()->GetResource(L"GacStudioUI");
+		auto projects = resources->GetFolderByPath(L"Config/Projects/");
+		auto files = resources->GetFolderByPath(L"Config/Files/");
+		auto contents = resources->GetFolderByPath(L"Config/Contents/");
+		auto editors = resources->GetFolderByPath(L"Config/Editors/");
+
+		FOREACH(Ptr<GuiResourceItem>, item, projects->GetItems())
 		{
-			auto resources = GetInstanceLoaderManager()->GetResource(L"GacStudioUI");
+			auto xml = item->AsXml()->rootElement;
+			auto id = item->GetName();
+			auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
+			auto smallImage = XmlGetValue(XmlGetElement(xml, L"SmallImage"));
+			auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
+			auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
+			configProjects.Add(id, new ProjectFactoryModel(image, smallImage, display, description, id));
+		}
 
-			auto projects = resources->GetFolderByPath(L"Config/Projects/");
-			FOREACH(Ptr<GuiResourceItem>, item, projects->GetItems())
+		FOREACH(Ptr<GuiResourceItem>, item, files->GetItems())
+		{
+			auto xml = item->AsXml()->rootElement;
+			auto id = item->GetName();
+			auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
+			auto smallImage = XmlGetValue(XmlGetElement(xml, L"SmallImage"));
+			auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
+			auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
+			auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
+			auto ext = XmlGetValue(XmlGetElement(xml, L"DefaultFileExt"));
+
+			Ptr<ITextTemplate> textTemplate;
+			if (auto element = XmlGetElement(xml, L"TextTemplate"))
 			{
-				auto xml = item->AsXml()->rootElement;
-				auto id = item->GetName();
-				auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
-				auto smallImage = XmlGetValue(XmlGetElement(xml, L"SmallImage"));
-				auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
-				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
-				configProjects.Add(id, new ProjectFactoryModel(image, smallImage, display, description, id));
+				textTemplate = new TextTemplate(XmlGetValue(element));
 			}
 
-			auto files = resources->GetFolderByPath(L"Config/Files/");
-			FOREACH(Ptr<GuiResourceItem>, item, files->GetItems())
+			configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext, textTemplate));
+		}
+
+		FOREACH(Ptr<GuiResourceItem>, item, contents->GetItems())
+		{
+			auto xml = item->AsXml()->rootElement;
+			auto id = item->GetName();
+			auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
+			configContents.Add(id, new EditorContentFactoryModel(display, id));
+		}
+
+		FOREACH(Ptr<GuiResourceItem>, item, contents->GetItems())
+		{
+			auto xml = item->AsXml()->rootElement;
+			if (auto element = XmlGetElement(xml, L"BaseContent"))
 			{
-				auto xml = item->AsXml()->rootElement;
-				auto id = item->GetName();
-				auto image = XmlGetValue(XmlGetElement(xml, L"Image"));
-				auto smallImage = XmlGetValue(XmlGetElement(xml, L"SmallImage"));
-				auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
-				auto description = XmlGetValue(XmlGetElement(xml, L"Description"));
-				auto category = XmlGetValue(XmlGetElement(xml, L"Category"));
-				auto ext = XmlGetValue(XmlGetElement(xml, L"DefaultFileExt"));
-
-				Ptr<ITextTemplate> textTemplate;
-				if (auto element = XmlGetElement(xml, L"TextTemplate"))
-				{
-					textTemplate = new TextTemplate(XmlGetValue(element));
-				}
-
-				configFiles.Add(id, new FileFactoryModel(image, smallImage, display, category, description, id, ext, textTemplate));
+				configContents[item->GetName()]->baseContentFactory = configContents[XmlGetValue(element)].Obj();
 			}
+		}
+
+		FOREACH(Ptr<GuiResourceItem>, item, editors->GetItems())
+		{
+			auto xml = item->AsXml()->rootElement;
+			auto id = item->GetName();
+			auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
+			auto required = configContents[XmlGetValue(XmlGetElement(xml, L"Required"))];
+			auto editing = configContents[XmlGetValue(XmlGetElement(xml, L"Editing"))];
+			configEditors.Add(id, new EditorFactoryModel(display, id, required, editing));
 		}
 
 		solutionProjectFactory = new FileFactoryFilterModel;
@@ -555,13 +585,11 @@ StudioModel
 		{
 			solutionProjectFactory->AddChild(project);
 		}
-
 		rootSolutionItem = new RootSolutionItemModel;
 		
-		FOREACH(Ptr<FileFactoryModel>, file, configFiles.Values())
-		{
-			fileFactories.Add(file);
-		}
+		CopyFrom(fileFactories, configFiles.Values());
+		CopyFrom(contentFactories, configContents.Values());
+		CopyFrom(editorFactories, configEditors.Values());
 	}
 
 	StudioModel::~StudioModel()
