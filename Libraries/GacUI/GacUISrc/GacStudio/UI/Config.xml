@@ -31,6 +31,7 @@
     <Xml name="GACUI_TEXT_CONTENT">
       <Content>
         <Display>Text Content</Display>
+        <Class>vm::TextContentModel</Class>
       </Content>
     </Xml>
     <Xml name="GACUI_XML_CONTENT">

@@ -17,6 +17,10 @@ namespace vm
 {
 	class StudioModel;
 
+/***********************************************************************
+Text Template
+***********************************************************************/
+
 	class TextTemplateItem : public Object
 	{
 	public:
@@ -35,6 +39,10 @@ namespace vm
 
 		WString											Generate(Ptr<IMacroEnvironment> macroEnvironment)override;
 	};
+
+/***********************************************************************
+File Factory
+***********************************************************************/
 
 	class FileFactoryModel : public Object, public virtual IFileFactoryModel
 	{
@@ -65,6 +73,10 @@ namespace vm
 		Ptr<ITextTemplate>								GetTextTemplate()override;
 		Ptr<IEditorContentFactoryModel>					GetContentFactory()override;
 	};
+
+/***********************************************************************
+Project Factory
+***********************************************************************/
 
 	class ProjectFactoryModel : public Object, public virtual IProjectFactoryModel
 	{
@@ -121,6 +133,10 @@ namespace vm
 		void											SetSolution(Ptr<ISolutionModel> solution);
 	};
 
+/***********************************************************************
+Operation Models
+***********************************************************************/
+
 	class StudioNewFileModel : public Object, public virtual IStudioNewFileModel
 	{
 	protected:
@@ -162,16 +178,21 @@ namespace vm
 		void											RemoveFiles(LazyList<vint32_t> indices)override;
 	};
 
+/***********************************************************************
+Editor
+***********************************************************************/
+
 	class EditorContentFactoryModel : public Object, public virtual IEditorContentFactoryModel
 	{
 		friend class StudioModel;
 	protected:
 		WString											name;
 		WString											id;
+		description::ITypeDescriptor*					contentType = nullptr;
 		IEditorContentFactoryModel*						baseContentFactory = nullptr;
 
 	public:
-		EditorContentFactoryModel(const WString& _name, const WString& _id);
+		EditorContentFactoryModel(const WString& _name, const WString& _id, description::ITypeDescriptor* _contentType);
 		~EditorContentFactoryModel();
 
 		WString											GetName()override;
@@ -198,6 +219,10 @@ namespace vm
 		Ptr<IEditorContentFactoryModel>					GetEditingContentFactory()override;
 		Ptr<IEditorModel>								CreateEditor()override;
 	};
+
+/***********************************************************************
+Studio Model
+***********************************************************************/
 
 	class StudioModel : public Object, public virtual IStudioModel
 	{
