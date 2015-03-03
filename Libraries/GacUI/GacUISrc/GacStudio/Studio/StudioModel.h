@@ -15,6 +15,8 @@ using namespace vl::collections;
 
 namespace vm
 {
+	class StudioModel;
+
 	class TextTemplateItem : public Object
 	{
 	public:
@@ -36,6 +38,7 @@ namespace vm
 
 	class FileFactoryModel : public Object, public virtual IFileFactoryModel
 	{
+		friend class StudioModel;
 	protected:
 		Ptr<GuiImageData>								image;
 		Ptr<GuiImageData>								smallImage;
@@ -45,6 +48,7 @@ namespace vm
 		WString											id;
 		WString											ext;
 		Ptr<ITextTemplate>								textTemplate;
+		Ptr<IEditorContentFactoryModel>					contentFactory;
 
 	public:
 		FileFactoryModel(WString _imageUrl, WString _smallImageUrl, WString _name, WString _category, WString _description, WString _id, WString _ext, Ptr<ITextTemplate> _textTemplate);

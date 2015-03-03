@@ -153,7 +153,7 @@ FileFactoryModel
 
 	Ptr<IEditorContentFactoryModel> FileFactoryModel::GetContentFactory()
 	{
-		return nullptr;
+		return contentFactory;
 	}
 
 /***********************************************************************
@@ -516,11 +516,15 @@ StudioModel
 		Dictionary<WString, Ptr<EditorContentFactoryModel>> configContents;
 		Dictionary<WString, Ptr<EditorFactoryModel>> configEditors;
 
+		// loading resources
+
 		auto resources = GetInstanceLoaderManager()->GetResource(L"GacStudioUI");
 		auto projects = resources->GetFolderByPath(L"Config/Projects/");
 		auto files = resources->GetFolderByPath(L"Config/Files/");
 		auto contents = resources->GetFolderByPath(L"Config/Contents/");
 		auto editors = resources->GetFolderByPath(L"Config/Editors/");
+
+		// parsing resources
 
 		FOREACH(Ptr<GuiResourceItem>, item, projects->GetItems())
 		{
@@ -561,15 +565,6 @@ StudioModel
 			configContents.Add(id, new EditorContentFactoryModel(display, id));
 		}
 
-		FOREACH(Ptr<GuiResourceItem>, item, contents->GetItems())
-		{
-			auto xml = item->AsXml()->rootElement;
-			if (auto element = XmlGetElement(xml, L"BaseContent"))
-			{
-				configContents[item->GetName()]->baseContentFactory = configContents[XmlGetValue(element)].Obj();
-			}
-		}
-
 		FOREACH(Ptr<GuiResourceItem>, item, editors->GetItems())
 		{
 			auto xml = item->AsXml()->rootElement;
@@ -581,6 +576,28 @@ StudioModel
 			configEditors.Add(id, editorFactory);
 			associatedEditors.Add(required.Obj(), editorFactory);
 		}
+
+		// creating resource connections
+
+		FOREACH(Ptr<GuiResourceItem>, item, files->GetItems())
+		{
+			auto xml = item->AsXml()->rootElement;
+			if (auto element = XmlGetElement(xml, L"Content"))
+			{
+				configFiles[item->GetName()]->contentFactory = configContents[XmlGetValue(element)].Obj();
+			}
+		}
+
+		FOREACH(Ptr<GuiResourceItem>, item, contents->GetItems())
+		{
+			auto xml = item->AsXml()->rootElement;
+			if (auto element = XmlGetElement(xml, L"BaseContent"))
+			{
+				configContents[item->GetName()]->baseContentFactory = configContents[XmlGetValue(element)].Obj();
+			}
+		}
+
+		// initialize remainings
 
 		solutionProjectFactory = new FileFactoryFilterModel;
 		FOREACH(Ptr<ProjectFactoryModel>, project, configProjects.Values())
