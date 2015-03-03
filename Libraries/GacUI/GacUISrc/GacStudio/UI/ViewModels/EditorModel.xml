@@ -23,7 +23,9 @@
     <Property Name="Id" Type="string" Readonly="true"/>
     <Property Name="BaseContentFactory" Type="vm::IEditorContentFactoryModel*" Readonly="true"/>
 
-    <Method Name="CreateContent" Type="vm::IEditorContentModel^"/>
+    <Method Name="CreateContent" Type="vm::IEditorContentModel^">
+      <Argument Name="baseContent" Type="vm::IEditorContentModel^"/>
+    </Method>
   </Interface>
   
   <Interface ref.Class="vm::IEditorContentModel">

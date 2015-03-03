@@ -44,12 +44,6 @@ EditorContentModelBase
 		return false;
 	}
 
-	void EditorContentModelBase::SetBaseContent(EditorContentModelBase* _baseContent)
-	{
-		baseContent = _baseContent;
-		baseContent->subContent = this;
-	}
-
 	void EditorContentModelBase::OnBasePersistedContentChanged()
 	{
 		state = BaseContentChanged;
@@ -70,9 +64,11 @@ EditorContentModelBase
 		}
 	}
 
-	EditorContentModelBase::EditorContentModelBase(Ptr<IEditorContentFactoryModel> _contentFactory)
+	EditorContentModelBase::EditorContentModelBase(Ptr<IEditorContentFactoryModel> _contentFactory, EditorContentModelBase* _baseContent)
 		:contentFactory(_contentFactory)
 	{
+		baseContent = _baseContent;
+		baseContent->subContent = this;
 	}
 
 	EditorContentModelBase::~EditorContentModelBase()
@@ -190,7 +186,7 @@ EditorFileContentModelBase
 	}
 
 	EditorFileContentModelBase::EditorFileContentModelBase(Ptr<IEditorContentFactoryModel> _contentFactory)
-		:EditorContentModelBase(_contentFactory)
+		:EditorContentModelBase(_contentFactory, nullptr)
 	{
 	}
 

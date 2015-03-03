@@ -16,7 +16,6 @@
 
   <Interface ref.Class="vm::IFileModel" Parent="vm::ISolutionItemModel">
     <Property Name="FileFactory" Type="vm::IFileFactoryModel^" Readonly="true"/>
-    <Method Name="OpenFile" Type="void"/>
     <Method Name="InitializeFileAndSave" Type="void"/>
   </Interface>
 

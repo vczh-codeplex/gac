@@ -51,6 +51,7 @@ namespace vm
 	class FileItem : public Object, public virtual IFileModel, public Description<FileItem>
 		, public virtual IRenameItemAction
 		, public virtual IRemoveItemAction
+		, public virtual IOpenInEditorItemAction
 	{
 		friend class FolderItemBase;
 		friend class FolderItem;
@@ -60,9 +61,14 @@ namespace vm
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
 		Ptr<IFileFactoryModel>							fileFactory;
 		WString											filePath;
-		collections::List<WString>						errors;
+		List<WString>									errors;
 		bool											unsupported;
 		ISolutionItemModel*								parent;
+
+		Ptr<IEditorFileContentModel>					fileContent;
+		List<Ptr<IEditorContentModel>>					supportedContents;
+		List<Ptr<IEditorFactoryModel>>					supportedEditors;
+		IEditorModel*									currentEditor;
 
 		void											UpdateFilePath(const WString& newFilePath);
 	public:
@@ -72,12 +78,17 @@ namespace vm
 		// --------------------------- action
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		Rename(WString newName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		Remove()override;
+		LazyList<Ptr<ISaveItemAction>>					Rename(WString newName)override;
+		LazyList<Ptr<ISaveItemAction>>					Remove()override;
+
+		LazyList<Ptr<IEditorContentModel>>				GetSupportedContents()override;
+		LazyList<Ptr<IEditorFactoryModel>>				GetSupportedEditors()override;
+		IEditorModel*									GetCurrentEditor()override;
+		Ptr<IEditorModel>								OpenEditor(Ptr<IEditorFactoryModel> editorFactory)override;
+		void											CloseEditor()override;
 
 		// --------------------------- feature
 		Ptr<IFileFactoryModel>							GetFileFactory()override;
-		void											OpenFile()override;
 		void											InitializeFileAndSave()override;
 
 		// --------------------------- solution item
@@ -95,11 +106,11 @@ namespace vm
 	{
 	protected:
 		list::ObservableList<Ptr<ISolutionItemModel>>	children;
-		collections::SortedList<WString>				folderNames;
-		collections::SortedList<WString>				fileNames;
+		SortedList<WString>								folderNames;
+		SortedList<WString>								fileNames;
 
 		void											ClearInternal();
-		void											FindFileItems(collections::List<Ptr<FileItem>>& fileItems);
+		void											FindFileItems(List<Ptr<FileItem>>& fileItems);
 		void											AddFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 		bool											RemoveFileItemInternal(const wchar_t* filePath, Ptr<IFileModel> fileItem);
 	public:
@@ -123,11 +134,11 @@ namespace vm
 		
 		// --------------------------- action
 		bool											HasFile(WString fileName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		AddFile(Ptr<IFileModel> file)override;
+		LazyList<Ptr<ISaveItemAction>>					AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		Rename(WString newName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		Remove()override;
+		LazyList<Ptr<ISaveItemAction>>					Rename(WString newName)override;
+		LazyList<Ptr<ISaveItemAction>>					Remove()override;
 		
 		// --------------------------- solution item
 		ISolutionItemModel*								GetParent()override;
@@ -153,7 +164,7 @@ namespace vm
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
 		List<Ptr<IFileModel>>							fileItems;
-		collections::List<WString>						errors;
+		List<WString>									errors;
 		bool											unsupported;
 
 		WString											GetNormalizedRelativePath(Ptr<IFileModel> fileItem);
@@ -166,11 +177,11 @@ namespace vm
 		
 		// --------------------------- action
 		bool											HasFile(WString fileName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		AddFile(Ptr<IFileModel> file)override;
+		LazyList<Ptr<ISaveItemAction>>					AddFile(Ptr<IFileModel> file)override;
 		WString											GetRenameablePart()override;
 		WString											PreviewRename(WString newName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		Rename(WString newName)override;
-		collections::LazyList<Ptr<ISaveItemAction>>		Remove()override;
+		LazyList<Ptr<ISaveItemAction>>					Rename(WString newName)override;
+		LazyList<Ptr<ISaveItemAction>>					Remove()override;
 		void											Save()override;
 		
 		// --------------------------- feature
@@ -197,7 +208,7 @@ namespace vm
 		list::ObservableList<Ptr<IProjectModel>>		projects;
 		Ptr<IProjectFactoryModel>						projectFactory;
 		WString											filePath;
-		collections::List<WString>						errors;
+		List<WString>									errors;
 
 	public:
 		SolutionItem(IStudioModel* _studioModel, Ptr<IProjectFactoryModel> _projectFactory, WString _filePath);

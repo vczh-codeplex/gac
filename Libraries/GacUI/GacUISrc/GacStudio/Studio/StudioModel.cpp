@@ -459,7 +459,7 @@ EditorContentFactoryModel
 		return baseContentFactory;
 	}
 
-	Ptr<IEditorContentModel> EditorContentFactoryModel::CreateContent()
+	Ptr<IEditorContentModel> EditorContentFactoryModel::CreateContent(Ptr<IEditorContentModel> baseContent)
 	{
 		throw 0;
 	}
@@ -577,7 +577,9 @@ StudioModel
 			auto display = XmlGetValue(XmlGetElement(xml, L"Display"));
 			auto required = configContents[XmlGetValue(XmlGetElement(xml, L"Required"))];
 			auto editing = configContents[XmlGetValue(XmlGetElement(xml, L"Editing"))];
-			configEditors.Add(id, new EditorFactoryModel(display, id, required, editing));
+			auto editorFactory = MakePtr<EditorFactoryModel>(display, id, required, editing);
+			configEditors.Add(id, editorFactory);
+			associatedEditors.Add(required.Obj(), editorFactory);
 		}
 
 		solutionProjectFactory = new FileFactoryFilterModel;
@@ -687,6 +689,19 @@ StudioModel
 				return model->GetId() == id;
 			})
 		.First(nullptr);
+	}
+
+	LazyList<Ptr<IEditorFactoryModel>> StudioModel::GetAssociatedEditors(Ptr<IEditorContentFactoryModel> contentFactory)
+	{
+		auto index = associatedEditors.Keys().IndexOf(contentFactory.Obj());
+		if (index == -1)
+		{
+			return LazyList<Ptr<IEditorFactoryModel>>();
+		}
+		else
+		{
+			return From(associatedEditors.GetByIndex(index));
+		}
 	}
 
 	void StudioModel::OpenSolution(WString filePath)

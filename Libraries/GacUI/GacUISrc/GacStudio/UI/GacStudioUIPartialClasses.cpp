@@ -62,7 +62,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Id)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaseContentFactory)
-				CLASS_MEMBER_METHOD(CreateContent, NO_PARAMETER);
+				CLASS_MEMBER_METHOD(CreateContent, { L"baseContent" });
 			END_CLASS_MEMBER(vm::IEditorContentFactoryModel)
 
 			BEGIN_CLASS_MEMBER(vm::IEditorContentModel)
@@ -123,7 +123,6 @@ namespace vl
 			BEGIN_CLASS_MEMBER(vm::IFileModel)
 				CLASS_MEMBER_BASE(vm::ISolutionItemModel)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(FileFactory)
-				CLASS_MEMBER_METHOD(OpenFile, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(InitializeFileAndSave, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IFileModel)
 
@@ -140,6 +139,9 @@ namespace vl
 
 			BEGIN_CLASS_MEMBER(vm::IOpenInEditorItemAction)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SupportedContents)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SupportedEditors)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CurrentEditor)
 				CLASS_MEMBER_METHOD(OpenEditor, { L"editorFactory" });
 				CLASS_MEMBER_METHOD(CloseEditor, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IOpenInEditorItemAction)
@@ -233,6 +235,7 @@ namespace vl
 				CLASS_MEMBER_METHOD(GetProjectFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetFileFactory, { L"id" });
 				CLASS_MEMBER_METHOD(GetEditorFactory, { L"id" });
+				CLASS_MEMBER_METHOD(GetAssociatedEditors, { L"contentFactory" });
 				CLASS_MEMBER_METHOD(OpenSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(NewSolution, { L"filePath" });
 				CLASS_MEMBER_METHOD(CloseSolution, NO_PARAMETER);

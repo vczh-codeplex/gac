@@ -190,6 +190,53 @@ FileItem
 		{
 			errors.Add(L"This file is not supported.");
 		}
+
+		List<IEditorContentFactoryModel*> contentFactories;
+		{
+			auto contentFactory = fileFactory->GetContentFactory().Obj();
+			while (contentFactory)
+			{
+				contentFactories.Add(contentFactory);
+				contentFactory = contentFactory->GetBaseContentFactory();
+			}
+		}
+
+		Ptr<IEditorContentModel> lastContent;
+		for (vint i = contentFactories.Count() - 1; i >= 0; i--)
+		{
+			auto contentFactory = contentFactories[i];
+			auto content = contentFactory->CreateContent(lastContent);
+			if (!lastContent)
+			{
+				fileContent = content.Cast<IEditorFileContentModel>();
+				if (!fileContent)
+				{
+					throw StudioException(L"Internal error: File \"" + filePath + L"\" requires a content of \"" + fileFactory->GetContentFactory()->GetName() + L"\" , failed to use a content of \"" + contentFactory->GetName() + L"\" as a file content.", true);
+				}
+			}
+			lastContent = content;
+		}
+
+		SortedList<IEditorContentFactoryModel*> contentFactorySet;
+		CopyFrom(contentFactorySet, contentFactories);
+		CopyFrom(
+			supportedEditors,
+			From(contentFactories)
+				.SelectMany([=](IEditorContentFactoryModel* contentFactory)
+				{
+					return studioModel->GetAssociatedEditors(contentFactory);
+				})
+				.Where([&](Ptr<IEditorFactoryModel> editorFactory)
+				{
+					return contentFactorySet.Contains(editorFactory->GetEditingContentFactory().Obj());
+				})
+				.Distinct()
+			);
+
+		if (fileContent)
+		{
+			fileContent->LoadFile(filePath);
+		}
 	}
 
 	FileItem::~FileItem()
@@ -206,7 +253,7 @@ FileItem
 		return GetDisplayNamePreviewFromFilePath(filePath, fileFactory->GetDefaultFileExt(), newName);
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> FileItem::Rename(WString newName)
+	LazyList<Ptr<ISaveItemAction>> FileItem::Rename(WString newName)
 	{
 		auto project = GetOwnerProject(this);
 		auto newFullPath = PreviewRename(newName);
@@ -222,10 +269,14 @@ FileItem
 
 		UpdateFilePath(newFullPath);
 		project->RenameFileItem(fileItem, oldRelativePath);
+		if (fileContent)
+		{
+			fileContent->RenameFile(filePath);
+		}
 		return SingleSaveItem(project);
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> FileItem::Remove()
+	LazyList<Ptr<ISaveItemAction>> FileItem::Remove()
 	{
 		if (auto project = GetOwnerProject(this))
 		{
@@ -238,14 +289,58 @@ FileItem
 		}
 	}
 
+	LazyList<Ptr<IEditorContentModel>> FileItem::GetSupportedContents()
+	{
+		return From(supportedContents);
+	}
+
+	LazyList<Ptr<IEditorFactoryModel>> FileItem::GetSupportedEditors()
+	{
+		return From(supportedEditors);
+	}
+
+	IEditorModel* FileItem::GetCurrentEditor()
+	{
+		return currentEditor;
+	}
+
+	Ptr<IEditorModel> FileItem::OpenEditor(Ptr<IEditorFactoryModel> editorFactory)
+	{
+		if (!currentEditor)
+		{
+			throw StudioException(L"Internal error: File \"" + filePath + L"\" cannot open another editor while it is being edited.", true);
+		}
+
+		if (!supportedEditors.Contains(editorFactory.Obj()))
+		{
+			throw StudioException(L"Internal error: File \"" + filePath + L"\" doesn't support editor \"" + editorFactory->GetName() + L"\".", true);
+		}
+
+		auto editor = editorFactory->CreateEditor();
+		auto editingContent = From(supportedContents)
+			.Where([=](Ptr<IEditorContentModel> content)
+			{
+				return content->GetContentFactory() == editorFactory->GetEditingContentFactory();
+			})
+			.First(nullptr);
+		editor->Open(editingContent);
+		currentEditor = editor.Obj();
+		return editor;
+	}
+
+	void FileItem::CloseEditor()
+	{
+		if (!currentEditor)
+		{
+			throw StudioException(L"Internal error: File \"" + filePath + L"\" cannot close an unexisting editor.", true);
+		}
+		currentEditor->Close();
+		currentEditor = 0;
+	}
+
 	Ptr<IFileFactoryModel> FileItem::GetFileFactory()
 	{
 		return fileFactory;
-	}
-
-	void FileItem::OpenFile()
-	{
-		throw 0;
 	}
 
 	void FileItem::InitializeFileAndSave()
@@ -320,7 +415,7 @@ FolderItemBase
 		fileNames.Clear();
 	}
 
-	void FolderItemBase::FindFileItems(collections::List<Ptr<FileItem>>& fileItems)
+	void FolderItemBase::FindFileItems(List<Ptr<FileItem>>& fileItems)
 	{
 		FOREACH(Ptr<ISolutionItemModel>, item, children)
 		{
@@ -450,7 +545,7 @@ FolderItem
 		}
 	}
 	
-	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::AddFile(Ptr<IFileModel> file)
+	LazyList<Ptr<ISaveItemAction>> FolderItem::AddFile(Ptr<IFileModel> file)
 	{
 		if (auto project = GetOwnerProject(this))
 		{
@@ -473,7 +568,7 @@ FolderItem
 		return GetDisplayNamePreviewFromFilePath(filePath, L"", newName);
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::Rename(WString newName)
+	LazyList<Ptr<ISaveItemAction>> FolderItem::Rename(WString newName)
 	{
 		List<Ptr<FileItem>> fileItems;
 		List<WString> oldRelativePaths, newFullPaths;
@@ -509,7 +604,7 @@ FolderItem
 		return SingleSaveItem(project);
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> FolderItem::Remove()
+	LazyList<Ptr<ISaveItemAction>> FolderItem::Remove()
 	{
 		auto project = GetOwnerProject(this);
 		if (!project)
@@ -669,7 +764,7 @@ ProjectItem
 			});
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::AddFile(Ptr<IFileModel> file)
+	LazyList<Ptr<ISaveItemAction>> ProjectItem::AddFile(Ptr<IFileModel> file)
 	{
 		AddFileItem(file);
 		return SingleSaveItem(this);
@@ -685,7 +780,7 @@ ProjectItem
 		return (FilePath(filePath).GetFolder().GetFolder() / newName / (newName + L".gacproj.xml")).GetFullPath();
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Rename(WString newName)
+	LazyList<Ptr<ISaveItemAction>> ProjectItem::Rename(WString newName)
 	{
 		if (unsupported)
 		{
@@ -719,7 +814,7 @@ ProjectItem
 		return SingleSaveItem(studioModel->GetOpenedSolution());
 	}
 
-	collections::LazyList<Ptr<ISaveItemAction>> ProjectItem::Remove()
+	LazyList<Ptr<ISaveItemAction>> ProjectItem::Remove()
 	{
 		studioModel->GetOpenedSolution()->RemoveProject(this);
 		return SingleSaveItem(studioModel->GetOpenedSolution());
@@ -1096,6 +1191,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vm::IFileModel)
 				CLASS_MEMBER_BASE(vm::IRenameItemAction)
 				CLASS_MEMBER_BASE(vm::IRemoveItemAction)
+				CLASS_MEMBER_BASE(vm::IOpenInEditorItemAction)
 			END_CLASS_MEMBER(vm::FileItem)
 
 			BEGIN_CLASS_MEMBER(vm::FolderItem)

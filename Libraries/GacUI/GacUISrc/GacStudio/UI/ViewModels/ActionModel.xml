@@ -14,9 +14,9 @@
   </Interface>
 
   <Interface ref.Class="vm::IOpenInEditorItemAction">
-    <Parameter Name="SupportedContents" Type="vm::IEditorContentModel^{}" Readonly="true"/>
-    <Parameter Name="SupportedEditors" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
-    <Parameter Name="CurrentEditor" Type="vm::IEditorModel*" Readonly="true"/>
+    <Property Name="SupportedContents" Type="vm::IEditorContentModel^{}" Readonly="true"/>
+    <Property Name="SupportedEditors" Type="vm::IEditorFactoryModel^{}" Readonly="true"/>
+    <Property Name="CurrentEditor" Type="vm::IEditorModel*" Readonly="true"/>
 
     <Method Name="OpenEditor" Type="vm::IEditorModel^">
       <Argument Name="editorFactory" Type="vm::IEditorFactoryModel^"/>
