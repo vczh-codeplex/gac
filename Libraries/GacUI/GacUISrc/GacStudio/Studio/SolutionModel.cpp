@@ -1183,6 +1183,7 @@ namespace vl
 		namespace description
 		{
 			#define _ ,
+
 			IMPL_CPP_TYPE_INFO(vm::FileItem)
 			IMPL_CPP_TYPE_INFO(vm::FolderItem)
 			IMPL_CPP_TYPE_INFO(vm::ProjectItem)

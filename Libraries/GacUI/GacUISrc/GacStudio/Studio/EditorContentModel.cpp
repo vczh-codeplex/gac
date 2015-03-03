@@ -1,6 +1,9 @@
 #include "EditorContentModel.h"
 #include "SolutionModel.h"
 
+using namespace vl::stream;
+using namespace vl::collections;
+
 namespace vm
 {
 
@@ -270,5 +273,106 @@ UnsupportedEditorFileContentModel
 
 	UnsupportedEditorFileContentModel::~UnsupportedEditorFileContentModel()
 	{
+	}
+
+/***********************************************************************
+TextContentModel
+***********************************************************************/
+
+	description::Value TextContentModel::LoadFromFile(const WString& _fileName)
+	{
+		FileStream fileStream(_fileName, FileStream::ReadOnly);
+		if (!fileStream.IsAvailable())
+		{
+			throw StudioException(L"Unable to read file \"" + _fileName + L"\".", true);
+		}
+		
+		BomDecoder decoder;
+		DecoderStream decoderStream(fileStream, decoder);
+		StreamReader reader(decoderStream);
+		return description::BoxValue(reader.ReadToEnd());
+	}
+
+	void TextContentModel::SaveToFile(const WString& _fileName, description::Value content)
+	{
+		FileStream fileStream(_fileName, FileStream::WriteOnly);
+		if (!fileStream.IsAvailable())
+		{
+			throw StudioException(L"Unable to read file \"" + _fileName + L"\".", true);
+		}
+
+		BomEncoder encoder(BomEncoder::Utf16);
+		EncoderStream encoderStream(fileStream, encoder);
+		StreamWriter writer(encoderStream);
+		writer.WriteString(description::UnboxValue<WString>(content));
+	}
+
+	TextContentModel::TextContentModel(Ptr<IEditorContentFactoryModel> _contentFactory)
+		:EditorFileContentModelBase(_contentFactory)
+	{
+	}
+
+	TextContentModel::~TextContentModel()
+	{
+	}
+}
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+			#define _ ,
+
+			EDITOR_CONTENT_MODEL_TYPELIST(IMPL_CPP_TYPE_INFO)
+
+			BEGIN_CLASS_MEMBER(vm::EditorContentModelBase)
+				CLASS_MEMBER_BASE(vm::IEditorContentModel)
+			END_CLASS_MEMBER(vm::EditorContentModelBase)
+
+			BEGIN_CLASS_MEMBER(vm::EditorFileContentModelBase)
+				CLASS_MEMBER_BASE(vm::IEditorFileContentModel)
+			END_CLASS_MEMBER(vm::EditorFileContentModelBase)
+
+			BEGIN_CLASS_MEMBER(vm::TextContentModel)
+				CLASS_MEMBER_BASE(vm::EditorFileContentModelBase)
+
+				CLASS_MEMBER_CONSTRUCTOR(Ptr<vm::TextContentModel>(Ptr<vm::IEditorContentFactoryModel>), {L"contentFactory"})
+			END_CLASS_MEMBER(vm::TextContentModel)
+
+			#undef _
+
+			class GacStudioEditorContentModelLoader : public Object, public ITypeLoader
+			{
+			public:
+				void Load(ITypeManager* manager)
+				{
+					EDITOR_CONTENT_MODEL_TYPELIST(ADD_TYPE_INFO)
+				}
+
+				void Unload(ITypeManager* manager)
+				{
+				}
+			};
+
+			class GacStudioEditorContentModelPlugin : public Object, public vl::presentation::controls::IGuiPlugin
+			{
+			public:
+				void Load()override
+				{
+					GetGlobalTypeManager()->AddTypeLoader(new GacStudioEditorContentModelLoader);
+				}
+
+				void AfterLoad()override
+				{
+				}
+
+				void Unload()override
+				{
+				}
+			};
+			GUI_REGISTER_PLUGIN(GacStudioEditorContentModelPlugin)
+		}
 	}
 }

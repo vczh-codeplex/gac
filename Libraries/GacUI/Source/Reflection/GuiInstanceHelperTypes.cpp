@@ -56,18 +56,18 @@ Type Declaration
 Type Loader
 ***********************************************************************/
 
-			class GuiHelperTypesLoader : public Object, public ITypeLoader
+		class GuiHelperTypesLoader : public Object, public ITypeLoader
+		{
+		public:
+			void Load(ITypeManager* manager)
 			{
-			public:
-				void Load(ITypeManager* manager)
-				{
-					GUIREFLECTIONHELPERTYPES_TYPELIST(ADD_TYPE_INFO)
-				}
+				GUIREFLECTIONHELPERTYPES_TYPELIST(ADD_TYPE_INFO)
+			}
 
-				void Unload(ITypeManager* manager)
-				{
-				}
-			};
+			void Unload(ITypeManager* manager)
+			{
+			}
+		};
 
 /***********************************************************************
 GuiHelperTypesLoaderPlugin

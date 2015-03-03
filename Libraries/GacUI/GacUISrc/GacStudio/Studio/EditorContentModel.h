@@ -10,6 +10,9 @@ Interfaces:
 
 using namespace vl::collections;
 
+#pragma warning(push)
+#pragma warning(disable:4250)
+
 namespace vm
 {
 
@@ -59,8 +62,6 @@ Basic IEditorContentModel Implementations
 		void										EndEdit()override;
 	};
 
-#pragma warning(push)
-#pragma warning(disable:4250)
 	class EditorFileContentModelBase : public EditorContentModelBase, public virtual IEditorFileContentModel
 	{
 	protected:
@@ -81,30 +82,58 @@ Basic IEditorContentModel Implementations
 		void										LoadFile(WString _fileName)override;
 		void										RenameFile(WString _fileName)override;
 	};
-#pragma warning(pop)
 
 	class UnsupportedEditorContentModel : public EditorContentModelBase
 	{
 	protected:
 
-		virtual description::Value					FromBase(description::Value base)override;
-		virtual description::Value					ToBase(description::Value sub)override;
+		description::Value							FromBase(description::Value base)override;
+		description::Value							ToBase(description::Value sub)override;
 	public:
 		UnsupportedEditorContentModel(Ptr<IEditorContentFactoryModel> _contentFactory, EditorContentModelBase* _baseContent);
 		~UnsupportedEditorContentModel();
 	};
 	
-#pragma warning(push)
-#pragma warning(disable:4250)
 	class UnsupportedEditorFileContentModel : public EditorFileContentModelBase
 	{
 	protected:
 
-		virtual description::Value					LoadFromFile(const WString& _fileName)override;
-		virtual void								SaveToFile(const WString& _fileName, description::Value content)override;
+		description::Value							LoadFromFile(const WString& _fileName)override;
+		void										SaveToFile(const WString& _fileName, description::Value content)override;
 	public:
 		UnsupportedEditorFileContentModel(Ptr<IEditorContentFactoryModel> _contentFactory);
 		~UnsupportedEditorFileContentModel();
 	};
+
+/***********************************************************************
+Concrete IEditorContentModel Implementations
+***********************************************************************/
+
+	class TextContentModel : public EditorFileContentModelBase
+	{
+	protected:
+		
+		description::Value							LoadFromFile(const WString& _fileName)override;
+		void										SaveToFile(const WString& _fileName, description::Value content)override;
+	public:
+		TextContentModel(Ptr<IEditorContentFactoryModel> _contentFactory);
+		~TextContentModel();
+	};
+}
 #pragma warning(pop)
+
+namespace vl
+{
+	namespace reflection
+	{
+		namespace description
+		{
+#define EDITOR_CONTENT_MODEL_TYPELIST(F)\
+			F(vm::EditorContentModelBase)\
+			F(vm::EditorFileContentModelBase)\
+			F(vm::TextContentModel)\
+
+			EDITOR_CONTENT_MODEL_TYPELIST(DECL_TYPE_INFO)
+		}
+	}
 }

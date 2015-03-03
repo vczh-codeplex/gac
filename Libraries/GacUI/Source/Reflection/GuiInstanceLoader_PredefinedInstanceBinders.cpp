@@ -472,6 +472,7 @@ GuiPredefinedInstanceBindersPlugin
 			void Load()override
 			{
 				WfLoadTypes();
+				GuiIqLoadTypes();
 			}
 
 			void AfterLoad()override
