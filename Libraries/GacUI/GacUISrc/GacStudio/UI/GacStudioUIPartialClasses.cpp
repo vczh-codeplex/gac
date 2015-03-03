@@ -77,7 +77,7 @@ namespace vl
 				CLASS_MEMBER_PROPERTY_EVENT_READONLY_FAST(CurrentEditor, CurrentEditorChanged)
 				CLASS_MEMBER_METHOD(Persist, { L"content" });
 				CLASS_MEMBER_METHOD(BeginEdit, { L"editor" });
-				CLASS_MEMBER_METHOD(EndEdit, { L"editor" });
+				CLASS_MEMBER_METHOD(EndEdit, NO_PARAMETER);
 			END_CLASS_MEMBER(vm::IEditorContentModel)
 
 			BEGIN_CLASS_MEMBER(vm::IEditorFactoryModel)
@@ -100,6 +100,7 @@ namespace vl
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorFactory)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorControl)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditingContent)
 				CLASS_MEMBER_METHOD(Open, { L"content" });
 				CLASS_MEMBER_METHOD(Save, NO_PARAMETER);
 				CLASS_MEMBER_METHOD(Close, NO_PARAMETER);
