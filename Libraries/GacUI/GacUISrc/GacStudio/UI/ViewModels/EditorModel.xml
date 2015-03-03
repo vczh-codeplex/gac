@@ -65,6 +65,7 @@
 
   <Interface ref.Class="vm::IEditorModel">
     <Property Name="EditorFactory" Type="vm::IEditorFactoryModel^" Readonly="true"/>
+    <Property Name="EditorAction" Type="vm::IOpenInEditorItemAction^" Readonly="true"/>
     <Property Name="EditorControl" Type="Control*" Readonly="true"/>
     <Property Name="EditingContent" Type="object" Readonly="true"/>
 
