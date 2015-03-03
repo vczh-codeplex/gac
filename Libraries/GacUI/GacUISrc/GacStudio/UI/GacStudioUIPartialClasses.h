@@ -144,7 +144,7 @@ namespace vm
 
 		virtual void Persist(vl::reflection::description::Value content) = 0;
 		virtual void BeginEdit(vm::IEditorModel* editor) = 0;
-		virtual void EndEdit(vm::IEditorModel* editor) = 0;
+		virtual void EndEdit() = 0;
 	};
 
 	class IEditorFileContentModel : public virtual vm::IEditorContentModel, public vl::reflection::Description<IEditorFileContentModel>
@@ -179,6 +179,8 @@ namespace vm
 		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory() = 0;
 
 		virtual vl::presentation::controls::GuiControl* GetEditorControl() = 0;
+
+		virtual vl::reflection::description::Value GetEditingContent() = 0;
 
 		virtual void Open(vl::Ptr<vm::IEditorContentModel> content) = 0;
 		virtual void Save() = 0;
