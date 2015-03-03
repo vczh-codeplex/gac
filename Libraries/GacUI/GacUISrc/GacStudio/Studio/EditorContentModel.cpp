@@ -67,8 +67,10 @@ EditorContentModelBase
 	EditorContentModelBase::EditorContentModelBase(Ptr<IEditorContentFactoryModel> _contentFactory, EditorContentModelBase* _baseContent)
 		:contentFactory(_contentFactory)
 	{
-		baseContent = _baseContent;
-		baseContent->subContent = this;
+		if ((baseContent = _baseContent))
+		{
+			baseContent->subContent = this;
+		}
 	}
 
 	EditorContentModelBase::~EditorContentModelBase()
@@ -154,7 +156,7 @@ EditorContentModelBase
 	{
 		if (currentEditor)
 		{
-			throw StudioException(L"Internal error: \""+currentEditor->GetEditorFactory()->GetName()+L"\" has already been opened for this item.", true);
+			throw StudioException(L"Internal error: \"" + currentEditor->GetEditorFactory()->GetName() + L"\" has already been opened for this item.", true);
 		}
 		currentEditor = editor;
 		CurrentEditorChanged();
@@ -222,5 +224,51 @@ EditorFileContentModelBase
 	void EditorFileContentModelBase::RenameFile(WString _fileName)
 	{
 		fileName = _fileName;
+	}
+
+/***********************************************************************
+UnsupportedEditorContentModel
+***********************************************************************/
+
+	description::Value UnsupportedEditorContentModel::FromBase(description::Value base)
+	{
+		throw StudioException(contentFactory->GetName() + L" is not supported.", true);
+	}
+
+	description::Value UnsupportedEditorContentModel::ToBase(description::Value sub)
+	{
+		throw StudioException(contentFactory->GetName() + L" is not supported.", true);
+	}
+
+	UnsupportedEditorContentModel::UnsupportedEditorContentModel(Ptr<IEditorContentFactoryModel> _contentFactory, EditorContentModelBase* _baseContent)
+		:EditorContentModelBase(_contentFactory, _baseContent)
+	{
+	}
+
+	UnsupportedEditorContentModel::~UnsupportedEditorContentModel()
+	{
+	}
+
+/***********************************************************************
+UnsupportedEditorFileContentModel
+***********************************************************************/
+
+	description::Value UnsupportedEditorFileContentModel::LoadFromFile(const WString& _fileName)
+	{
+		throw StudioException(contentFactory->GetName() + L" is not supported.", true);
+	}
+
+	void UnsupportedEditorFileContentModel::SaveToFile(const WString& _fileName, description::Value content)
+	{
+		throw StudioException(contentFactory->GetName() + L" is not supported.", true);
+	}
+
+	UnsupportedEditorFileContentModel::UnsupportedEditorFileContentModel(Ptr<IEditorContentFactoryModel> _contentFactory)
+		:EditorFileContentModelBase(_contentFactory)
+	{
+	}
+
+	UnsupportedEditorFileContentModel::~UnsupportedEditorFileContentModel()
+	{
 	}
 }

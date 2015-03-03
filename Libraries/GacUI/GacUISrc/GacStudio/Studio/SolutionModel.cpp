@@ -206,6 +206,7 @@ FileItem
 		{
 			auto contentFactory = contentFactories[i];
 			auto content = contentFactory->CreateContent(lastContent);
+			supportedContents.Add(content);
 			if (!lastContent)
 			{
 				fileContent = content.Cast<IEditorFileContentModel>();

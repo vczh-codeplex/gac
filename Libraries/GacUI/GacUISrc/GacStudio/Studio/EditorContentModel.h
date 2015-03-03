@@ -12,6 +12,11 @@ using namespace vl::collections;
 
 namespace vm
 {
+
+/***********************************************************************
+Basic IEditorContentModel Implementations
+***********************************************************************/
+
 	class EditorFileContentModelBase;
 
 	class EditorContentModelBase : public Object, public virtual IEditorContentModel
@@ -28,7 +33,7 @@ namespace vm
 		Ptr<IEditorContentFactoryModel>				contentFactory;
 		EditorContentModelBase*						baseContent = nullptr;
 		EditorContentModelBase*						subContent = nullptr;
-		ContentState								state = Ready;
+		ContentState								state = BaseContentChanged;
 		description::Value							persisted;
 		IEditorModel*								currentEditor = nullptr;
 
@@ -78,4 +83,28 @@ namespace vm
 	};
 #pragma warning(pop)
 
+	class UnsupportedEditorContentModel : public EditorContentModelBase
+	{
+	protected:
+
+		virtual description::Value					FromBase(description::Value base)override;
+		virtual description::Value					ToBase(description::Value sub)override;
+	public:
+		UnsupportedEditorContentModel(Ptr<IEditorContentFactoryModel> _contentFactory, EditorContentModelBase* _baseContent);
+		~UnsupportedEditorContentModel();
+	};
+	
+#pragma warning(push)
+#pragma warning(disable:4250)
+	class UnsupportedEditorFileContentModel : public EditorFileContentModelBase
+	{
+	protected:
+
+		virtual description::Value					LoadFromFile(const WString& _fileName)override;
+		virtual void								SaveToFile(const WString& _fileName, description::Value content)override;
+	public:
+		UnsupportedEditorFileContentModel(Ptr<IEditorContentFactoryModel> _contentFactory);
+		~UnsupportedEditorFileContentModel();
+	};
+#pragma warning(pop)
 }

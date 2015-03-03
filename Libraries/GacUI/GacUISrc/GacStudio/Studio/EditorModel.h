@@ -12,6 +12,11 @@ using namespace vl::collections;
 
 namespace vm
 {
+
+/***********************************************************************
+Basic IEditorModel Implementations
+***********************************************************************/
+
 	class EditorModelBase : public Object, public virtual IEditorModel
 	{
 	protected:
