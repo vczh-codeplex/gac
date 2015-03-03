@@ -178,6 +178,8 @@ namespace vm
 
 		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory() = 0;
 
+		virtual vl::Ptr<vm::IOpenInEditorItemAction> GetEditorAction() = 0;
+
 		virtual vl::presentation::controls::GuiControl* GetEditorControl() = 0;
 
 		virtual vl::reflection::description::Value GetEditingContent() = 0;

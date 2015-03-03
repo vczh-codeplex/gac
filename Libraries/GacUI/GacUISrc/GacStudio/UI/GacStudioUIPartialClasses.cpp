@@ -99,6 +99,7 @@ namespace vl
 			BEGIN_CLASS_MEMBER(vm::IEditorModel)
 				CLASS_MEMBER_BASE(vl::reflection::IDescriptable)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorFactory)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorAction)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditorControl)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(EditingContent)
 				CLASS_MEMBER_METHOD(Open, { L"content" });
