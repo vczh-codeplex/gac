@@ -1,5 +1,6 @@
 #include "StudioModel.h"
 #include "SolutionModel.h"
+#include "EditorContentModel.h"
 #include <Windows.h>
 
 using namespace vl::stream;
@@ -461,7 +462,14 @@ EditorContentFactoryModel
 
 	Ptr<IEditorContentModel> EditorContentFactoryModel::CreateContent(Ptr<IEditorContentModel> baseContent)
 	{
-		throw 0;
+		if (baseContentFactory)
+		{
+			return new UnsupportedEditorContentModel(this, dynamic_cast<EditorContentModelBase*>(baseContent.Obj()));
+		}
+		else
+		{
+			return new UnsupportedEditorFileContentModel(this);
+		}
 	}
 
 /***********************************************************************
