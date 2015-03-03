@@ -74,6 +74,12 @@ namespace vm
 	{
 	public:
 
+		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorContentModel>> GetSupportedContents() = 0;
+
+		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorFactoryModel>> GetSupportedEditors() = 0;
+
+		virtual vm::IEditorModel* GetCurrentEditor() = 0;
+
 		virtual vl::Ptr<vm::IEditorModel> OpenEditor(vl::Ptr<vm::IEditorFactoryModel> editorFactory) = 0;
 		virtual void CloseEditor() = 0;
 	};
@@ -121,7 +127,7 @@ namespace vm
 
 		virtual vm::IEditorContentFactoryModel* GetBaseContentFactory() = 0;
 
-		virtual vl::Ptr<vm::IEditorContentModel> CreateContent() = 0;
+		virtual vl::Ptr<vm::IEditorContentModel> CreateContent(vl::Ptr<vm::IEditorContentModel> baseContent) = 0;
 	};
 
 	class IEditorContentModel : public virtual vl::reflection::IDescriptable, public vl::reflection::Description<IEditorContentModel>
@@ -221,7 +227,6 @@ namespace vm
 
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory() = 0;
 
-		virtual void OpenFile() = 0;
 		virtual void InitializeFileAndSave() = 0;
 	};
 
@@ -357,6 +362,7 @@ namespace vm
 		virtual vl::Ptr<vm::IProjectFactoryModel> GetProjectFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IFileFactoryModel> GetFileFactory(vl::WString id) = 0;
 		virtual vl::Ptr<vm::IEditorFactoryModel> GetEditorFactory(vl::WString id) = 0;
+		virtual vl::collections::LazyList<vl::Ptr<vm::IEditorFactoryModel>> GetAssociatedEditors(vl::Ptr<vm::IEditorContentFactoryModel> contentFactory) = 0;
 		virtual void OpenSolution(vl::WString filePath) = 0;
 		virtual void NewSolution(vl::WString filePath) = 0;
 		virtual void CloseSolution() = 0;

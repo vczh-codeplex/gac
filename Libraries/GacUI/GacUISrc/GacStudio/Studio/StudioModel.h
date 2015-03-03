@@ -173,7 +173,7 @@ namespace vm
 		WString											GetName()override;
 		WString											GetId()override;
 		IEditorContentFactoryModel*						GetBaseContentFactory()override;
-		Ptr<IEditorContentModel>						CreateContent()override;
+		Ptr<IEditorContentModel>						CreateContent(Ptr<IEditorContentModel> baseContent)override;
 	};
 
 	class EditorFactoryModel : public Object, public virtual IEditorFactoryModel
@@ -197,11 +197,13 @@ namespace vm
 
 	class StudioModel : public Object, public virtual IStudioModel
 	{
+		typedef Group<IEditorContentFactoryModel*, Ptr<IEditorFactoryModel>>		AssociatedEditorMap;
 	protected:
 		Ptr<FileFactoryFilterModel>						solutionProjectFactory;
 		List<Ptr<IFileFactoryModel>>					fileFactories;
 		List<Ptr<IEditorContentFactoryModel>>			contentFactories;
 		List<Ptr<IEditorFactoryModel>>					editorFactories;
+		AssociatedEditorMap								associatedEditors;
 		Ptr<RootSolutionItemModel>						rootSolutionItem;
 		Ptr<ISolutionItemModel>							selectedSolutionItem;
 
@@ -227,6 +229,7 @@ namespace vm
 		Ptr<IProjectFactoryModel>						GetProjectFactory(WString id)override;
 		Ptr<IFileFactoryModel>							GetFileFactory(WString id)override;
 		Ptr<IEditorFactoryModel>						GetEditorFactory(WString id)override;
+		LazyList<Ptr<IEditorFactoryModel>>				GetAssociatedEditors(Ptr<IEditorContentFactoryModel> contentFactory)override;
 
 		void											OpenSolution(WString filePath)override;
 		void											NewSolution(WString filePath)override;

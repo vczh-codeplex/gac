@@ -37,11 +37,10 @@ namespace vm
 
 		bool										TryGetEditingContentFromBaseContent(description::Value& content);
 		bool										TryGetEditingContentFromSubContent(description::Value& content);
-		void										SetBaseContent(EditorContentModelBase* _baseContent);
 		virtual void								OnBasePersistedContentChanged();
 		virtual void								OnSubPersistedContentChanged();
 	public:
-		EditorContentModelBase(Ptr<IEditorContentFactoryModel> _contentFactory);
+		EditorContentModelBase(Ptr<IEditorContentFactoryModel> _contentFactory, EditorContentModelBase* _baseContent);
 		~EditorContentModelBase();
 
 		Ptr<IEditorContentFactoryModel>				GetContentFactory()override;

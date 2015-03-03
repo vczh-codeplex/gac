@@ -75,6 +75,9 @@
     <Method Name="GetEditorFactory" Type="vm::IEditorFactoryModel^">
       <Argument Name="id" Type="string"/>
     </Method>
+    <Method Name="GetAssociatedEditors" Type="vm::IEditorFactoryModel^{}">
+      <Argument Name="contentFactory" Type="vm::IEditorContentFactoryModel^"/>
+    </Method>
 
     <Method Name="OpenSolution" Type="void">
       <Argument Name="filePath" Type="string"/>
