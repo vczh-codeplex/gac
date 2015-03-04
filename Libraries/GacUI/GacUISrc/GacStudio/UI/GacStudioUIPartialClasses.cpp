@@ -120,6 +120,19 @@ namespace darkskin
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 
+	DocumentViewerTemplate::DocumentViewerTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace darkskin
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
 	ExpandingDecoratorTemplate::ExpandingDecoratorTemplate()
 	{
 		InitializeComponents();
@@ -659,6 +672,7 @@ namespace vl
 			IMPL_CPP_TYPE_INFO(darkskin::ComboBoxTemplate)
 			IMPL_CPP_TYPE_INFO(darkskin::DatePickerTemplate)
 			IMPL_CPP_TYPE_INFO(darkskin::DocumentLabelTemplate)
+			IMPL_CPP_TYPE_INFO(darkskin::DocumentViewerTemplate)
 			IMPL_CPP_TYPE_INFO(darkskin::ExpandingDecoratorTemplate)
 			IMPL_CPP_TYPE_INFO(darkskin::GroupBoxTemplate)
 			IMPL_CPP_TYPE_INFO(darkskin::HScrollHandleTemplate)
@@ -962,9 +976,14 @@ namespace vl
 			END_CLASS_MEMBER(darkskin::DatePickerTemplate)
 
 			BEGIN_CLASS_MEMBER(darkskin::DocumentLabelTemplate)
-				CLASS_MEMBER_BASE(vl::presentation::templates::GuiControlTemplate)
+				CLASS_MEMBER_BASE(vl::presentation::templates::GuiDocumentLabelTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(darkskin::DocumentLabelTemplate*(), NO_PARAMETER)
 			END_CLASS_MEMBER(darkskin::DocumentLabelTemplate)
+
+			BEGIN_CLASS_MEMBER(darkskin::DocumentViewerTemplate)
+				CLASS_MEMBER_BASE(vl::presentation::templates::GuiDocumentViewerTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(darkskin::DocumentViewerTemplate*(), NO_PARAMETER)
+			END_CLASS_MEMBER(darkskin::DocumentViewerTemplate)
 
 			BEGIN_CLASS_MEMBER(darkskin::ExpandingDecoratorTemplate)
 				CLASS_MEMBER_BASE(vl::presentation::templates::GuiSelectableButtonTemplate)
@@ -1314,6 +1333,7 @@ namespace vl
 					ADD_TYPE_INFO(darkskin::ComboBoxTemplate)
 					ADD_TYPE_INFO(darkskin::DatePickerTemplate)
 					ADD_TYPE_INFO(darkskin::DocumentLabelTemplate)
+					ADD_TYPE_INFO(darkskin::DocumentViewerTemplate)
 					ADD_TYPE_INFO(darkskin::ExpandingDecoratorTemplate)
 					ADD_TYPE_INFO(darkskin::GroupBoxTemplate)
 					ADD_TYPE_INFO(darkskin::HScrollHandleTemplate)

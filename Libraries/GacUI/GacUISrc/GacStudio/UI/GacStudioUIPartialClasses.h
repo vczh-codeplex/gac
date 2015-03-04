@@ -49,6 +49,7 @@ namespace darkskin
 	class ComboBoxTemplate;
 	class DatePickerTemplate;
 	class DocumentLabelTemplate;
+	class DocumentViewerTemplate;
 	class ExpandingDecoratorTemplate;
 	class GroupBoxTemplate;
 	class HScrollHandleTemplate;
@@ -621,12 +622,12 @@ namespace darkskin
 	};
 
 	template<typename TImpl>
-	class DocumentLabelTemplate_ : public vl::presentation::templates::GuiControlTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiControlTemplate>, public vl::reflection::Description<TImpl>
+	class DocumentLabelTemplate_ : public vl::presentation::templates::GuiDocumentLabelTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiDocumentLabelTemplate>, public vl::reflection::Description<TImpl>
 	{
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
 	private:
 	protected:
-		vl::presentation::templates::GuiControlTemplate* self;
+		vl::presentation::templates::GuiDocumentLabelTemplate* self;
 
 		void InitializeComponents()
 		{
@@ -640,7 +641,36 @@ namespace darkskin
 		}
 	public:
 		DocumentLabelTemplate_()
-			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiControlTemplate>(L"darkskin::DocumentLabelTemplate")
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiDocumentLabelTemplate>(L"darkskin::DocumentLabelTemplate")
+			,self(0)
+		{
+		}
+	};
+
+	template<typename TImpl>
+	class DocumentViewerTemplate_ : public vl::presentation::templates::GuiDocumentViewerTemplate, public vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiDocumentViewerTemplate>, public vl::reflection::Description<TImpl>
+	{
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
+	private:
+	protected:
+		vl::presentation::compositions::GuiBoundsComposition* container;
+		vl::presentation::templates::GuiDocumentViewerTemplate* self;
+
+		void InitializeComponents()
+		{
+			if (InitializeFromResource())
+			{
+				GUI_INSTANCE_REFERENCE(container);
+				GUI_INSTANCE_REFERENCE(self);
+			}
+			else
+			{
+			}
+		}
+	public:
+		DocumentViewerTemplate_()
+			:vl::presentation::GuiInstancePartialClass<vl::presentation::templates::GuiDocumentViewerTemplate>(L"darkskin::DocumentViewerTemplate")
+			,container(0)
 			,self(0)
 		{
 		}
@@ -2270,6 +2300,7 @@ namespace vl
 			DECL_TYPE_INFO(darkskin::ComboBoxTemplate)
 			DECL_TYPE_INFO(darkskin::DatePickerTemplate)
 			DECL_TYPE_INFO(darkskin::DocumentLabelTemplate)
+			DECL_TYPE_INFO(darkskin::DocumentViewerTemplate)
 			DECL_TYPE_INFO(darkskin::ExpandingDecoratorTemplate)
 			DECL_TYPE_INFO(darkskin::GroupBoxTemplate)
 			DECL_TYPE_INFO(darkskin::HScrollHandleTemplate)
@@ -2446,6 +2477,22 @@ namespace darkskin
 		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
 	public:
 		DocumentLabelTemplate();
+	};
+}
+
+
+namespace darkskin
+{
+	class DocumentViewerTemplate : public darkskin::DocumentViewerTemplate_<darkskin::DocumentViewerTemplate>
+	{
+		friend class darkskin::DocumentViewerTemplate_<darkskin::DocumentViewerTemplate>;
+		friend struct vl::reflection::description::CustomTypeDescriptorSelector<darkskin::DocumentViewerTemplate>;
+	protected:
+
+		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+	public:
+		DocumentViewerTemplate();
 	};
 }
 
