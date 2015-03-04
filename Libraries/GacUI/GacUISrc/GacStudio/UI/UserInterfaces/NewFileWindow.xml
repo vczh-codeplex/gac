@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Instance ref.Class="ui::NewFileWindow">
+<Instance ref.Class="ui::NewFileWindow" ref.Styles="res://DarkSkin/Apply">
   <ref.Parameter Name="ViewModel" Class="vm::IStudioModel"/>
   <ref.Parameter Name="OperationModel" Class="vm::IStudioNewFileModel"/>
   <ref.Parameter Name="Action" Class="vm::IAddFileItemAction"/>
