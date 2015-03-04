@@ -210,6 +210,31 @@ TextBox
 				void										SetVisuallyEnabled(bool value)override;
 				compositions::GuiGraphicsComposition*		InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
+			
+#pragma warning(push)
+#pragma warning(disable:4250)
+			/// <summary>Document viewer style (Windows 7).</summary>
+			class Win8DocumentViewerStyle : public Win8MultilineTextBoxProvider, public virtual controls::GuiDocumentViewer::IStyleProvider, public Description<Win8DocumentViewerStyle>
+			{
+			public:
+				/// <summary>Create the style.</summary>
+				Win8DocumentViewerStyle();
+				~Win8DocumentViewerStyle();
+
+				Ptr<DocumentModel>							GetBaselineDocument()override;
+			};
+
+			/// <summary>Document label style (Windows 7).</summary>
+			class Win8DocumentlabelStyle : public controls::GuiControl::EmptyStyleController, public virtual controls::GuiDocumentLabel::IStyleController, public Description<Win8DocumentlabelStyle>
+			{
+			public:
+				/// <summary>Create the style.</summary>
+				Win8DocumentlabelStyle();
+				~Win8DocumentlabelStyle();
+
+				Ptr<DocumentModel>							GetBaselineDocument()override;
+			};
+#pragma warning(pop)
 		}
 	}
 }

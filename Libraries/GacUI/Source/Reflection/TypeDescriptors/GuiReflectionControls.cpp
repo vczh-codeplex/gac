@@ -1349,11 +1349,25 @@ Type Declaration
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDocumentViewer)
 			END_CLASS_MEMBER(GuiDocumentViewer)
 
+			BEGIN_CLASS_MEMBER(GuiDocumentViewer::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiScrollContainer::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiDocumentViewer, IStyleProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaselineDocument)
+			END_CLASS_MEMBER(GuiDocumentViewer::IStyleProvider)
+
 			BEGIN_CLASS_MEMBER(GuiDocumentLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiDocumentLabel)
 			END_CLASS_MEMBER(GuiDocumentLabel)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentLabel::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiDocumentLabel, IStyleController)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaselineDocument)
+			END_CLASS_MEMBER(GuiDocumentLabel::IStyleProvider)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxCommonInterface)
 				CLASS_MEMBER_GUIEVENT(SelectionChanged)

@@ -140,6 +140,21 @@ GuiSinglelineTextBoxTemplate
 			}
 
 /***********************************************************************
+GuiDocumentLabelTemplate
+***********************************************************************/
+
+			GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDocumentLabelTemplate::GuiDocumentLabelTemplate()
+			{
+				GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDocumentLabelTemplate::~GuiDocumentLabelTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiMenuTemplate
 ***********************************************************************/
 
@@ -354,6 +369,21 @@ GuiTextListTemplate
 			}
 
 			GuiTextListTemplate::~GuiTextListTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiDocumentViewerTemplate
+***********************************************************************/
+
+			GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDocumentViewerTemplate::GuiDocumentViewerTemplate()
+			{
+				GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDocumentViewerTemplate::~GuiDocumentViewerTemplate()
 			{
 			}
 

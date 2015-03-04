@@ -79,6 +79,21 @@ Control Template
 				compositions::GuiGraphicsComposition*							InstallBackground(compositions::GuiBoundsComposition* boundsComposition)override;
 			};
 
+			class GuiDocumentLabelTemplate_StyleProvider
+				: public GuiControlTemplate_StyleProvider
+				, public virtual controls::GuiDocumentLabel::IStyleController
+				, public Description<GuiDocumentLabelTemplate_StyleProvider>
+			{
+			protected:
+				GuiDocumentLabelTemplate*										controlTemplate;
+				
+			public:
+				GuiDocumentLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiDocumentLabelTemplate_StyleProvider();
+				
+				Ptr<DocumentModel>												GetBaselineDocument()override;
+			};
+
 			class GuiMenuTemplate_StyleProvider
 				: public GuiControlTemplate_StyleProvider
 				, public controls::GuiWindow::DefaultBehaviorStyleController
@@ -297,6 +312,21 @@ Control Template
 				~GuiMultilineTextBoxTemplate_StyleProvider();
 				
 				void															SetFocusableComposition(compositions::GuiGraphicsComposition* value)override;
+			};
+
+			class GuiDocumentViewerTemplate_StyleProvider
+				: public GuiScrollViewTemplate_StyleProvider
+				, public virtual controls::GuiDocumentViewer::IStyleProvider
+				, public Description<GuiDocumentViewerTemplate_StyleProvider>
+			{
+			protected:
+				GuiDocumentViewerTemplate*										controlTemplate;
+				
+			public:
+				GuiDocumentViewerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory);
+				~GuiDocumentViewerTemplate_StyleProvider();
+				
+				Ptr<DocumentModel>												GetBaselineDocument()override;
 			};
 
 			class GuiTextListTemplate_StyleProvider

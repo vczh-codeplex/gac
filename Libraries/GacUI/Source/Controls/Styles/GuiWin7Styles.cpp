@@ -95,12 +95,12 @@ Win7Theme
 
 			controls::GuiDocumentViewer::IStyleProvider* Win7Theme::CreateDocumentViewerStyle()
 			{
-				return new Win7MultilineTextBoxProvider;
+				return new Win7DocumentViewerStyle;
 			}
 
 			controls::GuiDocumentLabel::IStyleController* Win7Theme::CreateDocumentLabelStyle()
 			{
-				return new controls::GuiControl::EmptyStyleController;
+				return new Win7DocumentlabelStyle;
 			}
 
 			controls::GuiListView::IStyleProvider* Win7Theme::CreateListViewStyle()

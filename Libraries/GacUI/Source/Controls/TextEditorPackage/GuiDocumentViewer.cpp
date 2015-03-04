@@ -479,8 +479,9 @@ GuiDocumentViewer
 			{
 			}
 
-			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
-				:documentElement(0)
+			GuiDocumentCommonInterface::GuiDocumentCommonInterface(Ptr<DocumentModel> _baselineDocument)
+				:baselineDocument(_baselineDocument)
+				,documentElement(0)
 				,documentComposition(0)
 				,activeHyperlinkParagraph(-1)
 				,dragging(false)
@@ -948,6 +949,7 @@ GuiDocumentViewer
 
 			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
 				:GuiScrollContainer(styleProvider)
+				, GuiDocumentCommonInterface(styleProvider->GetBaselineDocument())
 			{
 				SetExtendToFullWidth(true);
 				SetHorizontalAlwaysVisible(false);
@@ -978,6 +980,7 @@ GuiDocumentLabel
 
 			GuiDocumentLabel::GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController)
 				:GuiControl(styleController)
+				, GuiDocumentCommonInterface(styleController->GetBaselineDocument())
 			{
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				SetFocusableComposition(GetBoundsComposition());
