@@ -24,11 +24,6 @@ namespace darkskin
 
 	void HScrollTemplate::OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
 	{
-		draggingHandle = false;
-	}
-
-	void HScrollTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
 		if (draggingHandle)
 		{
 			vint totalPixels = handle->GetParent()->GetBounds().Width();
@@ -52,6 +47,11 @@ namespace darkskin
 				GetCommands()->SetPosition(newPosition + 1);
 			}
 		}
+	}
+
+	void HScrollTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+		draggingHandle = false;
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER

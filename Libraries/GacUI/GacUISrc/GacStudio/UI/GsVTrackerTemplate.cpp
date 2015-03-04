@@ -24,11 +24,6 @@ namespace darkskin
 
 	void VTrackerTemplate::OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
 	{
-		draggingHandle = false;
-	}
-
-	void VTrackerTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
 		if (draggingHandle)
 		{
 			vint totalPixels = handle->GetParent()->GetBounds().Height();
@@ -52,6 +47,11 @@ namespace darkskin
 				GetCommands()->SetPosition(newPosition + 1);
 			}
 		}
+	}
+
+	void VTrackerTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
+	{
+		draggingHandle = false;
 	}
 
 	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
