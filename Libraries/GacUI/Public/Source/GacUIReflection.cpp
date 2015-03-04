@@ -63,18 +63,18 @@ Type Declaration
 Type Loader
 ***********************************************************************/
 
-			class GuiHelperTypesLoader : public Object, public ITypeLoader
+		class GuiHelperTypesLoader : public Object, public ITypeLoader
+		{
+		public:
+			void Load(ITypeManager* manager)
 			{
-			public:
-				void Load(ITypeManager* manager)
-				{
-					GUIREFLECTIONHELPERTYPES_TYPELIST(ADD_TYPE_INFO)
-				}
+				GUIREFLECTIONHELPERTYPES_TYPELIST(ADD_TYPE_INFO)
+			}
 
-				void Unload(ITypeManager* manager)
-				{
-				}
-			};
+			void Unload(ITypeManager* manager)
+			{
+			}
+		};
 
 /***********************************************************************
 GuiHelperTypesLoaderPlugin
@@ -7423,6 +7423,11 @@ GuiInstanceContext
 			Ptr<GuiInstanceContext> context=new GuiInstanceContext;
 			if(xml->rootElement->name.value==L"Instance")
 			{
+				if (auto codeBehindAttr = XmlGetAttribute(xml->rootElement, L"ref.CodeBehind"))
+				{
+					context->codeBehind = codeBehindAttr->value.value == L"true";
+				}
+
 				// load type name
 				if (auto classAttr = XmlGetAttribute(xml->rootElement, L"ref.Class"))
 				{
@@ -7591,6 +7596,13 @@ GuiInstanceContext
 		{
 			auto xmlInstance = MakePtr<XmlElement>();
 			xmlInstance->name.value = L"Instance";
+
+			{
+				auto attCodeBehind = MakePtr<XmlAttribute>();
+				attCodeBehind->name.value = L"ref.CodeBehind";
+				attCodeBehind->value.value = codeBehind ? L"true" : L"false";
+				xmlInstance->attributes.Add(attCodeBehind);
+			}
 			
 			if (className)
 			{
@@ -7782,7 +7794,7 @@ GuiInstanceContext
 				}
 			}
 			{
-				reader << context->className;
+				reader << context->codeBehind << context->className;
 			}
 			{
 				vint count = -1;
@@ -7897,7 +7909,7 @@ GuiInstanceContext
 				}
 			}
 			{
-				writer << className;
+				writer << codeBehind << className;
 			}
 			{
 				vint count = parameters.Count();

@@ -524,8 +524,11 @@ void GuiMain()
 
 	FOREACH(Ptr<Instance>, instance, typeLoader->instances.Values())
 	{
-		WriteControlClassHeaderFile(config, instance);
-		WriteControlClassCppFile(config, instance);
+		if (instance->context->codeBehind)
+		{
+			WriteControlClassHeaderFile(config, instance);
+			WriteControlClassCppFile(config, instance);
+		}
 	}
 	WritePartialClassHeaderFile(config, typeLoader->typeSchemas, typeLoader->typeSchemaOrder, typeLoader->instances);
 	WritePartialClassCppFile(config, typeLoader->typeSchemas, typeLoader->typeSchemaOrder, typeLoader->instances);

@@ -469,6 +469,7 @@ Instance Context
 		public:
 			Ptr<GuiConstructorRepr>					instance;
 			NamespaceMap							namespaces;
+			bool									codeBehind = true;
 			Nullable<WString>						className;
 			ParameterList							parameters;
 			PropertyList							properties;

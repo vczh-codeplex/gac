@@ -303,17 +303,14 @@ void WritePartialClassHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, 
 
 	WriteNamespaceStop(currentNamespaces, writer);
 
-	writer.WriteLine(L"/*");
 	FOREACH(Ptr<Instance>, instance, instances.Values())
 	{
-		writer.WriteLine(config->GetControlClassHeaderFileName(instance) + L" :");
-		WriteControlClassHeaderFileContent(config, instance, writer);
-		writer.WriteLine(L"");
-		writer.WriteLine(config->GetControlClassCppFileName(instance) + L" :");
-		WriteControlClassCppFileContent(config, instance, writer);
-		writer.WriteLine(L"");
+		if (!instance->context->codeBehind)
+		{
+			WriteControlClassHeaderFileContent(config, instance, writer);
+			writer.WriteLine(L"");
+		}
 	}
-	writer.WriteLine(L"*/");
 	writer.WriteLine(L"");
 
 	writer.WriteLine(L"#endif");
@@ -326,6 +323,15 @@ void WritePartialClassCppFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr
 
 	writer.WriteLine(L"#include \"" + config->GetGlobalHeaderFileName() + L"\"");
 	writer.WriteLine(L"");
+
+	FOREACH(Ptr<Instance>, instance, instances.Values())
+	{
+		if (!instance->context->codeBehind)
+		{
+			WriteControlClassCppFileContent(config, instance, writer);
+			writer.WriteLine(L"");
+		}
+	}
 
 	List<WString> ns, currentNamespaces;
 	FillReflectionNamespaces(ns);

@@ -1,4 +1,4 @@
-..\..\..\Common\Tools\Codepack.exe CodegenConfig.xml
+call 0.Codepack.bat
 cd ..\..\..\Common\Tools
 call BuildTools.bat
 cd ..\..\Libraries\GacUI\Public

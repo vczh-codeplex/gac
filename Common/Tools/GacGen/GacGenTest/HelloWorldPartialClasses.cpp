@@ -10,6 +10,539 @@ DO NOT MODIFY
 
 #include "HelloWorld.h"
 
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	BottomScrollButtonTemplate::BottomScrollButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ButtonTemplate::ButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	CheckBoxTemplate::CheckBoxTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	CheckItemBackgroundTemplate::CheckItemBackgroundTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	CheckTextListTemplate::CheckTextListTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ComboBoxTemplate::ComboBoxTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	DatePickerTemplate::DatePickerTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	DocumentLabelTemplate::DocumentLabelTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ExpandingDecoratorTemplate::ExpandingDecoratorTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	GroupBoxTemplate::GroupBoxTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	HScrollHandleTemplate::HScrollHandleTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ItemBackgroundTemplate::ItemBackgroundTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	LabelTemplate::LabelTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	LeftScrollButtonTemplate::LeftScrollButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ListViewColumnHeaderTemplate::ListViewColumnHeaderTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ListViewTemplate::ListViewTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	MenuBarButtonTemplate::MenuBarButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	MenuItemButtonTemplate::MenuItemButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	MenuSplitterTemplate::MenuSplitterTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	MultilineTextBoxTemplate::MultilineTextBoxTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ProgressBarTemplate::ProgressBarTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	RadioButtonTemplate::RadioButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	RadioTextListTemplate::RadioTextListTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	RightScrollButtonTemplate::RightScrollButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ScrollViewTemplate::ScrollViewTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	SinglelineTextBoxTemplate::SinglelineTextBoxTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	TabDropdownTemplate::TabDropdownTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	TabHeaderTemplate::TabHeaderTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	TabTemplate::TabTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	TextListTemplate::TextListTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripButtonTemplate::ToolstripButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripDropdownButtonTemplate::ToolstripDropdownButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripMenuTemplate::ToolstripMenuTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripSplitArrowTemplate::ToolstripSplitArrowTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripSplitButtonTemplate::ToolstripSplitButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripSplitterTemplate::ToolstripSplitterTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	ToolstripTemplate::ToolstripTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	TopScrollButtonTemplate::TopScrollButtonTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	TreeViewTemplate::TreeViewTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	VScrollHandleTemplate::VScrollHandleTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace demos
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	WindowTemplate::WindowTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
 namespace vl
 {
 	namespace reflection

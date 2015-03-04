@@ -11,12 +11,7 @@ DO NOT MODIFY
 #ifndef VCZH_GACUI_RESOURCE_CODE_GENERATOR_GacStudioUI
 #define VCZH_GACUI_RESOURCE_CODE_GENERATOR_GacStudioUI
 
-#include "GsAboutWindow.h"
 #include "GsAddExistingFilesWindow.h"
-#include "GsFileReferenceFactoryColumnTemplate.h"
-#include "GsFileReferenceFactoryEditorTemplate.h"
-#include "GsFileReferenceFolderColumnTemplate.h"
-#include "GsFileReferenceNameColumnTemplate.h"
 #include "GsMainWindow.h"
 #include "GsNewFileWindow.h"
 #include "GsNewProjectWindow.h"

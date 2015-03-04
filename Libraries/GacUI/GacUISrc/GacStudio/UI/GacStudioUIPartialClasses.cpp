@@ -10,6 +10,71 @@ DO NOT MODIFY
 
 #include "GacStudioUI.h"
 
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	AboutWindow::AboutWindow(Ptr<vm::IStudioModel> ViewModel)
+	{
+		InitializeComponents(ViewModel);
+	}
+}
+
+
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceFactoryColumnTemplate::FileReferenceFactoryColumnTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceFactoryEditorTemplate::FileReferenceFactoryEditorTemplate(Ptr<vm::IStudioAddExistingFilesModel> OperationModel)
+	{
+		InitializeComponents(OperationModel);
+	}
+}
+
+
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceFolderColumnTemplate::FileReferenceFolderColumnTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
+namespace ui
+{
+	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
+
+	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
+
+	FileReferenceNameColumnTemplate::FileReferenceNameColumnTemplate()
+	{
+		InitializeComponents();
+	}
+}
+
+
 namespace vl
 {
 	namespace reflection
