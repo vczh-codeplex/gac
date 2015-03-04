@@ -21,6 +21,7 @@
     <Instance content="File">UserInterfaces\RenameFileWindow.xml</Instance>
     <Folder name="AddExistingFilesWindowFolder" content="Link">UserInterfaces\AddExistingFilesWindow.xml</Folder>
   </Folder>
+  <Folder name="DarkSkin" content="Link">Skin.xml</Folder>
   <Folder name="Config" content="Link">Config.xml</Folder>
   <Folder name="Documents">
     <Doc name="AboutDocument" content="File">About.xml</Doc>
