@@ -38,6 +38,7 @@ GuiDocumentCommonInterface
 					Editable,
 				};
 			protected:
+				Ptr<DocumentModel>							baselineDocument;
 				GuiControl*									documentControl;
 				elements::GuiDocumentElement*				documentElement;
 				compositions::GuiBoundsComposition*			documentComposition;
@@ -72,7 +73,7 @@ GuiDocumentCommonInterface
 				virtual Point								GetDocumentViewPosition();
 				virtual void								EnsureRectVisible(Rect bounds);
 			public:
-				GuiDocumentCommonInterface();
+				GuiDocumentCommonInterface(Ptr<DocumentModel> _baselineDocument);
 				~GuiDocumentCommonInterface();
 
 				/// <summary>Active hyperlink changed event.</summary>
@@ -268,6 +269,15 @@ GuiDocumentViewer
 			/// <summary>Scrollable document viewer for displaying <see cref="DocumentModel"/>.</summary>
 			class GuiDocumentViewer : public GuiScrollContainer, public GuiDocumentCommonInterface, public Description<GuiDocumentViewer>
 			{
+			public:
+				/// <summary>Style provider interface for <see cref="GuiDocumentViewer"/>.</summary>
+				class IStyleProvider : public virtual GuiScrollContainer::IStyleProvider, public Description<IStyleProvider>
+				{
+				public:
+					/// <summary>Get a baseline document for customize default styles.</summary>
+					/// <returns>The baseline document.</returns>
+					virtual Ptr<DocumentModel>				GetBaselineDocument() = 0;
+				};
 			protected:
 
 				Point										GetDocumentViewPosition()override;
@@ -289,6 +299,15 @@ GuiDocumentViewer
 			/// <summary>Static document viewer for displaying <see cref="DocumentModel"/>.</summary>
 			class GuiDocumentLabel : public GuiControl, public GuiDocumentCommonInterface, public Description<GuiDocumentLabel>
 			{
+			public:
+				/// <summary>Style controller interface for <see cref="GuiDocumentLabel"/>.</summary>
+				class IStyleController : public virtual GuiControl::IStyleController, public Description<IStyleController>
+				{
+				public:
+					/// <summary>Get a baseline document for customize default styles.</summary>
+					/// <returns>The baseline document.</returns>
+					virtual Ptr<DocumentModel>				GetBaselineDocument() = 0;
+				};
 			public:
 				/// <summary>Create a control with a specified style controller.</summary>
 				/// <param name="styleController">The style controller.</param>

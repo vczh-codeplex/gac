@@ -94,12 +94,12 @@ Win8Theme
 
 			controls::GuiDocumentViewer::IStyleProvider* Win8Theme::CreateDocumentViewerStyle()
 			{
-				return new Win8MultilineTextBoxProvider;
+				return new Win8DocumentViewerStyle;
 			}
 
 			controls::GuiDocumentLabel::IStyleController* Win8Theme::CreateDocumentLabelStyle()
 			{
-				return new controls::GuiControl::EmptyStyleController;
+				return new Win8DocumentlabelStyle;
 			}
 
 			controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()

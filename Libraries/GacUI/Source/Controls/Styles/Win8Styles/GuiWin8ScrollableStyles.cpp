@@ -619,6 +619,40 @@ Win8SinglelineTextBoxProvider
 			{
 				return background.InstallBackground(boundsComposition);
 			}
+
+/***********************************************************************
+Win8DocumentViewerStyle
+***********************************************************************/
+
+			Win8DocumentViewerStyle::Win8DocumentViewerStyle()
+			{
+			}
+
+			Win8DocumentViewerStyle::~Win8DocumentViewerStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win8DocumentViewerStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
+
+/***********************************************************************
+Win8DocumentlabelStyle
+***********************************************************************/
+
+			Win8DocumentlabelStyle::Win8DocumentlabelStyle()
+			{
+			}
+
+			Win8DocumentlabelStyle::~Win8DocumentlabelStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win8DocumentlabelStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
 		}
 	}
 }

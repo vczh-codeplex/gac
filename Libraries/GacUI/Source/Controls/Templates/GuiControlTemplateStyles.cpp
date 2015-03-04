@@ -153,6 +153,28 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 			}
 
 /***********************************************************************
+GuiDocumentLabelTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDocumentLabelTemplate_StyleProvider::GuiDocumentLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDocumentLabelTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDocumentLabelTemplate_StyleProvider::GuiDocumentLabelTemplate_StyleProvider()#An instance of GuiDocumentLabelTemplate is expected.");
+				}
+			}
+
+			GuiDocumentLabelTemplate_StyleProvider::~GuiDocumentLabelTemplate_StyleProvider()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentLabelTemplate_StyleProvider::GetBaselineDocument()
+			{
+				return controlTemplate->GetBaselineDocument();
+			}
+
+/***********************************************************************
 GuiMenuTemplate_StyleProvider
 ***********************************************************************/
 
@@ -626,6 +648,28 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 					element->SetColors(colors);
 					element->SetCaretColor(controlTemplate->GetCaretColor());
 				}
+			}
+
+/***********************************************************************
+GuiDocumentViewerTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDocumentViewerTemplate_StyleProvider::GuiDocumentViewerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDocumentViewerTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDocumentViewerTemplate_StyleProvider::GuiDocumentViewerTemplate_StyleProvider()#An instance of GuiDocumentViewerTemplate is expected.");
+				}
+			}
+
+			GuiDocumentViewerTemplate_StyleProvider::~GuiDocumentViewerTemplate_StyleProvider()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentViewerTemplate_StyleProvider::GetBaselineDocument()
+			{
+				return controlTemplate->GetBaselineDocument();
 			}
 
 /***********************************************************************

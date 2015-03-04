@@ -71,12 +71,26 @@ Type Declaration
 				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiSinglelineTextBoxTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiDocumentLabelTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDocumentLabelTemplate*(), NO_PARAMETER)
+
+				GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiDocumentLabelTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
 				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiMultilineTextBoxTemplate*(), NO_PARAMETER)
 
 				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentViewerTemplate)
+				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDocumentViewerTemplate*(), NO_PARAMETER)
+
+				GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiDocumentViewerTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiMenuTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)

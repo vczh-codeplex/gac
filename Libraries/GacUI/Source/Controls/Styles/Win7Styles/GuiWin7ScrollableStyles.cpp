@@ -648,6 +648,40 @@ Win7SinglelineTextBoxProvider
 			{
 				return background.InstallBackground(boundsComposition);
 			}
+
+/***********************************************************************
+Win7DocumentViewerStyle
+***********************************************************************/
+
+			Win7DocumentViewerStyle::Win7DocumentViewerStyle()
+			{
+			}
+
+			Win7DocumentViewerStyle::~Win7DocumentViewerStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win7DocumentViewerStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
+
+/***********************************************************************
+Win7DocumentlabelStyle
+***********************************************************************/
+
+			Win7DocumentlabelStyle::Win7DocumentlabelStyle()
+			{
+			}
+
+			Win7DocumentlabelStyle::~Win7DocumentlabelStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win7DocumentlabelStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
 		}
 	}
 }

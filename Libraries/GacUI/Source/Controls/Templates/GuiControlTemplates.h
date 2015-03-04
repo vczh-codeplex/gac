@@ -114,6 +114,18 @@ Control Template
 				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
+			class GuiDocumentLabelTemplate : public GuiControlTemplate, public Description<GuiDocumentLabelTemplate>
+			{
+			public:
+				GuiDocumentLabelTemplate();
+				~GuiDocumentLabelTemplate();
+
+#define GuiDocumentLabelTemplate_PROPERTIES(F)\
+				F(GuiDocumentLabelTemplate, Ptr<DocumentModel>, BaselineDocument)\
+
+				GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
 			class GuiMenuTemplate : public GuiControlTemplate, public Description<GuiMenuTemplate>
 			{
 			public:
@@ -289,6 +301,18 @@ Control Template
 				F(GuiMultilineTextBoxTemplate, Color, CaretColor)\
 
 				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
+			};
+
+			class GuiDocumentViewerTemplate : public GuiScrollViewTemplate, public Description<GuiDocumentViewerTemplate>
+			{
+			public:
+				GuiDocumentViewerTemplate();
+				~GuiDocumentViewerTemplate();
+
+#define GuiDocumentViewerTemplate_PROPERTIES(F)\
+				F(GuiDocumentViewerTemplate, Ptr<DocumentModel>, BaselineDocument)\
+
+				GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_DECL)
 			};
 
 			class GuiTextListTemplate : public GuiScrollViewTemplate, public Description<GuiTextListTemplate>
