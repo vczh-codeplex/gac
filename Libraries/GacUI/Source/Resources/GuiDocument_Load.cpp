@@ -386,24 +386,29 @@ DocumentModel
 					{
 						auto style = ParseDocumentStyle(styleElement);
 						auto styleName = name->value.value;
-						if (styleName.Length() > 9 && styleName.Right(9) == L"-Override")
-						{
-							styleName = styleName.Left(styleName.Length() - 9);
-							auto index = model->styles.Keys().IndexOf(styleName);
-							if (index == -1)
-							{
-								model->styles.Add(styleName, style);
-							}
-							else
-							{
-								auto originalStyle = model->styles.Values()[index];
-								MergeStyle(style->styles, originalStyle->styles);
-								originalStyle->styles = style->styles;
-							}
-						}
-						else if(!model->styles.Keys().Contains(styleName))
+						if(!model->styles.Keys().Contains(styleName))
 						{
 							model->styles.Add(styleName, style);
+							if (styleName.Length() > 9 && styleName.Right(9) == L"-Override")
+							{
+								{
+									auto sp = new DocumentStyleProperties(*style->styles.Obj());
+									style = new DocumentStyle;
+									style->styles = sp;
+								}
+								styleName = styleName.Left(styleName.Length() - 9);
+								auto index = model->styles.Keys().IndexOf(styleName);
+								if (index == -1)
+								{
+									model->styles.Add(styleName, style);
+								}
+								else
+								{
+									auto originalStyle = model->styles.Values()[index];
+									MergeStyle(style->styles, originalStyle->styles);
+									originalStyle->styles = style->styles;
+								}
+							}
 						}
 					}
 				}

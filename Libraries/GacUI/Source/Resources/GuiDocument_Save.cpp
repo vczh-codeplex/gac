@@ -244,7 +244,7 @@ DocumentModel
 				for(vint i=0;i<styles.Count();i++)
 				{
 					WString name=styles.Keys()[i];
-					if(name.Length()>0 && name[0]==L'#') continue;
+					if (name.Length()>0 && name[0] == L'#' && (name.Length() <= 9 || name.Right(9) != L"-Override")) continue;
 
 					Ptr<DocumentStyle> style=styles.Values().Get(i);
 					Ptr<DocumentStyleProperties> sp=style->styles;
