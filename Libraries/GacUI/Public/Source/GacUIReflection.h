@@ -1484,7 +1484,9 @@ Type List
 			F(presentation::controls::GuiDocumentCommonInterface)\
 			F(presentation::controls::GuiDocumentCommonInterface::EditMode)\
 			F(presentation::controls::GuiDocumentViewer)\
+			F(presentation::controls::GuiDocumentViewer::IStyleProvider)\
 			F(presentation::controls::GuiDocumentLabel)\
+			F(presentation::controls::GuiDocumentLabel::IStyleController)\
 			F(presentation::controls::GuiTextBoxCommonInterface)\
 			F(presentation::controls::ILanguageProvider)\
 			F(presentation::controls::RepeatingParsingExecutor)\
@@ -3357,6 +3359,45 @@ Interface Proxy
 					}
 				};
 
+				class GuiDocumentViewer_IStyleProvider : public GuiScrollView_IStyleProvider, public virtual GuiDocumentViewer::IStyleProvider
+				{
+				public:
+					GuiDocumentViewer_IStyleProvider(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleProvider(_proxy)
+						,GuiScrollView_IStyleProvider(_proxy)
+					{
+					}
+
+					static Ptr<GuiDocumentViewer::IStyleProvider> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiDocumentViewer_IStyleProvider(_proxy);
+					}
+
+					Ptr<DocumentModel> GetBaselineDocument()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBaselineDocument);
+					}
+				};
+
+				class GuiDocumentLabel_IStyleController : public GuiControl_IStyleController, public virtual GuiDocumentLabel::IStyleController
+				{
+				public:
+					GuiDocumentLabel_IStyleController(Ptr<IValueInterfaceProxy> _proxy)
+						:GuiControl_IStyleController(_proxy)
+					{
+					}
+
+					static Ptr<GuiDocumentLabel::IStyleController> Create(Ptr<IValueInterfaceProxy> _proxy)
+					{
+						return new GuiDocumentLabel_IStyleController(_proxy);
+					}
+
+					Ptr<DocumentModel> GetBaselineDocument()override
+					{
+						return INVOKEGET_INTERFACE_PROXY_NOPARAMS(GetBaselineDocument);
+					}
+				};
+
 				class controls_ILanguageProvider : public ValueInterfaceRoot, public virtual ILanguageProvider
 				{
 				public:
@@ -3850,7 +3891,9 @@ Type List
 			F(presentation::templates::GuiControlTemplate)\
 			F(presentation::templates::GuiLabelTemplate)\
 			F(presentation::templates::GuiSinglelineTextBoxTemplate)\
+			F(presentation::templates::GuiDocumentLabelTemplate)\
 			F(presentation::templates::GuiMultilineTextBoxTemplate)\
+			F(presentation::templates::GuiDocumentViewerTemplate)\
 			F(presentation::templates::GuiMenuTemplate)\
 			F(presentation::templates::GuiWindowTemplate)\
 			F(presentation::templates::GuiButtonTemplate)\

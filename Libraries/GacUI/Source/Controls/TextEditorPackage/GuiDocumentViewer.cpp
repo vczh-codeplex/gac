@@ -517,6 +517,11 @@ GuiDocumentViewer
 				{
 					value->paragraphs.Add(new DocumentParagraphRun);
 				}
+
+				if (baselineDocument)
+				{
+					value->MergeBaselineStyles(baselineDocument);
+				}
 				documentElement->SetDocument(value);
 			}
 

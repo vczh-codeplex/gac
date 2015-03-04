@@ -282,6 +282,9 @@ Rich Content Document (model)
 			
 			DocumentModel();
 
+			static void						MergeStyle(Ptr<DocumentStyleProperties> style, Ptr<DocumentStyleProperties> parent);
+			void							MergeBaselineStyle(Ptr<DocumentModel> baselineDocument, const WString& styleName);
+			void							MergeBaselineStyles(Ptr<DocumentModel> baselineDocument);
 			ResolvedStyle					GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context);
 			ResolvedStyle					GetStyle(const WString& styleName, const ResolvedStyle& context);
 
