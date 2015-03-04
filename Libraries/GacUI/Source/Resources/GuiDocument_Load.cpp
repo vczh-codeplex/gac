@@ -297,6 +297,76 @@ document_operation_visitors::DeserializeNodeVisitor
 				{
 				}
 			};
+
+			Ptr<DocumentStyle> ParseDocumentStyle(Ptr<XmlElement> styleElement)
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+
+				if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+				{
+					style->parentStyleName=parent->value.value;
+				}
+
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				style->styles=sp;
+
+				FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+				{
+					if(att->name.value==L"face")
+					{
+						sp->face=XmlGetValue(att);
+					}
+					else if(att->name.value==L"size")
+					{
+						sp->size=wtoi(XmlGetValue(att));
+					}
+					else if(att->name.value==L"color")
+					{
+						sp->color=Color::Parse(XmlGetValue(att));
+					}
+					else if(att->name.value==L"bkcolor")
+					{
+						sp->backgroundColor=Color::Parse(XmlGetValue(att));
+					}
+					else if(att->name.value==L"b")
+					{
+						sp->bold=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"i")
+					{
+						sp->italic=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"u")
+					{
+						sp->underline=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"s")
+					{
+						sp->strikeline=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"antialias")
+					{
+						WString value=XmlGetValue(att);
+						if(value==L"horizontal" || value==L"default")
+						{
+							sp->antialias=true;
+							sp->verticalAntialias=false;
+						}
+						else if(value==L"no")
+						{
+							sp->antialias=false;
+							sp->verticalAntialias=false;
+						}
+						else if(value==L"vertical")
+						{
+							sp->antialias=true;
+							sp->verticalAntialias=true;
+						}
+					}
+				}
+
+				return style;
+			}
 		}
 		using namespace document_operation_visitors;
 
@@ -312,73 +382,28 @@ DocumentModel
 				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Styles"))
 				{
 					FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(styles, L"Style"))
-					if(Ptr<XmlAttribute> name=XmlGetAttribute(styleElement, L"name"))
-					if(!model->styles.Keys().Contains(name->value.value))
+					if (Ptr<XmlAttribute> name = XmlGetAttribute(styleElement, L"name"))
 					{
-						Ptr<DocumentStyle> style=new DocumentStyle;
-						model->styles.Add(name->value.value, style);
-
-						if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+						auto style = ParseDocumentStyle(styleElement);
+						auto styleName = name->value.value;
+						if (styleName.Length() > 9 && styleName.Right(9) == L"-Override")
 						{
-							style->parentStyleName=parent->value.value;
+							styleName = styleName.Left(styleName.Length() - 9);
+							auto index = model->styles.Keys().IndexOf(styleName);
+							if (index == -1)
+							{
+								model->styles.Add(styleName, style);
+							}
+							else
+							{
+								auto originalStyle = model->styles.Values()[index];
+								MergeStyle(style->styles, originalStyle->styles);
+								originalStyle->styles = style->styles;
+							}
 						}
-
-						Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-						style->styles=sp;
-
-						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+						else if(!model->styles.Keys().Contains(styleName))
 						{
-							if(att->name.value==L"face")
-							{
-								sp->face=XmlGetValue(att);
-							}
-							else if(att->name.value==L"size")
-							{
-								sp->size=wtoi(XmlGetValue(att));
-							}
-							else if(att->name.value==L"color")
-							{
-								sp->color=Color::Parse(XmlGetValue(att));
-							}
-							else if(att->name.value==L"bkcolor")
-							{
-								sp->backgroundColor=Color::Parse(XmlGetValue(att));
-							}
-							else if(att->name.value==L"b")
-							{
-								sp->bold=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"i")
-							{
-								sp->italic=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"u")
-							{
-								sp->underline=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"s")
-							{
-								sp->strikeline=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"antialias")
-							{
-								WString value=XmlGetValue(att);
-								if(value==L"horizontal" || value==L"default")
-								{
-									sp->antialias=true;
-									sp->verticalAntialias=false;
-								}
-								else if(value==L"no")
-								{
-									sp->antialias=false;
-									sp->verticalAntialias=false;
-								}
-								else if(value==L"vertical")
-								{
-									sp->antialias=true;
-									sp->verticalAntialias=true;
-								}
-							}
+							model->styles.Add(styleName, style);
 						}
 					}
 				}

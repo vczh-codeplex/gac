@@ -15121,12 +15121,12 @@ Win7Theme
 
 			controls::GuiDocumentViewer::IStyleProvider* Win7Theme::CreateDocumentViewerStyle()
 			{
-				return new Win7MultilineTextBoxProvider;
+				return new Win7DocumentViewerStyle;
 			}
 
 			controls::GuiDocumentLabel::IStyleController* Win7Theme::CreateDocumentLabelStyle()
 			{
-				return new controls::GuiControl::EmptyStyleController;
+				return new Win7DocumentlabelStyle;
 			}
 
 			controls::GuiListView::IStyleProvider* Win7Theme::CreateListViewStyle()
@@ -15361,12 +15361,12 @@ Win8Theme
 
 			controls::GuiDocumentViewer::IStyleProvider* Win8Theme::CreateDocumentViewerStyle()
 			{
-				return new Win8MultilineTextBoxProvider;
+				return new Win8DocumentViewerStyle;
 			}
 
 			controls::GuiDocumentLabel::IStyleController* Win8Theme::CreateDocumentLabelStyle()
 			{
-				return new controls::GuiControl::EmptyStyleController;
+				return new Win8DocumentlabelStyle;
 			}
 
 			controls::GuiListView::IStyleProvider* Win8Theme::CreateListViewStyle()
@@ -18146,6 +18146,40 @@ Win7SinglelineTextBoxProvider
 			compositions::GuiGraphicsComposition* Win7SinglelineTextBoxProvider::InstallBackground(compositions::GuiBoundsComposition* boundsComposition)
 			{
 				return background.InstallBackground(boundsComposition);
+			}
+
+/***********************************************************************
+Win7DocumentViewerStyle
+***********************************************************************/
+
+			Win7DocumentViewerStyle::Win7DocumentViewerStyle()
+			{
+			}
+
+			Win7DocumentViewerStyle::~Win7DocumentViewerStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win7DocumentViewerStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
+
+/***********************************************************************
+Win7DocumentlabelStyle
+***********************************************************************/
+
+			Win7DocumentlabelStyle::Win7DocumentlabelStyle()
+			{
+			}
+
+			Win7DocumentlabelStyle::~Win7DocumentlabelStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win7DocumentlabelStyle::GetBaselineDocument()
+			{
+				return nullptr;
 			}
 		}
 	}
@@ -22134,6 +22168,40 @@ Win8SinglelineTextBoxProvider
 			{
 				return background.InstallBackground(boundsComposition);
 			}
+
+/***********************************************************************
+Win8DocumentViewerStyle
+***********************************************************************/
+
+			Win8DocumentViewerStyle::Win8DocumentViewerStyle()
+			{
+			}
+
+			Win8DocumentViewerStyle::~Win8DocumentViewerStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win8DocumentViewerStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
+
+/***********************************************************************
+Win8DocumentlabelStyle
+***********************************************************************/
+
+			Win8DocumentlabelStyle::Win8DocumentlabelStyle()
+			{
+			}
+
+			Win8DocumentlabelStyle::~Win8DocumentlabelStyle()
+			{
+			}
+
+			Ptr<DocumentModel> Win8DocumentlabelStyle::GetBaselineDocument()
+			{
+				return nullptr;
+			}
 		}
 	}
 }
@@ -23786,6 +23854,21 @@ GuiSinglelineTextBoxTemplate
 			}
 
 /***********************************************************************
+GuiDocumentLabelTemplate
+***********************************************************************/
+
+			GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDocumentLabelTemplate::GuiDocumentLabelTemplate()
+			{
+				GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDocumentLabelTemplate::~GuiDocumentLabelTemplate()
+			{
+			}
+
+/***********************************************************************
 GuiMenuTemplate
 ***********************************************************************/
 
@@ -24000,6 +24083,21 @@ GuiTextListTemplate
 			}
 
 			GuiTextListTemplate::~GuiTextListTemplate()
+			{
+			}
+
+/***********************************************************************
+GuiDocumentViewerTemplate
+***********************************************************************/
+
+			GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_IMPL)
+
+			GuiDocumentViewerTemplate::GuiDocumentViewerTemplate()
+			{
+				GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_EVENT_INIT)
+			}
+
+			GuiDocumentViewerTemplate::~GuiDocumentViewerTemplate()
 			{
 			}
 
@@ -24270,6 +24368,28 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 				controlTemplate->SetAlignmentToParent(Margin(0, 0, 0, 0));
 				boundsComposition->AddChild(controlTemplate);
 				return controlTemplate->GetContainerComposition();
+			}
+
+/***********************************************************************
+GuiDocumentLabelTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDocumentLabelTemplate_StyleProvider::GuiDocumentLabelTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiControlTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDocumentLabelTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDocumentLabelTemplate_StyleProvider::GuiDocumentLabelTemplate_StyleProvider()#An instance of GuiDocumentLabelTemplate is expected.");
+				}
+			}
+
+			GuiDocumentLabelTemplate_StyleProvider::~GuiDocumentLabelTemplate_StyleProvider()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentLabelTemplate_StyleProvider::GetBaselineDocument()
+			{
+				return controlTemplate->GetBaselineDocument();
 			}
 
 /***********************************************************************
@@ -24746,6 +24866,28 @@ GuiSinglelineTextBoxTemplate_StyleProvider
 					element->SetColors(colors);
 					element->SetCaretColor(controlTemplate->GetCaretColor());
 				}
+			}
+
+/***********************************************************************
+GuiDocumentViewerTemplate_StyleProvider
+***********************************************************************/
+
+			GuiDocumentViewerTemplate_StyleProvider::GuiDocumentViewerTemplate_StyleProvider(Ptr<GuiTemplate::IFactory> factory)
+				:GuiScrollViewTemplate_StyleProvider(factory)
+			{
+				if (!(controlTemplate = dynamic_cast<GuiDocumentViewerTemplate*>(GetBoundsComposition())))
+				{
+					CHECK_FAIL(L"GuiDocumentViewerTemplate_StyleProvider::GuiDocumentViewerTemplate_StyleProvider()#An instance of GuiDocumentViewerTemplate is expected.");
+				}
+			}
+
+			GuiDocumentViewerTemplate_StyleProvider::~GuiDocumentViewerTemplate_StyleProvider()
+			{
+			}
+
+			Ptr<DocumentModel> GuiDocumentViewerTemplate_StyleProvider::GetBaselineDocument()
+			{
+				return controlTemplate->GetBaselineDocument();
 			}
 
 /***********************************************************************
@@ -26212,8 +26354,9 @@ GuiDocumentViewer
 			{
 			}
 
-			GuiDocumentCommonInterface::GuiDocumentCommonInterface()
-				:documentElement(0)
+			GuiDocumentCommonInterface::GuiDocumentCommonInterface(Ptr<DocumentModel> _baselineDocument)
+				:baselineDocument(_baselineDocument)
+				,documentElement(0)
 				,documentComposition(0)
 				,activeHyperlinkParagraph(-1)
 				,dragging(false)
@@ -26248,6 +26391,11 @@ GuiDocumentViewer
 				if(value->paragraphs.Count()==0)
 				{
 					value->paragraphs.Add(new DocumentParagraphRun);
+				}
+
+				if (baselineDocument)
+				{
+					value->MergeBaselineStyles(baselineDocument);
 				}
 				documentElement->SetDocument(value);
 			}
@@ -26681,6 +26829,7 @@ GuiDocumentViewer
 
 			GuiDocumentViewer::GuiDocumentViewer(GuiDocumentViewer::IStyleProvider* styleProvider)
 				:GuiScrollContainer(styleProvider)
+				, GuiDocumentCommonInterface(styleProvider->GetBaselineDocument())
 			{
 				SetExtendToFullWidth(true);
 				SetHorizontalAlwaysVisible(false);
@@ -26711,6 +26860,7 @@ GuiDocumentLabel
 
 			GuiDocumentLabel::GuiDocumentLabel(GuiDocumentLabel::IStyleController* styleController)
 				:GuiControl(styleController)
+				, GuiDocumentCommonInterface(styleController->GetBaselineDocument())
 			{
 				GetContainerComposition()->SetMinSizeLimitation(GuiGraphicsComposition::LimitToElementAndChildren);
 				SetFocusableComposition(GetBoundsComposition());
@@ -38556,6 +38706,62 @@ DocumentModel
 			}
 		}
 
+		void DocumentModel::MergeStyle(Ptr<DocumentStyleProperties> style, Ptr<DocumentStyleProperties> parent)
+		{
+			if(!style->face					&& parent->face)				style->face					=parent->face;
+			if(!style->size					&& parent->size)				style->size					=parent->size;
+			if(!style->color				&& parent->color)				style->color				=parent->color;
+			if(!style->backgroundColor		&& parent->backgroundColor)		style->backgroundColor		=parent->backgroundColor;
+			if(!style->bold					&& parent->bold)				style->bold					=parent->bold;
+			if(!style->italic				&& parent->italic)				style->italic				=parent->italic;
+			if(!style->underline			&& parent->underline)			style->underline			=parent->underline;
+			if(!style->strikeline			&& parent->strikeline)			style->strikeline			=parent->strikeline;
+			if(!style->antialias			&& parent->antialias)			style->antialias			=parent->antialias;
+			if(!style->verticalAntialias	&& parent->verticalAntialias)	style->verticalAntialias	=parent->verticalAntialias;
+		}
+
+		void DocumentModel::MergeBaselineStyle(Ptr<DocumentModel> baselineDocument, const WString& styleName)
+		{
+			auto indexSrc = baselineDocument->styles.Keys().IndexOf(styleName);
+			if (indexSrc == -1)
+			{
+				return;
+			}
+
+			auto indexDst = styles.Keys().IndexOf(styleName);
+			auto csp = baselineDocument->styles.Values()[indexSrc]->styles;
+			Ptr<DocumentStyleProperties> sp = new DocumentStyleProperties(*csp.Obj());
+			if (indexDst != -1)
+			{
+				MergeStyle(sp, styles.Values()[indexDst]->styles);
+			}
+
+			if (indexDst == -1)
+			{
+				auto style = new DocumentStyle;
+				style->styles = sp;
+				styles.Add(styleName, style);
+			}
+			else
+			{
+				styles.Values()[indexDst]->styles = sp;
+			}
+
+			FOREACH(Ptr<DocumentStyle>, style, styles.Values())
+			{
+				style->resolvedStyles = nullptr;
+			}
+		}
+
+		void DocumentModel::MergeBaselineStyles(Ptr<DocumentModel> baselineDocument)
+		{
+			MergeBaselineStyle(baselineDocument, DefaultStyleName);
+			MergeBaselineStyle(baselineDocument, SelectionStyleName);
+			MergeBaselineStyle(baselineDocument, ContextStyleName);
+			MergeBaselineStyle(baselineDocument, NormalLinkStyleName);
+			MergeBaselineStyle(baselineDocument, ActiveLinkStyleName);
+		}
+
 		DocumentModel::ResolvedStyle DocumentModel::GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context)
 		{
 			FontProperties font;
@@ -38589,29 +38795,18 @@ DocumentModel
 
 			if(!selectedStyle->resolvedStyles)
 			{
-				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-				selectedStyle->resolvedStyles=sp;
+				Ptr<DocumentStyleProperties> sp = new DocumentStyleProperties;
+				selectedStyle->resolvedStyles = sp;
 
 				Ptr<DocumentStyle> currentStyle;
-				WString currentName=styleName;
+				WString currentName = styleName;
 				while(true)
 				{
-					vint index=styles.Keys().IndexOf(currentName);
-					if(index==-1) break;
-					currentStyle=styles.Values().Get(index);
-					currentName=currentStyle->parentStyleName;
-					Ptr<DocumentStyleProperties> csp=currentStyle->styles;
-
-					if(!sp->face				&& csp->face)				sp->face				=csp->face;
-					if(!sp->size				&& csp->size)				sp->size				=csp->size;
-					if(!sp->color				&& csp->color)				sp->color				=csp->color;
-					if(!sp->backgroundColor		&& csp->backgroundColor)	sp->backgroundColor		=csp->backgroundColor;
-					if(!sp->bold				&& csp->bold)				sp->bold				=csp->bold;
-					if(!sp->italic				&& csp->italic)				sp->italic				=csp->italic;
-					if(!sp->underline			&& csp->underline)			sp->underline			=csp->underline;
-					if(!sp->strikeline			&& csp->strikeline)			sp->strikeline			=csp->strikeline;
-					if(!sp->antialias			&& csp->antialias)			sp->antialias			=csp->antialias;
-					if(!sp->verticalAntialias	&& csp->verticalAntialias)	sp->verticalAntialias	=csp->verticalAntialias;
+					vint index = styles.Keys().IndexOf(currentName);
+					if (index == -1) break;
+					currentStyle = styles.Values().Get(index);
+					currentName = currentStyle->parentStyleName;
+					MergeStyle(sp, currentStyle->styles);
 				}
 			}
 
@@ -40968,6 +41163,76 @@ document_operation_visitors::DeserializeNodeVisitor
 				{
 				}
 			};
+
+			Ptr<DocumentStyle> ParseDocumentStyle(Ptr<XmlElement> styleElement)
+			{
+				Ptr<DocumentStyle> style=new DocumentStyle;
+
+				if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+				{
+					style->parentStyleName=parent->value.value;
+				}
+
+				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
+				style->styles=sp;
+
+				FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+				{
+					if(att->name.value==L"face")
+					{
+						sp->face=XmlGetValue(att);
+					}
+					else if(att->name.value==L"size")
+					{
+						sp->size=wtoi(XmlGetValue(att));
+					}
+					else if(att->name.value==L"color")
+					{
+						sp->color=Color::Parse(XmlGetValue(att));
+					}
+					else if(att->name.value==L"bkcolor")
+					{
+						sp->backgroundColor=Color::Parse(XmlGetValue(att));
+					}
+					else if(att->name.value==L"b")
+					{
+						sp->bold=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"i")
+					{
+						sp->italic=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"u")
+					{
+						sp->underline=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"s")
+					{
+						sp->strikeline=XmlGetValue(att)==L"true";
+					}
+					else if(att->name.value==L"antialias")
+					{
+						WString value=XmlGetValue(att);
+						if(value==L"horizontal" || value==L"default")
+						{
+							sp->antialias=true;
+							sp->verticalAntialias=false;
+						}
+						else if(value==L"no")
+						{
+							sp->antialias=false;
+							sp->verticalAntialias=false;
+						}
+						else if(value==L"vertical")
+						{
+							sp->antialias=true;
+							sp->verticalAntialias=true;
+						}
+					}
+				}
+
+				return style;
+			}
 		}
 		using namespace document_operation_visitors;
 
@@ -40983,73 +41248,28 @@ DocumentModel
 				if(Ptr<XmlElement> styles=XmlGetElement(xml->rootElement, L"Styles"))
 				{
 					FOREACH(Ptr<XmlElement>, styleElement, XmlGetElements(styles, L"Style"))
-					if(Ptr<XmlAttribute> name=XmlGetAttribute(styleElement, L"name"))
-					if(!model->styles.Keys().Contains(name->value.value))
+					if (Ptr<XmlAttribute> name = XmlGetAttribute(styleElement, L"name"))
 					{
-						Ptr<DocumentStyle> style=new DocumentStyle;
-						model->styles.Add(name->value.value, style);
-
-						if(Ptr<XmlAttribute> parent=XmlGetAttribute(styleElement, L"parent"))
+						auto style = ParseDocumentStyle(styleElement);
+						auto styleName = name->value.value;
+						if (styleName.Length() > 9 && styleName.Right(9) == L"-Override")
 						{
-							style->parentStyleName=parent->value.value;
+							styleName = styleName.Left(styleName.Length() - 9);
+							auto index = model->styles.Keys().IndexOf(styleName);
+							if (index == -1)
+							{
+								model->styles.Add(styleName, style);
+							}
+							else
+							{
+								auto originalStyle = model->styles.Values()[index];
+								MergeStyle(style->styles, originalStyle->styles);
+								originalStyle->styles = style->styles;
+							}
 						}
-
-						Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-						style->styles=sp;
-
-						FOREACH(Ptr<XmlElement>, att, XmlGetElements(styleElement))
+						else if(!model->styles.Keys().Contains(styleName))
 						{
-							if(att->name.value==L"face")
-							{
-								sp->face=XmlGetValue(att);
-							}
-							else if(att->name.value==L"size")
-							{
-								sp->size=wtoi(XmlGetValue(att));
-							}
-							else if(att->name.value==L"color")
-							{
-								sp->color=Color::Parse(XmlGetValue(att));
-							}
-							else if(att->name.value==L"bkcolor")
-							{
-								sp->backgroundColor=Color::Parse(XmlGetValue(att));
-							}
-							else if(att->name.value==L"b")
-							{
-								sp->bold=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"i")
-							{
-								sp->italic=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"u")
-							{
-								sp->underline=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"s")
-							{
-								sp->strikeline=XmlGetValue(att)==L"true";
-							}
-							else if(att->name.value==L"antialias")
-							{
-								WString value=XmlGetValue(att);
-								if(value==L"horizontal" || value==L"default")
-								{
-									sp->antialias=true;
-									sp->verticalAntialias=false;
-								}
-								else if(value==L"no")
-								{
-									sp->antialias=false;
-									sp->verticalAntialias=false;
-								}
-								else if(value==L"vertical")
-								{
-									sp->antialias=true;
-									sp->verticalAntialias=true;
-								}
-							}
+							model->styles.Add(styleName, style);
 						}
 					}
 				}

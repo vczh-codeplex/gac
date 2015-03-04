@@ -177,6 +177,62 @@ DocumentModel
 			}
 		}
 
+		void DocumentModel::MergeStyle(Ptr<DocumentStyleProperties> style, Ptr<DocumentStyleProperties> parent)
+		{
+			if(!style->face					&& parent->face)				style->face					=parent->face;
+			if(!style->size					&& parent->size)				style->size					=parent->size;
+			if(!style->color				&& parent->color)				style->color				=parent->color;
+			if(!style->backgroundColor		&& parent->backgroundColor)		style->backgroundColor		=parent->backgroundColor;
+			if(!style->bold					&& parent->bold)				style->bold					=parent->bold;
+			if(!style->italic				&& parent->italic)				style->italic				=parent->italic;
+			if(!style->underline			&& parent->underline)			style->underline			=parent->underline;
+			if(!style->strikeline			&& parent->strikeline)			style->strikeline			=parent->strikeline;
+			if(!style->antialias			&& parent->antialias)			style->antialias			=parent->antialias;
+			if(!style->verticalAntialias	&& parent->verticalAntialias)	style->verticalAntialias	=parent->verticalAntialias;
+		}
+
+		void DocumentModel::MergeBaselineStyle(Ptr<DocumentModel> baselineDocument, const WString& styleName)
+		{
+			auto indexSrc = baselineDocument->styles.Keys().IndexOf(styleName);
+			if (indexSrc == -1)
+			{
+				return;
+			}
+
+			auto indexDst = styles.Keys().IndexOf(styleName);
+			auto csp = baselineDocument->styles.Values()[indexSrc]->styles;
+			Ptr<DocumentStyleProperties> sp = new DocumentStyleProperties(*csp.Obj());
+			if (indexDst != -1)
+			{
+				MergeStyle(sp, styles.Values()[indexDst]->styles);
+			}
+
+			if (indexDst == -1)
+			{
+				auto style = new DocumentStyle;
+				style->styles = sp;
+				styles.Add(styleName, style);
+			}
+			else
+			{
+				styles.Values()[indexDst]->styles = sp;
+			}
+
+			FOREACH(Ptr<DocumentStyle>, style, styles.Values())
+			{
+				style->resolvedStyles = nullptr;
+			}
+		}
+
+		void DocumentModel::MergeBaselineStyles(Ptr<DocumentModel> baselineDocument)
+		{
+			MergeBaselineStyle(baselineDocument, DefaultStyleName);
+			MergeBaselineStyle(baselineDocument, SelectionStyleName);
+			MergeBaselineStyle(baselineDocument, ContextStyleName);
+			MergeBaselineStyle(baselineDocument, NormalLinkStyleName);
+			MergeBaselineStyle(baselineDocument, ActiveLinkStyleName);
+		}
+
 		DocumentModel::ResolvedStyle DocumentModel::GetStyle(Ptr<DocumentStyleProperties> sp, const ResolvedStyle& context)
 		{
 			FontProperties font;
@@ -210,29 +266,18 @@ DocumentModel
 
 			if(!selectedStyle->resolvedStyles)
 			{
-				Ptr<DocumentStyleProperties> sp=new DocumentStyleProperties;
-				selectedStyle->resolvedStyles=sp;
+				Ptr<DocumentStyleProperties> sp = new DocumentStyleProperties;
+				selectedStyle->resolvedStyles = sp;
 
 				Ptr<DocumentStyle> currentStyle;
-				WString currentName=styleName;
+				WString currentName = styleName;
 				while(true)
 				{
-					vint index=styles.Keys().IndexOf(currentName);
-					if(index==-1) break;
-					currentStyle=styles.Values().Get(index);
-					currentName=currentStyle->parentStyleName;
-					Ptr<DocumentStyleProperties> csp=currentStyle->styles;
-
-					if(!sp->face				&& csp->face)				sp->face				=csp->face;
-					if(!sp->size				&& csp->size)				sp->size				=csp->size;
-					if(!sp->color				&& csp->color)				sp->color				=csp->color;
-					if(!sp->backgroundColor		&& csp->backgroundColor)	sp->backgroundColor		=csp->backgroundColor;
-					if(!sp->bold				&& csp->bold)				sp->bold				=csp->bold;
-					if(!sp->italic				&& csp->italic)				sp->italic				=csp->italic;
-					if(!sp->underline			&& csp->underline)			sp->underline			=csp->underline;
-					if(!sp->strikeline			&& csp->strikeline)			sp->strikeline			=csp->strikeline;
-					if(!sp->antialias			&& csp->antialias)			sp->antialias			=csp->antialias;
-					if(!sp->verticalAntialias	&& csp->verticalAntialias)	sp->verticalAntialias	=csp->verticalAntialias;
+					vint index = styles.Keys().IndexOf(currentName);
+					if (index == -1) break;
+					currentStyle = styles.Values().Get(index);
+					currentName = currentStyle->parentStyleName;
+					MergeStyle(sp, currentStyle->styles);
 				}
 			}
 

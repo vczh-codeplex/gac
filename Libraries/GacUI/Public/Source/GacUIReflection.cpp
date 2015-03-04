@@ -5789,8 +5789,8 @@ GuiPredefinedInstanceLoadersPlugin
 				ADD_TEMPLATE_CONTROL	(							GuiScrollContainer,		g::NewScrollContainer,			GuiScrollViewTemplate);			// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiWindow,				g::NewWindow,					GuiWindowTemplate);				// ControlTemplate
 				ADD_TEMPLATE_CONTROL_2	(							GuiTextList,			g::NewTextList,					GuiTextListTemplate);			// ControlTemplate
-				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiScrollViewTemplate);			// ControlTemplate
-				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiControlTemplate);			// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiDocumentViewer,		g::NewDocumentViewer,			GuiDocumentViewerTemplate);		// ControlTemplate
+				ADD_TEMPLATE_CONTROL	(							GuiDocumentLabel,		g::NewDocumentLabel,			GuiDocumentLabelTemplate);		// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiMultilineTextBox,	g::NewMultilineTextBox,			GuiMultilineTextBoxTemplate);	// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiSinglelineTextBox,	g::NewTextBox,					GuiSinglelineTextBoxTemplate);	// ControlTemplate
 				ADD_TEMPLATE_CONTROL	(							GuiDatePicker,			g::NewDatePicker,				GuiDatePickerTemplate);			// ControlTemplate
@@ -11711,11 +11711,25 @@ Type Declaration
 				CONTROL_CONSTRUCTOR_PROVIDER(GuiDocumentViewer)
 			END_CLASS_MEMBER(GuiDocumentViewer)
 
+			BEGIN_CLASS_MEMBER(GuiDocumentViewer::IStyleProvider)
+				CLASS_MEMBER_BASE(GuiScrollContainer::IStyleProvider)
+				INTERFACE_EXTERNALCTOR(GuiDocumentViewer, IStyleProvider)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaselineDocument)
+			END_CLASS_MEMBER(GuiDocumentViewer::IStyleProvider)
+
 			BEGIN_CLASS_MEMBER(GuiDocumentLabel)
 				CLASS_MEMBER_BASE(GuiControl)
 				CLASS_MEMBER_BASE(GuiDocumentCommonInterface)
 				CONTROL_CONSTRUCTOR_CONTROLLER(GuiDocumentLabel)
 			END_CLASS_MEMBER(GuiDocumentLabel)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentLabel::IStyleController)
+				CLASS_MEMBER_BASE(GuiControl::IStyleController)
+				INTERFACE_EXTERNALCTOR(GuiDocumentLabel, IStyleController)
+
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(BaselineDocument)
+			END_CLASS_MEMBER(GuiDocumentLabel::IStyleProvider)
 
 			BEGIN_CLASS_MEMBER(GuiTextBoxCommonInterface)
 				CLASS_MEMBER_GUIEVENT(SelectionChanged)
@@ -12867,12 +12881,26 @@ Type Declaration
 				GuiSinglelineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiSinglelineTextBoxTemplate)
 
+			BEGIN_CLASS_MEMBER(GuiDocumentLabelTemplate)
+				CLASS_MEMBER_BASE(GuiControlTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDocumentLabelTemplate*(), NO_PARAMETER)
+
+				GuiDocumentLabelTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiDocumentLabelTemplate)
+
 			BEGIN_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
 				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
 				CLASS_MEMBER_CONSTRUCTOR(GuiMultilineTextBoxTemplate*(), NO_PARAMETER)
 
 				GuiMultilineTextBoxTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
 			END_CLASS_MEMBER(GuiMultilineTextBoxTemplate)
+
+			BEGIN_CLASS_MEMBER(GuiDocumentViewerTemplate)
+				CLASS_MEMBER_BASE(GuiScrollViewTemplate)
+				CLASS_MEMBER_CONSTRUCTOR(GuiDocumentViewerTemplate*(), NO_PARAMETER)
+
+				GuiDocumentViewerTemplate_PROPERTIES(GUI_TEMPLATE_PROPERTY_REFLECTION)
+			END_CLASS_MEMBER(GuiDocumentViewerTemplate)
 
 			BEGIN_CLASS_MEMBER(GuiMenuTemplate)
 				CLASS_MEMBER_BASE(GuiControlTemplate)
