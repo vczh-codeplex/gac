@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA472-C40E-41C8-BDF9-9866F36C9AE3}"
 	ProjectSection(SolutionItems) = preProject
+		..\Public\0.Codepack.bat = ..\Public\0.Codepack.bat
 		..\Public\Source\GacUI.cpp = ..\Public\Source\GacUI.cpp
 		..\Public\Source\GacUI.h = ..\Public\Source\GacUI.h
 		..\Public\Source\GacUIReflection.cpp = ..\Public\Source\GacUIReflection.cpp

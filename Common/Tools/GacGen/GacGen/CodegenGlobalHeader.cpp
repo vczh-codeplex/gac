@@ -14,7 +14,10 @@ void WriteGlobalHeaderFile(Ptr<CodegenConfig> config, Dictionary<WString, Ptr<In
 	writer.WriteLine(L"");
 	FOREACH(Ptr<Instance>, instance, instances.Values())
 	{
-		writer.WriteLine(L"#include \"" + config->GetControlClassHeaderFileName(instance) + L"\"");
+		if (instance->context->codeBehind)
+		{
+			writer.WriteLine(L"#include \"" + config->GetControlClassHeaderFileName(instance) + L"\"");
+		}
 	}
 	writer.WriteLine(L"");
 

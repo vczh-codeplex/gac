@@ -74,14 +74,14 @@ namespace data
 {
 	struct Point
 	{
-		vint X;
-		vint Y;
+		vl::vint32_t X;
+		vl::vint32_t Y;
 	};
 
 	class Node : public vl::Object, public vl::reflection::Description<Node>
 	{
 	public:
-		Ptr<data::Node> Next;
+		vl::Ptr<data::Node> Next;
 	};
 
 	class PointNode : public data::Node, public vl::reflection::Description<PointNode>
@@ -94,10 +94,10 @@ namespace data
 	{
 	public:
 
-		virtual vint GetCount() = 0;
+		virtual vl::vint32_t GetCount() = 0;
 		vl::Event<void()> CountChanged;
 
-		virtual data::Point GetPoint(vint index) = 0;
+		virtual data::Point GetPoint(vl::vint32_t index) = 0;
 	};
 
 }
@@ -610,10 +610,10 @@ namespace demos
 		friend struct vl::reflection::description::CustomTypeDescriptorSelector<TImpl>;
 	private:
 		Ptr<data::PointProvider> ViewModel_;
-		vint PointCount_;
+		vl::vint32_t PointCount_;
 		data::Point PointData_;
 	protected:
-		WString pointCountInternal;
+		vl::WString pointCountInternal;
 		vl::presentation::controls::GuiButton* buttonAddTab;
 		vl::presentation::controls::GuiButton* buttonEnable;
 		vl::presentation::controls::GuiComboBoxListControl* comboBoxSeasons;
@@ -733,7 +733,7 @@ return style;
 
 		vl::Event<void()> PointCountChanged;
 
-		vint GetPointCount()
+		vl::vint32_t GetPointCount()
 		{
 			return PointCount_;
 		}
@@ -1557,8 +1557,6 @@ namespace vl
 		}
 	}
 }
-/*
-BottomScrollButtonTemplate.h :
 namespace demos
 {
 	class BottomScrollButtonTemplate : public demos::BottomScrollButtonTemplate_<demos::BottomScrollButtonTemplate>
@@ -1575,21 +1573,6 @@ namespace demos
 }
 
 
-BottomScrollButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	BottomScrollButtonTemplate::BottomScrollButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ButtonTemplate.h :
 namespace demos
 {
 	class ButtonTemplate : public demos::ButtonTemplate_<demos::ButtonTemplate>
@@ -1606,21 +1589,6 @@ namespace demos
 }
 
 
-ButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ButtonTemplate::ButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-CheckBoxTemplate.h :
 namespace demos
 {
 	class CheckBoxTemplate : public demos::CheckBoxTemplate_<demos::CheckBoxTemplate>
@@ -1637,21 +1605,6 @@ namespace demos
 }
 
 
-CheckBoxTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	CheckBoxTemplate::CheckBoxTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-CheckItemBackgroundTemplate.h :
 namespace demos
 {
 	class CheckItemBackgroundTemplate : public demos::CheckItemBackgroundTemplate_<demos::CheckItemBackgroundTemplate>
@@ -1668,21 +1621,6 @@ namespace demos
 }
 
 
-CheckItemBackgroundTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	CheckItemBackgroundTemplate::CheckItemBackgroundTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-CheckTextListTemplate.h :
 namespace demos
 {
 	class CheckTextListTemplate : public demos::CheckTextListTemplate_<demos::CheckTextListTemplate>
@@ -1699,21 +1637,6 @@ namespace demos
 }
 
 
-CheckTextListTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	CheckTextListTemplate::CheckTextListTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ComboBoxTemplate.h :
 namespace demos
 {
 	class ComboBoxTemplate : public demos::ComboBoxTemplate_<demos::ComboBoxTemplate>
@@ -1730,21 +1653,6 @@ namespace demos
 }
 
 
-ComboBoxTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ComboBoxTemplate::ComboBoxTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-DatePickerTemplate.h :
 namespace demos
 {
 	class DatePickerTemplate : public demos::DatePickerTemplate_<demos::DatePickerTemplate>
@@ -1761,21 +1669,6 @@ namespace demos
 }
 
 
-DatePickerTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	DatePickerTemplate::DatePickerTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-DocumentLabelTemplate.h :
 namespace demos
 {
 	class DocumentLabelTemplate : public demos::DocumentLabelTemplate_<demos::DocumentLabelTemplate>
@@ -1792,21 +1685,6 @@ namespace demos
 }
 
 
-DocumentLabelTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	DocumentLabelTemplate::DocumentLabelTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ExpandingDecoratorTemplate.h :
 namespace demos
 {
 	class ExpandingDecoratorTemplate : public demos::ExpandingDecoratorTemplate_<demos::ExpandingDecoratorTemplate>
@@ -1823,21 +1701,6 @@ namespace demos
 }
 
 
-ExpandingDecoratorTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ExpandingDecoratorTemplate::ExpandingDecoratorTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-GroupBoxTemplate.h :
 namespace demos
 {
 	class GroupBoxTemplate : public demos::GroupBoxTemplate_<demos::GroupBoxTemplate>
@@ -1854,21 +1717,6 @@ namespace demos
 }
 
 
-GroupBoxTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	GroupBoxTemplate::GroupBoxTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-HScrollHandleTemplate.h :
 namespace demos
 {
 	class HScrollHandleTemplate : public demos::HScrollHandleTemplate_<demos::HScrollHandleTemplate>
@@ -1885,113 +1733,6 @@ namespace demos
 }
 
 
-HScrollHandleTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	HScrollHandleTemplate::HScrollHandleTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-HScrollTemplate.h :
-namespace demos
-{
-	class HScrollTemplate : public demos::HScrollTemplate_<demos::HScrollTemplate>
-	{
-		friend class demos::HScrollTemplate_<demos::HScrollTemplate>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<demos::HScrollTemplate>;
-	protected:
-
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-		void OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-	public:
-		HScrollTemplate();
-	};
-}
-
-
-HScrollTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	void HScrollTemplate::OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void HScrollTemplate::OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void HScrollTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	HScrollTemplate::HScrollTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-HTrackerTemplate.h :
-namespace demos
-{
-	class HTrackerTemplate : public demos::HTrackerTemplate_<demos::HTrackerTemplate>
-	{
-		friend class demos::HTrackerTemplate_<demos::HTrackerTemplate>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<demos::HTrackerTemplate>;
-	protected:
-
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-		void OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-	public:
-		HTrackerTemplate();
-	};
-}
-
-
-HTrackerTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	void HTrackerTemplate::OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void HTrackerTemplate::OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void HTrackerTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	HTrackerTemplate::HTrackerTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ItemBackgroundTemplate.h :
 namespace demos
 {
 	class ItemBackgroundTemplate : public demos::ItemBackgroundTemplate_<demos::ItemBackgroundTemplate>
@@ -2008,21 +1749,6 @@ namespace demos
 }
 
 
-ItemBackgroundTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ItemBackgroundTemplate::ItemBackgroundTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-LabelTemplate.h :
 namespace demos
 {
 	class LabelTemplate : public demos::LabelTemplate_<demos::LabelTemplate>
@@ -2039,21 +1765,6 @@ namespace demos
 }
 
 
-LabelTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	LabelTemplate::LabelTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-LeftScrollButtonTemplate.h :
 namespace demos
 {
 	class LeftScrollButtonTemplate : public demos::LeftScrollButtonTemplate_<demos::LeftScrollButtonTemplate>
@@ -2070,21 +1781,6 @@ namespace demos
 }
 
 
-LeftScrollButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	LeftScrollButtonTemplate::LeftScrollButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ListViewColumnHeaderTemplate.h :
 namespace demos
 {
 	class ListViewColumnHeaderTemplate : public demos::ListViewColumnHeaderTemplate_<demos::ListViewColumnHeaderTemplate>
@@ -2101,21 +1797,6 @@ namespace demos
 }
 
 
-ListViewColumnHeaderTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ListViewColumnHeaderTemplate::ListViewColumnHeaderTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ListViewTemplate.h :
 namespace demos
 {
 	class ListViewTemplate : public demos::ListViewTemplate_<demos::ListViewTemplate>
@@ -2132,52 +1813,6 @@ namespace demos
 }
 
 
-ListViewTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ListViewTemplate::ListViewTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-MainWindow.h :
-namespace demos
-{
-	class MainWindow : public demos::MainWindow_<demos::MainWindow>
-	{
-		friend class demos::MainWindow_<demos::MainWindow>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<demos::MainWindow>;
-	protected:
-
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-	public:
-		MainWindow(Ptr<data::PointProvider> ViewModel);
-	};
-}
-
-
-MainWindow.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	MainWindow::MainWindow(Ptr<data::PointProvider> ViewModel)
-	{
-		InitializeComponents(ViewModel);
-	}
-}
-
-
-MenuBarButtonTemplate.h :
 namespace demos
 {
 	class MenuBarButtonTemplate : public demos::MenuBarButtonTemplate_<demos::MenuBarButtonTemplate>
@@ -2194,21 +1829,6 @@ namespace demos
 }
 
 
-MenuBarButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	MenuBarButtonTemplate::MenuBarButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-MenuItemButtonTemplate.h :
 namespace demos
 {
 	class MenuItemButtonTemplate : public demos::MenuItemButtonTemplate_<demos::MenuItemButtonTemplate>
@@ -2225,21 +1845,6 @@ namespace demos
 }
 
 
-MenuItemButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	MenuItemButtonTemplate::MenuItemButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-MenuSplitterTemplate.h :
 namespace demos
 {
 	class MenuSplitterTemplate : public demos::MenuSplitterTemplate_<demos::MenuSplitterTemplate>
@@ -2256,21 +1861,6 @@ namespace demos
 }
 
 
-MenuSplitterTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	MenuSplitterTemplate::MenuSplitterTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-MultilineTextBoxTemplate.h :
 namespace demos
 {
 	class MultilineTextBoxTemplate : public demos::MultilineTextBoxTemplate_<demos::MultilineTextBoxTemplate>
@@ -2287,21 +1877,6 @@ namespace demos
 }
 
 
-MultilineTextBoxTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	MultilineTextBoxTemplate::MultilineTextBoxTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ProgressBarTemplate.h :
 namespace demos
 {
 	class ProgressBarTemplate : public demos::ProgressBarTemplate_<demos::ProgressBarTemplate>
@@ -2318,21 +1893,6 @@ namespace demos
 }
 
 
-ProgressBarTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ProgressBarTemplate::ProgressBarTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-RadioButtonTemplate.h :
 namespace demos
 {
 	class RadioButtonTemplate : public demos::RadioButtonTemplate_<demos::RadioButtonTemplate>
@@ -2349,21 +1909,6 @@ namespace demos
 }
 
 
-RadioButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	RadioButtonTemplate::RadioButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-RadioTextListTemplate.h :
 namespace demos
 {
 	class RadioTextListTemplate : public demos::RadioTextListTemplate_<demos::RadioTextListTemplate>
@@ -2380,21 +1925,6 @@ namespace demos
 }
 
 
-RadioTextListTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	RadioTextListTemplate::RadioTextListTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-RightScrollButtonTemplate.h :
 namespace demos
 {
 	class RightScrollButtonTemplate : public demos::RightScrollButtonTemplate_<demos::RightScrollButtonTemplate>
@@ -2411,21 +1941,6 @@ namespace demos
 }
 
 
-RightScrollButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	RightScrollButtonTemplate::RightScrollButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ScrollViewTemplate.h :
 namespace demos
 {
 	class ScrollViewTemplate : public demos::ScrollViewTemplate_<demos::ScrollViewTemplate>
@@ -2442,21 +1957,6 @@ namespace demos
 }
 
 
-ScrollViewTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ScrollViewTemplate::ScrollViewTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-SinglelineTextBoxTemplate.h :
 namespace demos
 {
 	class SinglelineTextBoxTemplate : public demos::SinglelineTextBoxTemplate_<demos::SinglelineTextBoxTemplate>
@@ -2473,21 +1973,6 @@ namespace demos
 }
 
 
-SinglelineTextBoxTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	SinglelineTextBoxTemplate::SinglelineTextBoxTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-TabDropdownTemplate.h :
 namespace demos
 {
 	class TabDropdownTemplate : public demos::TabDropdownTemplate_<demos::TabDropdownTemplate>
@@ -2504,21 +1989,6 @@ namespace demos
 }
 
 
-TabDropdownTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	TabDropdownTemplate::TabDropdownTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-TabHeaderTemplate.h :
 namespace demos
 {
 	class TabHeaderTemplate : public demos::TabHeaderTemplate_<demos::TabHeaderTemplate>
@@ -2535,21 +2005,6 @@ namespace demos
 }
 
 
-TabHeaderTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	TabHeaderTemplate::TabHeaderTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-TabTemplate.h :
 namespace demos
 {
 	class TabTemplate : public demos::TabTemplate_<demos::TabTemplate>
@@ -2566,21 +2021,6 @@ namespace demos
 }
 
 
-TabTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	TabTemplate::TabTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-TextListTemplate.h :
 namespace demos
 {
 	class TextListTemplate : public demos::TextListTemplate_<demos::TextListTemplate>
@@ -2597,21 +2037,6 @@ namespace demos
 }
 
 
-TextListTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	TextListTemplate::TextListTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripButtonTemplate.h :
 namespace demos
 {
 	class ToolstripButtonTemplate : public demos::ToolstripButtonTemplate_<demos::ToolstripButtonTemplate>
@@ -2628,21 +2053,6 @@ namespace demos
 }
 
 
-ToolstripButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripButtonTemplate::ToolstripButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripDropdownButtonTemplate.h :
 namespace demos
 {
 	class ToolstripDropdownButtonTemplate : public demos::ToolstripDropdownButtonTemplate_<demos::ToolstripDropdownButtonTemplate>
@@ -2659,21 +2069,6 @@ namespace demos
 }
 
 
-ToolstripDropdownButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripDropdownButtonTemplate::ToolstripDropdownButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripMenuTemplate.h :
 namespace demos
 {
 	class ToolstripMenuTemplate : public demos::ToolstripMenuTemplate_<demos::ToolstripMenuTemplate>
@@ -2690,21 +2085,6 @@ namespace demos
 }
 
 
-ToolstripMenuTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripMenuTemplate::ToolstripMenuTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripSplitArrowTemplate.h :
 namespace demos
 {
 	class ToolstripSplitArrowTemplate : public demos::ToolstripSplitArrowTemplate_<demos::ToolstripSplitArrowTemplate>
@@ -2721,21 +2101,6 @@ namespace demos
 }
 
 
-ToolstripSplitArrowTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripSplitArrowTemplate::ToolstripSplitArrowTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripSplitButtonTemplate.h :
 namespace demos
 {
 	class ToolstripSplitButtonTemplate : public demos::ToolstripSplitButtonTemplate_<demos::ToolstripSplitButtonTemplate>
@@ -2752,21 +2117,6 @@ namespace demos
 }
 
 
-ToolstripSplitButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripSplitButtonTemplate::ToolstripSplitButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripSplitterTemplate.h :
 namespace demos
 {
 	class ToolstripSplitterTemplate : public demos::ToolstripSplitterTemplate_<demos::ToolstripSplitterTemplate>
@@ -2783,21 +2133,6 @@ namespace demos
 }
 
 
-ToolstripSplitterTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripSplitterTemplate::ToolstripSplitterTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-ToolstripTemplate.h :
 namespace demos
 {
 	class ToolstripTemplate : public demos::ToolstripTemplate_<demos::ToolstripTemplate>
@@ -2814,21 +2149,6 @@ namespace demos
 }
 
 
-ToolstripTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	ToolstripTemplate::ToolstripTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-TopScrollButtonTemplate.h :
 namespace demos
 {
 	class TopScrollButtonTemplate : public demos::TopScrollButtonTemplate_<demos::TopScrollButtonTemplate>
@@ -2845,21 +2165,6 @@ namespace demos
 }
 
 
-TopScrollButtonTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	TopScrollButtonTemplate::TopScrollButtonTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-TreeViewTemplate.h :
 namespace demos
 {
 	class TreeViewTemplate : public demos::TreeViewTemplate_<demos::TreeViewTemplate>
@@ -2876,21 +2181,6 @@ namespace demos
 }
 
 
-TreeViewTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	TreeViewTemplate::TreeViewTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-VScrollHandleTemplate.h :
 namespace demos
 {
 	class VScrollHandleTemplate : public demos::VScrollHandleTemplate_<demos::VScrollHandleTemplate>
@@ -2907,113 +2197,6 @@ namespace demos
 }
 
 
-VScrollHandleTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	VScrollHandleTemplate::VScrollHandleTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-VScrollTemplate.h :
-namespace demos
-{
-	class VScrollTemplate : public demos::VScrollTemplate_<demos::VScrollTemplate>
-	{
-		friend class demos::VScrollTemplate_<demos::VScrollTemplate>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<demos::VScrollTemplate>;
-	protected:
-
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-		void OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-	public:
-		VScrollTemplate();
-	};
-}
-
-
-VScrollTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	void VScrollTemplate::OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void VScrollTemplate::OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void VScrollTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	VScrollTemplate::VScrollTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-VTrackerTemplate.h :
-namespace demos
-{
-	class VTrackerTemplate : public demos::VTrackerTemplate_<demos::VTrackerTemplate>
-	{
-		friend class demos::VTrackerTemplate_<demos::VTrackerTemplate>;
-		friend struct vl::reflection::description::CustomTypeDescriptorSelector<demos::VTrackerTemplate>;
-	protected:
-
-		// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-		void OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		void OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments);
-		// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-	public:
-		VTrackerTemplate();
-	};
-}
-
-
-VTrackerTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	void VTrackerTemplate::OnHandleMouseDown(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void VTrackerTemplate::OnHandleMouseMove(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	void VTrackerTemplate::OnHandleMouseUp(GuiGraphicsComposition* sender, vl::presentation::compositions::GuiMouseEventArgs& arguments)
-	{
-	}
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	VTrackerTemplate::VTrackerTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-WindowTemplate.h :
 namespace demos
 {
 	class WindowTemplate : public demos::WindowTemplate_<demos::WindowTemplate>
@@ -3030,20 +2213,5 @@ namespace demos
 }
 
 
-WindowTemplate.cpp :
-namespace demos
-{
-	// #region CLASS_MEMBER_GUIEVENT_HANDLER (DO NOT PUT OTHER CONTENT IN THIS #region.)
-
-	// #endregion CLASS_MEMBER_GUIEVENT_HANDLER
-
-	WindowTemplate::WindowTemplate()
-	{
-		InitializeComponents();
-	}
-}
-
-
-*/
 
 #endif

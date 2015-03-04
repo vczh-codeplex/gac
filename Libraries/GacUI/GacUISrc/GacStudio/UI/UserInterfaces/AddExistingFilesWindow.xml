@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Folder>
   <Instance name="FileReferenceNameColumnTemplateResource">
-    <Instance ref.Class="ui::FileReferenceNameColumnTemplate">
+    <Instance ref.CodeBehind="false" ref.Class="ui::FileReferenceNameColumnTemplate">
       <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
         <Table MinSizeLimitation="LimitToElementAndChildren" AlignmentToParent="left:5 top:2 right:5 bottom:2">
           <att.Rows>
@@ -31,7 +31,7 @@
   </Instance>
   
   <Instance name="FileReferenceFolderColumnTemplateResource">
-    <Instance ref.Class="ui::FileReferenceFolderColumnTemplate">
+    <Instance ref.CodeBehind="false" ref.Class="ui::FileReferenceFolderColumnTemplate">
       <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
         <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
           <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
@@ -41,7 +41,7 @@
   </Instance>
   
   <Instance name="FileReferenceFactoryColumnTemplateResource">
-    <Instance ref.Class="ui::FileReferenceFactoryColumnTemplate">
+    <Instance ref.CodeBehind="false" ref.Class="ui::FileReferenceFactoryColumnTemplate">
       <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
         <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
           <SolidLabel Ellipse="true" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -54,7 +54,7 @@
   </Instance>
 
   <Instance name="FileReferenceFactoryEditorTemplateResource">
-    <Instance ref.Class="ui::FileReferenceFactoryEditorTemplate">
+    <Instance ref.CodeBehind="false" ref.Class="ui::FileReferenceFactoryEditorTemplate">
       <ref.Parameter Name="OperationModel" Class="vm::IStudioAddExistingFilesModel"/>
       <GridEditorTemplate ref.Name="self" CellValue-bind="OperationModel.FilteredFileFactories.Get(comboBoxFactory.SelectedIndex) ?? null">
         <BoundsComposition AlignmentToParent="left:1 top:1 right:1 bottom:1" Visible-bind="self.CellValue is not null">
