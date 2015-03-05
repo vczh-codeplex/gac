@@ -68,13 +68,13 @@ Instance Representation
 			typedef collections::List<Ptr<GuiValueRepr>>						ValueList;
 			static const vint						BinaryKey = 2;
 
-			struct SetterValue
+			struct SetterValue : public Object, public Description<SetterValue>
 			{
 				GlobalStringKey						binding;
 				ValueList							values;
 			};
 
-			struct EventValue
+			struct EventValue : public Object, public Description<EventValue>
 			{
 				GlobalStringKey						binding;
 				WString								value;
@@ -166,7 +166,7 @@ Instance Context
 			typedef collections::List<Ptr<GuiInstanceNamespace>>						NamespaceList;
 			typedef collections::Dictionary<GlobalStringKey, Ptr<IGuiInstanceCache>>	CacheMap;
 
-			struct NamespaceInfo
+			struct NamespaceInfo : public Object, public Description<NamespaceInfo>
 			{
 				GlobalStringKey						name;
 				NamespaceList						namespaces;
