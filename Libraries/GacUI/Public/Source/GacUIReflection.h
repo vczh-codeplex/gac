@@ -342,13 +342,13 @@ Instance Representation
 			typedef collections::List<Ptr<GuiValueRepr>>						ValueList;
 			static const vint						BinaryKey = 2;
 
-			struct SetterValue
+			struct SetterValue : public Object, public Description<SetterValue>
 			{
 				GlobalStringKey						binding;
 				ValueList							values;
 			};
 
-			struct EventValue
+			struct EventValue : public Object, public Description<EventValue>
 			{
 				GlobalStringKey						binding;
 				WString								value;
@@ -440,7 +440,7 @@ Instance Context
 			typedef collections::List<Ptr<GuiInstanceNamespace>>						NamespaceList;
 			typedef collections::Dictionary<GlobalStringKey, Ptr<IGuiInstanceCache>>	CacheMap;
 
-			struct NamespaceInfo
+			struct NamespaceInfo : public Object, public Description<NamespaceInfo>
 			{
 				GlobalStringKey						name;
 				NamespaceList						namespaces;
@@ -515,6 +515,106 @@ Instance Style Context
 
 			static Ptr<GuiInstanceStyleContext>		LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
 			Ptr<parsing::xml::XmlDocument>			SaveToXml();
+		};
+	}
+}
+
+#endif
+
+/***********************************************************************
+GUIINSTANCESCHEMAREPRESENTATION.H
+***********************************************************************/
+/***********************************************************************
+Vczh Library++ 3.0
+Developer: Zihan Chen(vczh)
+GacUI Reflection: Instance Schema Representation
+
+Interfaces:
+***********************************************************************/
+
+#ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHEMAREPRESENTATION
+#define VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHEMAREPRESENTATION
+
+
+namespace vl
+{
+	namespace presentation
+	{
+		class GuiInstancePropertySchame :public Object, public Description<GuiInstancePropertySchame>
+		{
+		public:
+			WString										name;
+			WString										typeName;
+			bool										readonly = false;
+			bool										observable = false;
+
+			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml();
+		};
+
+		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
+		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
+		public:
+			WString										typeName;
+			WString										parentType;
+			PropertyList								properties;
+
+			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			virtual Ptr<parsing::xml::XmlElement>		SaveToXml() = 0;
+		};
+
+/***********************************************************************
+Instance Struct/Class Schema
+***********************************************************************/
+
+		class GuiInstanceDataSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceDataSchema>
+		{
+		public:
+			bool										referenceType = false;
+
+			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
+		};
+
+/***********************************************************************
+Instance Interface Schema
+***********************************************************************/
+
+		class GuiInstanceMethodSchema : public Object, public Description<GuiInstanceMethodSchema>
+		{
+			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
+		public:
+			WString										name;
+			WString										returnType;
+			PropertyList								arguments;
+
+			static Ptr<GuiInstanceMethodSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml();
+		};
+
+		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
+		{
+			typedef collections::List<Ptr<GuiInstanceMethodSchema>>		MethodList;
+		public:
+			MethodList									methods;
+
+			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
+		};
+
+/***********************************************************************
+Instance Schema Representation
+***********************************************************************/
+
+		class GuiInstanceSchema : public Object, public Description<GuiInstanceSchema>
+		{
+			typedef collections::List<Ptr<GuiInstanceTypeSchema>>		TypeSchemaList;
+		public:
+			TypeSchemaList								schemas;
+
+			static Ptr<GuiInstanceSchema>				LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
+			Ptr<parsing::xml::XmlDocument>				SaveToXml();
 		};
 	}
 }
@@ -975,6 +1075,7 @@ Type List
 			F(presentation::Rect)\
 			F(presentation::Margin)\
 			F(presentation::FontProperties)\
+			F(presentation::GlobalStringKey)\
 			F(presentation::INativeImageFrame)\
 			F(presentation::INativeImage)\
 			F(presentation::INativeImage::FormatType)\
@@ -1015,6 +1116,26 @@ Type List
 			F(presentation::DocumentParagraphRun)\
 			F(presentation::DocumentStyle)\
 			F(presentation::DocumentModel)\
+			F(presentation::GuiInstanceStyle)\
+			F(presentation::GuiInstanceStyleContext)\
+			F(presentation::GuiInstancePropertySchame)\
+			F(presentation::GuiInstanceTypeSchema)\
+			F(presentation::GuiInstanceDataSchema)\
+			F(presentation::GuiInstanceMethodSchema)\
+			F(presentation::GuiInstanceInterfaceSchema)\
+			F(presentation::GuiInstanceSchema)\
+			F(presentation::GuiValueRepr)\
+			F(presentation::GuiTextRepr)\
+			F(presentation::GuiAttSetterRepr)\
+			F(presentation::GuiAttSetterRepr::SetterValue)\
+			F(presentation::GuiAttSetterRepr::EventValue)\
+			F(presentation::GuiConstructorRepr)\
+			F(presentation::GuiInstanceNamespace)\
+			F(presentation::GuiInstanceParameter)\
+			F(presentation::GuiInstanceProperty)\
+			F(presentation::GuiInstanceState)\
+			F(presentation::GuiInstanceContext)\
+			F(presentation::GuiInstanceContext::NamespaceInfo)\
 			F(presentation::GuiResourceNodeBase)\
 			F(presentation::GuiResourceItem)\
 			F(presentation::GuiResourceFolder)\
@@ -1051,6 +1172,21 @@ Type Declaration
 			{
 			public:
 				typedef SerializableTypeDescriptor<TypedDefaultValueSerializer<Color>> CustomTypeDescriptorImpl;
+			};
+
+			template<>
+			struct TypedValueSerializerProvider<GlobalStringKey>
+			{
+				static GlobalStringKey GetDefaultValue();
+				static bool Serialize(const GlobalStringKey& input, WString& output);
+				static bool Deserialize(const WString& input, GlobalStringKey& output);
+			};
+
+			template<>
+			struct CustomTypeDescriptorSelector<GlobalStringKey>
+			{
+			public:
+				typedef SerializableTypeDescriptor<TypedDefaultValueSerializer<GlobalStringKey>> CustomTypeDescriptorImpl;
 			};
 
 /***********************************************************************
@@ -3668,106 +3804,6 @@ namespace vl
 		extern void ExecuteQuery(Ptr<GuiIqQuery> query, Ptr<GuiInstanceContext> context, collections::List<Ptr<GuiConstructorRepr>>& output);
 		extern void ApplyStyle(Ptr<GuiInstanceStyle> style, Ptr<GuiConstructorRepr> ctor);
 		extern void GuiIqPrint(Ptr<GuiIqQuery> query, stream::StreamWriter& writer);
-	}
-}
-
-#endif
-
-/***********************************************************************
-GUIINSTANCESCHEMAREPRESENTATION.H
-***********************************************************************/
-/***********************************************************************
-Vczh Library++ 3.0
-Developer: Zihan Chen(vczh)
-GacUI Reflection: Instance Schema Representation
-
-Interfaces:
-***********************************************************************/
-
-#ifndef VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHEMAREPRESENTATION
-#define VCZH_PRESENTATION_REFLECTION_GUIINSTANCESCHEMAREPRESENTATION
-
-
-namespace vl
-{
-	namespace presentation
-	{
-		class GuiInstancePropertySchame :public Object, public Description<GuiInstancePropertySchame>
-		{
-		public:
-			WString										name;
-			WString										typeName;
-			bool										readonly = false;
-			bool										observable = false;
-
-			static Ptr<GuiInstancePropertySchame>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlElement>				SaveToXml();
-		};
-
-		class GuiInstanceTypeSchema : public Object, public Description<GuiInstanceTypeSchema>
-		{
-			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
-		public:
-			WString										typeName;
-			WString										parentType;
-			PropertyList								properties;
-
-			void										LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
-			virtual Ptr<parsing::xml::XmlElement>		SaveToXml() = 0;
-		};
-
-/***********************************************************************
-Instance Struct/Class Schema
-***********************************************************************/
-
-		class GuiInstanceDataSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceDataSchema>
-		{
-		public:
-			bool										referenceType = false;
-
-			static Ptr<GuiInstanceDataSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
-		};
-
-/***********************************************************************
-Instance Interface Schema
-***********************************************************************/
-
-		class GuiInstanceMethodSchema : public Object, public Description<GuiInstanceMethodSchema>
-		{
-			typedef collections::List<Ptr<GuiInstancePropertySchame>>	PropertyList;
-		public:
-			WString										name;
-			WString										returnType;
-			PropertyList								arguments;
-
-			static Ptr<GuiInstanceMethodSchema>			LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlElement>				SaveToXml();
-		};
-
-		class GuiInstanceInterfaceSchema : public GuiInstanceTypeSchema, public Description<GuiInstanceInterfaceSchema>
-		{
-			typedef collections::List<Ptr<GuiInstanceMethodSchema>>		MethodList;
-		public:
-			MethodList									methods;
-
-			static Ptr<GuiInstanceInterfaceSchema>		LoadFromXml(Ptr<parsing::xml::XmlElement> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlElement>				SaveToXml()override;
-		};
-
-/***********************************************************************
-Instance Schema Representation
-***********************************************************************/
-
-		class GuiInstanceSchema : public Object, public Description<GuiInstanceSchema>
-		{
-			typedef collections::List<Ptr<GuiInstanceTypeSchema>>		TypeSchemaList;
-		public:
-			TypeSchemaList								schemas;
-
-			static Ptr<GuiInstanceSchema>				LoadFromXml(Ptr<parsing::xml::XmlDocument> xml, collections::List<WString>& errors);
-			Ptr<parsing::xml::XmlDocument>				SaveToXml();
-		};
 	}
 }
 

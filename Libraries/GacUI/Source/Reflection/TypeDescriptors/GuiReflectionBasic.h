@@ -35,6 +35,7 @@ Type List
 			F(presentation::Rect)\
 			F(presentation::Margin)\
 			F(presentation::FontProperties)\
+			F(presentation::GlobalStringKey)\
 			F(presentation::INativeImageFrame)\
 			F(presentation::INativeImage)\
 			F(presentation::INativeImage::FormatType)\
@@ -75,6 +76,26 @@ Type List
 			F(presentation::DocumentParagraphRun)\
 			F(presentation::DocumentStyle)\
 			F(presentation::DocumentModel)\
+			F(presentation::GuiInstanceStyle)\
+			F(presentation::GuiInstanceStyleContext)\
+			F(presentation::GuiInstancePropertySchame)\
+			F(presentation::GuiInstanceTypeSchema)\
+			F(presentation::GuiInstanceDataSchema)\
+			F(presentation::GuiInstanceMethodSchema)\
+			F(presentation::GuiInstanceInterfaceSchema)\
+			F(presentation::GuiInstanceSchema)\
+			F(presentation::GuiValueRepr)\
+			F(presentation::GuiTextRepr)\
+			F(presentation::GuiAttSetterRepr)\
+			F(presentation::GuiAttSetterRepr::SetterValue)\
+			F(presentation::GuiAttSetterRepr::EventValue)\
+			F(presentation::GuiConstructorRepr)\
+			F(presentation::GuiInstanceNamespace)\
+			F(presentation::GuiInstanceParameter)\
+			F(presentation::GuiInstanceProperty)\
+			F(presentation::GuiInstanceState)\
+			F(presentation::GuiInstanceContext)\
+			F(presentation::GuiInstanceContext::NamespaceInfo)\
 			F(presentation::GuiResourceNodeBase)\
 			F(presentation::GuiResourceItem)\
 			F(presentation::GuiResourceFolder)\
@@ -111,6 +132,21 @@ Type Declaration
 			{
 			public:
 				typedef SerializableTypeDescriptor<TypedDefaultValueSerializer<Color>> CustomTypeDescriptorImpl;
+			};
+
+			template<>
+			struct TypedValueSerializerProvider<GlobalStringKey>
+			{
+				static GlobalStringKey GetDefaultValue();
+				static bool Serialize(const GlobalStringKey& input, WString& output);
+				static bool Deserialize(const WString& input, GlobalStringKey& output);
+			};
+
+			template<>
+			struct CustomTypeDescriptorSelector<GlobalStringKey>
+			{
+			public:
+				typedef SerializableTypeDescriptor<TypedDefaultValueSerializer<GlobalStringKey>> CustomTypeDescriptorImpl;
 			};
 
 /***********************************************************************
