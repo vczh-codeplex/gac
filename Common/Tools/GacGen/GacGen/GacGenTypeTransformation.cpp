@@ -103,34 +103,25 @@ Ptr<WfType> ParseWorkflowType(Ptr<CodegenConfig> config, const WString& workflow
 	}
 	if (!config->workflowManager)
 	{
-		config->workflowManager = new WfLexicalScopeManager(config->workflowTable);
-		const wchar_t* moduleCode = LR"workflow(
-module TypeConversion;
+		List<WString> errors;
+		WString contextCode = L"<Instance><Window/></Instance>";
 
-using presentation::controls::Gui*;
-using presentation::elements::Gui*Element;
-using presentation::compositions::Gui*Composition;
-using presentation::compositions::Gui*;
-using presentation::templates::Gui*;
-using system::*;
-using system::reflection::*;
-using presentation::*;
-using presentation::Gui*;
-using presentation::controls::*;
-using presentation::controls::list::*;
-using presentation::controls::tree::*;
-using presentation::elements::*;
-using presentation::elements::Gui*;
-using presentation::elements::text*;
-using presentation::compositions::*;
-using presentation::templates::*;
+		auto xmlParser = GetParserManager()->GetParser<XmlDocument>(L"XML");
+		auto xml = xmlParser->TypedParse(contextCode, errors);
+		auto context = GuiInstanceContext::LoadFromXml(xml, errors);
 
-)workflow";
-		auto module = config->workflowManager->AddModule(moduleCode);
-		if (!module)
+		if (errors.Count())
 		{
-			PrintErrorMessage(L"Internal error: wrong module code.");
+			FOREACH(WString, error, errors)
+			{
+				PrintErrorMessage(L"Internal error: " + error);
+			}
 		}
+
+		auto module = Workflow_CreateEmptyModule(context);
+
+		config->workflowManager = new WfLexicalScopeManager(config->workflowTable);
+		config->workflowManager->modules.Add(module);
 		config->workflowManager->Rebuild(true);
 	}
 
