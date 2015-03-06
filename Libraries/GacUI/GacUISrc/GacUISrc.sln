@@ -7,6 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GacUISrc", "GacUISrc\GacUIS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780E4-7D2F-4955-B988-88325DFB6B9E}"
 	ProjectSection(SolutionItems) = preProject
+		..\Public\0.Codepack.bat = ..\Public\0.Codepack.bat
 		..\Public\1.Codegen.bat = ..\Public\1.Codegen.bat
 		..\Public\2.Clean.bat = ..\Public\2.Clean.bat
 		..\Public\3.DumpPdb.bat = ..\Public\3.DumpPdb.bat
@@ -22,7 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{843780
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{695AA472-C40E-41C8-BDF9-9866F36C9AE3}"
 	ProjectSection(SolutionItems) = preProject
-		..\Public\0.Codepack.bat = ..\Public\0.Codepack.bat
 		..\Public\Source\GacUI.cpp = ..\Public\Source\GacUI.cpp
 		..\Public\Source\GacUI.h = ..\Public\Source\GacUI.h
 		..\Public\Source\GacUIReflection.cpp = ..\Public\Source\GacUIReflection.cpp

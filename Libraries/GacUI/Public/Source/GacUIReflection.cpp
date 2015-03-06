@@ -3564,7 +3564,7 @@ GuiWorkflowGlobalContext
 					types::VariableTypeMap types;
 					ITypeDescriptor* thisType = env->scope->rootInstance.GetTypeDescriptor();
 					Workflow_GetVariableTypes(env, types);
-					assembly = Workflow_CompileDataBinding(types, thisType, env->scope->errors, dataBindings);
+					assembly = Workflow_CompileDataBinding(env->context, types, thisType, env->scope->errors, dataBindings);
 					env->context->precompiledCaches.Add(GetContextName(), new GuiWorkflowCache(assembly));
 				}
 
@@ -3634,7 +3634,7 @@ GuiScriptInstanceBinder
 					Ptr<WfExpression> expression;
 					types::VariableTypeMap types;
 					Workflow_GetVariableTypes(env, types);
-					if (Workflow_ValidateExpression(types, env->scope->errors, propertyValue, expressionCode, expression))
+					if (Workflow_ValidateExpression(env->context, types, env->scope->errors, propertyValue, expressionCode, expression))
 					{
 						auto expr = expression;
 						if (auto bind = expr.Cast<WfBindExpression>())
@@ -3701,7 +3701,7 @@ GuiEvalInstanceBinder
 					{
 						types::VariableTypeMap types;
 						Workflow_GetVariableTypes(env, types);
-						assembly = Workflow_CompileExpression(types, env->scope->errors, expressionCode);
+						assembly = Workflow_CompileExpression(env->context, types, env->scope->errors, expressionCode);
 						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
@@ -3786,7 +3786,7 @@ GuiEvalInstanceEventBinder
 					{
 						types::VariableTypeMap types;
 						Workflow_GetVariableTypes(env, types);
-						assembly = Workflow_CompileEventHandler(types, env->scope->errors, propertyValue, statementCode);
+						assembly = Workflow_CompileEventHandler(env->context, types, env->scope->errors, propertyValue, statementCode);
 						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
@@ -5848,6 +5848,78 @@ namespace vl
 #define ERROR_CODE_PREFIX L"================================================================"
 
 /***********************************************************************
+Module
+***********************************************************************/
+
+		Ptr<workflow::WfModule> Workflow_CreateEmptyModule(Ptr<GuiInstanceContext> context)
+		{
+			auto module = MakePtr<WfModule>();
+			vint index = context->namespaces.Keys().IndexOf(GlobalStringKey());
+			if (index != -1)
+			{
+				auto nss = context->namespaces.Values()[index];
+				FOREACH(Ptr<GuiInstanceNamespace>, ns, nss->namespaces)
+				{
+					auto path = MakePtr<WfModuleUsingPath>();
+					module->paths.Add(path);
+
+					auto pathCode = ns->prefix + L"*" + ns->postfix;
+					auto reading = pathCode.Buffer();
+					while (reading)
+					{
+						auto delimiter = wcsstr(reading, L"::");
+						auto begin = reading;
+						auto end = delimiter ? delimiter : begin + wcslen(reading);
+
+						auto wildcard = wcschr(reading, L'*');
+						if (wildcard >= end)
+						{
+							wildcard = nullptr;
+						}
+
+						auto item = MakePtr<WfModuleUsingItem>();
+						path->items.Add(item);
+						if (wildcard)
+						{
+							if (begin < wildcard)
+							{
+								auto fragment = MakePtr<WfModuleUsingNameFragment>();
+								item->fragments.Add(fragment);
+								fragment->name.value = WString(begin, vint(wildcard - begin));
+							}
+							{
+								auto fragment = MakePtr<WfModuleUsingWildCardFragment>();
+								item->fragments.Add(fragment);
+							}
+							if (wildcard + 1 < end)
+							{
+								auto fragment = MakePtr<WfModuleUsingNameFragment>();
+								item->fragments.Add(fragment);
+								fragment->name.value = WString(wildcard, vint(end - wildcard - 1));
+							}
+						}
+						else if (begin < end)
+						{
+							auto fragment = MakePtr<WfModuleUsingNameFragment>();
+							item->fragments.Add(fragment);
+							fragment->name.value = WString(begin, vint(end - begin));
+						}
+
+						if (delimiter)
+						{
+							reading = delimiter + 2;
+						}
+						else
+						{
+							reading = nullptr;
+						}
+					}
+				}
+			}
+			return module;
+		}
+
+/***********************************************************************
 Variable
 ***********************************************************************/
 
@@ -5914,7 +5986,7 @@ Variable
 Workflow_ValidateExpression
 ***********************************************************************/
 
-		bool Workflow_ValidateExpression(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression)
+		bool Workflow_ValidateExpression(Ptr<GuiInstanceContext> context, types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& expressionCode, Ptr<workflow::WfExpression>& expression)
 		{
 			auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
 			expression = parser->TypedParse(expressionCode, errors);
@@ -5938,7 +6010,7 @@ Workflow_ValidateExpression
 				failed = true;
 			}
 
-			auto module = MakePtr<WfModule>();
+			auto module = Workflow_CreateEmptyModule(context);
 			Workflow_CreateVariablesForReferenceValues(module, types);
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
@@ -5994,7 +6066,7 @@ Workflow_ValidateExpression
 Workflow_CompileExpression
 ***********************************************************************/
 
-		Ptr<workflow::runtime::WfAssembly> Workflow_CompileExpression(types::VariableTypeMap& types, types::ErrorList& errors, const WString& expressionCode)
+		Ptr<workflow::runtime::WfAssembly> Workflow_CompileExpression(Ptr<GuiInstanceContext> context, types::VariableTypeMap& types, types::ErrorList& errors, const WString& expressionCode)
 		{
 			auto parser = GetParserManager()->GetParser<WfExpression>(L"WORKFLOW-EXPRESSION");
 			auto expression = parser->TypedParse(expressionCode, errors);
@@ -6004,7 +6076,7 @@ Workflow_CompileExpression
 				return 0;
 			}
 
-			auto module = MakePtr<WfModule>();
+			auto module = Workflow_CreateEmptyModule(context);
 			Workflow_CreateVariablesForReferenceValues(module, types);
 			{
 				auto lambda = MakePtr<WfOrderedLambdaExpression>();
@@ -6037,7 +6109,7 @@ Workflow_CompileExpression
 Workflow_CompileEventHandler
 ***********************************************************************/
 
-		Ptr<workflow::runtime::WfAssembly> Workflow_CompileEventHandler(types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode)
+		Ptr<workflow::runtime::WfAssembly> Workflow_CompileEventHandler(Ptr<GuiInstanceContext> context, types::VariableTypeMap& types, types::ErrorList& errors, IGuiInstanceLoader::PropertyInfo& bindingTarget, const WString& statementCode)
 		{
 			auto parser = GetParserManager()->GetParser<WfStatement>(L"WORKFLOW-STATEMENT");
 			auto statement = parser->TypedParse(statementCode, errors);
@@ -6047,7 +6119,7 @@ Workflow_CompileEventHandler
 				return 0;
 			}
 
-			auto module = MakePtr<WfModule>();
+			auto module = Workflow_CreateEmptyModule(context);
 			Workflow_CreateVariablesForReferenceValues(module, types);
 			{
 				auto func = MakePtr<WfFunctionDeclaration>();
@@ -6109,9 +6181,9 @@ Workflow_CompileDataBinding
 			return reader.ReadToEnd();
 		}
 
-		Ptr<workflow::runtime::WfAssembly> Workflow_CompileDataBinding(types::VariableTypeMap& types, description::ITypeDescriptor* thisType, types::ErrorList& errors, collections::List<WorkflowDataBinding>& dataBindings)
+		Ptr<workflow::runtime::WfAssembly> Workflow_CompileDataBinding(Ptr<GuiInstanceContext> context, types::VariableTypeMap& types, description::ITypeDescriptor* thisType, types::ErrorList& errors, collections::List<WorkflowDataBinding>& dataBindings)
 		{
-			auto module = MakePtr<WfModule>();
+			auto module = Workflow_CreateEmptyModule(context);
 			Workflow_CreateVariablesForReferenceValues(module, types);
 			Workflow_CreatePointerVariable(module, GlobalStringKey::Get(L"<this>"), thisType);
 
@@ -6555,7 +6627,7 @@ Workflow_GetSharedManager
 								}
 
 								Ptr<WfExpression> expression;
-								if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
+								if (Workflow_ValidateExpression(context, types, errors, info, expressionCode, expression))
 								{
 									dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName.ToString(), true);
 									dataBinding.bindExpression = expression;
@@ -6568,7 +6640,7 @@ Workflow_GetSharedManager
 								if (propertyInfo->scope != GuiInstancePropertyInfo::Property)
 								{
 									WString cacheKey = L"<att.eval>" + expressionCode;
-									auto assembly = Workflow_CompileExpression(types, errors, expressionCode);
+									auto assembly = Workflow_CompileExpression(context, types, errors, expressionCode);
 									context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 								}
 								else
@@ -6576,7 +6648,7 @@ Workflow_GetSharedManager
 									WorkflowDataBinding dataBinding;
 									dataBinding.variableName = repr->instanceName;
 									Ptr<WfExpression> expression;
-									if (Workflow_ValidateExpression(types, errors, info, expressionCode, expression))
+									if (Workflow_ValidateExpression(context, types, errors, info, expressionCode, expression))
 									{
 										dataBinding.propertyInfo = reprTypeInfo.typeDescriptor->GetPropertyByName(propertyName.ToString(), true);
 										dataBinding.bindExpression = expression;
@@ -6629,7 +6701,7 @@ Workflow_GetSharedManager
 							if (handler->binding == GlobalStringKey::_Eval)
 							{
 								WString cacheKey = L"<ev.eval><" + repr->instanceName.ToString() + L"><" + propertyName.ToString() + L">" + statementCode;
-								auto assembly = Workflow_CompileEventHandler(types, errors, info, statementCode);
+								auto assembly = Workflow_CompileEventHandler(context, types, errors, info, statementCode);
 								context->precompiledCaches.Add(GlobalStringKey::Get(cacheKey), new GuiWorkflowCache(assembly));
 							}
 						}
@@ -6678,7 +6750,7 @@ Workflow_GetSharedManager
 
 				if (visitor.dataBindings.Count() > 0 && rootTypeDescriptor)
 				{
-					auto assembly = Workflow_CompileDataBinding(visitor.types, rootTypeDescriptor, errors, visitor.dataBindings);
+					auto assembly = Workflow_CompileDataBinding(context, visitor.types, rootTypeDescriptor, errors, visitor.dataBindings);
 					context->precompiledCaches.Add(GuiWorkflowCache::CacheContextName, new GuiWorkflowCache(assembly));
 				}
 			}
@@ -7463,7 +7535,7 @@ GuiInstanceContext
 						L"presentation::elements::*;"
 						L"presentation::elements::Gui*;"
 						L"presentation::elements::text*;"
-						L"presentation::compositions::*"
+						L"presentation::compositions::*;"
 						L"presentation::templates::*";
 					namespaceAttributes.Add(att);
 				}

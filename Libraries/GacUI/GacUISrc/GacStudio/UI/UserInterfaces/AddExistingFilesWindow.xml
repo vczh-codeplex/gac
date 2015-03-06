@@ -23,7 +23,7 @@
           </Cell>
 
           <Cell Site="row:0 column:1 rowSpan:3">
-            <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <SolidLabel Color="#FFFFFF" Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
           </Cell>
         </Table>
       </GridVisualizerTemplate>
@@ -34,7 +34,7 @@
     <Instance ref.CodeBehind="false" ref.Class="ui::FileReferenceFolderColumnTemplate" ref.Styles="res://DarkSkin/Apply">
       <GridVisualizerTemplate ref.Name="self" MinSizeLimitation="LimitToElementAndChildren">
         <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
-          <SolidLabel Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+          <SolidLabel Color="#FFFFFF" Ellipse="true" Text-bind="self.Text" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </BoundsComposition>
       </GridVisualizerTemplate>
     </Instance>
@@ -46,7 +46,7 @@
         <BoundsComposition AlignmentToParent="left:5 top:5 right:5 bottom:5" MinSizeLimitation="LimitToElement">
           <SolidLabel Ellipse="true" Font-bind="self.Font" HorizontalAlignment="Left" VerticalAlignment="Center">
             <att.Text-bind>(cast (vm::IFileFactoryModel^) self.CellValue).Name ?? "Not Recognized"</att.Text-bind>
-            <att.Color-bind>cast (presentation::Color) ((cast (vm::IFileFactoryModel^) self.CellValue) is null ? "#AAAAAA" : "#000000")</att.Color-bind>
+            <att.Color-bind>cast Color ((cast (vm::IFileFactoryModel^) self.CellValue) is null ? "#AAAAAA" : "#FFFFFF")</att.Color-bind>
           </SolidLabel>
         </BoundsComposition>
       </GridVisualizerTemplate>
@@ -109,7 +109,7 @@
 
               <att.Columns>
                 <BindableDataColumn Text="File Name" Size="160" ValueProperty="name" VisualizerTemplates="ui::FileReferenceNameColumnTemplate"/>
-                <BindableDataColumn Text="Folder" Size="180" ValueProperty="folder" VisualizerTemplates="ui::FileReferenceFolderColumnTemplate"/>
+                <BindableDataColumn Text="Folder" Size="280" ValueProperty="folder" VisualizerTemplates="ui::FileReferenceFolderColumnTemplate"/>
                 <BindableDataColumn Text="Type" Size="120" ValueProperty="fileFactory" VisualizerTemplates="ui::FileReferenceFactoryColumnTemplate" EditorTemplate="ui::FileReferenceFactoryEditorTemplate"/>
               </att.Columns>
             </BindableDataGrid>

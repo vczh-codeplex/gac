@@ -171,7 +171,7 @@ GuiWorkflowGlobalContext
 					types::VariableTypeMap types;
 					ITypeDescriptor* thisType = env->scope->rootInstance.GetTypeDescriptor();
 					Workflow_GetVariableTypes(env, types);
-					assembly = Workflow_CompileDataBinding(types, thisType, env->scope->errors, dataBindings);
+					assembly = Workflow_CompileDataBinding(env->context, types, thisType, env->scope->errors, dataBindings);
 					env->context->precompiledCaches.Add(GetContextName(), new GuiWorkflowCache(assembly));
 				}
 
@@ -241,7 +241,7 @@ GuiScriptInstanceBinder
 					Ptr<WfExpression> expression;
 					types::VariableTypeMap types;
 					Workflow_GetVariableTypes(env, types);
-					if (Workflow_ValidateExpression(types, env->scope->errors, propertyValue, expressionCode, expression))
+					if (Workflow_ValidateExpression(env->context, types, env->scope->errors, propertyValue, expressionCode, expression))
 					{
 						auto expr = expression;
 						if (auto bind = expr.Cast<WfBindExpression>())
@@ -308,7 +308,7 @@ GuiEvalInstanceBinder
 					{
 						types::VariableTypeMap types;
 						Workflow_GetVariableTypes(env, types);
-						assembly = Workflow_CompileExpression(types, env->scope->errors, expressionCode);
+						assembly = Workflow_CompileExpression(env->context, types, env->scope->errors, expressionCode);
 						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
@@ -393,7 +393,7 @@ GuiEvalInstanceEventBinder
 					{
 						types::VariableTypeMap types;
 						Workflow_GetVariableTypes(env, types);
-						assembly = Workflow_CompileEventHandler(types, env->scope->errors, propertyValue, statementCode);
+						assembly = Workflow_CompileEventHandler(env->context, types, env->scope->errors, propertyValue, statementCode);
 						env->context->precompiledCaches.Add(cacheKey, new GuiWorkflowCache(assembly));
 					}
 
