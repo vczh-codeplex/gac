@@ -832,5 +832,48 @@ SpinLock
 	{
 		_InterlockedExchange(&token, 0);
 	}
+
+/***********************************************************************
+SpinLock
+***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct TlsData
+		{
+			DWORD			index;
+
+			TlsData()
+			{
+				index = TlsAlloc();
+				CHECK_ERROR(index != TLS_OUT_OF_INDEXES, L"vl::threading::threading_internal::TlsData::TlsData()#Failed to alloc new thread local storage index.");
+			}
+
+			~TlsData()
+			{
+				TlsFree(index);
+			}
+		};
+	}
+
+	ThreadLocalStorage::ThreadLocalStorage()
+	{
+		internalData = new TlsData;
+	}
+
+	ThreadLocalStorage::~ThreadLocalStorage()
+	{
+		delete internalData;
+	}
+
+	void* ThreadLocalStorage::Get()
+	{
+		return TlsGetValue(internalData->index);
+	}
+
+	void ThreadLocalStorage::Set(void* data)
+	{
+		TlsSetValue(internalData->index, data);
+	}
 }
 #endif

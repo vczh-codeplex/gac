@@ -246,14 +246,14 @@ TEST_CASE(TestAutoEventObject)
 		{
 			threads.Add(Thread::CreateAndStart(AutoEvent_ThreadProc, &data, false));
 		}
-		Thread::Sleep(1000);
+		Thread::Sleep(100);
 		TEST_ASSERT(data.counter==0);
 	}
 	for(vint i=0;i<10;i++)
 	{
 		TEST_ASSERT(data.counter==i);
 		TEST_ASSERT(data.eventObject.Signal());
-		Thread::Sleep(1000);
+		Thread::Sleep(100);
 		TEST_ASSERT(data.counter==i+1);
 	}
 	FOREACH(Thread*, thread, threads)
@@ -454,4 +454,42 @@ TEST_CASE(TestSpinLock2)
 #ifdef VCZH_GCC
 	TEST_ASSERT(ThreadPoolLite::Stop(true));
 #endif
+}
+
+namespace mynamespace
+{
+	ThreadVariable<int> tls1;
+	ThreadVariable<const wchar_t*> tls2;
+}
+using namespace mynamespace;
+
+TEST_CASE(ThreadLocalStorage)
+{
+	volatile int counter = 0;
+	for (int i = 0; i < 10; i++)
+	{
+		ThreadPoolLite::QueueLambda([i, &counter]()
+		{
+			TEST_ASSERT(tls1.HasData() == false);
+			tls1.Set(i);
+			TEST_ASSERT(tls1.HasData() == true);
+			TEST_ASSERT(tls1.Get() == i);
+			tls1.Clear();
+			TEST_ASSERT(tls1.HasData() == false);
+			
+			WString text = itow(i);
+			TEST_ASSERT(tls2.HasData() == false);
+			tls2.Set(text.Buffer());
+			TEST_ASSERT(tls2.HasData() == true);
+			TEST_ASSERT(tls2.Get() == text.Buffer());
+			tls2.Clear();
+			TEST_ASSERT(tls2.HasData() == false);
+
+			INCRC(&counter);
+		});
+	}
+	Thread::Sleep(1000);
+	TEST_ASSERT(counter == 10);
+	tls1.Dispose();
+	tls2.Dispose();
 }
