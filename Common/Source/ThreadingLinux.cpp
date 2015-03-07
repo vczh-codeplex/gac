@@ -1,6 +1,6 @@
-#ifdef VCZH_GCC
 #include "Threading.h"
 #include "Collections/List.h"
+#ifdef VCZH_GCC
 #include <pthread.h>
 #include <unistd.h>
 #include <fcntl.h>
