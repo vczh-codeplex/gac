@@ -1,3 +1,4 @@
+#ifdef VCZH_GCC
 #include "Threading.h"
 #include "Collections/List.h"
 #include <pthread.h>
@@ -889,3 +890,5 @@ ThreadLocalStorage
 		pthread_setspecific(internalData->index, data);
 	}
 }
+
+#endif
