@@ -1,17 +1,14 @@
 #include "Threading.h"
 #include "Collections/List.h"
-#ifdef VCZH_GCC
 #include <pthread.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <semaphore.h>
-
-
+#include <errno.h>
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 #include <CoreFoundation/CoreFoundation.h>
 #endif
-
 
 namespace vl
 {
@@ -146,7 +143,14 @@ Thread
 
 	void Thread::Sleep(vint ms)
 	{
-		sleep((ms+999)/1000);
+		if (ms >= 1000)
+		{
+			sleep(ms / 1000);
+		}
+		if (ms % 1000)
+		{
+			usleep((ms % 1000) * 1000);
+		}
 	}
 	
 	vint Thread::GetCPUCount()
@@ -841,5 +845,47 @@ SpinLock
 	{
 		__sync_lock_test_and_set(&token, 0);
 	}
+
+/***********************************************************************
+ThreadLocalStorage
+***********************************************************************/
+
+	namespace threading_internal
+	{
+		struct TlsData
+		{
+			pthread_key_t			index;
+
+			TlsData()
+			{
+				auto error = pthread_key_create(&index, nullptr);
+				CHECK_ERROR(error != EAGAIN && error != ENOMEM, L"vl::threading::threading_internal::TlsData::TlsData()#Failed to create a thread local storage index.");
+			}
+
+			~TlsData()
+			{
+				pthread_key_delete(index);
+			}
+		};
+	}
+
+	ThreadLocalStorage::ThreadLocalStorage()
+	{
+		internalData = new TlsData;
+	}
+
+	ThreadLocalStorage::~ThreadLocalStorage()
+	{
+		delete internalData;
+	}
+
+	void* ThreadLocalStorage::Get()
+	{
+		return pthread_getspecific(internalData->index);
+	}
+
+	void ThreadLocalStorage::Set(void* data)
+	{
+		pthread_setspecific(internalData->index, data);
+	}
 }
-#endif

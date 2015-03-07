@@ -117,7 +117,7 @@ namespace test
 			{
 				TEST_ASSERT(serializer->Parse(i, value));
 #ifdef VCZH_GCC
-			TEST_PRINT(L"\tPrinting: " + value.GetText());
+				TEST_PRINT(L"\tPrinting: " + value.GetText());
 #endif
 				TEST_ASSERT(value.GetValueType()==Value::Text);
 				TEST_ASSERT(value.GetTypeDescriptor()==type);
@@ -128,7 +128,7 @@ namespace test
 			{
 				TEST_ASSERT(serializer->Serialize(j, value));
 #ifdef VCZH_GCC
-			TEST_PRINT(L"\tPrinting: " + value.GetText());
+				TEST_PRINT(L"\tPrinting: " + value.GetText());
 #endif
 				TEST_ASSERT(value.GetValueType()==Value::Text);
 				TEST_ASSERT(value.GetTypeDescriptor()==type);
@@ -146,6 +146,9 @@ namespace test
 		for(vint x=0;x<IllegalCount;x++)
 		{
 			WString i=illegalsText[x];
+#ifdef VCZH_GCC
+			TEST_PRINT(L"\tParsing: " + i + L" using " + type->GetTypeName());
+#endif
 			Value value;
 			TEST_ASSERT(serializer->Validate(i)==false);
 			{

@@ -90,7 +90,7 @@ DateTime
 		return systemTime;
 	}
 #elif defined VCZH_GCC
-	DateTime ConvertTMToDateTime(tm* timeinfo, bool rewriteMilliseconds)
+	DateTime ConvertTMToDateTime(tm* timeinfo, vint milliseconds)
 	{
 		time_t timer = mktime(timeinfo);
 		DateTime dt;
@@ -101,18 +101,17 @@ DateTime
 		dt.hour = timeinfo->tm_hour;
 		dt.minute = timeinfo->tm_min;
 		dt.second = timeinfo->tm_sec;
-
-		struct timeval tv;
-		gettimeofday(&tv, 0);
-
-		dt.milliseconds = tv.tv_usec / 1000;
-        dt.filetime = (vuint64_t)timer * 1000 + tv.tv_usec / 1000;
-		
-		if (rewriteMilliseconds)
-		{
-			dt.totalMilliseconds = tv.tv_sec * 1000 + tv.tv_usec / 1000;
-		}
+		dt.milliseconds = milliseconds;
+        dt.filetime = (vuint64_t)timer * 1000 + milliseconds;
+		dt.totalMilliseconds = (vuint64_t)timer * 1000 + milliseconds;
 		return dt;
+	}
+
+	vint GetCurrentMilliseconds()
+	{
+		struct timeval tv;
+		gettimeofday(&tv, nullptr);
+		return tv.tv_usec / 1000;
 	}
 #endif
 
@@ -125,7 +124,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = time(nullptr);
 		tm* timeinfo = localtime(&timer);
-		return ConvertTMToDateTime(timeinfo, true);
+		return ConvertTMToDateTime(timeinfo, GetCurrentMilliseconds());
 #endif
 	}
 
@@ -138,7 +137,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = time(nullptr);
 		tm* timeinfo = gmtime(&timer);
-		return ConvertTMToDateTime(timeinfo, true);
+		return ConvertTMToDateTime(timeinfo, GetCurrentMilliseconds());
 #endif
 	}
 
@@ -165,13 +164,12 @@ DateTime
 		timeinfo.tm_year = _year-1900;
 		timeinfo.tm_mon = _month-1;
 		timeinfo.tm_mday = _day;
+		timeinfo.tm_hour = _hour;
+		timeinfo.tm_min = _minute;
+		timeinfo.tm_sec = _second;
+		timeinfo.tm_isdst = -1;
 
-		auto dt = ConvertTMToDateTime(&timeinfo, false);
-		dt.hour = _hour;
-		dt.minute = _minute;
-		dt.second = _second;
-		dt.milliseconds = _milliseconds;
-		return dt;
+		return ConvertTMToDateTime(&timeinfo, _milliseconds);
 #endif
 	}
 
@@ -190,10 +188,7 @@ DateTime
 #elif defined VCZH_GCC
 		time_t timer = (time_t)(filetime / 1000);
 		tm* timeinfo = localtime(&timer);
-		DateTime t = ConvertTMToDateTime(timeinfo, true);
-        t.filetime = filetime;
-        t.milliseconds = 0;
-        return t;
+		return ConvertTMToDateTime(timeinfo, filetime % 1000);
 #endif
 	}
 
@@ -222,9 +217,7 @@ DateTime
 		time_t timer = (time_t)(filetime / 1000) + localTimer - utcTimer;
 		tm* timeinfo = localtime(&timer);
 
-		auto dt = ConvertTMToDateTime(timeinfo, false);
-		dt.milliseconds = milliseconds;
-		return dt;
+		return ConvertTMToDateTime(timeinfo, milliseconds);
 #endif
 	}
 
@@ -239,9 +232,7 @@ DateTime
 		time_t timer = (time_t)(filetime / 1000);
 		tm* timeinfo = gmtime(&timer);
 
-		auto dt = ConvertTMToDateTime(timeinfo, false);
-		dt.milliseconds = milliseconds;
-		return dt;
+		return ConvertTMToDateTime(timeinfo, milliseconds);
 #endif
 	}
 
