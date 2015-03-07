@@ -32,10 +32,10 @@ namespace vl
 		struct MutexData;
 		struct SemaphoreData;
 		struct EventData;
-
 		struct CriticalSectionData;
 		struct ReaderWriterLockData;
 		struct ConditionVariableData;
+		struct TlsData;
 	}
 	
 	class WaitableObject : public Object, public NotCopyable
@@ -306,6 +306,132 @@ namespace vl
 #define CS_LOCK(LOCK) SCOPE_VARIABLE(const CriticalSection::Scope&, scope, LOCK)
 #define READER_LOCK(LOCK) SCOPE_VARIABLE(const ReaderWriterLock::ReaderScope&, scope, LOCK)
 #define WRITER_LOCK(LOCK) SCOPE_VARIABLE(const ReaderWriterLock::WriterScope&, scope, LOCK)
+
+/***********************************************************************
+Thread Local Storage
+***********************************************************************/
+
+	class ThreadLocalStorage : public Object, private NotCopyable
+	{
+	protected:
+		threading_internal::TlsData*			internalData;
+	public:
+		ThreadLocalStorage();
+		~ThreadLocalStorage();
+
+		void*									Get();
+		void									Set(void* data);
+	};
+
+	template<typename T>
+	class ThreadVariable : public Object, private NotCopyable
+	{
+	protected:
+		ThreadLocalStorage*						storage;
+
+		void Replace(void* replaceData)
+		{
+			auto data = (T*)storage->Get();
+			if (data)
+			{
+				delete data;
+			}
+			storage->Set(replaceData);
+		}
+	public:
+		ThreadVariable()
+		{
+			storage = new ThreadLocalStorage();
+		}
+
+		~ThreadVariable()
+		{
+			if (storage)
+			{
+				Clear();
+				delete storage;
+			}
+		}
+
+		bool HasData()
+		{
+			return storage->Get() != nullptr;
+		}
+
+		void Clear()
+		{
+			Replace(nullptr);
+		}
+
+		T& Get()
+		{
+			return *(T*)storage->Get();
+		}
+
+		void Set(const T& value)
+		{
+			Replace(new T(value));
+		}
+
+		void Dispose()
+		{
+			if (storage)
+			{
+				delete storage;
+				storage = nullptr;
+			}
+		}
+	};
+
+	template<typename T>
+	class ThreadVariable<T*> : public Object, private NotCopyable
+	{
+	protected:
+		ThreadLocalStorage*						storage;
+
+	public:
+		ThreadVariable()
+		{
+			storage = new ThreadLocalStorage();
+		}
+
+		~ThreadVariable()
+		{
+			if (storage)
+			{
+				delete storage;
+			}
+		}
+
+		bool HasData()
+		{
+			return storage->Get() != nullptr;
+		}
+
+		void Clear()
+		{
+			storage->Set(nullptr);
+		}
+
+		T* Get()
+		{
+			return (T*)storage->Get();
+		}
+
+		void Set(T* value)
+		{
+			storage->Set((void*)value);
+		}
+
+		void Dispose()
+		{
+			if (storage)
+			{
+				delete storage;
+				storage = nullptr;
+			}
+		}
+	};
 
 /***********************************************************************
 RepeatingTaskExecutor
