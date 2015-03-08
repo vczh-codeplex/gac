@@ -499,15 +499,23 @@ TEST_CASE(ThreadLocalStorage)
 {
 	ThreadLocalStorage::FixStorages();
 	volatile int counter = 0;
-	for (int i = 0; i < 10; i++)
+	List<Thread*> threads;
 	{
-		Thread::CreateAndStart([i, &counter]()
+		for (int i = 0; i < 10; i++)
 		{
-			TlsProc(i, counter);
-		});
+			threads.Add(Thread::CreateAndStart([i, &counter]()
+			{
+				TlsProc(i, counter);
+			}, false));
+		}
 	}
 	TlsProc(-1, counter);
 	Thread::Sleep(1000);
+	FOREACH(Thread*, thread, threads)
+	{
+		thread->Wait();
+		delete thread;
+	}
 	TEST_ASSERT(counter == 11);
 	ThreadLocalStorage::DisposeStorages();
 }
