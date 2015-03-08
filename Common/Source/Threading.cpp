@@ -839,7 +839,8 @@ ThreadLocalStorage
 
 #define KEY ((DWORD&)key)
 
-	ThreadLocalStorage::ThreadLocalStorage()
+	ThreadLocalStorage::ThreadLocalStorage(Destructor _destructor)
+		:destructor(_destructor)
 	{
 		static_assert(sizeof(key) >= sizeof(DWORD), "ThreadLocalStorage's key storage is not large enouth.");
 
@@ -860,6 +861,18 @@ ThreadLocalStorage
 	void ThreadLocalStorage::Set(void* data)
 	{
 		TlsSetValue(KEY, data);
+	}
+
+	void ThreadLocalStorage::Clear()
+	{
+		if(destructor)
+		{
+			if (auto data = Get())
+			{
+				destructor(data);
+			}
+		}
+		Set(nullptr);
 	}
 
 #undef KEY

@@ -853,10 +853,11 @@ ThreadLocalStorage
 
 #define KEY ((pthread_key_t&)key)
 
-	ThreadLocalStorage::ThreadLocalStorage()
+	ThreadLocalStorage::ThreadLocalStorage(Destructor _destructor)
+		:destructor(_destructor)
 	{
 		static_assert(sizeof(key) >= sizeof(pthread_key_t), "ThreadLocalStorage's key storage is not large enouth.");
-		auto error = pthread_key_create(&KEY, nullptr);
+		auto error = pthread_key_create(&KEY, destructor);
 		CHECK_ERROR(error != EAGAIN && error != ENOMEM, L"vl::threading::ThreadLocalStorage::ThreadLocalStorage()#Failed to create a thread local storage index.");
 	}
 
@@ -873,6 +874,18 @@ ThreadLocalStorage
 	void ThreadLocalStorage::Set(void* data)
 	{
 		pthread_setspecific(KEY, data);
+	}
+
+	void ThreadLocalStorage::Clear()
+	{
+		if(destructor)
+		{
+			if (auto data = Get())
+			{
+				destructor(data);
+			}
+		}
+		Set(nullptr);
 	}
 
 #undef KEY
