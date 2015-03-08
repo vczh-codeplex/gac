@@ -7,6 +7,7 @@
 
 #include "TestFunctions.h"
 #include "../../../../Common/Source/Console.h"
+#include "../../../../Common/Source/UnitTest/UnitTest.h"
 
 Ptr<ParsingTable> workflowTable;
 
@@ -494,6 +495,7 @@ int wmain(int argc, wchar_t* argv[])
 int main()
 #endif
 {
+	unittest::UnitTest::RunAndDisposeTests();
 	workflowTable = 0;
 #ifdef VCZH_MSVC
 	_CrtDumpMemoryLeaks();

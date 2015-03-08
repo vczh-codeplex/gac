@@ -1,4 +1,5 @@
 #include "../Source/String.h"
+#include "../Source/UnitTest/UnitTest.h"
 
 using namespace vl;
 
@@ -9,5 +10,6 @@ WString GetPath()
 
 int main()
 {
+	unittest::UnitTest::RunAndDisposeTests();
 	return 0;
 }
