@@ -73,15 +73,14 @@ namespace vl
 		};
 
 		typedef void(*ThreadProcedure)(Thread*, void*);
-	private:
+	protected:
 		threading_internal::ThreadData*				internalData;
 		volatile ThreadState						threadState;
 
-	protected:
-
 		virtual void								Run()=0;
-	public:
+
 		Thread();
+	public:
 		~Thread();
 
 		static Thread*								CreateAndStart(ThreadProcedure procedure, void* argument=0, bool deleteAfterStopped=true);

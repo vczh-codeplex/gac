@@ -159,6 +159,7 @@ Thread
 				try
 				{
 					procedure(this, argument);
+					threadState=Thread::Stopped;
 					ThreadLocalStorage::ClearStorages();
 				}
 				catch (...)
@@ -192,6 +193,7 @@ Thread
 				try
 				{
 					procedure();
+					threadState=Thread::Stopped;
 					ThreadLocalStorage::ClearStorages();
 				}
 				catch (...)
@@ -215,7 +217,6 @@ Thread
 	void InternalThreadProc(Thread* thread)
 	{
 		thread->Run();
-		thread->threadState=Thread::Stopped;
 	}
 
 	DWORD WINAPI InternalThreadProcWrapper(LPVOID lpParameter)
