@@ -43,6 +43,8 @@ Thread
 				try
 				{
 					procedure(this, argument);
+					threadState=Thread::Stopped;
+					internalData->ev.Signal();
 					ThreadLocalStorage::ClearStorages();
 				}
 				catch (...)
@@ -76,6 +78,8 @@ Thread
 				try
 				{
 					procedure();
+					threadState=Thread::Stopped;
+					internalData->ev.Signal();
 					ThreadLocalStorage::ClearStorages();
 				}
 				catch (...)
@@ -99,8 +103,6 @@ Thread
 	void InternalThreadProc(Thread* thread)
 	{
 		thread->Run();
-		thread->threadState=Thread::Stopped;
-		thread->internalData->ev.Signal();
 	}
 
 	void* InternalThreadProcWrapper(void* lpParameter)
