@@ -3,7 +3,9 @@
 #include <crtdbg.h>
 #include <windows.h>
 #include "../../Source/String.h"
+#include "../../Source/Threading.h"
 #include "../../Source/GlobalStorage.h"
+#include "../../Source/UnitTest/UnitTest.h"
 
 using namespace vl;
 
@@ -30,6 +32,7 @@ WString GetPath()
 
 int wmain(vint argc , wchar_t* args[])
 {
+	unittest::UnitTest::RunAndDisposeTests();
 	FinalizeGlobalStorage();
 	_CrtDumpMemoryLeaks();
 	return 0;
