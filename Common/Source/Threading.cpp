@@ -837,43 +837,31 @@ SpinLock
 ThreadLocalStorage
 ***********************************************************************/
 
-	namespace threading_internal
-	{
-		struct TlsData
-		{
-			DWORD			index;
-
-			TlsData()
-			{
-				index = TlsAlloc();
-				CHECK_ERROR(index != TLS_OUT_OF_INDEXES, L"vl::threading::threading_internal::TlsData::TlsData()#Failed to alloc new thread local storage index.");
-			}
-
-			~TlsData()
-			{
-				TlsFree(index);
-			}
-		};
-	}
+#define KEY ((DWORD&)key)
 
 	ThreadLocalStorage::ThreadLocalStorage()
 	{
-		internalData = new TlsData;
+		static_assert(sizeof(key) >= sizeof(DWORD), "ThreadLocalStorage's key storage is not large enouth.");
+
+		KEY = TlsAlloc();
+		CHECK_ERROR(KEY != TLS_OUT_OF_INDEXES, L"vl::threading::ThreadLocalStorage::ThreadLocalStorage()#Failed to alloc new thread local storage index.");
 	}
 
 	ThreadLocalStorage::~ThreadLocalStorage()
 	{
-		delete internalData;
+		TlsFree(KEY);
 	}
 
 	void* ThreadLocalStorage::Get()
 	{
-		return TlsGetValue(internalData->index);
+		return TlsGetValue(KEY);
 	}
 
 	void ThreadLocalStorage::Set(void* data)
 	{
-		TlsSetValue(internalData->index, data);
+		TlsSetValue(KEY, data);
 	}
+
+#undef KEY
 }
 #endif
