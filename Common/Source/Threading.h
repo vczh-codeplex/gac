@@ -312,15 +312,18 @@ Thread Local Storage
 
 	class ThreadLocalStorage : public Object, private NotCopyable
 	{
+		typedef void(*Destructor)(void*);
 	protected:
 		vuint64_t								key;
+		Destructor								destructor;
 
 	public:
-		ThreadLocalStorage();
+		ThreadLocalStorage(Destructor _destructor);
 		~ThreadLocalStorage();
 
 		void*									Get();
 		void									Set(void* data);
+		void									Clear();
 	};
 
 	template<typename T>
@@ -329,17 +332,16 @@ Thread Local Storage
 	protected:
 		ThreadLocalStorage						storage;
 
-		void Replace(void* replaceData)
+		static void Destructor(void* data)
 		{
-			auto data = (T*)storage.Get();
 			if (data)
 			{
-				delete data;
+				delete (T*)data;
 			}
-			storage.Set(replaceData);
 		}
 	public:
 		ThreadVariable()
+			:storage(&Destructor)
 		{
 		}
 
@@ -354,7 +356,7 @@ Thread Local Storage
 
 		void Clear()
 		{
-			Replace(nullptr);
+			storage.Clear();
 		}
 
 		T& Get()
@@ -364,7 +366,8 @@ Thread Local Storage
 
 		void Set(const T& value)
 		{
-			Replace(new T(value));
+			storage.Clear();
+			storage.Set(new T(value));
 		}
 	};
 
@@ -376,6 +379,7 @@ Thread Local Storage
 
 	public:
 		ThreadVariable()
+			:storage(nullptr)
 		{
 		}
 
