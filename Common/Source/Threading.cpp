@@ -155,7 +155,16 @@ Thread
 		protected:
 			void Run()
 			{
-				procedure(this, argument);
+				ThreadLocalStorage::FixStorages();
+				try
+				{
+					procedure(this, argument);
+					ThreadLocalStorage::ClearStorages();
+				}
+				catch (...)
+				{
+					ThreadLocalStorage::ClearStorages();
+				}
 				if(deleteAfterStopped)
 				{
 					delete this;
@@ -179,7 +188,16 @@ Thread
 		protected:
 			void Run()
 			{
-				procedure();
+				ThreadLocalStorage::FixStorages();
+				try
+				{
+					procedure();
+					ThreadLocalStorage::ClearStorages();
+				}
+				catch (...)
+				{
+					ThreadLocalStorage::ClearStorages();
+				}
 				if(deleteAfterStopped)
 				{
 					delete this;
@@ -554,14 +572,32 @@ ThreadPoolLite
 		DWORD WINAPI ThreadPoolQueueProc(void* argument)
 		{
 			Ptr<ThreadPoolQueueProcArgument> proc=(ThreadPoolQueueProcArgument*)argument;
-			proc->proc(proc->argument);
+			ThreadLocalStorage::FixStorages();
+			try
+			{
+				proc->proc(proc->argument);
+				ThreadLocalStorage::ClearStorages();
+			}
+			catch (...)
+			{
+				ThreadLocalStorage::ClearStorages();
+			}
 			return 0;
 		}
 
 		DWORD WINAPI ThreadPoolQueueFunc(void* argument)
 		{
 			Ptr<Func<void()>> proc=(Func<void()>*)argument;
-			(*proc.Obj())();
+			ThreadLocalStorage::FixStorages();
+			try
+			{
+				(*proc.Obj())();
+				ThreadLocalStorage::ClearStorages();
+			}
+			catch (...)
+			{
+				ThreadLocalStorage::ClearStorages();
+			}
 			return 0;
 		}
 
@@ -843,9 +879,9 @@ ThreadLocalStorage
 		:destructor(_destructor)
 	{
 		static_assert(sizeof(key) >= sizeof(DWORD), "ThreadLocalStorage's key storage is not large enouth.");
-
+		PushStorage(this);
 		KEY = TlsAlloc();
-		CHECK_ERROR(KEY != TLS_OUT_OF_INDEXES, L"vl::threading::ThreadLocalStorage::ThreadLocalStorage()#Failed to alloc new thread local storage index.");
+		CHECK_ERROR(KEY != TLS_OUT_OF_INDEXES, L"vl::ThreadLocalStorage::ThreadLocalStorage()#Failed to alloc new thread local storage index.");
 	}
 
 	ThreadLocalStorage::~ThreadLocalStorage()
@@ -855,16 +891,29 @@ ThreadLocalStorage
 
 	void* ThreadLocalStorage::Get()
 	{
+		CHECK_ERROR(!disposed, L"vl::ThreadLocalStorage::Get()#Cannot access a disposed ThreadLocalStorage.");
 		return TlsGetValue(KEY);
 	}
 
 	void ThreadLocalStorage::Set(void* data)
 	{
+		CHECK_ERROR(!disposed, L"vl::ThreadLocalStorage::Set()#Cannot access a disposed ThreadLocalStorage.");
 		TlsSetValue(KEY, data);
 	}
 
+#undef KEY
+}
+#endif
+
+/***********************************************************************
+ThreadLocalStorage Common Implementations
+***********************************************************************/
+
+namespace vl
+{
 	void ThreadLocalStorage::Clear()
 	{
+		CHECK_ERROR(!disposed, L"vl::ThreadLocalStorage::Clear()#Cannot access a disposed ThreadLocalStorage.");
 		if(destructor)
 		{
 			if (auto data = Get())
@@ -875,6 +924,61 @@ ThreadLocalStorage
 		Set(nullptr);
 	}
 
-#undef KEY
+	void ThreadLocalStorage::Dispose()
+	{
+		CHECK_ERROR(!disposed, L"vl::ThreadLocalStorage::Dispose()#Cannot access a disposed ThreadLocalStorage.");
+		Clear();
+		disposed = true;
+	}
+
+	struct TlsStorageLink
+	{
+		ThreadLocalStorage*		storage = nullptr;
+		TlsStorageLink*			next = nullptr;
+	};
+
+	volatile bool				tlsFixed = false;
+	TlsStorageLink*				tlsHead = nullptr;
+	TlsStorageLink**			tlsTail = &tlsHead;
+
+	void ThreadLocalStorage::PushStorage(ThreadLocalStorage* storage)
+	{
+		CHECK_ERROR(!tlsFixed, L"vl::ThreadLocalStorage::PushStorage(ThreadLocalStorage*)#Cannot create new ThreadLocalStorage instance after calling ThreadLocalStorage::FixStorages().");
+		auto link = new TlsStorageLink;
+		link->storage = storage;
+		*tlsTail = link;
+		tlsTail = &link->next;
+	}
+
+	void ThreadLocalStorage::FixStorages()
+	{
+		tlsFixed = true;
+	}
+
+	void ThreadLocalStorage::ClearStorages()
+	{
+		FixStorages();
+		auto current = tlsHead;
+		while (current)
+		{
+			current->storage->Clear();
+			current = current->next;
+		}
+	}
+
+	void ThreadLocalStorage::DisposeStorages()
+	{
+		FixStorages();
+		auto current = tlsHead;
+		tlsHead = nullptr;
+		tlsTail = nullptr;
+		while (current)
+		{
+			current->storage->Dispose();
+
+			auto temp = current;
+			current = current->next;
+			delete temp;
+		}
+	}
 }
-#endif

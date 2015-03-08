@@ -47,5 +47,36 @@ UnitTest
 			Console::WriteLine(string);
 			Console::SetColor(true, true, true, false);
 		}
+
+		struct UnitTestLink
+		{
+			UnitTest::TestProc			testProc = nullptr;
+			UnitTestLink*				next = nullptr;
+		};
+		UnitTestLink*					testHead = nullptr;
+		UnitTestLink**					testTail = &testHead;
+
+		void UnitTest::PushTest(TestProc testProc)
+		{
+			auto link = new UnitTestLink;
+			link->testProc = testProc;
+			*testTail = link;
+			testTail = &link->next;
+		}
+
+		void UnitTest::RunAndDisposeTests()
+		{
+			auto current = testHead;
+			testHead = nullptr;
+			testTail = nullptr;
+
+			while (current)
+			{
+				current->testProc();
+				auto temp = current;
+				current = current->next;
+				delete temp;
+			}
+		}
 	}
 }

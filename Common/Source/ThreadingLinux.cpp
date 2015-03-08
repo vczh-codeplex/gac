@@ -39,7 +39,16 @@ Thread
 		protected:
 			void Run()
 			{
-				procedure(this, argument);
+				ThreadLocalStorage::FixStorages();
+				try
+				{
+					procedure(this, argument);
+					ThreadLocalStorage::ClearStorages();
+				}
+				catch (...)
+				{
+					ThreadLocalStorage::ClearStorages();
+				}
 				if(deleteAfterStopped)
 				{
 					delete this;
@@ -63,7 +72,16 @@ Thread
 		protected:
 			void Run()
 			{
-				procedure();
+				ThreadLocalStorage::FixStorages();
+				try
+				{
+					procedure();
+					ThreadLocalStorage::ClearStorages();
+				}
+				catch (...)
+				{
+					ThreadLocalStorage::ClearStorages();
+				}
 				if(deleteAfterStopped)
 				{
 					delete this;
@@ -538,7 +556,16 @@ ThreadPoolLite
 
 				if (task)
 				{
-					task->task();
+					ThreadLocalStorage::FixStorages();
+					try
+					{
+						task->task();
+						ThreadLocalStorage::ClearStorages();
+					}
+					catch (...)
+					{
+						ThreadLocalStorage::ClearStorages();
+					}
 				}
 				else if (threadPoolData->stopping)
 				{
@@ -857,8 +884,9 @@ ThreadLocalStorage
 		:destructor(_destructor)
 	{
 		static_assert(sizeof(key) >= sizeof(pthread_key_t), "ThreadLocalStorage's key storage is not large enouth.");
+		PushStorage(this);
 		auto error = pthread_key_create(&KEY, destructor);
-		CHECK_ERROR(error != EAGAIN && error != ENOMEM, L"vl::threading::ThreadLocalStorage::ThreadLocalStorage()#Failed to create a thread local storage index.");
+		CHECK_ERROR(error != EAGAIN && error != ENOMEM, L"vl::ThreadLocalStorage::ThreadLocalStorage()#Failed to create a thread local storage index.");
 	}
 
 	ThreadLocalStorage::~ThreadLocalStorage()
@@ -868,27 +896,16 @@ ThreadLocalStorage
 
 	void* ThreadLocalStorage::Get()
 	{
+		CHECK_ERROR(!disposed, L"vl::ThreadLocalStorage::Get()#Cannot access a disposed ThreadLocalStorage.");
 		return pthread_getspecific(KEY);
 	}
 
 	void ThreadLocalStorage::Set(void* data)
 	{
+		CHECK_ERROR(!disposed, L"vl::ThreadLocalStorage::Set()#Cannot access a disposed ThreadLocalStorage.");
 		pthread_setspecific(KEY, data);
-	}
-
-	void ThreadLocalStorage::Clear()
-	{
-		if(destructor)
-		{
-			if (auto data = Get())
-			{
-				destructor(data);
-			}
-		}
-		Set(nullptr);
 	}
 
 #undef KEY
 }
-
 #endif

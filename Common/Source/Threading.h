@@ -308,6 +308,9 @@ namespace vl
 
 /***********************************************************************
 Thread Local Storage
+
+ThreadLocalStorage and ThreadVariable<T> are designed to be used as global value types only.
+Dynamically create instances of them are undefined behavior.
 ***********************************************************************/
 
 	class ThreadLocalStorage : public Object, private NotCopyable
@@ -316,7 +319,9 @@ Thread Local Storage
 	protected:
 		vuint64_t								key;
 		Destructor								destructor;
-
+		volatile bool							disposed = false;
+		
+		static void								PushStorage(ThreadLocalStorage* storage);
 	public:
 		ThreadLocalStorage(Destructor _destructor);
 		~ThreadLocalStorage();
@@ -324,6 +329,11 @@ Thread Local Storage
 		void*									Get();
 		void									Set(void* data);
 		void									Clear();
+		void									Dispose();
+
+		static void								FixStorages();
+		static void								ClearStorages();
+		static void								DisposeStorages();
 	};
 
 	template<typename T>

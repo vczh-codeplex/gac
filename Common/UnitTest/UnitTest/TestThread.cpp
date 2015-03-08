@@ -460,34 +460,54 @@ namespace mynamespace
 {
 	ThreadVariable<int> tls1;
 	ThreadVariable<const wchar_t*> tls2;
+	ThreadVariable<WString> tls3;
+
+	void TlsProc(int i, volatile int& counter)
+	{
+		TEST_ASSERT(tls1.HasData() == false);
+		tls1.Set(i);
+		TEST_ASSERT(tls1.HasData() == true);
+		TEST_ASSERT(tls1.Get() == i);
+		tls1.Clear();
+		TEST_ASSERT(tls1.HasData() == false);
+			
+		WString text = itow(i);
+		TEST_ASSERT(tls2.HasData() == false);
+		tls2.Set(text.Buffer());
+		TEST_ASSERT(tls2.HasData() == true);
+		TEST_ASSERT(tls2.Get() == text.Buffer());
+		tls2.Clear();
+		TEST_ASSERT(tls2.HasData() == false);
+			
+		TEST_ASSERT(tls3.HasData() == false);
+		tls3.Set(text);
+		TEST_ASSERT(tls3.HasData() == true);
+		TEST_ASSERT(tls3.Get() == text);
+		tls3.Clear();
+		TEST_ASSERT(tls3.HasData() == false);
+
+		tls1.Set(0);
+		tls2.Set(L"");
+		tls3.Set(L"");
+
+		INCRC(&counter);
+	}
 }
 using namespace mynamespace;
 
 TEST_CASE(ThreadLocalStorage)
 {
+	ThreadLocalStorage::FixStorages();
 	volatile int counter = 0;
 	for (int i = 0; i < 10; i++)
 	{
-		ThreadPoolLite::QueueLambda([i, &counter]()
+		Thread::CreateAndStart([i, &counter]()
 		{
-			TEST_ASSERT(tls1.HasData() == false);
-			tls1.Set(i);
-			TEST_ASSERT(tls1.HasData() == true);
-			TEST_ASSERT(tls1.Get() == i);
-			tls1.Clear();
-			TEST_ASSERT(tls1.HasData() == false);
-			
-			WString text = itow(i);
-			TEST_ASSERT(tls2.HasData() == false);
-			tls2.Set(text.Buffer());
-			TEST_ASSERT(tls2.HasData() == true);
-			TEST_ASSERT(tls2.Get() == text.Buffer());
-			tls2.Clear();
-			TEST_ASSERT(tls2.HasData() == false);
-
-			INCRC(&counter);
+			TlsProc(i, counter);
 		});
 	}
+	TlsProc(-1, counter);
 	Thread::Sleep(1000);
-	TEST_ASSERT(counter == 10);
+	TEST_ASSERT(counter == 11);
+	ThreadLocalStorage::DisposeStorages();
 }
