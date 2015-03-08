@@ -35,7 +35,6 @@ namespace vl
 		struct CriticalSectionData;
 		struct ReaderWriterLockData;
 		struct ConditionVariableData;
-		struct TlsData;
 	}
 	
 	class WaitableObject : public Object, public NotCopyable
@@ -314,7 +313,8 @@ Thread Local Storage
 	class ThreadLocalStorage : public Object, private NotCopyable
 	{
 	protected:
-		threading_internal::TlsData*			internalData;
+		vuint64_t								key;
+
 	public:
 		ThreadLocalStorage();
 		~ThreadLocalStorage();
@@ -327,35 +327,29 @@ Thread Local Storage
 	class ThreadVariable : public Object, private NotCopyable
 	{
 	protected:
-		ThreadLocalStorage*						storage;
+		ThreadLocalStorage						storage;
 
 		void Replace(void* replaceData)
 		{
-			auto data = (T*)storage->Get();
+			auto data = (T*)storage.Get();
 			if (data)
 			{
 				delete data;
 			}
-			storage->Set(replaceData);
+			storage.Set(replaceData);
 		}
 	public:
 		ThreadVariable()
 		{
-			storage = new ThreadLocalStorage();
 		}
 
 		~ThreadVariable()
 		{
-			if (storage)
-			{
-				Clear();
-				delete storage;
-			}
 		}
 
 		bool HasData()
 		{
-			return storage->Get() != nullptr;
+			return storage.Get() != nullptr;
 		}
 
 		void Clear()
@@ -365,21 +359,12 @@ Thread Local Storage
 
 		T& Get()
 		{
-			return *(T*)storage->Get();
+			return *(T*)storage.Get();
 		}
 
 		void Set(const T& value)
 		{
 			Replace(new T(value));
-		}
-
-		void Dispose()
-		{
-			if (storage)
-			{
-				delete storage;
-				storage = nullptr;
-			}
 		}
 	};
 
@@ -387,49 +372,35 @@ Thread Local Storage
 	class ThreadVariable<T*> : public Object, private NotCopyable
 	{
 	protected:
-		ThreadLocalStorage*						storage;
+		ThreadLocalStorage						storage;
 
 	public:
 		ThreadVariable()
 		{
-			storage = new ThreadLocalStorage();
 		}
 
 		~ThreadVariable()
 		{
-			if (storage)
-			{
-				delete storage;
-			}
 		}
 
 		bool HasData()
 		{
-			return storage->Get() != nullptr;
+			return storage.Get() != nullptr;
 		}
 
 		void Clear()
 		{
-			storage->Set(nullptr);
+			storage.Set(nullptr);
 		}
 
 		T* Get()
 		{
-			return (T*)storage->Get();
+			return (T*)storage.Get();
 		}
 
 		void Set(T* value)
 		{
-			storage->Set((void*)value);
-		}
-
-		void Dispose()
-		{
-			if (storage)
-			{
-				delete storage;
-				storage = nullptr;
-			}
+			storage.Set((void*)value);
 		}
 	};
 

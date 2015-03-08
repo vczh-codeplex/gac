@@ -851,44 +851,31 @@ SpinLock
 ThreadLocalStorage
 ***********************************************************************/
 
-	namespace threading_internal
-	{
-		struct TlsData
-		{
-			pthread_key_t			index;
-
-			TlsData()
-			{
-				auto error = pthread_key_create(&index, nullptr);
-				CHECK_ERROR(error != EAGAIN && error != ENOMEM, L"vl::threading::threading_internal::TlsData::TlsData()#Failed to create a thread local storage index.");
-			}
-
-			~TlsData()
-			{
-				pthread_key_delete(index);
-			}
-		};
-	}
+#define KEY ((pthread_key_t&)key)
 
 	ThreadLocalStorage::ThreadLocalStorage()
 	{
-		internalData = new TlsData;
+		static_assert(sizeof(key) >= sizeof(pthread_key_t), "ThreadLocalStorage's key storage is not large enouth.");
+		auto error = pthread_key_create(&KEY, nullptr);
+		CHECK_ERROR(error != EAGAIN && error != ENOMEM, L"vl::threading::ThreadLocalStorage::ThreadLocalStorage()#Failed to create a thread local storage index.");
 	}
 
 	ThreadLocalStorage::~ThreadLocalStorage()
 	{
-		delete internalData;
+		pthread_key_delete(KEY);
 	}
 
 	void* ThreadLocalStorage::Get()
 	{
-		return pthread_getspecific(internalData->index);
+		return pthread_getspecific(KEY);
 	}
 
 	void ThreadLocalStorage::Set(void* data)
 	{
-		pthread_setspecific(internalData->index, data);
+		pthread_setspecific(KEY, data);
 	}
+
+#undef KEY
 }
 
 #endif

@@ -490,6 +490,4 @@ TEST_CASE(ThreadLocalStorage)
 	}
 	Thread::Sleep(1000);
 	TEST_ASSERT(counter == 10);
-	tls1.Dispose();
-	tls2.Dispose();
 }
