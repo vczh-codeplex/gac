@@ -121,7 +121,35 @@ GenerateAssembly
 			Ptr<runtime::WfAssembly> GenerateAssembly(WfLexicalScopeManager* manager)
 			{
 				auto assembly = MakePtr<WfAssembly>();
+				assembly->insBeforeCodegen = new WfInstructionDebugInfo;
+				assembly->insAfterCodegen = new WfInstructionDebugInfo;
+				
 				WfCodegenContext context(assembly, manager);
+				FOREACH_INDEXER(Ptr<WfModule>, module, index, manager->GetModules())
+				{
+					auto codeBeforeCodegen = manager->GetModuleCodes()[index];
+
+					auto recorderBefore = new ParsingGeneratedLocationRecorder(context.nodePositionsBeforeCodegen);
+					auto recorderAfter = new ParsingGeneratedLocationRecorder(context.nodePositionsAfterCodegen);
+					auto recorderOriginal = new ParsingOriginalLocationRecorder(recorderBefore);
+					auto recorderMultiple = new ParsingMultiplePrintNodeRecorder;
+					recorderMultiple->AddRecorder(recorderOriginal);
+					recorderMultiple->AddRecorder(recorderAfter);
+
+					stream::MemoryStream memoryStream;
+					{
+						stream::StreamWriter streamWriter(memoryStream);
+						ParsingWriter parsingWriter(streamWriter, recorderMultiple, index);
+						WfPrint(module, L"", parsingWriter);
+					}
+
+					memoryStream.SeekFromBegin(0);
+					auto codeAfterCodegen = stream::StreamReader(memoryStream).ReadToEnd();
+
+					assembly->insBeforeCodegen->moduleCodes.Add(codeBeforeCodegen);
+					assembly->insAfterCodegen->moduleCodes.Add(codeAfterCodegen);
+				}
+
 				FOREACH(Ptr<WfModule>, module, manager->GetModules())
 				{
 					FOREACH(Ptr<WfDeclaration>, decl, module->declarations)

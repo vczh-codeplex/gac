@@ -638,7 +638,9 @@ ParsingEmptyPrintNodeRecorder
 
 		void ParsingOriginalLocationRecorder::Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)
 		{
-			recorder->Record(node, node->codeRange);
+			auto codeRange = node->codeRange;
+			codeRange.codeIndex = range.codeIndex;
+			recorder->Record(node, codeRange);
 		}
 
 /***********************************************************************

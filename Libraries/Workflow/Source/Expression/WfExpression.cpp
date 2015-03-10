@@ -838,7 +838,7 @@ Print (Statement)
 					writer.WriteString(indent);
 					writer.WriteLine(L"else");
 					writer.WriteString(indent);
-					WfPrint(node->trueBranch, indent, writer);
+					WfPrint(node->falseBranch, indent, writer);
 				}
 				writer.AfterPrint(node);
 			}

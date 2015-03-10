@@ -349,14 +349,17 @@ Code Generation
 
 			class WfCodegenContext : public Object
 			{
-				typedef collections::Dictionary<WfLexicalSymbol*, vint>				VariableIndexMap;
-				typedef collections::Dictionary<WfLexicalSymbol*, vint>				FunctionIndexMap;
+				typedef collections::Dictionary<WfLexicalSymbol*, vint>											VariableIndexMap;
+				typedef collections::Dictionary<WfLexicalSymbol*, vint>											FunctionIndexMap;
+				typedef collections::Dictionary<parsing::ParsingTreeCustomBase*, parsing::ParsingTextRange>		NodePositionMap;
 			public:
 				Ptr<runtime::WfAssembly>			assembly;
 				WfLexicalScopeManager*				manager;
 				VariableIndexMap					globalVariables;
 				FunctionIndexMap					globalFunctions;
 				Ptr<WfCodegenFunctionContext>		functionContext;
+				NodePositionMap						nodePositionsBeforeCodegen;
+				NodePositionMap						nodePositionsAfterCodegen;
 
 				WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager);
 
