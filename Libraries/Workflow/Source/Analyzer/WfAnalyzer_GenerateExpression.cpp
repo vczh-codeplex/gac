@@ -15,7 +15,7 @@ namespace vl
 
 			typedef WfInstruction Ins;
 
-#define INSTRUCTION(X) context.assembly->instructions.Add(X)
+#define INSTRUCTION(X) context.AddInstruction(node, X)
 
 /***********************************************************************
 GenerateInstructions(Expression)
@@ -31,7 +31,7 @@ GenerateInstructions(Expression)
 				{
 				}
 
-				void GenerateLoadSymbolInstructions(WfLexicalSymbol* symbol)
+				void GenerateLoadSymbolInstructions(WfLexicalSymbol* symbol, parsing::ParsingTreeCustomBase* node)
 				{
 					vint index = -1;
 					if ((index = context.globalFunctions.Keys().IndexOf(symbol)) != -1)
@@ -66,7 +66,7 @@ GenerateInstructions(Expression)
 					auto result = context.manager->expressionResolvings[node];
 					if (result.symbol)
 					{
-						GenerateLoadSymbolInstructions(result.symbol.Obj());
+						GenerateLoadSymbolInstructions(result.symbol.Obj(), node);
 					}
 					else
 					{
@@ -118,7 +118,7 @@ GenerateInstructions(Expression)
 						const auto& symbols = context.manager->orderedLambdaCaptures.GetByIndex(index);
 						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
 						{
-							GenerateLoadSymbolInstructions(symbol.Obj());
+							GenerateLoadSymbolInstructions(symbol.Obj(), node);
 						}
 						INSTRUCTION(Ins::LoadClosure(functionIndex, symbols.Count()));
 					}
@@ -522,7 +522,7 @@ GenerateInstructions(Expression)
 						INSTRUCTION(Ins::LoadLocalVar(index));
 						if (!IsSameType(typeElement.Obj(), typeLeft.Obj()))
 						{
-							GenerateTypeCastInstructions(context, typeLeft, true);
+							GenerateTypeCastInstructions(context, typeLeft, true, node);
 						}
 						GenerateExpressionInstructions(context, range->begin, typeLeft);
 						INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(typeLeft)));
@@ -538,7 +538,7 @@ GenerateInstructions(Expression)
 						INSTRUCTION(Ins::LoadLocalVar(index));
 						if (!IsSameType(typeElement.Obj(), typeRight.Obj()))
 						{
-							GenerateTypeCastInstructions(context, typeRight, true);
+							GenerateTypeCastInstructions(context, typeRight, true, node);
 						}
 						GenerateExpressionInstructions(context, range->end, typeRight);
 						INSTRUCTION(Ins::CompareLiteral(GetInstructionTypeArgument(typeRight)));
@@ -621,7 +621,7 @@ GenerateInstructions(Expression)
 						auto scope = context.manager->expressionScopes[node].Obj();
 						auto type = CreateTypeInfoFromType(scope, node->type);
 						GenerateExpressionInstructions(context, node->expression);
-						GenerateTypeCastInstructions(context, type, false);
+						GenerateTypeCastInstructions(context, type, false, node);
 					}
 				}
 
@@ -645,7 +645,7 @@ GenerateInstructions(Expression)
 							auto scope = context.manager->expressionScopes[node].Obj();
 							auto type = CreateTypeInfoFromType(scope, node->type);
 							GenerateExpressionInstructions(context, node->expression);
-							GenerateTypeTestingInstructions(context, type);
+							GenerateTypeTestingInstructions(context, type, node);
 						}
 						break;
 					case WfTypeTesting::IsNotType:
@@ -653,7 +653,7 @@ GenerateInstructions(Expression)
 							auto scope = context.manager->expressionScopes[node].Obj();
 							auto type = CreateTypeInfoFromType(scope, node->type);
 							GenerateExpressionInstructions(context, node->expression);
-							GenerateTypeTestingInstructions(context, type);
+							GenerateTypeTestingInstructions(context, type, node);
 							INSTRUCTION(Ins::OpNot(WfInsType::Bool));
 						}
 						break;
@@ -736,7 +736,7 @@ GenerateInstructions(Expression)
 					INSTRUCTION(Ins::InvokeProxy(node->arguments.Count()));
 				}
 
-				void VisitFunction(WfFunctionDeclaration* decl, WfCodegenLambdaContext lc, const WString& name)
+				void VisitFunction(WfFunctionDeclaration* node, WfCodegenLambdaContext lc, const WString& name)
 				{
 					auto meta = MakePtr<WfAssemblyFunction>();
 					meta->name = name;
@@ -745,13 +745,13 @@ GenerateInstructions(Expression)
 
 					context.functionContext->closuresToCodegen.Add(functionIndex, lc);
 
-					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(decl);
+					vint index = context.manager->functionLambdaCaptures.Keys().IndexOf(node);
 					if (index != -1)
 					{
 						const auto& symbols = context.manager->functionLambdaCaptures.GetByIndex(index);
 						FOREACH(Ptr<WfLexicalSymbol>, symbol, symbols)
 						{
-							GenerateLoadSymbolInstructions(symbol.Obj());
+							GenerateLoadSymbolInstructions(symbol.Obj(), node);
 						}
 						INSTRUCTION(Ins::LoadClosure(functionIndex, symbols.Count()));
 					}
@@ -811,13 +811,13 @@ GenerateInstructions(Expression)
 				if (result.expectedType && !IsSameType(type.Obj(), result.expectedType.Obj()))
 				{
 					type = result.expectedType;
-					GenerateTypeCastInstructions(context, type, true);
+					GenerateTypeCastInstructions(context, type, true, expression.Obj());
 				}
 
 				if (expectedType && !IsSameType(type.Obj(), expectedType.Obj()))
 				{
 					type = expectedType;
-					GenerateTypeCastInstructions(context, type, true);
+					GenerateTypeCastInstructions(context, type, true, expression.Obj());
 				}
 
 				return type;
