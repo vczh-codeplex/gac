@@ -34,10 +34,7 @@ GenerateInstructions(Statement)
 
 				void ApplyExitCode(Ptr<WfCodegenScopeContext> scopeContext)
 				{
-					if (scopeContext->exitInstructions.Count() > 0)
-					{
-						CopyFrom(context.assembly->instructions, scopeContext->exitInstructions, true);
-					}
+					context.ApplyExitInstructions(scopeContext);
 					if (scopeContext->exitStatement)
 					{
 						GenerateStatementInstructions(context, scopeContext->exitStatement);

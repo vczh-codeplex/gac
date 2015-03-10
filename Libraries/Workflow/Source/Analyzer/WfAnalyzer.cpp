@@ -775,12 +775,37 @@ WfCodegenContext
 
 			vint WfCodegenContext::AddInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins)
 			{
-				return assembly->instructions.Add(ins);
+				auto index = assembly->instructions.Add(ins);
+				if (node)
+				{
+					assembly->insBeforeCodegen->instructionCodeMapping.Add(nodePositionsBeforeCodegen[node]);
+					assembly->insAfterCodegen->instructionCodeMapping.Add(nodePositionsAfterCodegen[node]);
+				}
+				else
+				{
+					parsing::ParsingTextRange range;
+					assembly->insBeforeCodegen->instructionCodeMapping.Add(range);
+					assembly->insAfterCodegen->instructionCodeMapping.Add(range);
+				}
+				return index;
 			}
 
 			void WfCodegenContext::AddExitInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins)
 			{
-				functionContext->GetCurrentScopeContext()->exitInstructions.Add(ins);
+				auto context = functionContext->GetCurrentScopeContext();
+				context->exitInstructions.Add(ins);
+				context->instructionCodeMappingBeforeCodegen.Add(nodePositionsBeforeCodegen[node]);
+				context->instructionCodeMappingAfterCodegen.Add(nodePositionsAfterCodegen[node]);
+			}
+
+			void WfCodegenContext::ApplyExitInstructions(Ptr<WfCodegenScopeContext> scopeContext)
+			{
+				if (scopeContext->exitInstructions.Count() > 0)
+				{
+					CopyFrom(assembly->instructions, scopeContext->exitInstructions, true);
+					CopyFrom(assembly->insBeforeCodegen->instructionCodeMapping, scopeContext->instructionCodeMappingBeforeCodegen, true);
+					CopyFrom(assembly->insAfterCodegen->instructionCodeMapping, scopeContext->instructionCodeMappingAfterCodegen, true);
+				}
 			}
 		}
 	}

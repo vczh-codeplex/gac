@@ -127,7 +127,28 @@ Location
 			bool Contains(const ParsingTextPos& pos)const{return start<=pos && pos<=end;}
 			bool Contains(const ParsingTextRange& range)const{return start<=range.start && range.end<=end;}
 		};
+	}
 
+	namespace stream
+	{
+		namespace internal
+		{
+			BEGIN_SERIALIZATION(parsing::ParsingTextPos)
+				SERIALIZE(index)
+				SERIALIZE(row)
+				SERIALIZE(column)
+			END_SERIALIZATION
+			
+			BEGIN_SERIALIZATION(parsing::ParsingTextRange)
+				SERIALIZE(start)
+				SERIALIZE(end)
+				SERIALIZE(codeIndex)
+			END_SERIALIZATION
+		}
+	}
+
+	namespace parsing
+	{
 /***********************************************************************
 General Syntax Tree
 ***********************************************************************/
