@@ -38,7 +38,7 @@ TEST_CASE(TestCodegen)
 		manager.Clear(true, true);
 		List<RegexToken> tokens;
 		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
-		manager.modules.Add(module);
+		manager.AddModule(module);
 		manager.Rebuild(true);
 		MemoryStream stream;
 		{

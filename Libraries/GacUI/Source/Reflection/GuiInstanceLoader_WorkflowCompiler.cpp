@@ -192,7 +192,7 @@ Workflow_ValidateExpression
 			}
 
 			Workflow_GetSharedManager()->Clear(true, true);
-			Workflow_GetSharedManager()->modules.Add(module);
+			Workflow_GetSharedManager()->AddModule(module);
 			Workflow_GetSharedManager()->Rebuild(true);
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
@@ -256,7 +256,7 @@ Workflow_CompileExpression
 			}
 
 			Workflow_GetSharedManager()->Clear(true, true);
-			Workflow_GetSharedManager()->modules.Add(module);
+			Workflow_GetSharedManager()->AddModule(module);
 			Workflow_GetSharedManager()->Rebuild(true);
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
@@ -316,7 +316,7 @@ Workflow_CompileEventHandler
 			}
 
 			Workflow_GetSharedManager()->Clear(true, true);
-			Workflow_GetSharedManager()->modules.Add(module);
+			Workflow_GetSharedManager()->AddModule(module);
 			Workflow_GetSharedManager()->Rebuild(true);
 			if (Workflow_GetSharedManager()->errors.Count() > 0)
 			{
@@ -538,7 +538,7 @@ Workflow_CompileDataBinding
 			}
 
 			Workflow_GetSharedManager()->Clear(true, true);
-			Workflow_GetSharedManager()->modules.Add(module);
+			Workflow_GetSharedManager()->AddModule(module);
 			Workflow_GetSharedManager()->Rebuild(true);
 			WString moduleCode = Workflow_ModuleToString(module);
 
