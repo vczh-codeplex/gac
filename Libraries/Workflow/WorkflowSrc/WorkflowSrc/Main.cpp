@@ -307,6 +307,7 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 			{
 				auto line = reader.ReadLine();
 				writer.WriteLine(L"//  " + line);
+				break;
 			}
 		}
 		switch (ins.code)
