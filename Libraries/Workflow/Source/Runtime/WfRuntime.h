@@ -367,6 +367,7 @@ Runtime
 				WfRuntimeThreadContextError		LoadLocalVariable(vint variableIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		StoreLocalVariable(vint variableIndex, const reflection::description::Value& value);
 
+				WfRuntimeExecutionAction		ExecuteInternal(WfInstruction& ins, WfRuntimeStackFrame& stackFrame);
 				WfRuntimeExecutionAction		Execute();
 				void							ExecuteToEnd();
 			};
