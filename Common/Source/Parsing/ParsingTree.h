@@ -22,7 +22,7 @@ namespace vl
 	{
 
 /***********************************************************************
-位置信息
+Location
 ***********************************************************************/
 
 		struct ParsingTextPos
@@ -129,7 +129,7 @@ namespace vl
 		};
 
 /***********************************************************************
-通用语法树
+General Syntax Tree
 ***********************************************************************/
 
 		class ParsingTreeNode;
@@ -282,12 +282,6 @@ namespace vl
 		};
 
 /***********************************************************************
-辅助函数
-***********************************************************************/
-
-		extern void								Log(ParsingTreeNode* node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
-
-/***********************************************************************
 语法树基础设施
 ***********************************************************************/
 
@@ -323,7 +317,7 @@ namespace vl
 		};
 
 /***********************************************************************
-语法树构造
+Syntax Tree Serialization Helper
 ***********************************************************************/
 
 		class ParsingTreeConverter : public Object
@@ -384,7 +378,91 @@ namespace vl
 		};
 
 /***********************************************************************
-符号表
+Logging
+***********************************************************************/
+
+		class IParsingPrintNodeRecorder : public virtual Interface
+		{
+		public:
+			virtual void						Record(ParsingTreeCustomBase* node, const ParsingTextRange& range) = 0;
+		};
+
+		class ParsingEmptyPrintNodeRecorder : public Object, public virtual IParsingPrintNodeRecorder
+		{
+		public:
+			ParsingEmptyPrintNodeRecorder();
+			~ParsingEmptyPrintNodeRecorder();
+
+			void								Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)override;
+		};
+
+		class ParsingMultiplePrintNodeRecorder : public Object, public virtual IParsingPrintNodeRecorder
+		{
+			typedef collections::List<Ptr<IParsingPrintNodeRecorder>>				RecorderList;
+		protected:
+			RecorderList						recorders;
+
+		public:
+			ParsingMultiplePrintNodeRecorder();
+			~ParsingMultiplePrintNodeRecorder();
+
+			void								AddRecorder(Ptr<IParsingPrintNodeRecorder> recorder);
+			void								Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)override;
+		};
+
+		class ParsingOriginalLocationRecorder : public Object, public virtual IParsingPrintNodeRecorder
+		{
+		protected:
+			Ptr<IParsingPrintNodeRecorder>		recorder;
+
+		public:
+			ParsingOriginalLocationRecorder(Ptr<IParsingPrintNodeRecorder> _recorder);
+			~ParsingOriginalLocationRecorder();
+
+			void								Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)override;
+		};
+
+		class ParsingGeneratedLocationRecorder : public Object, public virtual IParsingPrintNodeRecorder
+		{
+			typedef collections::Dictionary<ParsingTreeCustomBase*, ParsingTextRange>		RangeMap;
+		protected:
+			RangeMap&							rangeMap;
+
+		public:
+			ParsingGeneratedLocationRecorder(RangeMap& _rangeMap);
+			~ParsingGeneratedLocationRecorder();
+
+			void								Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)override;
+		};
+
+		class ParsingWriter : public stream::TextWriter
+		{
+			typedef collections::Pair<ParsingTreeCustomBase*, ParsingTextPos>				NodePosPair;
+			typedef collections::List<NodePosPair>											NodePosList;
+		protected:
+			stream::TextWriter&					writer;
+			Ptr<IParsingPrintNodeRecorder>		recorder;
+			vint								codeIndex;
+			ParsingTextPos						lastPos;
+			ParsingTextPos						currentPos;
+			NodePosList							nodePositions;
+
+			void								HandleChar(wchar_t c);
+		public:
+			ParsingWriter(stream::TextWriter& _writer, Ptr<IParsingPrintNodeRecorder> _recorder = nullptr, vint _codeIndex = -1);
+			~ParsingWriter();
+
+			using stream::TextWriter::WriteString;
+			void								WriteChar(wchar_t c)override;
+			void								WriteString(const wchar_t* string, vint charCount)override;
+			void								BeforePrint(ParsingTreeCustomBase* node);
+			void								AfterPrint(ParsingTreeCustomBase* node);
+		};
+
+		extern void								Log(ParsingTreeNode* node, const WString& originalInput, stream::TextWriter& writer, const WString& prefix=L"");
+
+/***********************************************************************
+Scope
 ***********************************************************************/
 
 		class ParsingScope;

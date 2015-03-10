@@ -583,6 +583,151 @@ ParsingError
 		}
 
 /***********************************************************************
+ParsingEmptyPrintNodeRecorder
+***********************************************************************/
+
+		ParsingEmptyPrintNodeRecorder::ParsingEmptyPrintNodeRecorder()
+		{
+		}
+
+		ParsingEmptyPrintNodeRecorder::~ParsingEmptyPrintNodeRecorder()
+		{
+		}
+
+		void ParsingEmptyPrintNodeRecorder::Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)
+		{
+		}
+
+/***********************************************************************
+ParsingMultiplePrintNodeRecorder
+***********************************************************************/
+
+		ParsingMultiplePrintNodeRecorder::ParsingMultiplePrintNodeRecorder()
+		{
+		}
+
+		ParsingMultiplePrintNodeRecorder::~ParsingMultiplePrintNodeRecorder()
+		{
+		}
+
+		void ParsingMultiplePrintNodeRecorder::AddRecorder(Ptr<IParsingPrintNodeRecorder> recorder)
+		{
+			recorders.Add(recorder);
+		}
+
+		void ParsingMultiplePrintNodeRecorder::Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)
+		{
+			FOREACH(Ptr<IParsingPrintNodeRecorder>, recorder, recorders)
+			{
+				recorder->Record(node, range);
+			}
+		}
+
+/***********************************************************************
+ParsingEmptyPrintNodeRecorder
+***********************************************************************/
+
+		ParsingOriginalLocationRecorder::ParsingOriginalLocationRecorder(Ptr<IParsingPrintNodeRecorder> _recorder)
+			:recorder(_recorder)
+		{
+		}
+
+		ParsingOriginalLocationRecorder::~ParsingOriginalLocationRecorder()
+		{
+		}
+
+		void ParsingOriginalLocationRecorder::Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)
+		{
+			recorder->Record(node, node->codeRange);
+		}
+
+/***********************************************************************
+ParsingEmptyPrintNodeRecorder
+***********************************************************************/
+
+		ParsingGeneratedLocationRecorder::ParsingGeneratedLocationRecorder(RangeMap& _rangeMap)
+			:rangeMap(_rangeMap)
+		{
+		}
+
+		ParsingGeneratedLocationRecorder::~ParsingGeneratedLocationRecorder()
+		{
+		}
+
+		void ParsingGeneratedLocationRecorder::Record(ParsingTreeCustomBase* node, const ParsingTextRange& range)
+		{
+			rangeMap.Add(node, range);
+		}
+
+/***********************************************************************
+ParsingWriter
+***********************************************************************/
+
+		void ParsingWriter::HandleChar(wchar_t c)
+		{
+			lastPos = currentPos;
+			switch (c)
+			{
+			case L'\n':
+				currentPos.index++;
+				currentPos.row++;
+				currentPos.column = 0;
+				break;
+			default:
+				currentPos.index++;
+				currentPos.column++;
+			}
+		}
+
+		ParsingWriter::ParsingWriter(stream::TextWriter& _writer, Ptr<IParsingPrintNodeRecorder> _recorder, vint _codeIndex)
+			:writer(_writer)
+			, recorder(_recorder)
+			, codeIndex(_codeIndex)
+			, lastPos(-1, 0, -1)
+			, currentPos(0, 0, 0)
+		{
+		}
+
+		ParsingWriter::~ParsingWriter()
+		{
+		}
+
+		void ParsingWriter::WriteChar(wchar_t c)
+		{
+			writer.WriteChar(c);
+			if (!recorder) return;
+			HandleChar(c);
+		}
+
+		void ParsingWriter::WriteString(const wchar_t* string, vint charCount)
+		{
+			writer.WriteString(string, charCount);
+			if (!recorder) return;
+			for (vint i = 0; i < charCount; i++)
+			{
+				HandleChar(string[i]);
+			}
+		}
+
+		void ParsingWriter::BeforePrint(ParsingTreeCustomBase* node)
+		{
+			if (!recorder) return;
+			nodePositions.Add(NodePosPair(node, currentPos));
+		}
+
+		void ParsingWriter::AfterPrint(ParsingTreeCustomBase* node)
+		{
+			if (!recorder) return;
+
+			auto pair = nodePositions[nodePositions.Count() - 1];
+			nodePositions.RemoveAt(nodePositions.Count() - 1);
+			CHECK_ERROR(pair.key == node, L"vl::parsing::ParsingWriter::AfterPrint(ParsingTreeNode*)#BeforePrint and AfterPrint should be call in pairs.");
+
+			ParsingTextRange range(pair.value, lastPos, codeIndex);
+			recorder->Record(node, range);
+		}
+
+/***********************************************************************
 ParsingScope
 ***********************************************************************/
 
