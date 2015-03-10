@@ -237,12 +237,21 @@ Instruction
 				vint												lastInstruction = -1;
 			};
 
+			class WfInstructionDebugInfo : public Object
+			{
+			public:
+				collections::List<WString>							moduleCodes;
+				collections::List<parsing::ParsingTextRange>		instructionCodeMapping;
+			};
+
 			class WfAssembly : public Object, public reflection::Description<WfAssembly>
 			{
 			protected:
 				template<typename TIO>
 				void IO(TIO& io);
 			public:
+				Ptr<WfInstructionDebugInfo>							insBeforeCodegen;
+				Ptr<WfInstructionDebugInfo>							insAfterCodegen;
 				collections::List<WString>							variableNames;
 				collections::Group<WString, vint>					functionByName;
 				collections::List<Ptr<WfAssemblyFunction>>			functions;
