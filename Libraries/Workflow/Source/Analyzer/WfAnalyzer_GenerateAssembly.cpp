@@ -122,7 +122,7 @@ GenerateAssembly
 			{
 				auto assembly = MakePtr<WfAssembly>();
 				WfCodegenContext context(assembly, manager);
-				FOREACH(Ptr<WfModule>, module, manager->modules)
+				FOREACH(Ptr<WfModule>, module, manager->GetModules())
 				{
 					FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
 					{
@@ -141,7 +141,7 @@ GenerateAssembly
 					context.functionContext = functionContext;
 					
 					meta->firstInstruction = assembly->instructions.Count();
-					FOREACH(Ptr<WfModule>, module, manager->modules)
+					FOREACH(Ptr<WfModule>, module, manager->GetModules())
 					{
 						FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
 						{
@@ -156,7 +156,7 @@ GenerateAssembly
 					GenerateClosureInstructions(context, functionContext);
 				}
 
-				FOREACH(Ptr<WfModule>, module, manager->modules)
+				FOREACH(Ptr<WfModule>, module, manager->GetModules())
 				{
 					FOREACH(Ptr<WfDeclaration>, decl, module->declarations)
 					{
@@ -175,18 +175,9 @@ Compile
 			Ptr<runtime::WfAssembly> Compile(Ptr<parsing::tabling::ParsingTable> table, WfLexicalScopeManager* manager, collections::List<WString>& moduleCodes, collections::List<Ptr<parsing::ParsingError>>& errors)
 			{
 				manager->Clear(true, true);
-				FOREACH_INDEXER(WString, code, index, moduleCodes)
+				FOREACH(WString, code, moduleCodes)
 				{
-					Ptr<ParsingTreeNode> node = WfParseModuleAsParsingTreeNode(code, table, errors);
-					if (node)
-					{
-						List<RegexToken> tokens;
-						Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
-						if (module)
-						{
-							manager->modules.Add(module);
-						}
-					}
+					manager->AddModule(code);
 				}
 				if (errors.Count() > 0) return 0;
 

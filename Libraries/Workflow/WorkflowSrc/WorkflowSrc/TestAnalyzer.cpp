@@ -15,7 +15,7 @@ void LoadMultipleSamples(WfLexicalScopeManager* manager, const WString& sampleNa
 
 		List<RegexToken> tokens;
 		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
-		manager->modules.Add(module);
+		manager->AddModule(module);
 
 		MemoryStream stream;
 		{
@@ -110,7 +110,7 @@ TEST_CASE(TestAnalyzerError)
 		manager.Clear(true, true);
 		List<RegexToken> tokens;
 		Ptr<WfModule> module = WfConvertParsingTreeNode(node, tokens).Cast<WfModule>();
-		manager.modules.Add(module);
+		manager.AddModule(module);
 		manager.Rebuild(true);
 		MemoryStream stream;
 		{

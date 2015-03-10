@@ -453,14 +453,32 @@ WfLexicalScopeManager
 			{
 			}
 
-			Ptr<WfModule> WfLexicalScopeManager::AddModule(const WString& moduleCode, vint codeIndex)
+			vint WfLexicalScopeManager::AddModule(const WString& moduleCode)
 			{
-				if (auto module = WfParseModule(moduleCode, parsingTable, errors, codeIndex))
+				if (auto module = WfParseModule(moduleCode, parsingTable, errors, usedCodeIndex))
 				{
 					modules.Add(module);
-					return module;
+					moduleCodes.Add(moduleCode);
 				}
-				return 0;
+				return usedCodeIndex++;
+			}
+
+			vint WfLexicalScopeManager::AddModule(Ptr<WfModule> module)
+			{
+				module->codeRange.codeIndex = usedCodeIndex;
+				modules.Add(module);
+				moduleCodes.Add(L"");
+				return usedCodeIndex++;
+			}
+
+			WfLexicalScopeManager::ModuleList& WfLexicalScopeManager::GetModules()
+			{
+				return modules;
+			}
+
+			WfLexicalScopeManager::ModuleCodeList& WfLexicalScopeManager::GetModuleCodes()
+			{
+				return moduleCodes;
 			}
 
 			void WfLexicalScopeManager::Clear(bool keepTypeDescriptorNames, bool deleteModules)
@@ -480,6 +498,8 @@ WfLexicalScopeManager
 				if (deleteModules)
 				{
 					modules.Clear();
+					moduleCodes.Clear();
+					usedCodeIndex = 0;
 				}
 
 				errors.Clear();

@@ -117,6 +117,7 @@ Scope Manager
 			class WfLexicalScopeManager : public Object
 			{
 				typedef collections::List<Ptr<WfModule>>													ModuleList;
+				typedef collections::List<WString>															ModuleCodeList;
 				typedef collections::List<Ptr<parsing::ParsingError>>										ParsingErrorList;
 				typedef collections::Dictionary<Ptr<WfNamespaceDeclaration>, Ptr<WfLexicalScopeName>>		NamespaceNameMap;
 				typedef collections::SortedList<Ptr<WfLexicalScope>>										ScopeSortedList;
@@ -127,7 +128,11 @@ Scope Manager
 				typedef collections::Dictionary<Ptr<WfExpression>, ResolveExpressionResult>					ExpressionResolvingMap;
 				typedef collections::Group<WfFunctionDeclaration*, Ptr<WfLexicalSymbol>>					FunctionLambdaCaptureGroup;
 				typedef collections::Group<WfOrderedLambdaExpression*, Ptr<WfLexicalSymbol>>				OrderedLambdaCaptureGroup;
+
 			protected:
+				ModuleList									modules;
+				ModuleCodeList								moduleCodes;
+				vint										usedCodeIndex = 0;
 
 				void										BuildGlobalNameFromTypeDescriptors();
 				void										BuildGlobalNameFromModules();
@@ -135,7 +140,6 @@ Scope Manager
 				void										ValidateScopeName(Ptr<WfLexicalScopeName> name);
 			public:
 				Ptr<parsing::tabling::ParsingTable>			parsingTable;
-				ModuleList									modules;
 				ParsingErrorList							errors;
 
 				Ptr<WfLexicalScopeName>						globalName;
@@ -153,7 +157,11 @@ Scope Manager
 				WfLexicalScopeManager(Ptr<parsing::tabling::ParsingTable> _parsingTable);
 				~WfLexicalScopeManager();
 				
-				Ptr<WfModule>								AddModule(const WString& moduleCode, vint codeIndex = -1);
+				vint										AddModule(const WString& moduleCode);
+				vint										AddModule(Ptr<WfModule> module);
+				ModuleList&									GetModules();
+				ModuleCodeList&								GetModuleCodes();
+
 				void										Clear(bool keepTypeDescriptorNames, bool deleteModules);
 				bool										CheckScopes();
 				void										Rebuild(bool keepTypeDescriptorNames);
