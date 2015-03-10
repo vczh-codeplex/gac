@@ -297,6 +297,18 @@ void LogSampleCodegenResult(const WString& sampleName, const WString& itemName, 
 
 	FOREACH_INDEXER(WfInstruction, ins, index, assembly->instructions)
 	{
+		auto range = assembly->insAfterCodegen->instructionCodeMapping[index];
+		if (range.codeIndex != -1)
+		{
+			auto code = assembly->insAfterCodegen->moduleCodes[range.codeIndex];
+			auto sample = code.Sub(range.start.index, range.end.index - range.start.index + 1);
+			stream::StringReader reader(sample);
+			while (!reader.IsEnd())
+			{
+				auto line = reader.ReadLine();
+				writer.WriteLine(L"//  " + line);
+			}
+		}
 		switch (ins.code)
 		{
 			INSTRUCTION_CASES(
