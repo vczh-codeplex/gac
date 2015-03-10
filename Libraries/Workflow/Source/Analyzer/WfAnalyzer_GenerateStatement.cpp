@@ -15,8 +15,8 @@ namespace vl
 
 			typedef WfInstruction Ins;
 
-#define INSTRUCTION(X) context.assembly->instructions.Add(X)
-#define EXIT_CODE(X) do{context.functionContext->GetCurrentScopeContext()->exitInstructions.Add(X);}while(0)
+#define INSTRUCTION(X) context.AddInstruction(node, X)
+#define EXIT_CODE(X) context.AddExitInstruction(node, X)
 
 /***********************************************************************
 GenerateInstructions(Statement)
@@ -136,7 +136,7 @@ GenerateInstructions(Statement)
 						variableIndex = function->argumentNames.Count() + function->localVariableNames.Add(L"<if>" + node->name.value);
 						context.functionContext->localVariables.Add(symbol.Obj(), variableIndex);
 
-						GenerateTypeCastInstructions(context, symbol->typeInfo, false);
+						GenerateTypeCastInstructions(context, symbol->typeInfo, false, node->expression.Obj());
 						INSTRUCTION(Ins::StoreLocalVar(variableIndex));
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 						INSTRUCTION(Ins::LoadValue(Value()));
@@ -188,12 +188,12 @@ GenerateInstructions(Statement)
 						INSTRUCTION(Ins::LoadLocalVar(variableIndex));
 						if (!IsSameType(expressionType.Obj(), mergedType.Obj()))
 						{
-							GenerateTypeCastInstructions(context, mergedType, true);
+							GenerateTypeCastInstructions(context, mergedType, true, switchCase->expression.Obj());
 						}
 						GenerateExpressionInstructions(context, switchCase->expression);
 						if (!IsSameType(caseType.Obj(), mergedType.Obj()))
 						{
-							GenerateTypeCastInstructions(context, mergedType, true);
+							GenerateTypeCastInstructions(context, mergedType, true, switchCase->expression.Obj());
 						}
 						if (mergedType->GetDecorator() == ITypeInfo::RawPtr || mergedType->GetDecorator() == ITypeInfo::SharedPtr)
 						{

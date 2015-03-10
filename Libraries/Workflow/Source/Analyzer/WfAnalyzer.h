@@ -359,6 +359,9 @@ Code Generation
 				Ptr<WfCodegenFunctionContext>		functionContext;
 
 				WfCodegenContext(Ptr<runtime::WfAssembly> _assembly, WfLexicalScopeManager* _manager);
+
+				vint								AddInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins);
+				void								AddExitInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins);
 			};
 
 			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
@@ -367,8 +370,8 @@ Code Generation
 			extern void										GenerateDeclarationInstructions(WfCodegenContext& context, Ptr<WfDeclaration> declaration);
 			extern void										GenerateStatementInstructions(WfCodegenContext& context, Ptr<WfStatement> statement);
 			extern Ptr<reflection::description::ITypeInfo>	GenerateExpressionInstructions(WfCodegenContext& context, Ptr<WfExpression> expression, Ptr<reflection::description::ITypeInfo> expectedType = 0);
-			extern void										GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast);
-			extern void										GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType);
+			extern void										GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast, WfExpression* node);
+			extern void										GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, WfExpression* node);
 			extern runtime::WfInsType						GetInstructionTypeArgument(Ptr<reflection::description::ITypeInfo> expectedType);
 			extern Ptr<runtime::WfAssembly>					GenerateAssembly(WfLexicalScopeManager* manager);
 			extern Ptr<runtime::WfAssembly>					Compile(Ptr<parsing::tabling::ParsingTable> table, WfLexicalScopeManager* manager, collections::List<WString>& moduleCodes, collections::List<Ptr<parsing::ParsingError>>& errors);

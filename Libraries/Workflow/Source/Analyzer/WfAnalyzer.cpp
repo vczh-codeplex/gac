@@ -772,6 +772,16 @@ WfCodegenContext
 				, manager(_manager)
 			{
 			}
+
+			vint WfCodegenContext::AddInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins)
+			{
+				return assembly->instructions.Add(ins);
+			}
+
+			void WfCodegenContext::AddExitInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins)
+			{
+				functionContext->GetCurrentScopeContext()->exitInstructions.Add(ins);
+			}
 		}
 	}
 }

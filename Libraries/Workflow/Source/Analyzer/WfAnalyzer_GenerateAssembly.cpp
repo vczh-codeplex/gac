@@ -15,13 +15,13 @@ namespace vl
 
 			typedef WfInstruction Ins;
 
-#define INSTRUCTION(X) context.assembly->instructions.Add(X)
+#define INSTRUCTION(X) context.AddInstruction(node, X)
 
 /***********************************************************************
 GenerateTypeCastInstructions
 ***********************************************************************/
 
-			void GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast)
+			void GenerateTypeCastInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, bool strongCast, WfExpression* node)
 			{
 				if (expectedType->GetTypeDescriptor() != GetTypeDescriptor<Value>())
 				{
@@ -66,7 +66,7 @@ GenerateTypeCastInstructions
 GetInstructionTypeArgument
 ***********************************************************************/
 
-			void GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType)
+			void GenerateTypeTestingInstructions(WfCodegenContext& context, Ptr<reflection::description::ITypeInfo> expectedType, WfExpression* node)
 			{
 				if (expectedType->GetTypeDescriptor() != GetTypeDescriptor<Value>())
 				{
@@ -148,8 +148,12 @@ GenerateAssembly
 							GenerateInitializeInstructions(context, decl);
 						}
 					}
+
+					// define node for INSTRUCTION
+					parsing::ParsingTreeCustomBase* node = nullptr;
 					INSTRUCTION(Ins::LoadValue(Value()));
 					INSTRUCTION(Ins::Return());
+
 					meta->lastInstruction = assembly->instructions.Count() - 1;
 
 					context.functionContext = 0;

@@ -15,7 +15,7 @@ namespace vl
 
 			typedef WfInstruction Ins;
 
-#define INSTRUCTION(X) context.assembly->instructions.Add(X)
+#define INSTRUCTION(X) context.AddInstruction(node, X)
 
 /***********************************************************************
 GenerateGlobalDeclarationMetadata
@@ -136,7 +136,7 @@ GenerateInstructions(Initialize)
 GenerateInstructions(Declaration)
 ***********************************************************************/
 
-			void GenerateFunctionInstructions(WfCodegenContext& context, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<ITypeInfo> returnType, Ptr<WfLexicalSymbol> recursiveLambdaSymbol, const List<Ptr<WfLexicalSymbol>>& argumentSymbols, const List<Ptr<WfLexicalSymbol>>& capturedSymbols, Ptr<WfStatement> statementBody, Ptr<WfExpression> expressionBody)
+			Ptr<WfCodegenFunctionContext> GenerateFunctionInstructions_Prolog(WfCodegenContext& context, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<ITypeInfo> returnType, Ptr<WfLexicalSymbol> recursiveLambdaSymbol, const List<Ptr<WfLexicalSymbol>>& argumentSymbols, const List<Ptr<WfLexicalSymbol>>& capturedSymbols, ParsingTreeCustomBase* node)
 			{
 				auto functionContext = MakePtr<WfCodegenFunctionContext>();
 				functionContext->function = meta;
@@ -167,15 +167,11 @@ GenerateInstructions(Declaration)
 					INSTRUCTION(Ins::LoadClosure(context.assembly->functions.IndexOf(meta.Obj()), functionContext->capturedVariables.Count()));
 					INSTRUCTION(Ins::StoreLocalVar(functionContext->localVariables[recursiveLambdaSymbol.Obj()]));
 				}
-				if (statementBody)
-				{
-					GenerateStatementInstructions(context, statementBody);
-				}
-				if (expressionBody)
-				{
-					GenerateExpressionInstructions(context, expressionBody);
-					INSTRUCTION(Ins::Return());
-				}
+				return functionContext;
+			}
+
+			void GenerateFunctionInstructions_Epilog(WfCodegenContext& context, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<ITypeInfo> returnType, Ptr<WfLexicalSymbol> recursiveLambdaSymbol, const List<Ptr<WfLexicalSymbol>>& argumentSymbols, const List<Ptr<WfLexicalSymbol>>& capturedSymbols, Ptr<WfCodegenFunctionContext> functionContext, ParsingTreeCustomBase* node)
+			{
 				if (returnType->GetDecorator() == ITypeInfo::TypeDescriptor && returnType->GetTypeDescriptor()->GetValueSerializer())
 				{
 					auto serializer = returnType->GetTypeDescriptor()->GetValueSerializer();
@@ -193,6 +189,21 @@ GenerateInstructions(Declaration)
 				context.functionContext = 0;
 
 				GenerateClosureInstructions(context, functionContext);
+			}
+
+			void GenerateFunctionInstructions(WfCodegenContext& context, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<ITypeInfo> returnType, Ptr<WfLexicalSymbol> recursiveLambdaSymbol, const List<Ptr<WfLexicalSymbol>>& argumentSymbols, const List<Ptr<WfLexicalSymbol>>& capturedSymbols, Ptr<WfStatement> statementBody, ParsingTreeCustomBase* node)
+			{
+				auto functionContext = GenerateFunctionInstructions_Prolog(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, node);
+				GenerateStatementInstructions(context, statementBody);
+				GenerateFunctionInstructions_Epilog(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, functionContext, node);
+			}
+
+			void GenerateFunctionInstructions(WfCodegenContext& context, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<ITypeInfo> returnType, Ptr<WfLexicalSymbol> recursiveLambdaSymbol, const List<Ptr<WfLexicalSymbol>>& argumentSymbols, const List<Ptr<WfLexicalSymbol>>& capturedSymbols, Ptr<WfExpression> expressionBody, ParsingTreeCustomBase* node)
+			{
+				auto functionContext = GenerateFunctionInstructions_Prolog(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, node);
+				GenerateExpressionInstructions(context, expressionBody);
+				INSTRUCTION(Ins::Return());
+				GenerateFunctionInstructions_Epilog(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, functionContext, node);
 			}
 
 			void GenerateFunctionDeclarationInstructions(WfCodegenContext& context, WfFunctionDeclaration* node, WfLexicalScope* scope, Ptr<WfAssemblyFunction> meta, Ptr<WfLexicalSymbol> recursiveLambdaSymbol)
@@ -216,7 +227,7 @@ GenerateInstructions(Declaration)
 				}
 
 				auto returnType = CreateTypeInfoFromType(scope, node->returnType);
-				GenerateFunctionInstructions(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, node->statement, 0);
+				GenerateFunctionInstructions(context, scope, meta, returnType, recursiveLambdaSymbol, argumentSymbols, capturedSymbols, node->statement, node);
 			}
 
 			class GenerateDeclarationInstructionsVisitor : public Object, public WfDeclaration::IVisitor
@@ -261,9 +272,9 @@ GenerateInstructions(Declaration)
 GenerateInstructions(Closure)
 ***********************************************************************/
 
-			void GenerateClosureInstructions_StaticMethod(WfCodegenContext& context, vint functionIndex, WfExpression* expression)
+			void GenerateClosureInstructions_StaticMethod(WfCodegenContext& context, vint functionIndex, WfExpression* node)
 			{
-				auto result = context.manager->expressionResolvings[expression];
+				auto result = context.manager->expressionResolvings[node];
 				auto methodInfo = result.methodInfo;
 				auto meta = context.assembly->functions[functionIndex];
 
@@ -283,9 +294,9 @@ GenerateInstructions(Closure)
 				meta->lastInstruction = context.assembly->instructions.Count() - 1;
 			}
 
-			void GenerateClosureInstructions_Method(WfCodegenContext& context, vint functionIndex, WfMemberExpression* expression)
+			void GenerateClosureInstructions_Method(WfCodegenContext& context, vint functionIndex, WfMemberExpression* node)
 			{
-				auto result = context.manager->expressionResolvings[expression];
+				auto result = context.manager->expressionResolvings[node];
 				auto methodInfo = result.methodInfo;
 				auto meta = context.assembly->functions[functionIndex];
 
@@ -306,22 +317,22 @@ GenerateInstructions(Closure)
 				meta->lastInstruction = context.assembly->instructions.Count() - 1;
 			}
 
-			void GenerateClosureInstructions_Function(WfCodegenContext& context, vint functionIndex, WfFunctionDeclaration* declaration, bool createInterface)
+			void GenerateClosureInstructions_Function(WfCodegenContext& context, vint functionIndex, WfFunctionDeclaration* node, bool createInterface)
 			{
-				auto scope = context.manager->declarationScopes[declaration].Obj();
+				auto scope = context.manager->declarationScopes[node].Obj();
 				auto meta = context.assembly->functions[functionIndex];
-				GenerateFunctionDeclarationMetadata(context, declaration, meta);
+				GenerateFunctionDeclarationMetadata(context, node, meta);
 				Ptr<WfLexicalSymbol> recursiveLambdaSymbol;
-				if (!createInterface && declaration->name.value != L"")
+				if (!createInterface && node->name.value != L"")
 				{
-					recursiveLambdaSymbol = scope->symbols[declaration->name.value][0];
+					recursiveLambdaSymbol = scope->symbols[node->name.value][0];
 				}
-				GenerateFunctionDeclarationInstructions(context, declaration, scope, meta, recursiveLambdaSymbol);
+				GenerateFunctionDeclarationInstructions(context, node, scope, meta, recursiveLambdaSymbol);
 			}
 
-			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* expression)
+			void GenerateClosureInstructions_Ordered(WfCodegenContext& context, vint functionIndex, WfOrderedLambdaExpression* node)
 			{
-				auto scope = context.manager->expressionScopes[expression].Obj();
+				auto scope = context.manager->expressionScopes[node].Obj();
 				List<Ptr<WfLexicalSymbol>> argumentSymbols, capturedSymbols;
 				CopyFrom(
 					argumentSymbols,
@@ -341,7 +352,7 @@ GenerateInstructions(Closure)
 					meta->argumentNames.Add(symbol->name);
 				}
 				{
-					vint index = context.manager->orderedLambdaCaptures.Keys().IndexOf(expression);
+					vint index = context.manager->orderedLambdaCaptures.Keys().IndexOf(node);
 					if (index != -1)
 					{
 						FOREACH(Ptr<WfLexicalSymbol>, symbol, context.manager->orderedLambdaCaptures.GetByIndex(index))
@@ -352,9 +363,9 @@ GenerateInstructions(Closure)
 					}
 				}
 
-				auto result = context.manager->expressionResolvings[expression];
+				auto result = context.manager->expressionResolvings[node];
 				auto returnType = CopyTypeInfo(result.type->GetElementType()->GetGenericArgument(0));
-				GenerateFunctionInstructions(context, scope, meta, returnType, 0, argumentSymbols, capturedSymbols, 0, expression->body);
+				GenerateFunctionInstructions(context, scope, meta, returnType, 0, argumentSymbols, capturedSymbols, node->body, node);
 			}
 
 			void GenerateClosureInstructions(WfCodegenContext& context, Ptr<WfCodegenFunctionContext> functionContext)
