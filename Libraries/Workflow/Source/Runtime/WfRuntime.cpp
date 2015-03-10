@@ -11,6 +11,11 @@ namespace vl
 			using namespace workflow::runtime;
 			using namespace collections;
 
+			BEGIN_SERIALIZATION(WfInstructionDebugInfo)
+				SERIALIZE(moduleCodes)
+				SERIALIZE(instructionCodeMapping)
+			END_SERIALIZATION
+
 			BEGIN_SERIALIZATION(WfAssemblyFunction)
 				SERIALIZE(name)
 				SERIALIZE(argumentNames)
@@ -407,6 +412,8 @@ WfAssembly
 			void WfAssembly::IO(TIO& io)
 			{
 				io
+					<< insBeforeCodegen
+					<< insAfterCodegen
 					<< variableNames
 					<< functionByName
 					<< functions

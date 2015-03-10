@@ -17,7 +17,7 @@ Ptr<ParsingTable> workflowTable;
 
 #define PRINT_TIMER\
 		endTime = DateTime::LocalTime();\
-		unittest::UnitTest::PrintInfo(L"Time elasped: " + ftow((endTime.totalMilliseconds - beginTime.totalMilliseconds) / 1000.0) + L" seconds");\
+		unittest::UnitTest::PrintInfo(L"Time elapsed: " + ftow((endTime.totalMilliseconds - beginTime.totalMilliseconds) / 1000.0) + L" seconds");\
 		beginTime = endTime;\
 
 Ptr<ParsingTable> GetWorkflowTable()

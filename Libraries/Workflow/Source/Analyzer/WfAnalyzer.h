@@ -317,12 +317,15 @@ Code Generation
 			{
 				typedef collections::List<vint>										InstructionIndexList;
 				typedef collections::List<runtime::WfInstruction>					InstructionList;
+				typedef collections::List<parsing::ParsingTextRange>				RangeMap;
 			public:
 				WfCodegenScopeType					type = WfCodegenScopeType::Function;
 				InstructionIndexList				continueInstructions;
 				InstructionIndexList				breakInstructions;
 				
 				InstructionList						exitInstructions;
+				RangeMap							instructionCodeMappingBeforeCodegen;
+				RangeMap							instructionCodeMappingAfterCodegen;
 				Ptr<WfStatement>					exitStatement;
 			};
 
@@ -365,6 +368,7 @@ Code Generation
 
 				vint								AddInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins);
 				void								AddExitInstruction(parsing::ParsingTreeCustomBase* node, const runtime::WfInstruction& ins);
+				void								ApplyExitInstructions(Ptr<WfCodegenScopeContext> scopeContext);
 			};
 
 			extern void										GenerateGlobalDeclarationMetadata(WfCodegenContext& context, Ptr<WfDeclaration> declaration, const WString& namePrefix = L"");
