@@ -400,9 +400,9 @@ Debugger
 					CreateObject,	// typeDescriptor
 				};
 
-				vint											id;
-				bool											available;
-				bool											enabled;
+				vint											id = -1;
+				bool											available = false;
+				bool											enabled = false;
 				Ptr<IWfBreakPointAction>						action;
 
 				Type											type;

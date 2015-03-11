@@ -157,6 +157,7 @@ WfDebugger
 					breakPoints[index] = breakPoint;
 				}
 
+				breakPoints[index].id = index;
 				breakPoints[index].available = true;
 				breakPoints[index].enabled = true;
 				return index;
