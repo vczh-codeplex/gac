@@ -2,7 +2,6 @@
 
 TEST_CASE(TestCodegen)
 {
-	LoadTypes();
 	Ptr<ParsingTable> table = GetWorkflowTable();
 	List<WString> codegenNames;
 	LoadSampleIndex(L"Codegen", codegenNames);
@@ -101,13 +100,10 @@ TEST_CASE(TestCodegen)
 		TEST_ASSERT(result.GetText() == itemResult);
 		TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::EmptyStack);
 	}
-
-	UnloadTypes();
 }
 
 TEST_CASE(TestWorkflow)
 {
-	LoadTypes();
 	List<Ptr<ParsingError>> errors;
 	List<WString> moduleCodes;
 	moduleCodes.Add(LR"workflow(
@@ -132,5 +128,4 @@ func main():string
 	Value result;
 	TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::Success);
 	TEST_ASSERT(result.GetText() == L"Hello, world!");
-	UnloadTypes();
 }
