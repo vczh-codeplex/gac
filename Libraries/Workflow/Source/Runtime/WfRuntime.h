@@ -440,6 +440,8 @@ Debugger
 
 			class WfDebugger : public Object, protected virtual IWfDebuggerCallback
 			{
+				friend IWfDebuggerCallback* GetDebuggerCallback();
+
 				typedef collections::List<WfBreakPoint>			BreakPointList;
 
 				typedef Tuple<WfAssembly*, vint>														AssemblyKey;
@@ -456,6 +458,7 @@ Debugger
 			protected:
 				BreakPointList					breakPoints;
 				collections::List<vint>			freeBreakPointIndices;
+				bool							evaluatingBreakPoint = false;
 
 				AssemblyBreakPointMap			insBreakPoints;
 				AssemblyBreakPointMap			getGlobalVarBreakPoints;

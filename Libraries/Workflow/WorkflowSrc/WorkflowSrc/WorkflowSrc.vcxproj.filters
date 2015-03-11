@@ -482,6 +482,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\Stream\CompressionStream.cpp">
       <Filter>Common\Stream</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Runtime\WfRuntime_Debugger.cpp">
+      <Filter>Workflow\Runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />
