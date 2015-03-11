@@ -510,6 +510,7 @@ int main()
 {
 	unittest::UnitTest::RunAndDisposeTests();
 	workflowTable = 0;
+	ThreadLocalStorage::DisposeStorages();
 #ifdef VCZH_MSVC
 	_CrtDumpMemoryLeaks();
 #endif

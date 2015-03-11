@@ -485,6 +485,9 @@
     <ClCompile Include="..\..\Source\Runtime\WfRuntime_Debugger.cpp">
       <Filter>Workflow\Runtime</Filter>
     </ClCompile>
+    <ClCompile Include="TestDebugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Spec.txt" />

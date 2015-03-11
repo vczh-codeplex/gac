@@ -382,7 +382,7 @@ Debugger
 			{
 			public:
 				virtual bool					EvaluateCondition(WfDebugger* debugger) = 0;
-				virtual void					PostAction() = 0;
+				virtual void					PostAction(WfDebugger* debugger) = 0;
 			};
 
 			struct WfBreakPoint
@@ -426,6 +426,8 @@ Debugger
 			class IWfDebuggerCallback : public virtual Interface
 			{
 			public:
+				virtual void					EnterThreadContext(WfRuntimeThreadContext* context) = 0;
+				virtual void					LeaveThreadContext(WfRuntimeThreadContext* context) = 0;
 				virtual bool					BreakIns(WfAssembly* assembly, vint instruction) = 0;
 				virtual bool					BreakRead(WfAssembly* assembly, vint variable) = 0;
 				virtual bool					BreakWrite(WfAssembly* assembly, vint variable) = 0;
@@ -434,15 +436,16 @@ Debugger
 				virtual bool					BreakAttach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo) = 0;
 				virtual bool					BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo) = 0;
 				virtual bool					BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo) = 0;
-				virtual bool					BreakCreate(reflection::DescriptableObject* thisObject, reflection::description::ITypeDescriptor* typeDescriptor) = 0;
+				virtual bool					BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor) = 0;
 				virtual bool					WaitForContinue() = 0;
 			};
 
 			class WfDebugger : public Object, protected virtual IWfDebuggerCallback
 			{
-				friend IWfDebuggerCallback* GetDebuggerCallback();
+				friend IWfDebuggerCallback* GetDebuggerCallback(WfDebugger* debugger);
 
-				typedef collections::List<WfBreakPoint>			BreakPointList;
+				typedef collections::List<WfBreakPoint>					BreakPointList;
+				typedef collections::List<WfRuntimeThreadContext*>		ThreadContextList;
 
 				typedef Tuple<WfAssembly*, vint>														AssemblyKey;
 				typedef Tuple<reflection::DescriptableObject*, reflection::description::IPropertyInfo*>	PropertyKey;
@@ -459,6 +462,7 @@ Debugger
 				BreakPointList					breakPoints;
 				collections::List<vint>			freeBreakPointIndices;
 				bool							evaluatingBreakPoint = false;
+				ThreadContextList				threadContexts;
 
 				AssemblyBreakPointMap			insBreakPoints;
 				AssemblyBreakPointMap			getGlobalVarBreakPoints;
@@ -470,6 +474,12 @@ Debugger
 				MethodBreakPointMap				invokeMethodBreakPoints;
 				TypeBreakPointMap				createObjectBreakPoints;
 				
+				template<typename TKey>
+				bool							HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap);
+				bool							SetBreakPoint(const WfBreakPoint& breakPoint, bool available);
+				
+				void							EnterThreadContext(WfRuntimeThreadContext* context)override;
+				void							LeaveThreadContext(WfRuntimeThreadContext* context)override;
 				bool							BreakIns(WfAssembly* assembly, vint instruction)override;
 				bool							BreakRead(WfAssembly* assembly, vint variable)override;
 				bool							BreakWrite(WfAssembly* assembly, vint variable)override;
@@ -478,8 +488,8 @@ Debugger
 				bool							BreakAttach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
 				bool							BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
 				bool							BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo)override;
-				bool							BreakCreate(reflection::DescriptableObject* thisObject, reflection::description::ITypeDescriptor* typeDescriptor)override;
-				bool							WaitForContinue() = 0;
+				bool							BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor)override;
+				bool							WaitForContinue()override;
 			public:
 				WfDebugger();
 				~WfDebugger();
@@ -496,12 +506,11 @@ Debugger
 				bool							StepInto();
 
 				bool							IsRunning();
-				WfAssembly*						GetCurrentAssembly();
 				WfRuntimeThreadContext*			GetCurrentThreadContext();
-				vint							GetCurrentInstruction();
 			};
 
 			extern IWfDebuggerCallback*			GetDebuggerCallback();
+			extern IWfDebuggerCallback*			GetDebuggerCallback(WfDebugger* debugger);
 			extern Ptr<WfDebugger>				GetDebuggerForCurrentThread();
 			extern void							SetDebugferForCurrentThread(Ptr<WfDebugger> debugger);
 
