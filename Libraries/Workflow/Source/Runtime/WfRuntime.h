@@ -476,7 +476,7 @@ Debugger
 				
 				template<typename TKey>
 				bool							HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap);
-				bool							SetBreakPoint(const WfBreakPoint& breakPoint, bool available);
+				bool							SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index);
 				
 				void							EnterThreadContext(WfRuntimeThreadContext* context)override;
 				void							LeaveThreadContext(WfRuntimeThreadContext* context)override;
