@@ -508,7 +508,9 @@ int wmain(int argc, wchar_t* argv[])
 int main()
 #endif
 {
+	LoadTypes();
 	unittest::UnitTest::RunAndDisposeTests();
+	UnloadTypes();
 	workflowTable = 0;
 	ThreadLocalStorage::DisposeStorages();
 #ifdef VCZH_MSVC

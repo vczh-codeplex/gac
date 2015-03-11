@@ -32,7 +32,6 @@ void LoadMultipleSamples(WfLexicalScopeManager* manager, const WString& sampleNa
 
 TEST_CASE(TestBuildGlobalName)
 {
-	LoadTypes();
 	WfLexicalScopeManager manager(GetWorkflowTable());
 	LoadMultipleSamples(&manager, L"AnalyzerScope");
 	manager.Rebuild(false);
@@ -87,13 +86,10 @@ TEST_CASE(TestBuildGlobalName)
 		auto function = name->declarations[0].Cast<WfFunctionDeclaration>();
 		TEST_ASSERT(function->name.value == L"main");
 	}
-
-	UnloadTypes();
 }
 
 TEST_CASE(TestAnalyzerError)
 {
-	LoadTypes();
 	Ptr<ParsingTable> table = GetWorkflowTable();
 	List<WString> itemNames;
 	LoadSampleIndex(L"AnalyzerError", itemNames);
@@ -129,6 +125,4 @@ TEST_CASE(TestAnalyzerError)
 		TEST_ASSERT(manager.errors.Count() > 0);
 		TEST_ASSERT(manager.errors[0]->errorMessage.Left(index + 1) == errorCode + L":");
 	}
-
-	UnloadTypes();
 }
