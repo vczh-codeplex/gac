@@ -14,6 +14,90 @@ namespace vl
 /***********************************************************************
 IWfDebuggerCallback
 ***********************************************************************/
+
+			WfBreakPoint WfBreakPoint::Ins(WfAssembly* assembly, vint instruction)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = Instruction;
+				breakPoint.assembly = assembly;
+				breakPoint.instruction = instruction;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Read(WfAssembly* assembly, vint variable)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = ReadGlobalVar;
+				breakPoint.assembly = assembly;
+				breakPoint.variable = variable;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Write(WfAssembly* assembly, vint variable)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = WriteGlobalVar;
+				breakPoint.assembly = assembly;
+				breakPoint.variable = variable;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Get(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = GetProperty;
+				breakPoint.thisObject = thisObject;
+				breakPoint.propertyInfo = propertyInfo;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Set(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = SetProperty;
+				breakPoint.thisObject = thisObject;
+				breakPoint.propertyInfo = propertyInfo;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Attach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = AttachEvent;
+				breakPoint.thisObject = thisObject;
+				breakPoint.eventInfo = eventInfo;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Detach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = DetachEvent;
+				breakPoint.thisObject = thisObject;
+				breakPoint.eventInfo = eventInfo;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Invoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = InvokeMethod;
+				breakPoint.thisObject = thisObject;
+				breakPoint.methodInfo = methodInfo;
+				return breakPoint;
+			}
+
+			WfBreakPoint WfBreakPoint::Create(reflection::description::ITypeDescriptor* typeDescriptor)
+			{
+				WfBreakPoint breakPoint;
+				breakPoint.type = CreateObject;
+				breakPoint.typeDescriptor = typeDescriptor;
+				return breakPoint;
+			}
+
+/***********************************************************************
+IWfDebuggerCallback
+***********************************************************************/
 				
 			template<typename TKey>
 			bool WfDebugger::HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap)

@@ -421,6 +421,16 @@ Debugger
 					reflection::description::IMethodInfo*		methodInfo;
 					reflection::description::ITypeDescriptor*	typeDescriptor;
 				};
+
+				static WfBreakPoint								Ins(WfAssembly* assembly, vint instruction);
+				static WfBreakPoint								Read(WfAssembly* assembly, vint variable);
+				static WfBreakPoint								Write(WfAssembly* assembly, vint variable);
+				static WfBreakPoint								Get(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo);
+				static WfBreakPoint								Set(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo);
+				static WfBreakPoint								Attach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo);
+				static WfBreakPoint								Detach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo);
+				static WfBreakPoint								Invoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo);
+				static WfBreakPoint								Create(reflection::description::ITypeDescriptor* typeDescriptor);
 			};
 
 			class IWfDebuggerCallback : public virtual Interface
