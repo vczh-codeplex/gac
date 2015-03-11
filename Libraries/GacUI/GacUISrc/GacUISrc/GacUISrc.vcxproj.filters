@@ -633,6 +633,9 @@
     <ClCompile Include="..\..\..\..\Common\Source\FileSystem.cpp">
       <Filter>Common\Basic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Debugger.cpp">
+      <Filter>Workflow\Runtime</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">

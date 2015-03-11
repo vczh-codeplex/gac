@@ -293,6 +293,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugNoReflection|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime.cpp" />
+    <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Debugger.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Execution.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiApplication.cpp" />
     <ClCompile Include="..\..\Source\Controls\GuiBasicControls.cpp" />
