@@ -121,7 +121,7 @@ IWfDebuggerCallback
 WfDebugger
 ***********************************************************************/
 
-			bool WfDebugger::SetBreakPoint(const WfBreakPoint& breakPoint, bool available)
+			bool WfDebugger::SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index)
 			{
 				throw 0;
 			}
@@ -136,22 +136,27 @@ WfDebugger
 
 			vint WfDebugger::AddBreakPoint(const WfBreakPoint& breakPoint)
 			{
-				if (!SetBreakPoint(breakPoint, true))
+				vint index = breakPoints.Count();
+				if (freeBreakPointIndices.Count() > 0)
+				{
+					index = freeBreakPointIndices[freeBreakPointIndices.Count() - 1];
+				}
+
+				if (!SetBreakPoint(breakPoint, true, index))
 				{
 					return -1;
 				}
 				
-				vint index = -1;
-				if (freeBreakPointIndices.Count() > 0)
+				if (index == breakPoints.Count())
 				{
-					index = freeBreakPointIndices[freeBreakPointIndices.Count() - 1];
-					freeBreakPointIndices.RemoveAt(freeBreakPointIndices.Count() - 1);
-					breakPoints[index] = breakPoint;
+					breakPoints.Add(breakPoint);
 				}
 				else
 				{
-					index = breakPoints.Add(breakPoint);
+					freeBreakPointIndices.RemoveAt(freeBreakPointIndices.Count() - 1);
+					breakPoints[index] = breakPoint;
 				}
+
 				breakPoints[index].available = true;
 				breakPoints[index].enabled = true;
 				return index;
@@ -175,7 +180,7 @@ WfDebugger
 				}
 
 				auto& breakPoint = breakPoints[index];
-				if (!breakPoint.available || !SetBreakPoint(breakPoint, false))
+				if (!breakPoint.available || !SetBreakPoint(breakPoint, false, -1))
 				{
 					return false;
 				}
