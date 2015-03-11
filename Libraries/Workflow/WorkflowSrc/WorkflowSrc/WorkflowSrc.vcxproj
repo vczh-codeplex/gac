@@ -290,6 +290,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TestAnalyzer.cpp" />
     <ClCompile Include="TestCodegen.cpp" />
+    <ClCompile Include="TestDebugger.cpp" />
     <ClCompile Include="TestSamples.cpp" />
   </ItemGroup>
   <ItemGroup>
