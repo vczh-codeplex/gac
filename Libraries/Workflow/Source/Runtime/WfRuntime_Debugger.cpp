@@ -98,6 +98,10 @@ IWfDebuggerCallback
 /***********************************************************************
 IWfDebuggerCallback
 ***********************************************************************/
+
+			void WfDebugger::BlockExecution()
+			{
+			}
 				
 			template<typename TKey>
 			bool WfDebugger::HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap)
@@ -435,7 +439,7 @@ Helper Functions
 
 			Ptr<WfDebugger> GetDebuggerForCurrentThread()
 			{
-				return threadDebugger.Get();
+				return threadDebugger.HasData() ? threadDebugger.Get() : nullptr;
 			}
 
 			void SetDebugferForCurrentThread(Ptr<WfDebugger> debugger)
