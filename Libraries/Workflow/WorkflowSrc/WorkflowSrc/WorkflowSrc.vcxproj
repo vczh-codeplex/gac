@@ -522,6 +522,7 @@
     <Text Include="..\TestFiles\Samples\Codegen\TryFinally.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\TypeOf.txt" />
     <Text Include="..\TestFiles\Samples\Codegen\TypeTesting.txt" />
+    <Text Include="..\TestFiles\Samples\Debugger\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt" />
@@ -580,6 +581,7 @@
     <Text Include="..\TestFiles\Samples\IndexAnalyzerError.txt" />
     <Text Include="..\TestFiles\Samples\IndexAnalyzerScope.txt" />
     <Text Include="..\TestFiles\Samples\IndexCodegen.txt" />
+    <Text Include="..\TestFiles\Samples\IndexDebugger.txt" />
     <Text Include="..\TestFiles\Samples\IndexDeclaration.txt" />
     <Text Include="..\TestFiles\Samples\IndexExpression.txt" />
     <Text Include="..\TestFiles\Samples\IndexModule.txt" />

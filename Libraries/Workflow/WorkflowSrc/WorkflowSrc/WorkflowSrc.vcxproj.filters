@@ -79,6 +79,9 @@
     <Filter Include="Resource Files\Samples\Codegen">
       <UniqueIdentifier>{7239e246-b4d0-45e5-8553-bfa76622b1f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Samples\Debugger">
+      <UniqueIdentifier>{17f999bc-6a7a-4549-a06c-5836bf608d2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\WorkflowVlppReferences.h">
@@ -1411,6 +1414,12 @@
     </Text>
     <Text Include="..\TestFiles\Samples\Codegen\OpMod.txt">
       <Filter>Resource Files\Samples\Codegen</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\IndexDebugger.txt">
+      <Filter>Resource Files\Samples</Filter>
+    </Text>
+    <Text Include="..\TestFiles\Samples\Debugger\HelloWorld.txt">
+      <Filter>Resource Files\Samples\Debugger</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>

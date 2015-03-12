@@ -694,7 +694,16 @@ WfRuntimeThreadContext
 
 			void WfRuntimeThreadContext::ExecuteToEnd()
 			{
-				while (Execute(GetDebuggerCallback()) != WfRuntimeExecutionAction::Nop);
+				auto callback = GetDebuggerCallback();
+				if (callback)
+				{
+					callback->EnterThreadContext(this);
+				}
+				while (Execute(callback) != WfRuntimeExecutionAction::Nop);
+				if (callback)
+				{
+					callback->LeaveThreadContext(this);
+				}
 			}
 		}
 	}
