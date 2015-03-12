@@ -514,11 +514,6 @@ WfDebugger
 				return lastActivatedBreakPoint;
 			}
 
-			bool WfDebugger::IsRunning()
-			{
-				return threadContexts.Count() > 0;
-			}
-
 			WfRuntimeThreadContext* WfDebugger::GetCurrentThreadContext()
 			{
 				if (threadContexts.Count() == 0)
@@ -526,6 +521,64 @@ WfDebugger
 					return nullptr;
 				}
 				return threadContexts[threadContexts.Count() - 1];
+			}
+
+			const parsing::ParsingTextRange& WfDebugger::GetCurrentPosition(bool beforeCodegen, WfRuntimeThreadContext* context, vint callStackIndex)
+			{
+				if (!context)
+				{
+					context = GetCurrentThreadContext();
+				}
+				if (callStackIndex == -1)
+				{
+					callStackIndex = context->stackFrames.Count() - 1;
+				}
+
+				auto& stackFrame = context->stackFrames[callStackIndex];
+				auto ins = stackFrame.nextInstructionIndex;
+				auto debugInfo = (beforeCodegen ? context->globalContext->assembly->insBeforeCodegen : context->globalContext->assembly->insAfterCodegen);
+				return debugInfo->instructionCodeMapping[ins];
+			}
+
+			reflection::description::Value WfDebugger::GetValueByName(const WString& name, WfRuntimeThreadContext* context, vint callStackIndex)
+			{
+				if (!context)
+				{
+					context = GetCurrentThreadContext();
+				}
+				if (callStackIndex == -1)
+				{
+					callStackIndex = context->stackFrames.Count() - 1;
+				}
+
+				auto& stackFrame = context->stackFrames[callStackIndex];
+				auto function = context->globalContext->assembly->functions[stackFrame.functionIndex];
+
+				vint index = function->argumentNames.IndexOf(name);
+				if (index != -1)
+				{
+					return context->stack[stackFrame.stackBase + index];
+				}
+
+				index = function->localVariableNames.IndexOf(name);
+				if (index != -1)
+				{
+					return context->stack[stackFrame.stackBase + function->argumentNames.Count() + index];
+				}
+
+				index = function->capturedVariableNames.IndexOf(name);
+				if (index != -1)
+				{
+					return stackFrame.capturedVariables->variables[index];
+				}
+
+				index = context->globalContext->assembly->variableNames.IndexOf(name);
+				if (index != -1)
+				{
+					return context->globalContext->globalVariables->variables[index];
+				}
+
+				return Value();
 			}
 
 /***********************************************************************

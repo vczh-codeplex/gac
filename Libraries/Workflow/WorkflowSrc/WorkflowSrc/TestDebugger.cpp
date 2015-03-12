@@ -265,18 +265,24 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
 			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 0);
+			TEST_ASSERT(debugger->GetCurrentPosition().start.row == 5);
+			TEST_ASSERT(UnboxValue<WString>(debugger->GetValueByName(L"s")) == L"zero");
 			TEST_ASSERT(debugger->Run());
 			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
 			debugger->Continue();
 			
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
 			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 1);
+			TEST_ASSERT(debugger->GetCurrentPosition().start.row == 6);
+			TEST_ASSERT(UnboxValue<WString>(debugger->GetValueByName(L"s")) == L"one");
 			TEST_ASSERT(debugger->Run());
 			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
 			debugger->Continue();
 			
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
 			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 2);
+			TEST_ASSERT(debugger->GetCurrentPosition().start.row == 7);
+			TEST_ASSERT(UnboxValue<WString>(debugger->GetValueByName(L"s")) == L"two");
 			TEST_ASSERT(debugger->Run());
 			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
 			debugger->Continue();
