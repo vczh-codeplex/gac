@@ -29,6 +29,20 @@ WfRuntimeThreadContext (Operators)
 					}\
 				} while (0)\
 
+#define CALL_DEBUGGER(ACTION)\
+				do {\
+					if (callback)\
+					{\
+						if (ACTION)\
+						{\
+							if (!callback->WaitForContinue())\
+							{\
+								INTERNAL_ERROR(L"Debugger stopped the program.");\
+							}\
+						}\
+					}\
+				} while (0)\
+
 			//-------------------------------------------------------------------------------
 
 #define UNARY_OPERATOR(NAME, OPERATOR)\
@@ -466,7 +480,7 @@ WfRuntimeThreadContext
 #define BEGIN_TYPE								switch(ins.typeParameter) {
 #define END_TYPE								default: INTERNAL_ERROR(L"unexpected type argument."); }
 
-			WfRuntimeExecutionAction WfRuntimeThreadContext::ExecuteInternal(WfInstruction& ins, WfRuntimeStackFrame& stackFrame)
+			WfRuntimeExecutionAction WfRuntimeThreadContext::ExecuteInternal(WfInstruction& ins, WfRuntimeStackFrame& stackFrame, IWfDebuggerCallback* callback)
 			{
 				switch (ins.code)
 				{
@@ -1119,7 +1133,7 @@ WfRuntimeThreadContext
 				}
 			}
 
-			WfRuntimeExecutionAction WfRuntimeThreadContext::Execute()
+			WfRuntimeExecutionAction WfRuntimeThreadContext::Execute(IWfDebuggerCallback* callback)
 			{
 				try
 				{
@@ -1137,8 +1151,13 @@ WfRuntimeThreadContext
 							{
 								INTERNAL_ERROR(L"illegal instruction index.");
 							}
-							auto& ins = globalContext->assembly->instructions[stackFrame.nextInstructionIndex++];
-							return ExecuteInternal(ins, stackFrame);
+
+							auto insIndex = stackFrame.nextInstructionIndex;
+							CALL_DEBUGGER(callback->BreakIns(globalContext->assembly.Obj(), insIndex));
+
+							stackFrame.nextInstructionIndex++;
+							auto& ins = globalContext->assembly->instructions[insIndex];
+							return ExecuteInternal(ins, stackFrame, callback);
 						}
 						break;
 					case WfRuntimeExecutionStatus::RaisedException:
@@ -1177,6 +1196,7 @@ WfRuntimeThreadContext
 
 #undef INTERNAL_ERROR
 #undef CONTEXT_ACTION
+#undef CALL_DEBUGGER
 #undef TYPE_OF_Bool
 #undef TYPE_OF_I1
 #undef TYPE_OF_I2

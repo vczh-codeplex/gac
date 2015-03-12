@@ -429,7 +429,7 @@ Helper Functions
 
 			IWfDebuggerCallback* GetDebuggerCallback()
 			{
-				return GetDebuggerCallback(threadDebugger.Get().Obj());
+				return GetDebuggerCallback(GetDebuggerForCurrentThread().Obj());
 			}
 
 			IWfDebuggerCallback* GetDebuggerCallback(WfDebugger* debugger)

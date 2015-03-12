@@ -17,6 +17,8 @@ namespace vl
 	{
 		namespace runtime
 		{
+			class IWfDebuggerCallback;
+			class WfDebugger;
 
 /***********************************************************************
 Instruction
@@ -367,16 +369,14 @@ Runtime
 				WfRuntimeThreadContextError		LoadLocalVariable(vint variableIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		StoreLocalVariable(vint variableIndex, const reflection::description::Value& value);
 
-				WfRuntimeExecutionAction		ExecuteInternal(WfInstruction& ins, WfRuntimeStackFrame& stackFrame);
-				WfRuntimeExecutionAction		Execute();
+				WfRuntimeExecutionAction		ExecuteInternal(WfInstruction& ins, WfRuntimeStackFrame& stackFrame, IWfDebuggerCallback* callback);
+				WfRuntimeExecutionAction		Execute(IWfDebuggerCallback* callback);
 				void							ExecuteToEnd();
 			};
 
 /***********************************************************************
 Debugger
 ***********************************************************************/
-
-			class WfDebugger;
 
 			class IWfBreakPointAction : public virtual Interface
 			{
