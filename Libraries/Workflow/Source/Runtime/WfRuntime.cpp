@@ -405,6 +405,22 @@ WfInstruction
 #undef CTOR_TYPE
 
 /***********************************************************************
+WfInstructionDebugInfo
+***********************************************************************/
+
+			void WfInstructionDebugInfo::Initialize()
+			{
+				for (vint i = 0; i < instructionCodeMapping.Count(); i++)
+				{
+					const auto& range = instructionCodeMapping[i];
+					if (range.codeIndex != -1)
+					{
+						codeInstructionMapping.Add(Tuple<vint, vint>(range.codeIndex, range.start.row), i);
+					}
+				}
+			}
+
+/***********************************************************************
 WfAssembly
 ***********************************************************************/
 
@@ -429,6 +445,13 @@ WfAssembly
 			{
 				stream::internal::Reader reader(input);
 				IO(reader);
+				Initialize();
+			}
+
+			void WfAssembly::Initialize()
+			{
+				insBeforeCodegen->Initialize();
+				insAfterCodegen->Initialize();
 			}
 
 			void WfAssembly::Serialize(stream::IStream& output)
