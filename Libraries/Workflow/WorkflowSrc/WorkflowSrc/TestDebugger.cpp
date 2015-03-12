@@ -202,10 +202,10 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 	SetDebugferForCurrentThread(debugger);
 
 	auto context = CreateThreadContextFromSample(L"Assignment");
-	auto debugInfo = context->assembly->insBeforeCodegen;
-	debugger->AddBreakPoint(WfBreakPoint::Ins(context->assembly.Obj(), debugInfo->codeInstructionMapping.Get(Tuple<vint, vint>(0, 5))[0]));
-	debugger->AddBreakPoint(WfBreakPoint::Ins(context->assembly.Obj(), debugInfo->codeInstructionMapping.Get(Tuple<vint, vint>(0, 6))[0]));
-	debugger->AddBreakPoint(WfBreakPoint::Ins(context->assembly.Obj(), debugInfo->codeInstructionMapping.Get(Tuple<vint, vint>(0, 7))[0]));
+	auto assembly = context->assembly.Obj();
+	TEST_ASSERT(debugger->AddCodeLineBreakPoint(assembly, 0, 5) == 0);
+	TEST_ASSERT(debugger->AddCodeLineBreakPoint(assembly, 0, 6) == 1);
+	TEST_ASSERT(debugger->AddCodeLineBreakPoint(assembly, 0, 7) == 2);
 
 	LoadFunction<void()>(context, L"<initialize>")();
 	auto result = LoadFunction<WString()>(context, L"Main")();

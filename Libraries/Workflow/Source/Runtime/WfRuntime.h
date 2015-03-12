@@ -512,6 +512,7 @@ Debugger
 				~WfDebugger();
 
 				vint							AddBreakPoint(const WfBreakPoint& breakPoint);
+				vint							AddCodeLineBreakPoint(WfAssembly* assembly, vint codeIndex, vint row, bool beforeCodegen = true);
 				vint							GetBreakPointCount();
 				const WfBreakPoint&				GetBreakPoint(vint index);
 				bool							RemoveBreakPoint(vint index);
