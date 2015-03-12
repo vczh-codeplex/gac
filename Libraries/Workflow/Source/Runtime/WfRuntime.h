@@ -242,8 +242,12 @@ Instruction
 			class WfInstructionDebugInfo : public Object
 			{
 			public:
-				collections::List<WString>							moduleCodes;
-				collections::List<parsing::ParsingTextRange>		instructionCodeMapping;
+
+				collections::List<WString>							moduleCodes;				// codeIndex -> code
+				collections::List<parsing::ParsingTextRange>		instructionCodeMapping;		// instruction -> range
+				collections::Group<Tuple<vint, vint>, vint>			codeInstructionMapping;		// (codeIndex, row) -> instruction [generated]
+
+				void												Initialize();
 			};
 
 			class WfAssembly : public Object, public reflection::Description<WfAssembly>
@@ -261,7 +265,8 @@ Instruction
 
 				WfAssembly();
 				WfAssembly(stream::IStream& input);
-
+				
+				void												Initialize();
 				void												Serialize(stream::IStream& output);
 			};
 

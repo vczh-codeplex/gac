@@ -202,7 +202,7 @@ IWfDebuggerCallback
 
 			bool WfDebugger::WaitForContinue()
 			{
-				throw 0;
+				return true;
 			}
 
 /***********************************************************************

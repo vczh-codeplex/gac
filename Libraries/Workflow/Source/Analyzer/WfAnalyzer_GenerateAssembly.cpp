@@ -195,6 +195,8 @@ GenerateAssembly
 						GenerateDeclarationInstructions(context, decl);
 					}
 				}
+
+				assembly->Initialize();
 				return assembly;
 			}
 

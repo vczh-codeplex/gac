@@ -198,8 +198,15 @@ TEST_CASE(TestDebugger_NoBreakPoint)
 
 TEST_CASE(TestDebugger_CodeLineBreakPoint)
 {
-	SetDebugferForCurrentThread(new WfDebugger);
+	auto debugger = MakePtr<WfDebugger>();
+	SetDebugferForCurrentThread(debugger);
+
 	auto context = CreateThreadContextFromSample(L"Assignment");
+	auto debugInfo = context->assembly->insBeforeCodegen;
+	debugger->AddBreakPoint(WfBreakPoint::Ins(context->assembly.Obj(), debugInfo->codeInstructionMapping.Get(Tuple<vint, vint>(0, 5))[0]));
+	debugger->AddBreakPoint(WfBreakPoint::Ins(context->assembly.Obj(), debugInfo->codeInstructionMapping.Get(Tuple<vint, vint>(0, 6))[0]));
+	debugger->AddBreakPoint(WfBreakPoint::Ins(context->assembly.Obj(), debugInfo->codeInstructionMapping.Get(Tuple<vint, vint>(0, 7))[0]));
+
 	LoadFunction<void()>(context, L"<initialize>")();
 	auto result = LoadFunction<WString()>(context, L"Main")();
 	TEST_ASSERT(result == L"three");
