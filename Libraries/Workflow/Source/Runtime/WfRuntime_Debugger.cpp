@@ -345,6 +345,20 @@ WfDebugger
 				return index;
 			}
 
+			vint WfDebugger::AddCodeLineBreakPoint(WfAssembly* assembly, vint codeIndex, vint row, bool beforeCodegen)
+			{
+				auto& codeInsMap = (beforeCodegen ? assembly->insBeforeCodegen : assembly->insAfterCodegen)->codeInstructionMapping;
+				Tuple<vint, vint> key(codeIndex, row);
+				vint index = codeInsMap.Keys().IndexOf(key);
+				if (index == -1)
+				{
+					return -1;
+				}
+
+				vint ins = codeInsMap.GetByIndex(index)[0];
+				return AddBreakPoint(WfBreakPoint::Ins(assembly, ins));
+			}
+
 			vint WfDebugger::GetBreakPointCount()
 			{
 				return breakPoints.Count();
