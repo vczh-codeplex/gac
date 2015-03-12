@@ -99,7 +99,15 @@ IWfDebuggerCallback
 IWfDebuggerCallback
 ***********************************************************************/
 
-			void WfDebugger::BlockExecution()
+			void WfDebugger::OnBlockExecution()
+			{
+			}
+
+			void WfDebugger::OnStartExecution()
+			{
+			}
+
+			void WfDebugger::OnStopExecution()
 			{
 			}
 				
@@ -137,6 +145,10 @@ IWfDebuggerCallback
 
 			void WfDebugger::EnterThreadContext(WfRuntimeThreadContext* context)
 			{
+				if (threadContexts.Count() == 0)
+				{
+					OnStartExecution();
+				}
 				threadContexts.Add(context);
 			}
 
@@ -145,6 +157,11 @@ IWfDebuggerCallback
 				auto oldContext = threadContexts[threadContexts.Count() - 1];
 				threadContexts.RemoveAt(threadContexts.Count() - 1);
 				CHECK_ERROR(context == oldContext, L"vl::workflow::runtime::WfDebugger::LeaveThreadContext(WfRuntimeThreadContext*)#EnterThreadContext and LeaveThreadContext should be called in pairs.");
+
+				if (threadContexts.Count() == 0)
+				{
+					OnStopExecution();
+				}
 			}
 
 			bool WfDebugger::BreakIns(WfAssembly* assembly, vint instruction)
@@ -202,6 +219,7 @@ IWfDebuggerCallback
 
 			bool WfDebugger::WaitForContinue()
 			{
+				OnBlockExecution();
 				return true;
 			}
 
@@ -403,22 +421,22 @@ WfDebugger
 
 			bool WfDebugger::Run()
 			{
-				throw 0;
+				return true;
 			}
 
 			bool WfDebugger::Stop()
 			{
-				throw 0;
+				return true;
 			}
 
 			bool WfDebugger::StepOver()
 			{
-				throw 0;
+				return true;
 			}
 
 			bool WfDebugger::StepInto()
 			{
-				throw 0;
+				return true;
 			}
 
 			bool WfDebugger::IsRunning()

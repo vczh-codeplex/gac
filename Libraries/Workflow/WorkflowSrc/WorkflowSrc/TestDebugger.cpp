@@ -196,9 +196,82 @@ TEST_CASE(TestDebugger_NoBreakPoint)
 	SetDebugferForCurrentThread(nullptr);
 }
 
+namespace debugger_helper
+{
+	class MultithreadDebugger : public WfDebugger
+	{
+	protected:
+		Ptr<Thread>				debuggerOperatorThread;
+		EventObject				blockOperatorEvent;
+		EventObject				blockDebuggerEvent;
+		volatile bool			stopped = false;
+		
+		void OnBlockExecution()override
+		{
+			blockOperatorEvent.Signal();
+			blockDebuggerEvent.Wait();
+		}
+
+		void OnStartExecution()override
+		{
+			stopped = false;
+		}
+
+		void OnStopExecution()override
+		{
+			stopped = true;
+			blockOperatorEvent.Signal();
+		}
+	public:
+		MultithreadDebugger(Func<void(MultithreadDebugger*)> debuggerOperator)
+		{
+			blockOperatorEvent.CreateAutoUnsignal(false);
+			blockDebuggerEvent.CreateAutoUnsignal(false);
+			debuggerOperatorThread = Thread::CreateAndStart(
+				[=]()
+				{
+					blockOperatorEvent.Wait();
+					debuggerOperator(this);
+				}, false);
+		}
+
+		~MultithreadDebugger()
+		{
+			debuggerOperatorThread->Wait();
+		}
+
+		void Continue()
+		{
+			TEST_ASSERT(!stopped);
+			blockDebuggerEvent.Signal();
+			blockOperatorEvent.Wait();
+		}
+
+		void ContinueNextExecution()
+		{
+			TEST_ASSERT(stopped);
+			blockOperatorEvent.Wait();
+		}
+	};
+}
+using namespace debugger_helper;
+
 TEST_CASE(TestDebugger_CodeLineBreakPoint)
 {
-	auto debugger = MakePtr<WfDebugger>();
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
+		{
+			debugger->ContinueNextExecution();
+
+			TEST_ASSERT(debugger->Run());
+			debugger->Continue();
+
+			TEST_ASSERT(debugger->Run());
+			debugger->Continue();
+
+			TEST_ASSERT(debugger->Run());
+			debugger->Continue();
+		});
 	SetDebugferForCurrentThread(debugger);
 
 	auto context = CreateThreadContextFromSample(L"Assignment");
