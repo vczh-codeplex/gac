@@ -72,10 +72,10 @@ TEST_CASE(TestCodegen)
 
 			while (context.status != WfRuntimeExecutionStatus::Finished)
 			{
-				auto action = context.Execute();
+				auto action = context.Execute(nullptr);
 				TEST_ASSERT(action != WfRuntimeExecutionAction::Nop);
 			}
-			TEST_ASSERT(context.Execute() == WfRuntimeExecutionAction::Nop);
+			TEST_ASSERT(context.Execute(nullptr) == WfRuntimeExecutionAction::Nop);
 			Value result;
 			TEST_ASSERT(context.PopValue(result) == WfRuntimeThreadContextError::Success);
 		}
@@ -87,10 +87,10 @@ TEST_CASE(TestCodegen)
 
 			while (context.status != WfRuntimeExecutionStatus::Finished)
 			{
-				auto action = context.Execute();
+				auto action = context.Execute(nullptr);
 				TEST_ASSERT(action != WfRuntimeExecutionAction::Nop);
 			}
-			TEST_ASSERT(context.Execute() == WfRuntimeExecutionAction::Nop);
+			TEST_ASSERT(context.Execute(nullptr) == WfRuntimeExecutionAction::Nop);
 		}
 		
 		Value result;
