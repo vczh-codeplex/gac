@@ -119,6 +119,13 @@ IWfDebuggerCallback
 					return false;
 				}
 
+				switch (state)
+				{
+				case RequiredToPause:
+				case RequiredToStop:
+					return true;
+				}
+
 				evaluatingBreakPoint = true;
 				bool activated = false;
 				vint index = breakPointMap.Keys().IndexOf(key);
@@ -138,6 +145,11 @@ IWfDebuggerCallback
 							activated = true;
 						}
 					}
+
+					if (activated)
+					{
+						lastActivatedBreakPoint = index;
+					}
 				}
 				evaluatingBreakPoint = false;
 				return activated;
@@ -147,6 +159,7 @@ IWfDebuggerCallback
 			{
 				if (threadContexts.Count() == 0)
 				{
+					state = Running;
 					OnStartExecution();
 				}
 				threadContexts.Add(context);
@@ -161,6 +174,7 @@ IWfDebuggerCallback
 				if (threadContexts.Count() == 0)
 				{
 					OnStopExecution();
+					state = Stopped;
 				}
 			}
 
@@ -219,7 +233,28 @@ IWfDebuggerCallback
 
 			bool WfDebugger::WaitForContinue()
 			{
-				OnBlockExecution();
+				if (state == RequiredToStop)
+				{
+					return false;
+				}
+
+				state = lastActivatedBreakPoint >= 0 ? PauseByBreakPoint : PauseByOperation;
+				while (state == PauseByBreakPoint || state == PauseByOperation)
+				{
+					OnBlockExecution();
+				}
+				switch (state)
+				{
+				case ReadyToRun:
+					state = Running;
+					break;
+				case ReadyToStepOver:
+					state = Running;
+					break;
+				case ReadyToStepInto:
+					state = Running;
+					break;
+				}
 				return true;
 			}
 
@@ -421,22 +456,62 @@ WfDebugger
 
 			bool WfDebugger::Run()
 			{
+				if (state != PauseByOperation && state != PauseByBreakPoint)
+				{
+					return false;
+				}
+				state = ReadyToRun;
+				return true;
+			}
+
+			bool WfDebugger::Pause()
+			{
+				if (state != Running)
+				{
+					return false;
+				}
+				state = RequiredToPause;
 				return true;
 			}
 
 			bool WfDebugger::Stop()
 			{
+				if (state == Stopped)
+				{
+					return false;
+				}
+				state = RequiredToStop;
 				return true;
 			}
 
 			bool WfDebugger::StepOver()
 			{
+				if (state != PauseByOperation && state != PauseByBreakPoint)
+				{
+					return false;
+				}
+				state = ReadyToStepOver;
 				return true;
 			}
 
 			bool WfDebugger::StepInto()
 			{
+				if (state != PauseByOperation && state != PauseByBreakPoint)
+				{
+					return false;
+				}
+				state = ReadyToStepInto;
 				return true;
+			}
+
+			WfDebugger::State WfDebugger::GetState()
+			{
+				return state;
+			}
+
+			vint WfDebugger::GetLastActivatedBreakPoint()
+			{
+				return lastActivatedBreakPoint;
 			}
 
 			bool WfDebugger::IsRunning()

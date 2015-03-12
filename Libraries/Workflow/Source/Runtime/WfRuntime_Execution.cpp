@@ -29,20 +29,6 @@ WfRuntimeThreadContext (Operators)
 					}\
 				} while (0)\
 
-#define CALL_DEBUGGER(ACTION)\
-				do {\
-					if (callback)\
-					{\
-						if (ACTION)\
-						{\
-							if (!callback->WaitForContinue())\
-							{\
-								INTERNAL_ERROR(L"Debugger stopped the program.");\
-							}\
-						}\
-					}\
-				} while (0)\
-
 			//-------------------------------------------------------------------------------
 
 #define UNARY_OPERATOR(NAME, OPERATOR)\
@@ -461,6 +447,20 @@ WfRuntimeThreadContext
 					if ((ACTION) != WfRuntimeThreadContextError::Success)\
 					{\
 						INTERNAL_ERROR(MESSAGE);\
+					}\
+				} while (0)\
+
+#define CALL_DEBUGGER(ACTION)\
+				do {\
+					if (callback)\
+					{\
+						if (ACTION)\
+						{\
+							if (!callback->WaitForContinue())\
+							{\
+								INTERNAL_ERROR(L"Debugger stopped the program.");\
+							}\
+						}\
 					}\
 				} while (0)\
 
