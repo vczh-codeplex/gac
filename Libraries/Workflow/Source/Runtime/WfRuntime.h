@@ -487,73 +487,74 @@ Debugger
 					RequiredToStop,
 				};
 
-				static const vint				InvalidBreakPoint = -1;
-				static const vint				PauseBreakPoint = -2;
+				static const vint						InvalidBreakPoint = -1;
+				static const vint						PauseBreakPoint = -2;
 			protected:
-				BreakPointList					breakPoints;
-				collections::List<vint>			freeBreakPointIndices;
-				bool							evaluatingBreakPoint = false;
-				ThreadContextList				threadContexts;
-				volatile State					state = Stopped;
-				volatile vint					lastActivatedBreakPoint = InvalidBreakPoint;
+				BreakPointList							breakPoints;
+				collections::List<vint>					freeBreakPointIndices;
+				bool									evaluatingBreakPoint = false;
+				ThreadContextList						threadContexts;
+				volatile State							state = Stopped;
+				volatile vint							lastActivatedBreakPoint = InvalidBreakPoint;
 
-				AssemblyBreakPointMap			insBreakPoints;
-				AssemblyBreakPointMap			getGlobalVarBreakPoints;
-				AssemblyBreakPointMap			setGlobalVarBreakPoints;
-				PropertyBreakPointMap			getPropertyBreakPoints;
-				PropertyBreakPointMap			setPropertyBreakPoints;
-				EventBreakPointMap				attachEventBreakPoints;
-				EventBreakPointMap				detachEventBreakPoints;
-				MethodBreakPointMap				invokeMethodBreakPoints;
-				TypeBreakPointMap				createObjectBreakPoints;
+				AssemblyBreakPointMap					insBreakPoints;
+				AssemblyBreakPointMap					getGlobalVarBreakPoints;
+				AssemblyBreakPointMap					setGlobalVarBreakPoints;
+				PropertyBreakPointMap					getPropertyBreakPoints;
+				PropertyBreakPointMap					setPropertyBreakPoints;
+				EventBreakPointMap						attachEventBreakPoints;
+				EventBreakPointMap						detachEventBreakPoints;
+				MethodBreakPointMap						invokeMethodBreakPoints;
+				TypeBreakPointMap						createObjectBreakPoints;
 
-				virtual void					OnBlockExecution();
-				virtual void					OnStartExecution();
-				virtual void					OnStopExecution();
+				virtual void							OnBlockExecution();
+				virtual void							OnStartExecution();
+				virtual void							OnStopExecution();
 				
 				template<typename TKey>
-				bool							HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap);
-				bool							SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index);
+				bool									HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap);
+				bool									SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index);
 				
-				void							EnterThreadContext(WfRuntimeThreadContext* context)override;
-				void							LeaveThreadContext(WfRuntimeThreadContext* context)override;
-				bool							BreakIns(WfAssembly* assembly, vint instruction)override;
-				bool							BreakRead(WfAssembly* assembly, vint variable)override;
-				bool							BreakWrite(WfAssembly* assembly, vint variable)override;
-				bool							BreakGet(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)override;
-				bool							BreakSet(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)override;
-				bool							BreakAttach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
-				bool							BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
-				bool							BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo)override;
-				bool							BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor)override;
-				bool							WaitForContinue()override;
+				void									EnterThreadContext(WfRuntimeThreadContext* context)override;
+				void									LeaveThreadContext(WfRuntimeThreadContext* context)override;
+				bool									BreakIns(WfAssembly* assembly, vint instruction)override;
+				bool									BreakRead(WfAssembly* assembly, vint variable)override;
+				bool									BreakWrite(WfAssembly* assembly, vint variable)override;
+				bool									BreakGet(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)override;
+				bool									BreakSet(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)override;
+				bool									BreakAttach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
+				bool									BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
+				bool									BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo)override;
+				bool									BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor)override;
+				bool									WaitForContinue()override;
 			public:
 				WfDebugger();
 				~WfDebugger();
 
-				vint							AddBreakPoint(const WfBreakPoint& breakPoint);
-				vint							AddCodeLineBreakPoint(WfAssembly* assembly, vint codeIndex, vint row, bool beforeCodegen = true);
-				vint							GetBreakPointCount();
-				const WfBreakPoint&				GetBreakPoint(vint index);
-				bool							RemoveBreakPoint(vint index);
-				bool							EnableBreakPoint(vint index, bool enabled);
+				vint									AddBreakPoint(const WfBreakPoint& breakPoint);
+				vint									AddCodeLineBreakPoint(WfAssembly* assembly, vint codeIndex, vint row, bool beforeCodegen = true);
+				vint									GetBreakPointCount();
+				const WfBreakPoint&						GetBreakPoint(vint index);
+				bool									RemoveBreakPoint(vint index);
+				bool									EnableBreakPoint(vint index, bool enabled);
 
-				bool							Run();
-				bool							Pause();
-				bool							Stop();
-				bool							StepOver();
-				bool							StepInto();
-				State							GetState();
-				vint							GetLastActivatedBreakPoint();
+				bool									Run();
+				bool									Pause();
+				bool									Stop();
+				bool									StepOver();
+				bool									StepInto();
+				State									GetState();
+				vint									GetLastActivatedBreakPoint();
 
-				bool							IsRunning();
-				WfRuntimeThreadContext*			GetCurrentThreadContext();
+				WfRuntimeThreadContext*					GetCurrentThreadContext();
+				const parsing::ParsingTextRange&		GetCurrentPosition(bool beforeCodegen = true, WfRuntimeThreadContext* context = nullptr, vint callStackIndex = -1);
+				reflection::description::Value			GetValueByName(const WString& name, WfRuntimeThreadContext* context = nullptr, vint callStackIndex = -1);
 			};
 
-			extern IWfDebuggerCallback*			GetDebuggerCallback();
-			extern IWfDebuggerCallback*			GetDebuggerCallback(WfDebugger* debugger);
-			extern Ptr<WfDebugger>				GetDebuggerForCurrentThread();
-			extern void							SetDebugferForCurrentThread(Ptr<WfDebugger> debugger);
+			extern IWfDebuggerCallback*					GetDebuggerCallback();
+			extern IWfDebuggerCallback*					GetDebuggerCallback(WfDebugger* debugger);
+			extern Ptr<WfDebugger>						GetDebuggerForCurrentThread();
+			extern void									SetDebugferForCurrentThread(Ptr<WfDebugger> debugger);
 
 /***********************************************************************
 Helper Functions
