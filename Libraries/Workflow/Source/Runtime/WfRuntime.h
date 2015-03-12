@@ -489,7 +489,9 @@ Debugger
 				MethodBreakPointMap				invokeMethodBreakPoints;
 				TypeBreakPointMap				createObjectBreakPoints;
 
-				virtual void					BlockExecution();
+				virtual void					OnBlockExecution();
+				virtual void					OnStartExecution();
+				virtual void					OnStopExecution();
 				
 				template<typename TKey>
 				bool							HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap);

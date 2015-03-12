@@ -165,6 +165,7 @@ Thread
 				catch (...)
 				{
 					ThreadLocalStorage::ClearStorages();
+					throw;
 				}
 				if(deleteAfterStopped)
 				{
@@ -199,6 +200,7 @@ Thread
 				catch (...)
 				{
 					ThreadLocalStorage::ClearStorages();
+					throw;
 				}
 				if(deleteAfterStopped)
 				{
