@@ -195,3 +195,13 @@ TEST_CASE(TestDebugger_NoBreakPoint)
 	TEST_ASSERT(result == L"Hello, world!");
 	SetDebugferForCurrentThread(nullptr);
 }
+
+TEST_CASE(TestDebugger_CodeLineBreakPoint)
+{
+	SetDebugferForCurrentThread(new WfDebugger);
+	auto context = CreateThreadContextFromSample(L"Assignment");
+	LoadFunction<void()>(context, L"<initialize>")();
+	auto result = LoadFunction<WString()>(context, L"Main")();
+	TEST_ASSERT(result == L"three");
+	SetDebugferForCurrentThread(nullptr);
+}

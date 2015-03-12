@@ -1421,6 +1421,9 @@
     <Text Include="..\TestFiles\Samples\Debugger\HelloWorld.txt">
       <Filter>Resource Files\Samples\Debugger</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Debugger\Assignment.txt">
+      <Filter>Resource Files\Samples\Debugger</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
