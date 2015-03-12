@@ -171,3 +171,27 @@ TEST_CASE(TestBreakpointTesting_Create)
 		TEST_ASSERT(callback->BreakInvoke(nullptr, mg->GetMethod(i)) == false);
 	}
 }
+
+namespace debugger_helper
+{
+	Ptr<WfRuntimeGlobalContext> CreateThreadContextFromSample(const WString& name)
+	{
+		List<WString> moduleCodes;
+		moduleCodes.Add(LoadSample(L"Debugger", name));
+		List<Ptr<ParsingError>> errors;
+		auto assembly = Compile(GetWorkflowTable(), moduleCodes, errors);
+		TEST_ASSERT(assembly && errors.Count() == 0);
+		return new WfRuntimeGlobalContext(assembly);
+	}
+}
+using namespace debugger_helper;
+
+TEST_CASE(TestDebugger_NoBreakPoint)
+{
+	SetDebugferForCurrentThread(new WfDebugger);
+	auto context = CreateThreadContextFromSample(L"HelloWorld");
+	LoadFunction<void()>(context, L"<initialize>")();
+	auto result = LoadFunction<WString()>(context, L"Main")();
+	TEST_ASSERT(result == L"Hello, world!");
+	SetDebugferForCurrentThread(nullptr);
+}
