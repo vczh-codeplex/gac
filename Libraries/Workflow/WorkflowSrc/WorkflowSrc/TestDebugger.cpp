@@ -263,13 +263,22 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 		{
 			debugger->ContinueNextExecution();
 
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
+			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 0);
 			TEST_ASSERT(debugger->Run());
+			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
 			debugger->Continue();
-
+			
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
+			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 1);
 			TEST_ASSERT(debugger->Run());
+			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
 			debugger->Continue();
-
+			
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
+			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 2);
 			TEST_ASSERT(debugger->Run());
+			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
 			debugger->Continue();
 		});
 	SetDebugferForCurrentThread(debugger);
@@ -283,5 +292,39 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 	LoadFunction<void()>(context, L"<initialize>")();
 	auto result = LoadFunction<WString()>(context, L"Main")();
 	TEST_ASSERT(result == L"three");
+	SetDebugferForCurrentThread(nullptr);
+}
+
+TEST_CASE(TestDebugger_Stop)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
+		{
+			debugger->ContinueNextExecution();
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
+			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 0);
+			TEST_ASSERT(debugger->Stop());
+			TEST_ASSERT(debugger->GetState() == WfDebugger::RequiredToStop);
+			debugger->Continue();
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"Assignment");
+	auto assembly = context->assembly.Obj();
+	TEST_ASSERT(debugger->AddCodeLineBreakPoint(assembly, 0, 5) == 0);
+	TEST_ASSERT(debugger->AddCodeLineBreakPoint(assembly, 0, 6) == 1);
+	TEST_ASSERT(debugger->AddCodeLineBreakPoint(assembly, 0, 7) == 2);
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	try
+	{
+		LoadFunction<WString()>(context, L"Main")();
+		TEST_ASSERT(false);
+	}
+	catch (const TypeDescriptorException& ex)
+	{
+		TEST_ASSERT(ex.Message() == L"Internal error: Debugger stopped the program.");
+	}
 	SetDebugferForCurrentThread(nullptr);
 }

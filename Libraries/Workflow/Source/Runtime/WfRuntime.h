@@ -473,11 +473,29 @@ Debugger
 				typedef collections::Dictionary<EventKey, vint>			EventBreakPointMap;
 				typedef collections::Dictionary<MethodKey, vint>		MethodBreakPointMap;
 				typedef collections::Dictionary<TypeKey, vint>			TypeBreakPointMap;
+			public:
+				enum State
+				{
+					Running,
+					PauseByOperation,
+					PauseByBreakPoint,
+					Stopped,
+					ReadyToRun,
+					ReadyToStepOver,
+					ReadyToStepInto,
+					RequiredToPause,
+					RequiredToStop,
+				};
+
+				static const vint				InvalidBreakPoint = -1;
+				static const vint				PauseBreakPoint = -2;
 			protected:
 				BreakPointList					breakPoints;
 				collections::List<vint>			freeBreakPointIndices;
 				bool							evaluatingBreakPoint = false;
 				ThreadContextList				threadContexts;
+				volatile State					state = Stopped;
+				volatile vint					lastActivatedBreakPoint = InvalidBreakPoint;
 
 				AssemblyBreakPointMap			insBreakPoints;
 				AssemblyBreakPointMap			getGlobalVarBreakPoints;
@@ -521,9 +539,12 @@ Debugger
 				bool							EnableBreakPoint(vint index, bool enabled);
 
 				bool							Run();
+				bool							Pause();
 				bool							Stop();
 				bool							StepOver();
 				bool							StepInto();
+				State							GetState();
+				vint							GetLastActivatedBreakPoint();
 
 				bool							IsRunning();
 				WfRuntimeThreadContext*			GetCurrentThreadContext();
