@@ -159,8 +159,8 @@ IWfDebuggerCallback
 			{
 				if (threadContexts.Count() == 0)
 				{
-					state = Running;
 					OnStartExecution();
+					state = Running;
 				}
 				threadContexts.Add(context);
 			}
@@ -173,8 +173,8 @@ IWfDebuggerCallback
 
 				if (threadContexts.Count() == 0)
 				{
-					OnStopExecution();
 					state = Stopped;
+					OnStopExecution();
 				}
 			}
 
@@ -243,17 +243,10 @@ IWfDebuggerCallback
 				{
 					OnBlockExecution();
 				}
-				switch (state)
+				
+				if (state == Continue)
 				{
-				case ReadyToRun:
 					state = Running;
-					break;
-				case ReadyToStepOver:
-					state = Running;
-					break;
-				case ReadyToStepInto:
-					state = Running;
-					break;
 				}
 				return true;
 			}
@@ -460,7 +453,8 @@ WfDebugger
 				{
 					return false;
 				}
-				state = ReadyToRun;
+				state = Continue;
+				runningType = RunUntilBreakPoint;
 				return true;
 			}
 
@@ -476,7 +470,7 @@ WfDebugger
 
 			bool WfDebugger::Stop()
 			{
-				if (state == Stopped)
+				if (state != PauseByOperation && state != PauseByBreakPoint && state != Running)
 				{
 					return false;
 				}
@@ -486,27 +480,41 @@ WfDebugger
 
 			bool WfDebugger::StepOver()
 			{
-				if (state != PauseByOperation && state != PauseByBreakPoint)
+				if (state != PauseByOperation && state != PauseByBreakPoint && state != Stopped)
 				{
 					return false;
 				}
-				state = ReadyToStepOver;
+				if (state != Stopped)
+				{
+					state = Continue;
+				}
+				runningType = RunStepOver;
 				return true;
 			}
 
 			bool WfDebugger::StepInto()
 			{
-				if (state != PauseByOperation && state != PauseByBreakPoint)
+				if (state != PauseByOperation && state != PauseByBreakPoint && state != Stopped)
 				{
 					return false;
 				}
-				state = ReadyToStepInto;
+				if (state != Stopped)
+				{
+					state = Continue;
+				}
+				state = Continue;
+				runningType = RunStepInto;
 				return true;
 			}
 
 			WfDebugger::State WfDebugger::GetState()
 			{
 				return state;
+			}
+
+			WfDebugger::RunningType WfDebugger::GetRunningType()
+			{
+				return runningType;
 			}
 
 			vint WfDebugger::GetLastActivatedBreakPoint()
