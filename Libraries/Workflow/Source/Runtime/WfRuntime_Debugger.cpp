@@ -96,6 +96,42 @@ IWfDebuggerCallback
 			}
 
 /***********************************************************************
+InstructionLocation
+***********************************************************************/
+
+			bool WfDebugger::InstructionLocation::BreakStepOver(const InstructionLocation& il, bool beforeCodegen)
+			{
+				if (contextIndex != il.contextIndex) return contextIndex > il.contextIndex;
+				if (assembly != il.assembly) return true;
+				if (stackFrameIndex != il.stackFrameIndex) return stackFrameIndex > il.stackFrameIndex;
+
+				auto debugInfo = (beforeCodegen ? assembly->insBeforeCodegen : assembly->insAfterCodegen);
+				auto& range1 = debugInfo->instructionCodeMapping[instruction];
+				auto& range2 = debugInfo->instructionCodeMapping[il.instruction];
+
+				if (range1.codeIndex != range2.codeIndex) return true;
+				if (range1.start.row != range2.start.row) return true;
+
+				return false;
+			}
+
+			bool WfDebugger::InstructionLocation::BreakStepInto(const InstructionLocation& il, bool beforeCodegen)
+			{
+				if (contextIndex != il.contextIndex) return true;
+				if (assembly != il.assembly) return true;
+				if (stackFrameIndex != il.stackFrameIndex) return true;
+
+				auto debugInfo = (beforeCodegen ? assembly->insBeforeCodegen : assembly->insAfterCodegen);
+				auto& range1 = debugInfo->instructionCodeMapping[instruction];
+				auto& range2 = debugInfo->instructionCodeMapping[il.instruction];
+
+				if (range1.codeIndex != range2.codeIndex) return true;
+				if (range1.start.row != range2.start.row) return true;
+
+				return false;
+			}
+
+/***********************************************************************
 IWfDebuggerCallback
 ***********************************************************************/
 
@@ -110,6 +146,17 @@ IWfDebuggerCallback
 			void WfDebugger::OnStopExecution()
 			{
 			}
+
+			WfDebugger::InstructionLocation WfDebugger::MakeCurrentInstructionLocation()
+			{
+				auto context = threadContexts[threadContexts.Count() - 1];
+				InstructionLocation il;
+				il.contextIndex = threadContexts.Count() - 1;
+				il.assembly = context->globalContext->assembly.Obj();
+				il.stackFrameIndex = context->stackFrames.Count() - 1;
+				il.instruction = context->stackFrames[context->stackFrames.Count() - 1].nextInstructionIndex;
+				return il;
+			}
 				
 			template<typename TKey>
 			bool WfDebugger::HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap)
@@ -117,13 +164,6 @@ IWfDebuggerCallback
 				if (evaluatingBreakPoint)
 				{
 					return false;
-				}
-
-				switch (state)
-				{
-				case RequiredToPause:
-				case RequiredToStop:
-					return true;
 				}
 
 				evaluatingBreakPoint = true;
@@ -159,8 +199,13 @@ IWfDebuggerCallback
 			{
 				if (threadContexts.Count() == 0)
 				{
+					lastActivatedBreakPoint = InvalidBreakPoint;
+					instructionLocation = InstructionLocation();
 					OnStartExecution();
-					state = Running;
+					if (state == Stopped)
+					{
+						state = Running;
+					}
 				}
 				threadContexts.Add(context);
 			}
@@ -180,6 +225,35 @@ IWfDebuggerCallback
 
 			bool WfDebugger::BreakIns(WfAssembly* assembly, vint instruction)
 			{
+				if (runningType != RunUntilBreakPoint)
+				{
+					auto il = MakeCurrentInstructionLocation();
+					bool needToBreak = false;
+					switch (runningType)
+					{
+					case RunStepOver:
+						needToBreak = instructionLocation.BreakStepOver(il, stepBeforeCodegen);
+						break;
+					case RunStepInto:
+						needToBreak = instructionLocation.BreakStepInto(il, stepBeforeCodegen);
+						break;
+					}
+					if (needToBreak)
+					{
+						instructionLocation = il;
+						lastActivatedBreakPoint = WfDebugger::PauseBreakPoint;
+						return true;
+					}
+				}
+
+				switch (state)
+				{
+				case RequiredToPause:
+				case RequiredToStop:
+					lastActivatedBreakPoint = WfDebugger::PauseBreakPoint;
+					return true;
+				}
+
 				AssemblyKey key(assembly, instruction);
 				return HandleBreakPoint(key, insBreakPoints);
 			}
@@ -460,7 +534,7 @@ WfDebugger
 
 			bool WfDebugger::Pause()
 			{
-				if (state != Running)
+				if (state != Running && state != Stopped)
 				{
 					return false;
 				}
@@ -478,7 +552,7 @@ WfDebugger
 				return true;
 			}
 
-			bool WfDebugger::StepOver()
+			bool WfDebugger::StepOver(bool beforeCodegen)
 			{
 				if (state != PauseByOperation && state != PauseByBreakPoint && state != Stopped)
 				{
@@ -487,12 +561,14 @@ WfDebugger
 				if (state != Stopped)
 				{
 					state = Continue;
+					instructionLocation = MakeCurrentInstructionLocation();
 				}
 				runningType = RunStepOver;
+				stepBeforeCodegen = beforeCodegen;
 				return true;
 			}
 
-			bool WfDebugger::StepInto()
+			bool WfDebugger::StepInto(bool beforeCodegen)
 			{
 				if (state != PauseByOperation && state != PauseByBreakPoint && state != Stopped)
 				{
@@ -501,9 +577,11 @@ WfDebugger
 				if (state != Stopped)
 				{
 					state = Continue;
+					instructionLocation = MakeCurrentInstructionLocation();
 				}
 				state = Continue;
 				runningType = RunStepInto;
+				stepBeforeCodegen = beforeCodegen;
 				return true;
 			}
 

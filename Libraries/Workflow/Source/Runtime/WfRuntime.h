@@ -479,7 +479,7 @@ Debugger
 					Running,			// R			*RTP	*RTS
 					PauseByOperation,	// PBO	*C				*RTS	*C			*C
 					PauseByBreakPoint,	// PBB	*C				*RTS	*C			*C
-					Stopped,			// S							*			*
+					Stopped,			// S			*RTP			*			*
 					Continue,			// C	soon becomes Running
 					RequiredToPause,	// RTP	soon becomes PauseByOperation
 					RequiredToStop,		// RTS	soon becomes Stop
@@ -492,16 +492,31 @@ Debugger
 					RunStepInto,
 				};
 
+				struct InstructionLocation
+				{
+					vint								contextIndex = -1;
+					WfAssembly*							assembly = nullptr;
+					vint								stackFrameIndex = -1;
+					vint								instruction = -1;
+
+					bool								BreakStepOver(const InstructionLocation& il, bool beforeCodegen);
+					bool								BreakStepInto(const InstructionLocation& il, bool beforeCodegen);
+				};
+
 				static const vint						InvalidBreakPoint = -1;
 				static const vint						PauseBreakPoint = -2;
 			protected:
 				BreakPointList							breakPoints;
 				collections::List<vint>					freeBreakPointIndices;
-				bool									evaluatingBreakPoint = false;
+				volatile bool							evaluatingBreakPoint = false;
+
 				ThreadContextList						threadContexts;
+
 				volatile State							state = Stopped;
 				volatile RunningType					runningType = RunUntilBreakPoint;
 				volatile vint							lastActivatedBreakPoint = InvalidBreakPoint;
+				bool									stepBeforeCodegen = true;
+				InstructionLocation						instructionLocation;
 
 				AssemblyBreakPointMap					insBreakPoints;
 				AssemblyBreakPointMap					getGlobalVarBreakPoints;
@@ -517,6 +532,7 @@ Debugger
 				virtual void							OnStartExecution();
 				virtual void							OnStopExecution();
 				
+				InstructionLocation						MakeCurrentInstructionLocation();
 				template<typename TKey>
 				bool									HandleBreakPoint(const TKey& key, collections::Dictionary<TKey, vint>& breakPointMap);
 				bool									SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index);
@@ -547,8 +563,8 @@ Debugger
 				bool									Run();
 				bool									Pause();
 				bool									Stop();
-				bool									StepOver();
-				bool									StepInto();
+				bool									StepOver(bool beforeCodegen = true);
+				bool									StepInto(bool beforeCodegen = true);
 				State									GetState();
 				RunningType								GetRunningType();
 				vint									GetLastActivatedBreakPoint();
