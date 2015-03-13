@@ -475,16 +475,21 @@ Debugger
 				typedef collections::Dictionary<TypeKey, vint>			TypeBreakPointMap;
 			public:
 				enum State
+				{						//		Run		Pause	Stop	StepOver	StepInto
+					Running,			// R			*RTP	*RTS
+					PauseByOperation,	// PBO	*C				*RTS	*C			*C
+					PauseByBreakPoint,	// PBB	*C				*RTS	*C			*C
+					Stopped,			// S							*			*
+					Continue,			// C	soon becomes Running
+					RequiredToPause,	// RTP	soon becomes PauseByOperation
+					RequiredToStop,		// RTS	soon becomes Stop
+				};
+
+				enum RunningType
 				{
-					Running,
-					PauseByOperation,
-					PauseByBreakPoint,
-					Stopped,
-					ReadyToRun,
-					ReadyToStepOver,
-					ReadyToStepInto,
-					RequiredToPause,
-					RequiredToStop,
+					RunUntilBreakPoint,
+					RunStepOver,
+					RunStepInto,
 				};
 
 				static const vint						InvalidBreakPoint = -1;
@@ -495,6 +500,7 @@ Debugger
 				bool									evaluatingBreakPoint = false;
 				ThreadContextList						threadContexts;
 				volatile State							state = Stopped;
+				volatile RunningType					runningType = RunUntilBreakPoint;
 				volatile vint							lastActivatedBreakPoint = InvalidBreakPoint;
 
 				AssemblyBreakPointMap					insBreakPoints;
@@ -544,6 +550,7 @@ Debugger
 				bool									StepOver();
 				bool									StepInto();
 				State									GetState();
+				RunningType								GetRunningType();
 				vint									GetLastActivatedBreakPoint();
 
 				WfRuntimeThreadContext*					GetCurrentThreadContext();

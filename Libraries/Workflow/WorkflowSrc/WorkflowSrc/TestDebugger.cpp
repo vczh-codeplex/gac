@@ -204,7 +204,6 @@ namespace debugger_helper
 		Ptr<Thread>				debuggerOperatorThread;
 		EventObject				blockOperatorEvent;
 		EventObject				blockDebuggerEvent;
-		volatile bool			stopped = false;
 		
 		void OnBlockExecution()override
 		{
@@ -214,12 +213,11 @@ namespace debugger_helper
 
 		void OnStartExecution()override
 		{
-			stopped = false;
+			blockDebuggerEvent.Wait();
 		}
 
 		void OnStopExecution()override
 		{
-			stopped = true;
 			blockOperatorEvent.Signal();
 		}
 	public:
@@ -230,7 +228,6 @@ namespace debugger_helper
 			debuggerOperatorThread = Thread::CreateAndStart(
 				[=]()
 				{
-					blockOperatorEvent.Wait();
 					debuggerOperator(this);
 				}, false);
 		}
@@ -242,14 +239,15 @@ namespace debugger_helper
 
 		void Continue()
 		{
-			TEST_ASSERT(!stopped);
+			TEST_ASSERT(state != Stopped);
 			blockDebuggerEvent.Signal();
 			blockOperatorEvent.Wait();
 		}
 
-		void ContinueNextExecution()
+		void BeginExecution()
 		{
-			TEST_ASSERT(stopped);
+			TEST_ASSERT(state == Stopped);
+			blockDebuggerEvent.Signal();
 			blockOperatorEvent.Wait();
 		}
 	};
@@ -261,14 +259,15 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 	auto debugger = MakePtr<MultithreadDebugger>(
 		[](MultithreadDebugger* debugger)
 		{
-			debugger->ContinueNextExecution();
+			debugger->BeginExecution();
+			debugger->BeginExecution();
 
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
 			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 0);
 			TEST_ASSERT(debugger->GetCurrentPosition().start.row == 5);
 			TEST_ASSERT(UnboxValue<WString>(debugger->GetValueByName(L"s")) == L"zero");
 			TEST_ASSERT(debugger->Run());
-			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Continue);
 			debugger->Continue();
 			
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
@@ -276,7 +275,7 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 			TEST_ASSERT(debugger->GetCurrentPosition().start.row == 6);
 			TEST_ASSERT(UnboxValue<WString>(debugger->GetValueByName(L"s")) == L"one");
 			TEST_ASSERT(debugger->Run());
-			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Continue);
 			debugger->Continue();
 			
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
@@ -284,8 +283,10 @@ TEST_CASE(TestDebugger_CodeLineBreakPoint)
 			TEST_ASSERT(debugger->GetCurrentPosition().start.row == 7);
 			TEST_ASSERT(UnboxValue<WString>(debugger->GetValueByName(L"s")) == L"two");
 			TEST_ASSERT(debugger->Run());
-			TEST_ASSERT(debugger->GetState() == WfDebugger::ReadyToRun);
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Continue);
 			debugger->Continue();
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
 		});
 	SetDebugferForCurrentThread(debugger);
 
@@ -306,7 +307,8 @@ TEST_CASE(TestDebugger_Stop)
 	auto debugger = MakePtr<MultithreadDebugger>(
 		[](MultithreadDebugger* debugger)
 		{
-			debugger->ContinueNextExecution();
+			debugger->BeginExecution();
+			debugger->BeginExecution();
 
 			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
 			TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == 0);
