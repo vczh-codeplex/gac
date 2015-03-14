@@ -404,6 +404,42 @@ TEST_CASE(TestDebugger_StepOver2)
 	SetDebugferForCurrentThread(nullptr);
 }
 
+TEST_CASE(TestDebugger_StepOver3)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
+		{
+			debugger->BeginExecution(false);
+			debugger->BeginExecution(true);
+
+			vint rows[] = { 13, 14, 15, 16, 17, 18 };
+			vint values[] = { 0, 0, 0, 1, 2, 3 };
+
+			for (vint i = 0; i < sizeof(rows) / sizeof(*rows); i++)
+			{
+				TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByOperation);
+				TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == WfDebugger::PauseBreakPoint);
+				TEST_ASSERT(debugger->GetCurrentPosition().start.row == rows[i]);
+				auto s = debugger->GetValueByName(L"s");
+				TEST_ASSERT(UnboxValue<vint>(s) == values[i]);
+				TEST_ASSERT(debugger->StepOver());
+				TEST_ASSERT(debugger->GetState() == WfDebugger::Continue);
+				debugger->Continue();
+			}
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"Event");
+	auto assembly = context->assembly.Obj();
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	auto result = LoadFunction<vint()>(context, L"Main")();
+	TEST_ASSERT(result == 3);
+	SetDebugferForCurrentThread(nullptr);
+}
+
 TEST_CASE(TestDebugger_StepInto1)
 {
 	auto debugger = MakePtr<MultithreadDebugger>(
@@ -473,6 +509,42 @@ TEST_CASE(TestDebugger_StepInto2)
 	LoadFunction<void()>(context, L"<initialize>")();
 	auto result = LoadFunction<WString()>(context, L"Main")();
 	TEST_ASSERT(result == L"three");
+	SetDebugferForCurrentThread(nullptr);
+}
+
+TEST_CASE(TestDebugger_StepInto3)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
+		{
+			debugger->BeginExecution(false);
+			debugger->BeginExecution(true);
+
+			vint rows[] = { 13, 14, 15, 8, 6, 15, 16, 8, 6, 16, 17, 8, 6, 17, 18 };
+			vint values[] = { 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3 };
+
+			for (vint i = 0; i < sizeof(rows) / sizeof(*rows); i++)
+			{
+				TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByOperation);
+				TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == WfDebugger::PauseBreakPoint);
+				TEST_ASSERT(debugger->GetCurrentPosition().start.row == rows[i]);
+				auto s = debugger->GetValueByName(L"s");
+				TEST_ASSERT(UnboxValue<vint>(s) == values[i]);
+				TEST_ASSERT(debugger->StepInto());
+				TEST_ASSERT(debugger->GetState() == WfDebugger::Continue);
+				debugger->Continue();
+			}
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"Event");
+	auto assembly = context->assembly.Obj();
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	auto result = LoadFunction<vint()>(context, L"Main")();
+	TEST_ASSERT(result == 3);
 	SetDebugferForCurrentThread(nullptr);
 }
 

@@ -1430,6 +1430,9 @@
     <Text Include="..\TestFiles\Samples\Debugger\Operation.txt">
       <Filter>Resource Files\Samples\Debugger</Filter>
     </Text>
+    <Text Include="..\TestFiles\Samples\Debugger\Event.txt">
+      <Filter>Resource Files\Samples\Debugger</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Source\Expression\Codegen.bat">
