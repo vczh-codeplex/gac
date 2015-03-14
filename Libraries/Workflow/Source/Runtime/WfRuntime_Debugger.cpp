@@ -336,7 +336,7 @@ WfDebugger
 
 #define TEST(AVAILABLE, KEY, MAP) if (AVAILABLE && available == MAP.Keys().Contains(KEY)) return false;
 #define SET(KEY, MAP) if (available) MAP.Add(KEY, index); else MAP.Remove(KEY);
-#define SETC(AVAILABLE, KEY, MAP) if (AVAILABLE) if (available) MAP.Add(KEY, index); else MAP.Remove(KEY);
+#define SETC(AVAILABLE, KEY, MAP) if (AVAILABLE) {if (available) MAP.Add(KEY, index); else MAP.Remove(KEY);}
 
 			bool WfDebugger::SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index)
 			{
