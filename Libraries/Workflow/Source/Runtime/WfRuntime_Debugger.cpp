@@ -335,7 +335,8 @@ WfDebugger
 ***********************************************************************/
 
 #define TEST(AVAILABLE, KEY, MAP) if (AVAILABLE && available == MAP.Keys().Contains(KEY)) return false;
-#define SET(AVAILABLE, KEY, MAP) if (AVAILABLE) if (available) MAP.Add(KEY, index); else MAP.Remove(KEY);
+#define SET(KEY, MAP) if (available) MAP.Add(KEY, index); else MAP.Remove(KEY);
+#define SETC(AVAILABLE, KEY, MAP) if (AVAILABLE) if (available) MAP.Add(KEY, index); else MAP.Remove(KEY);
 
 			bool WfDebugger::SetBreakPoint(const WfBreakPoint& breakPoint, bool available, vint index)
 			{
@@ -345,21 +346,21 @@ WfDebugger
 					{
 						AssemblyKey key(breakPoint.assembly, breakPoint.instruction);
 						TEST(true, key, insBreakPoints);
-						SET(true, key, insBreakPoints);
+						SET(key, insBreakPoints);
 					}
 					break;
 				case WfBreakPoint::ReadGlobalVar:
 					{
 						AssemblyKey key(breakPoint.assembly, breakPoint.variable);
 						TEST(true, key, getGlobalVarBreakPoints);
-						SET(true, key, getGlobalVarBreakPoints);
+						SET(key, getGlobalVarBreakPoints);
 					}
 					break;
 				case WfBreakPoint::WriteGlobalVar:
 					{
 						AssemblyKey key(breakPoint.assembly, breakPoint.instruction);
 						TEST(true, key, setGlobalVarBreakPoints);
-						SET(true, key, setGlobalVarBreakPoints);
+						SET(key, setGlobalVarBreakPoints);
 					}
 					break;
 				case WfBreakPoint::GetProperty:
@@ -368,8 +369,8 @@ WfDebugger
 						MethodKey key2(breakPoint.thisObject, breakPoint.propertyInfo->GetGetter());
 						TEST(true, key1, getPropertyBreakPoints);
 						TEST(key2.f1, key2, invokeMethodBreakPoints);
-						SET(true, key1, getPropertyBreakPoints);
-						SET(key2.f1, key2, invokeMethodBreakPoints);
+						SET(key1, getPropertyBreakPoints);
+						SETC(key2.f1, key2, invokeMethodBreakPoints);
 					}
 					break;
 				case WfBreakPoint::SetProperty:
@@ -378,22 +379,22 @@ WfDebugger
 						MethodKey key2(breakPoint.thisObject, breakPoint.propertyInfo->GetSetter());
 						TEST(true, key1, setPropertyBreakPoints);
 						TEST(key2.f1, key2, invokeMethodBreakPoints);
-						SET(true, key1, setPropertyBreakPoints);
-						SET(key2.f1, key2, invokeMethodBreakPoints);
+						SET(key1, setPropertyBreakPoints);
+						SETC(key2.f1, key2, invokeMethodBreakPoints);
 					}
 					break;
 				case WfBreakPoint::AttachEvent:
 					{
 						EventKey key(breakPoint.thisObject, breakPoint.eventInfo);
 						TEST(true, key, attachEventBreakPoints);
-						SET(true, key, attachEventBreakPoints);
+						SET(key, attachEventBreakPoints);
 					}
 					break;
 				case WfBreakPoint::DetachEvent:
 					{
 						EventKey key(breakPoint.thisObject, breakPoint.eventInfo);
 						TEST(true, key, detachEventBreakPoints);
-						SET(true, key, detachEventBreakPoints);
+						SET(key, detachEventBreakPoints);
 					}
 					break;
 				case WfBreakPoint::InvokeMethod:
@@ -402,7 +403,7 @@ WfDebugger
 						// so here it is not noecessary to generate other keys
 						MethodKey key(breakPoint.thisObject, breakPoint.methodInfo);
 						TEST(true, key, invokeMethodBreakPoints);
-						SET(true, key, invokeMethodBreakPoints);
+						SET(key, invokeMethodBreakPoints);
 					}
 					break;
 				case WfBreakPoint::CreateObject:
@@ -416,11 +417,11 @@ WfDebugger
 							MethodKey key(nullptr, group->GetMethod(i));
 							TEST(true, key, invokeMethodBreakPoints);
 						}
-						SET(true, breakPoint.typeDescriptor, createObjectBreakPoints);
+						SET(breakPoint.typeDescriptor, createObjectBreakPoints);
 						for (vint i = 0; i < count; i++)
 						{
 							MethodKey key(nullptr, group->GetMethod(i));
-							SET(true, key, invokeMethodBreakPoints);
+							SET(key, invokeMethodBreakPoints);
 						}
 					}
 					break;
@@ -432,6 +433,7 @@ WfDebugger
 
 #undef TEST
 #undef SET
+#undef SETC
 
 			WfDebugger::WfDebugger()
 			{
