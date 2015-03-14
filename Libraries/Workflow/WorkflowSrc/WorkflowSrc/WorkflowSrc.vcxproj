@@ -525,6 +525,7 @@
     <Text Include="..\TestFiles\Samples\Debugger\Assignment.txt" />
     <Text Include="..\TestFiles\Samples\Debugger\Function.txt" />
     <Text Include="..\TestFiles\Samples\Debugger\HelloWorld.txt" />
+    <Text Include="..\TestFiles\Samples\Debugger\Operation.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Function.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\HelloWorld.txt" />
     <Text Include="..\TestFiles\Samples\Declaration\Namespace.txt" />

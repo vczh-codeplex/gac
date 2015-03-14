@@ -213,7 +213,12 @@ Compile
 				{
 					manager->AddModule(code);
 				}
-				if (errors.Count() > 0) return 0;
+
+				if (manager->errors.Count() > 0)
+				{
+					CopyFrom(errors, manager->errors);
+					return 0;
+				}
 
 				manager->Rebuild(true);
 				if (manager->errors.Count() > 0)
