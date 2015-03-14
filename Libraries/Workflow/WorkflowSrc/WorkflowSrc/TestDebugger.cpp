@@ -482,7 +482,24 @@ TEST_CASE(TestDebugger_OperationBreakPoint)
 		[](MultithreadDebugger* debugger)
 		{
 			debugger->BeginExecution(false);
-			debugger->BeginExecution(false);
+
+			debugger->BeginExecution(true);
+			auto assembly = debugger->GetCurrentThreadContext()->globalContext->assembly.Obj();
+			auto variable = assembly->variableNames.IndexOf(L"s");
+			auto type = GetTypeDescriptor(L"test::ObservableValue");
+			auto prop = type->GetPropertyByName(L"Value", true);
+			auto ev = type->GetEventByName(L"ValueChanged", true);
+			auto method = type->GetMethodGroupByName(L"GetDisplayName", true)->GetMethod(0);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Read(assembly, variable)) == 0);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Write(assembly, variable)) == 1);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Create(type)) == 2);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Get(nullptr, prop)) == 3);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Set(nullptr, prop)) == 4);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Attach(nullptr, ev)) == 5);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Detach(nullptr, ev)) == 6);
+			TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Invoke(nullptr, method)) == 7);
+			debugger->Run();
+			debugger->Continue();
 
 			vint rows[] = { 8, 9, 10, 11, 12, 13, 14, 15 };
 			vint breakPoints[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
@@ -492,7 +509,7 @@ TEST_CASE(TestDebugger_OperationBreakPoint)
 				TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByBreakPoint);
 				TEST_ASSERT(debugger->GetLastActivatedBreakPoint() == breakPoints[i]);
 				TEST_ASSERT(debugger->GetCurrentPosition().start.row == rows[i]);
-				TEST_ASSERT(debugger->StepInto());
+				TEST_ASSERT(debugger->Run());
 				TEST_ASSERT(debugger->GetState() == WfDebugger::Continue);
 				debugger->Continue();
 			}
@@ -502,21 +519,6 @@ TEST_CASE(TestDebugger_OperationBreakPoint)
 	SetDebugferForCurrentThread(debugger);
 
 	auto context = CreateThreadContextFromSample(L"Operation");
-	auto assembly = context->assembly.Obj();
-	auto variable = assembly->variableNames.IndexOf(L"s");
-	auto type = GetTypeDescriptor(L"test::ObservableValue");
-	auto prop = type->GetPropertyByName(L"Value", true);
-	auto ev = type->GetEventByName(L"ValueChanged", true);
-	auto method = type->GetMethodGroupByName(L"GetDisplayName", true)->GetMethod(0);
-
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Read(assembly, variable)) == 0);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Write(assembly, variable)) == 1);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Create(type)) == 2);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Get(nullptr, prop)) == 3);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Set(nullptr, prop)) == 4);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Attach(nullptr, ev)) == 5);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Detach(nullptr, ev)) == 6);
-	TEST_ASSERT(debugger->AddBreakPoint(WfBreakPoint::Invoke(nullptr, method)) == 7);
 
 	LoadFunction<void()>(context, L"<initialize>")();
 	LoadFunction<void()>(context, L"Main")();
