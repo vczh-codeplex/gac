@@ -527,6 +527,7 @@ WfRuntimeThreadContext
 					}
 				case WfInsCode::LoadGlobalVar:
 					{
+						CALL_DEBUGGER(callback->BreakRead(globalContext->assembly.Obj(), ins.indexParameter));
 						Value operand;
 						CONTEXT_ACTION(LoadGlobalVariable(ins.indexParameter, operand), L"illegal global variable index.");
 						PushValue(operand);
@@ -541,6 +542,7 @@ WfRuntimeThreadContext
 					}
 				case WfInsCode::StoreGlobalVar:
 					{
+						CALL_DEBUGGER(callback->BreakWrite(globalContext->assembly.Obj(), ins.indexParameter));
 						Value operand;
 						CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
 						CONTEXT_ACTION(StoreGlobalVariable(ins.indexParameter, operand), L"illegal global variable index.");
@@ -713,6 +715,7 @@ WfRuntimeThreadContext
 					{
 						Value operand;
 						CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
+						CALL_DEBUGGER(callback->BreakGet(operand.GetRawPtr(), ins.propertyParameter));
 						Value result = ins.propertyParameter->GetValue(operand);
 						PushValue(result);
 						return WfRuntimeExecutionAction::ExecuteInstruction;
@@ -754,6 +757,7 @@ WfRuntimeThreadContext
 					{
 						Value thisValue;
 						CONTEXT_ACTION(PopValue(thisValue), L"failed to pop a value from the stack.");
+						CALL_DEBUGGER(callback->BreakInvoke(thisValue.GetRawPtr(), ins.methodParameter));
 
 						Array<Value> arguments(ins.countParameter);
 						for (vint i = 0; i < ins.countParameter; i++)
@@ -772,6 +776,7 @@ WfRuntimeThreadContext
 						Value thisValue, function;
 						CONTEXT_ACTION(PopValue(function), L"failed to pop a value from the stack.");
 						CONTEXT_ACTION(PopValue(thisValue), L"failed to pop a value from the stack.");
+						CALL_DEBUGGER(callback->BreakAttach(thisValue.GetRawPtr(), ins.eventParameter));
 						auto proxy = UnboxValue<Ptr<IValueFunctionProxy>>(function);
 						auto handler = ins.eventParameter->Attach(thisValue, proxy);
 						PushValue(Value::From(handler));
@@ -782,6 +787,7 @@ WfRuntimeThreadContext
 						Value operand;
 						CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
 						auto handler = UnboxValue<Ptr<IEventHandler>>(operand);
+						CALL_DEBUGGER(callback->BreakDetach(handler->GetOwnerObject().GetRawPtr(), handler->GetOwnerEvent()));
 						auto result = handler->Detach();
 						PushValue(BoxValue(result));
 						return WfRuntimeExecutionAction::ExecuteInstruction;
