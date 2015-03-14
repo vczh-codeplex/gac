@@ -272,32 +272,37 @@ IWfDebuggerCallback
 
 			bool WfDebugger::BreakGet(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)
 			{
-				PropertyKey key(thisObject, propertyInfo);
-				return HandleBreakPoint(key, getPropertyBreakPoints);
+				PropertyKey key1(thisObject, propertyInfo);
+				PropertyKey key2(nullptr, propertyInfo);
+				return HandleBreakPoint(key1, getPropertyBreakPoints) || HandleBreakPoint(key2, getPropertyBreakPoints);
 			}
 
 			bool WfDebugger::BreakSet(reflection::DescriptableObject* thisObject, reflection::description::IPropertyInfo* propertyInfo)
 			{
-				PropertyKey key(thisObject, propertyInfo);
-				return HandleBreakPoint(key, setPropertyBreakPoints);
+				PropertyKey key1(thisObject, propertyInfo);
+				PropertyKey key2(nullptr, propertyInfo);
+				return HandleBreakPoint(key1, setPropertyBreakPoints) || HandleBreakPoint(key2, setPropertyBreakPoints);
 			}
 
 			bool WfDebugger::BreakAttach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)
 			{
-				EventKey key(thisObject, eventInfo);
-				return HandleBreakPoint(key, attachEventBreakPoints);
+				EventKey key1(thisObject, eventInfo);
+				EventKey key2(nullptr, eventInfo);
+				return HandleBreakPoint(key1, attachEventBreakPoints) || HandleBreakPoint(key2, attachEventBreakPoints);
 			}
 
 			bool WfDebugger::BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)
 			{
-				EventKey key(thisObject, eventInfo);
-				return HandleBreakPoint(key, detachEventBreakPoints);
+				EventKey key1(thisObject, eventInfo);
+				EventKey key2(nullptr, eventInfo);
+				return HandleBreakPoint(key1, detachEventBreakPoints) || HandleBreakPoint(key2, detachEventBreakPoints);
 			}
 
 			bool WfDebugger::BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo)
 			{
-				MethodKey key(thisObject, methodInfo);
-				return HandleBreakPoint(key, invokeMethodBreakPoints);
+				MethodKey key1(thisObject, methodInfo);
+				MethodKey key2(nullptr, methodInfo);
+				return HandleBreakPoint(key1, invokeMethodBreakPoints) || HandleBreakPoint(key2, invokeMethodBreakPoints);
 			}
 
 			bool WfDebugger::BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor)
