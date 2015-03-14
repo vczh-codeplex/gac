@@ -237,6 +237,7 @@ IWfDebuggerCallback
 					case RunStepInto:
 						needToBreak = instructionLocation.BreakStepInto(il, stepBeforeCodegen);
 						break;
+					default:;
 					}
 					if (needToBreak)
 					{
@@ -252,6 +253,7 @@ IWfDebuggerCallback
 				case RequiredToStop:
 					lastActivatedBreakPoint = WfDebugger::PauseBreakPoint;
 					return true;
+				default:;
 				}
 
 				AssemblyKey key(assembly, instruction);
