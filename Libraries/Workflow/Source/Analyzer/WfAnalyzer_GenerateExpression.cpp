@@ -104,8 +104,8 @@ GenerateInstructions(Expression)
 				void Visit(WfOrderedLambdaExpression* node)override
 				{
 					auto meta = MakePtr<WfAssemblyFunction>();
-					meta->name = L"<lambda:> in " + context.functionContext->function->name;
 					vint functionIndex = context.assembly->functions.Add(meta);
+					meta->name = L"<lambda:(" + itow(functionIndex) + L")> in " + context.functionContext->function->name;
 					context.assembly->functionByName.Add(meta->name, functionIndex);
 
 					WfCodegenLambdaContext lc;
@@ -736,11 +736,11 @@ GenerateInstructions(Expression)
 					INSTRUCTION(Ins::InvokeProxy(node->arguments.Count()));
 				}
 
-				void VisitFunction(WfFunctionDeclaration* node, WfCodegenLambdaContext lc, const WString& name)
+				void VisitFunction(WfFunctionDeclaration* node, WfCodegenLambdaContext lc, const Func<WString(vint)>& getName)
 				{
 					auto meta = MakePtr<WfAssemblyFunction>();
-					meta->name = name;
 					vint functionIndex = context.assembly->functions.Add(meta);
+					meta->name = getName(functionIndex);
 					context.assembly->functionByName.Add(meta->name, functionIndex);
 
 					context.functionContext->closuresToCodegen.Add(functionIndex, lc);
@@ -765,8 +765,10 @@ GenerateInstructions(Expression)
 				{
 					WfCodegenLambdaContext lc;
 					lc.functionExpression = node;
-					WString name = L"<lambda:" + node->function->name.value + L"> in " + context.functionContext->function->name;
-					VisitFunction(node->function.Obj(), lc, name);
+					VisitFunction(node->function.Obj(), lc, [=](vint index)
+					{
+						return L"<lambda:" + node->function->name.value + L"(" + itow(index) + L")> in " + context.functionContext->function->name;
+					});
 				}
 
 				void Visit(WfNewTypeExpression* node)override
@@ -788,8 +790,10 @@ GenerateInstructions(Expression)
 							INSTRUCTION(Ins::LoadValue(BoxValue(decl->name.value)));
 							WfCodegenLambdaContext lc;
 							lc.functionDeclaration = decl.Obj();
-							WString name = L"<method:" + decl->name.value + L"<" + result.type->GetTypeDescriptor()->GetTypeName() + L">> in " + context.functionContext->function->name;
-							VisitFunction(decl.Obj(), lc, name);
+							VisitFunction(decl.Obj(), lc, [=](vint index)
+							{
+								return L"<method:" + decl->name.value + L"<" + result.type->GetTypeDescriptor()->GetTypeName() + L">(" + itow(index) + L")> in " + context.functionContext->function->name;
+							});
 						}
 						INSTRUCTION(Ins::CreateInterface(node->functions.Count() * 2));
 						INSTRUCTION(Ins::LoadValue(Value()));
