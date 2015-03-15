@@ -390,12 +390,12 @@ RuntimeException
 				{
 				}
 
-				Ptr<WfRuntimeExceptionInfo> GetInfo()
+				Ptr<WfRuntimeExceptionInfo> GetInfo()const
 				{
 					return info;
 				}
 
-				bool IsFatal()
+				bool IsFatal()const
 				{
 					return fatal;
 				}
@@ -462,8 +462,8 @@ RuntimeThreadContext
 				WfRuntimeThreadContextError		PopTrapFrame(vint saveStackPatternCount);
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
-				WfRuntimeThreadContextError		RaiseException(const WString& exception, bool fatalError);
-				WfRuntimeThreadContextError		RaiseException(Ptr<WfRuntimeExceptionInfo> info);
+				WfRuntimeThreadContextError		RaiseException(const WString& exception, bool fatalError, bool skipDebugger = false);
+				WfRuntimeThreadContextError		RaiseException(Ptr<WfRuntimeExceptionInfo> info, bool skipDebugger = false);
 
 				WfRuntimeThreadContextError		LoadStackValue(vint stackItemIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		LoadGlobalVariable(vint variableIndex, reflection::description::Value& value);
@@ -550,6 +550,7 @@ Debugger
 				virtual bool					BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo) = 0;
 				virtual bool					BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo) = 0;
 				virtual bool					BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor) = 0;
+				virtual bool					BreakException(Ptr<WfRuntimeExceptionInfo> info) = 0;
 				virtual bool					WaitForContinue() = 0;
 			};
 
@@ -607,6 +608,7 @@ Debugger
 				BreakPointList							breakPoints;
 				collections::List<vint>					freeBreakPointIndices;
 				volatile bool							evaluatingBreakPoint = false;
+				volatile bool							breakException = false;
 
 				ThreadContextList						threadContexts;
 
@@ -646,6 +648,7 @@ Debugger
 				bool									BreakDetach(reflection::DescriptableObject* thisObject, reflection::description::IEventInfo* eventInfo)override;
 				bool									BreakInvoke(reflection::DescriptableObject* thisObject, reflection::description::IMethodInfo* methodInfo)override;
 				bool									BreakCreate(reflection::description::ITypeDescriptor* typeDescriptor)override;
+				bool									BreakException(Ptr<WfRuntimeExceptionInfo> info)override;
 				bool									WaitForContinue()override;
 			public:
 				WfDebugger();
@@ -657,6 +660,8 @@ Debugger
 				const WfBreakPoint&						GetBreakPoint(vint index);
 				bool									RemoveBreakPoint(vint index);
 				bool									EnableBreakPoint(vint index, bool enabled);
+				bool									GetBreakException();
+				void									SetBreakException(bool value);
 
 				bool									Run();
 				bool									Pause();

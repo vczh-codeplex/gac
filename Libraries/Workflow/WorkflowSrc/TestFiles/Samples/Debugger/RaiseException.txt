@@ -16,3 +16,18 @@ func Main() : int
 	o.Value = 1;
 	return s;
 }
+
+func Main2() : int
+{
+	try
+	{
+		var o = new ObservableValue^(0);
+		attach(o.ValueChanged, Update);
+		o.Value = 1;
+		return s;
+	}
+	catch (ex)
+	{
+		return -1;
+	}
+}
