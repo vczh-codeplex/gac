@@ -17,6 +17,7 @@ namespace vl
 	{
 		namespace runtime
 		{
+			struct WfRuntimeThreadContext;
 			class IWfDebuggerCallback;
 			class WfDebugger;
 
@@ -327,6 +328,10 @@ RuntimeException
 
 				Ptr<IValueReadonlyDictionary>	GetVariables(collections::List<WString>& names, Ptr<WfRuntimeVariableContext> context, Ptr<IValueReadonlyDictionary>& cache);
 			public:
+				WfRuntimeCallStackInfo();
+				WfRuntimeCallStackInfo(WfRuntimeThreadContext* context, const WfRuntimeStackFrame& stackFrame);
+				~WfRuntimeCallStackInfo();
+
 				Ptr<WfAssembly>					assembly;
 				Ptr<WfRuntimeVariableContext>	global;
 				Ptr<WfRuntimeVariableContext>	captured;
@@ -662,6 +667,7 @@ Debugger
 				RunningType								GetRunningType();
 				vint									GetLastActivatedBreakPoint();
 
+				const ThreadContextList&				GetThreadContexts();
 				WfRuntimeThreadContext*					GetCurrentThreadContext();
 				const parsing::ParsingTextRange&		GetCurrentPosition(bool beforeCodegen = true, WfRuntimeThreadContext* context = nullptr, vint callStackIndex = -1);
 				reflection::description::Value			GetValueByName(const WString& name, WfRuntimeThreadContext* context = nullptr, vint callStackIndex = -1);

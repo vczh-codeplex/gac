@@ -609,6 +609,11 @@ WfDebugger
 				return lastActivatedBreakPoint;
 			}
 
+			const WfDebugger::ThreadContextList& WfDebugger::GetThreadContexts()
+			{
+				return threadContexts;
+			}
+
 			WfRuntimeThreadContext* WfDebugger::GetCurrentThreadContext()
 			{
 				if (threadContexts.Count() == 0)

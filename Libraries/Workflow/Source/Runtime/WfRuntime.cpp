@@ -478,20 +478,71 @@ WfRuntimeCallStackInfo
 			{
 				if (!cache)
 				{
-					Dictionary<WString, Value> map;
-					FOREACH_INDEXER(WString, name, index, names)
+					if (!context)
 					{
-						map.Add(name, context->variables[index]);
+						Dictionary<WString, Value> map;
+						FOREACH_INDEXER(WString, name, index, names)
+						{
+							map.Add(name, context->variables[index]);
+						}
+						cache = IValueDictionary::Create(
+							From(map)
+								.Select([](Pair<WString, Value> pair)
+								{
+									return Pair<Value, Value>(BoxValue(pair.key), pair.value);
+								})
+							);
 					}
-					return IValueDictionary::Create(
-						From(map)
-							.Select([](Pair<WString, Value> pair)
-							{
-								return Pair<Value, Value>(BoxValue(pair.key), pair.value);
-							})
-						);
+					else
+					{
+						cache = IValueDictionary::Create();
+					}
 				}
 				return cache;
+			}
+
+			WfRuntimeCallStackInfo::WfRuntimeCallStackInfo()
+			{
+			}
+
+			WfRuntimeCallStackInfo::WfRuntimeCallStackInfo(WfRuntimeThreadContext* context, const WfRuntimeStackFrame& stackFrame)
+			{
+				assembly = context->globalContext->assembly;
+				functionIndex = stackFrame.functionIndex;
+				instruction = stackFrame.nextInstructionIndex - 1;
+
+				auto function = assembly->functions[functionIndex];
+
+				if (context->globalContext->globalVariables->variables.Count() > 0)
+				{
+					global = context->globalContext->globalVariables;
+				}
+
+				captured = stackFrame.capturedVariables;
+
+				if (function->argumentNames.Count() > 0)
+				{
+					arguments = new WfRuntimeVariableContext;
+					arguments->variables.Resize(function->argumentNames.Count());
+					for (vint i = 0; i < arguments->variables.Count(); i++)
+					{
+						arguments->variables[i] = context->stack[stackFrame.stackBase + i];
+					}
+				}
+
+				if (function->localVariableNames.Count()>0)
+				{
+					localVariables = new WfRuntimeVariableContext;
+					localVariables->variables.Resize(function->localVariableNames.Count());
+					for (vint i = 0; i < localVariables->variables.Count(); i++)
+					{
+						localVariables->variables[i] = context->stack[stackFrame.stackBase + function->argumentNames.Count() + i];
+					}
+				}
+			}
+
+			WfRuntimeCallStackInfo::~WfRuntimeCallStackInfo()
+			{
 			}
 
 			Ptr<IValueReadonlyDictionary> WfRuntimeCallStackInfo::GetLocalVariables()
@@ -516,11 +567,19 @@ WfRuntimeCallStackInfo
 
 			WString WfRuntimeCallStackInfo::GetFunctionName()
 			{
+				if (!assembly)
+				{
+					return L"<EXTERNAL CODE>";
+				}
 				return assembly->functions[functionIndex]->name;
 			}
 
 			WString WfRuntimeCallStackInfo::GetSourceCodeBeforeCodegen()
 			{
+				if (!assembly)
+				{
+					return L"";
+				}
 				const auto& range = assembly->insBeforeCodegen->instructionCodeMapping[instruction];
 				if (range.codeIndex == -1)
 				{
@@ -531,6 +590,10 @@ WfRuntimeCallStackInfo
 
 			WString WfRuntimeCallStackInfo::GetSourceCodeAfterCodegen()
 			{
+				if (!assembly)
+				{
+					return L"";
+				}
 				const auto& range = assembly->insAfterCodegen->instructionCodeMapping[instruction];
 				if (range.codeIndex == -1)
 				{
@@ -541,12 +604,20 @@ WfRuntimeCallStackInfo
 
 			vint WfRuntimeCallStackInfo::GetRowBeforeCodegen()
 			{
+				if (!assembly)
+				{
+					return -1;
+				}
 				const auto& range = assembly->insBeforeCodegen->instructionCodeMapping[instruction];
 				return range.start.row;
 			}
 
 			vint WfRuntimeCallStackInfo::GetRowAfterCodegen()
 			{
+				if (!assembly)
+				{
+					return -1;
+				}
 				const auto& range = assembly->insAfterCodegen->instructionCodeMapping[instruction];
 				return range.start.row;
 			}
@@ -764,6 +835,30 @@ WfRuntimeThreadContext
 			{
 				exceptionInfo = info;
 				status = info->fatal ? WfRuntimeExecutionStatus::FatalError : WfRuntimeExecutionStatus::RaisedException;
+
+				if (info->callStack.Count() == 0)
+				{
+					if (auto debugger = GetDebuggerForCurrentThread())
+					{
+						vint contextCount = debugger->GetThreadContexts().Count();
+						for (vint i = contextCount - 1; i >= 0; i--)
+						{
+							auto context = debugger->GetThreadContexts()[i];
+							vint stackCount = context->stackFrames.Count();
+							for (vint j = stackCount - 1; j >= 0; j--)
+							{
+								const auto& stackFrame = context->stackFrames[j];
+								info->callStack.Add(new WfRuntimeCallStackInfo(context, stackFrame));
+							}
+
+							if (i > 0)
+							{
+								info->callStack.Add(new WfRuntimeCallStackInfo);
+							}
+						}
+					}
+				}
+
 				return WfRuntimeThreadContextError::Success;
 			}
 
