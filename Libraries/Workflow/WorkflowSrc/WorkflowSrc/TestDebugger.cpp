@@ -662,3 +662,60 @@ TEST_CASE(TestDebugger_OperationBreakPoint2)
 	LoadFunction<void()>(context, L"Main")();
 	SetDebugferForCurrentThread(nullptr);
 }
+
+TEST_CASE(TestDebugger_Exception1)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
+		{
+			debugger->BeginExecution(false);
+			debugger->BeginExecution(false);
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"RaiseException");
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	try
+	{
+		LoadFunction<vint()>(context, L"Main")();
+		TEST_ASSERT(false);
+	}
+	catch (WfRuntimeException& ex)
+	{
+		TEST_ASSERT(ex.Message() == L"Exception");
+		TEST_ASSERT(ex.IsFatal() == false);
+		TEST_ASSERT(ex.GetInfo()->callStack.Count() == 3);
+		{
+			auto callStack = ex.GetInfo()->callStack[0];
+			auto function = callStack->assembly->functions[callStack->functionIndex];
+			TEST_ASSERT(callStack->GetFunctionName() == L"Update");
+			TEST_ASSERT(callStack->GetRowBeforeCodegen() == 8);
+			TEST_ASSERT(callStack->global->variables.Count() == 1);
+			TEST_ASSERT(UnboxValue<vint>(callStack->global->variables[callStack->assembly->variableNames.IndexOf(L"s")]) == 0);
+			TEST_ASSERT(callStack->captured == nullptr);
+			TEST_ASSERT(callStack->arguments->variables.Count() == 2);
+			TEST_ASSERT(UnboxValue<vint>(callStack->arguments->variables[function->argumentNames.IndexOf(L"a")]) == 0);
+			TEST_ASSERT(UnboxValue<vint>(callStack->arguments->variables[function->argumentNames.IndexOf(L"b")]) == 1);
+			TEST_ASSERT(callStack->localVariables == nullptr);
+		}
+		{
+			auto callStack = ex.GetInfo()->callStack[1];
+			TEST_ASSERT(callStack->assembly == nullptr);
+		}
+		{
+			auto callStack = ex.GetInfo()->callStack[2];
+			auto function = callStack->assembly->functions[callStack->functionIndex];
+			TEST_ASSERT(callStack->GetFunctionName() == L"Main");
+			TEST_ASSERT(callStack->GetRowBeforeCodegen() == 15);
+			TEST_ASSERT(callStack->global->variables.Count() == 1);
+			TEST_ASSERT(UnboxValue<vint>(callStack->global->variables[callStack->assembly->variableNames.IndexOf(L"s")]) == 0);
+			TEST_ASSERT(callStack->captured == nullptr);
+			TEST_ASSERT(callStack->arguments == nullptr);
+			TEST_ASSERT(callStack->localVariables->variables.Count() == 1);
+			TEST_ASSERT(callStack->localVariables->variables[function->localVariableNames.IndexOf(L"o")].GetTypeDescriptor()->GetTypeName() == L"test::ObservableValue");
+		}
+	}
+	SetDebugferForCurrentThread(nullptr);
+}
