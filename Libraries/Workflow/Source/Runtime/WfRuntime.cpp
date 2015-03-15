@@ -825,13 +825,13 @@ WfRuntimeThreadContext
 				return WfRuntimeThreadContextError::Success;
 			}
 
-			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const WString& exception, bool fatalError)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const WString& exception, bool fatalError, bool skipDebugger)
 			{
 				auto info = MakePtr<WfRuntimeExceptionInfo>(exception, fatalError);
-				return RaiseException(info);
+				return RaiseException(info, skipDebugger);
 			}
 
-			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(Ptr<WfRuntimeExceptionInfo> info)
+			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(Ptr<WfRuntimeExceptionInfo> info, bool skipDebugger)
 			{
 				exceptionInfo = info;
 				status = info->fatal ? WfRuntimeExecutionStatus::FatalError : WfRuntimeExecutionStatus::RaisedException;
@@ -854,6 +854,20 @@ WfRuntimeThreadContext
 							if (i > 0)
 							{
 								info->callStack.Add(new WfRuntimeCallStackInfo);
+							}
+						}
+
+						if (!skipDebugger)
+						{
+							if (auto callback = GetDebuggerCallback(debugger.Obj()))
+							{
+								if (callback->BreakException(info))
+								{
+									if (!callback->WaitForContinue())
+									{
+										RaiseException(L"Internal error: Debugger stopped the program.", true, true);
+									}
+								}
 							}
 						}
 					}

@@ -325,7 +325,7 @@ TEST_CASE(TestDebugger_Stop)
 		LoadFunction<WString()>(context, L"Main")();
 		TEST_ASSERT(false);
 	}
-	catch (const TypeDescriptorException& ex)
+	catch (const WfRuntimeException& ex)
 	{
 		TEST_ASSERT(ex.Message() == L"Internal error: Debugger stopped the program.");
 	}
@@ -663,6 +663,50 @@ TEST_CASE(TestDebugger_OperationBreakPoint2)
 	SetDebugferForCurrentThread(nullptr);
 }
 
+namespace debugger_internal
+{
+	void AssertException(Ptr<WfRuntimeExceptionInfo> info, bool uncatch)
+	{
+		TEST_ASSERT(info->GetMessage() == L"Exception");
+		TEST_ASSERT(info->GetFatal() == false);
+		TEST_ASSERT(info->callStack.Count() == 3);
+		{
+			auto callStack = info->callStack[0];
+			auto function = callStack->assembly->functions[callStack->functionIndex];
+			TEST_ASSERT(callStack->GetFunctionName() == L"Update");
+			TEST_ASSERT(callStack->GetRowBeforeCodegen() == 8);
+			TEST_ASSERT(callStack->global->variables.Count() == 1);
+			TEST_ASSERT(UnboxValue<vint>(callStack->global->variables[callStack->assembly->variableNames.IndexOf(L"s")]) == 0);
+			TEST_ASSERT(callStack->captured == nullptr);
+			TEST_ASSERT(callStack->arguments->variables.Count() == 2);
+			TEST_ASSERT(UnboxValue<vint>(callStack->arguments->variables[function->argumentNames.IndexOf(L"a")]) == 0);
+			TEST_ASSERT(UnboxValue<vint>(callStack->arguments->variables[function->argumentNames.IndexOf(L"b")]) == 1);
+			TEST_ASSERT(callStack->localVariables == nullptr);
+		}
+		{
+			auto callStack = info->callStack[1];
+			TEST_ASSERT(callStack->assembly == nullptr);
+		}
+		{
+			auto callStack = info->callStack[2];
+			auto function = callStack->assembly->functions[callStack->functionIndex];
+			TEST_ASSERT(callStack->GetFunctionName() == (uncatch ? L"Main" : L"Main2"));
+			TEST_ASSERT(callStack->GetRowBeforeCodegen() == (uncatch ? 15 : 25));
+			TEST_ASSERT(callStack->global->variables.Count() == 1);
+			TEST_ASSERT(UnboxValue<vint>(callStack->global->variables[callStack->assembly->variableNames.IndexOf(L"s")]) == 0);
+			TEST_ASSERT(callStack->captured == nullptr);
+			TEST_ASSERT(callStack->arguments == nullptr);
+			TEST_ASSERT(callStack->localVariables->variables.Count() == (uncatch ? 1 : 2));
+			TEST_ASSERT(callStack->localVariables->variables[function->localVariableNames.IndexOf(L"o")].GetTypeDescriptor()->GetTypeName() == L"test::ObservableValue");
+			if (!uncatch)
+			{
+				TEST_ASSERT(callStack->localVariables->variables[function->localVariableNames.IndexOf(L"<catch>ex")].IsNull());
+			}
+		}
+	}
+}
+using namespace debugger_internal;
+
 TEST_CASE(TestDebugger_Exception1)
 {
 	auto debugger = MakePtr<MultithreadDebugger>(
@@ -682,40 +726,117 @@ TEST_CASE(TestDebugger_Exception1)
 		LoadFunction<vint()>(context, L"Main")();
 		TEST_ASSERT(false);
 	}
-	catch (WfRuntimeException& ex)
+	catch (const WfRuntimeException& ex)
 	{
 		TEST_ASSERT(ex.Message() == L"Exception");
 		TEST_ASSERT(ex.IsFatal() == false);
-		TEST_ASSERT(ex.GetInfo()->callStack.Count() == 3);
+		AssertException(ex.GetInfo(), true);
+	}
+	SetDebugferForCurrentThread(nullptr);
+}
+
+TEST_CASE(TestDebugger_Exception2)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
 		{
-			auto callStack = ex.GetInfo()->callStack[0];
-			auto function = callStack->assembly->functions[callStack->functionIndex];
-			TEST_ASSERT(callStack->GetFunctionName() == L"Update");
-			TEST_ASSERT(callStack->GetRowBeforeCodegen() == 8);
-			TEST_ASSERT(callStack->global->variables.Count() == 1);
-			TEST_ASSERT(UnboxValue<vint>(callStack->global->variables[callStack->assembly->variableNames.IndexOf(L"s")]) == 0);
-			TEST_ASSERT(callStack->captured == nullptr);
-			TEST_ASSERT(callStack->arguments->variables.Count() == 2);
-			TEST_ASSERT(UnboxValue<vint>(callStack->arguments->variables[function->argumentNames.IndexOf(L"a")]) == 0);
-			TEST_ASSERT(UnboxValue<vint>(callStack->arguments->variables[function->argumentNames.IndexOf(L"b")]) == 1);
-			TEST_ASSERT(callStack->localVariables == nullptr);
-		}
+			debugger->BeginExecution(false);
+			debugger->SetBreakException(true);
+			debugger->BeginExecution(false);
+			
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByOperation);
+			TEST_ASSERT(debugger->GetCurrentThreadContext()->exceptionInfo);
+			AssertException(debugger->GetCurrentThreadContext()->exceptionInfo, true);
+			debugger->Run();
+			debugger->Continue();
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"RaiseException");
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	try
+	{
+		LoadFunction<vint()>(context, L"Main")();
+		TEST_ASSERT(false);
+	}
+	catch (const WfRuntimeException& ex)
+	{
+		TEST_ASSERT(ex.Message() == L"Exception");
+		TEST_ASSERT(ex.IsFatal() == false);
+		AssertException(ex.GetInfo(), true);
+	}
+	SetDebugferForCurrentThread(nullptr);
+}
+
+TEST_CASE(TestDebugger_Exception3)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
 		{
-			auto callStack = ex.GetInfo()->callStack[1];
-			TEST_ASSERT(callStack->assembly == nullptr);
-		}
+			debugger->BeginExecution(false);
+			debugger->SetBreakException(true);
+			debugger->BeginExecution(false);
+			
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByOperation);
+			TEST_ASSERT(debugger->GetCurrentThreadContext()->exceptionInfo);
+			AssertException(debugger->GetCurrentThreadContext()->exceptionInfo, true);
+			debugger->Stop();
+			debugger->Continue();
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"RaiseException");
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	try
+	{
+		LoadFunction<vint()>(context, L"Main")();
+		TEST_ASSERT(false);
+	}
+	catch (const WfRuntimeException& ex)
+	{
+		TEST_ASSERT(ex.Message() == L"Exception");
+		TEST_ASSERT(ex.IsFatal() == false);
+		AssertException(ex.GetInfo(), true);
+	}
+	SetDebugferForCurrentThread(nullptr);
+}
+
+TEST_CASE(TestDebugger_Exception4)
+{
+	auto debugger = MakePtr<MultithreadDebugger>(
+		[](MultithreadDebugger* debugger)
 		{
-			auto callStack = ex.GetInfo()->callStack[2];
-			auto function = callStack->assembly->functions[callStack->functionIndex];
-			TEST_ASSERT(callStack->GetFunctionName() == L"Main");
-			TEST_ASSERT(callStack->GetRowBeforeCodegen() == 15);
-			TEST_ASSERT(callStack->global->variables.Count() == 1);
-			TEST_ASSERT(UnboxValue<vint>(callStack->global->variables[callStack->assembly->variableNames.IndexOf(L"s")]) == 0);
-			TEST_ASSERT(callStack->captured == nullptr);
-			TEST_ASSERT(callStack->arguments == nullptr);
-			TEST_ASSERT(callStack->localVariables->variables.Count() == 1);
-			TEST_ASSERT(callStack->localVariables->variables[function->localVariableNames.IndexOf(L"o")].GetTypeDescriptor()->GetTypeName() == L"test::ObservableValue");
-		}
+			debugger->BeginExecution(false);
+			debugger->SetBreakException(true);
+			debugger->BeginExecution(false);
+			
+			TEST_ASSERT(debugger->GetState() == WfDebugger::PauseByOperation);
+			TEST_ASSERT(debugger->GetCurrentThreadContext()->exceptionInfo);
+			AssertException(debugger->GetCurrentThreadContext()->exceptionInfo, false);
+			debugger->Stop();
+			debugger->Continue();
+
+			TEST_ASSERT(debugger->GetState() == WfDebugger::Stopped);
+		});
+	SetDebugferForCurrentThread(debugger);
+
+	auto context = CreateThreadContextFromSample(L"RaiseException");
+
+	LoadFunction<void()>(context, L"<initialize>")();
+	try
+	{
+		LoadFunction<vint()>(context, L"Main2")();
+		TEST_ASSERT(false);
+	}
+	catch (const WfRuntimeException& ex)
+	{
+		TEST_ASSERT(ex.Message() == L"Internal error: Debugger stopped the program.");
 	}
 	SetDebugferForCurrentThread(nullptr);
 }

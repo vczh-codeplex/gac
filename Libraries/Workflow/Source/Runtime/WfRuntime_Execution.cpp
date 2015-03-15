@@ -1190,7 +1190,7 @@ WfRuntimeThreadContext
 					}
 					return WfRuntimeExecutionAction::Nop;
 				}
-				catch (WfRuntimeException& ex)
+				catch (const WfRuntimeException& ex)
 				{
 					if (ex.GetInfo())
 					{

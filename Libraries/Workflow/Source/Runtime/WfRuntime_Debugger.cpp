@@ -312,6 +312,19 @@ IWfDebuggerCallback
 				return HandleBreakPoint(typeDescriptor, createObjectBreakPoints);
 			}
 
+			bool WfDebugger::BreakException(Ptr<WfRuntimeExceptionInfo> info)
+			{
+				if (breakException)
+				{
+					lastActivatedBreakPoint = PauseBreakPoint;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+
 			bool WfDebugger::WaitForContinue()
 			{
 				if (state == RequiredToStop)
@@ -528,6 +541,16 @@ WfDebugger
 					}
 				}
 				return false;
+			}
+
+			bool WfDebugger::GetBreakException()
+			{
+				return breakException;
+			}
+
+			void WfDebugger::SetBreakException(bool value)
+			{
+				breakException = value;
 			}
 
 			bool WfDebugger::Run()
