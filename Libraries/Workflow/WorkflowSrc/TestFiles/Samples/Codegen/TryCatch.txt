@@ -11,7 +11,7 @@ func test1():void
 	}
 	catch(ex)
 	{
-		log = log & "[" & ex & "]";
+		log = log & "[" & ex.Message & "]";
 	}
 }
 
@@ -23,7 +23,7 @@ func test2():void
 	}
 	catch(ex)
 	{
-		log = log & "[" & ex & "]";
+		log = log & "[" & ex.Message & "]";
 	}
 	finally
 	{
@@ -46,7 +46,7 @@ func test3():void
 		}
 		catch(ex)
 		{
-			log = log & "[" & ex & "1]";
+			log = log & "[" & ex.Message & "1]";
 			raise;
 		}
 		finally
@@ -56,7 +56,7 @@ func test3():void
 	}
 	catch(ex)
 	{
-		log = log & "[" & ex & "2]";
+		log = log & "[" & ex.Message & "2]";
 	}
 	finally
 	{
@@ -73,7 +73,7 @@ func test4():void
 		}
 		catch(ex)
 		{
-			log = log & "[" & ex & "1]";
+			log = log & "[" & ex.Message & "1]";
 			raise;
 		}
 		finally
@@ -83,7 +83,7 @@ func test4():void
 	}
 	catch(ex)
 	{
-		log = log & "[" & ex & "2]";
+		log = log & "[" & ex.Message & "2]";
 	}
 	finally
 	{

@@ -67,7 +67,7 @@ GuiTemplate::IFactory
 						message += viewModel.GetTypeDescriptor()->GetTypeName() + L".";
 					}
 
-					throw TypeDescriptorException(message);
+					throw ArgumentException(message);
 				}
 			};
 

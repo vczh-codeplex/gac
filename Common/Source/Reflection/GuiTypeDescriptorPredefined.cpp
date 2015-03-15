@@ -159,6 +159,8 @@ TypeName
 			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueFunctionProxy,			system::Function)
 			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueListener,				system::Listener)
 			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueSubscription,			system::Subscription)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueCallStack,				system::CallStack)
+			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueException,				system::Exception)
 
 			IMPL_TYPE_INFO_RENAME(vl::reflection::description::IValueSerializer,			system::reflection::ValueSerializer)
 			IMPL_TYPE_INFO_RENAME(vl::reflection::description::ITypeInfo,					system::reflection::TypeInfo)
@@ -1019,6 +1021,26 @@ Collections
 				CLASS_MEMBER_METHOD(Close, NO_PARAMETER)
 			END_CLASS_MEMBER(IValueSubscription)
 
+			BEGIN_CLASS_MEMBER(IValueCallStack)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(LocalVariables)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(LocalArguments)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CapturedVariables)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(GlobalVariables)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(FunctionName)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SourceCodeBeforeCodegen)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(SourceCodeAfterCodegen)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowBeforeCodegen)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(RowAfterCodegen)
+			END_CLASS_MEMBER(IValueCallStack)
+
+			BEGIN_CLASS_MEMBER(IValueException)
+				CLASS_MEMBER_BASE(IDescriptable)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Message)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(Fatal)
+				CLASS_MEMBER_PROPERTY_READONLY_FAST(CallStack)
+			END_CLASS_MEMBER(IValueException)
+
 			BEGIN_CLASS_MEMBER(IValueSerializer)
 				CLASS_MEMBER_BASE(IDescriptable)
 
@@ -1207,6 +1229,9 @@ LoadPredefinedTypes
 					
 					ADD_TYPE_INFO(IValueListener)
 					ADD_TYPE_INFO(IValueSubscription)
+					ADD_TYPE_INFO(IValueCallStack)
+					ADD_TYPE_INFO(IValueException)
+
 					ADD_TYPE_INFO(IValueSerializer)
 					ADD_TYPE_INFO(ITypeInfo)
 					ADD_TYPE_INFO(ITypeInfo::Decorator)

@@ -2,14 +2,15 @@
 
 namespace vl
 {
+	using namespace reflection;
+	using namespace reflection::description;
+	using namespace workflow::runtime;
+	using namespace collections;
+
 	namespace stream
 	{
 		namespace internal
 		{
-			using namespace reflection;
-			using namespace reflection::description;
-			using namespace workflow::runtime;
-			using namespace collections;
 
 			BEGIN_SERIALIZATION(WfInstructionDebugInfo)
 				SERIALIZE(moduleCodes)
@@ -253,8 +254,6 @@ namespace vl
 	{
 		namespace runtime
 		{
-			using namespace reflection;
-			using namespace reflection::description;
 
 /***********************************************************************
 WfInstruction
@@ -465,10 +464,131 @@ WfRuntimeGlobalContext
 ***********************************************************************/
 
 			WfRuntimeGlobalContext::WfRuntimeGlobalContext(Ptr<WfAssembly> _assembly)
-			:assembly(_assembly)
+				:assembly(_assembly)
 			{
 				globalVariables = new WfRuntimeVariableContext;
 				globalVariables->variables.Resize(assembly->variableNames.Count());
+			}
+
+/***********************************************************************
+WfRuntimeCallStackInfo
+***********************************************************************/
+
+			Ptr<IValueReadonlyDictionary> WfRuntimeCallStackInfo::GetVariables(collections::List<WString>& names, Ptr<WfRuntimeVariableContext> context, Ptr<IValueReadonlyDictionary>& cache)
+			{
+				if (!cache)
+				{
+					Dictionary<WString, Value> map;
+					FOREACH_INDEXER(WString, name, index, names)
+					{
+						map.Add(name, context->variables[index]);
+					}
+					return IValueDictionary::Create(
+						From(map)
+							.Select([](Pair<WString, Value> pair)
+							{
+								return Pair<Value, Value>(BoxValue(pair.key), pair.value);
+							})
+						);
+				}
+				return cache;
+			}
+
+			Ptr<IValueReadonlyDictionary> WfRuntimeCallStackInfo::GetLocalVariables()
+			{
+				return GetVariables(assembly->functions[functionIndex]->localVariableNames, localVariables, cachedLocalVariables);
+			}
+
+			Ptr<IValueReadonlyDictionary> WfRuntimeCallStackInfo::GetLocalArguments()
+			{
+				return GetVariables(assembly->functions[functionIndex]->argumentNames, localVariables, cachedLocalArguments);
+			}
+
+			Ptr<IValueReadonlyDictionary> WfRuntimeCallStackInfo::GetCapturedVariables()
+			{
+				return GetVariables(assembly->functions[functionIndex]->capturedVariableNames, captured, cachedCapturedVariables);
+			}
+
+			Ptr<IValueReadonlyDictionary> WfRuntimeCallStackInfo::GetGlobalVariables()
+			{
+				return GetVariables(assembly->variableNames, global, cachedGlobalVariables);
+			}
+
+			WString WfRuntimeCallStackInfo::GetFunctionName()
+			{
+				return assembly->functions[functionIndex]->name;
+			}
+
+			WString WfRuntimeCallStackInfo::GetSourceCodeBeforeCodegen()
+			{
+				const auto& range = assembly->insBeforeCodegen->instructionCodeMapping[instruction];
+				if (range.codeIndex == -1)
+				{
+					return L"";
+				}
+				return assembly->insBeforeCodegen->moduleCodes[range.codeIndex];
+			}
+
+			WString WfRuntimeCallStackInfo::GetSourceCodeAfterCodegen()
+			{
+				const auto& range = assembly->insAfterCodegen->instructionCodeMapping[instruction];
+				if (range.codeIndex == -1)
+				{
+					return L"";
+				}
+				return assembly->insAfterCodegen->moduleCodes[range.codeIndex];
+			}
+
+			vint WfRuntimeCallStackInfo::GetRowBeforeCodegen()
+			{
+				const auto& range = assembly->insBeforeCodegen->instructionCodeMapping[instruction];
+				return range.start.row;
+			}
+
+			vint WfRuntimeCallStackInfo::GetRowAfterCodegen()
+			{
+				const auto& range = assembly->insAfterCodegen->instructionCodeMapping[instruction];
+				return range.start.row;
+			}
+
+/***********************************************************************
+WfRuntimeExceptionInfo
+***********************************************************************/
+
+			WfRuntimeExceptionInfo::WfRuntimeExceptionInfo(const WString& _message, bool _fatal)
+				:message(_message)
+				, fatal(_fatal)
+			{
+			}
+
+			WfRuntimeExceptionInfo::~WfRuntimeExceptionInfo()
+			{
+			}
+				
+			WString WfRuntimeExceptionInfo::GetMessage()
+			{
+				return message;
+			}
+
+			bool WfRuntimeExceptionInfo::GetFatal()
+			{
+				return fatal;
+			}
+
+			Ptr<IValueReadonlyList> WfRuntimeExceptionInfo::GetCallStack()
+			{
+				if (!cachedCallStack)
+				{
+					cachedCallStack = IValueList::Create(
+						From(callStack)
+							.Cast<IValueCallStack>()
+							.Select([](Ptr<IValueCallStack> callStack)
+							{
+								return BoxValue(callStack);
+							})
+						);
+				}
+				return cachedCallStack;
 			}
 
 /***********************************************************************
@@ -636,8 +756,14 @@ WfRuntimeThreadContext
 
 			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(const WString& exception, bool fatalError)
 			{
-				exceptionValue = exception;
-				status = fatalError ? WfRuntimeExecutionStatus::FatalError : WfRuntimeExecutionStatus::RaisedException;
+				auto info = MakePtr<WfRuntimeExceptionInfo>(exception, fatalError);
+				return RaiseException(info);
+			}
+
+			WfRuntimeThreadContextError WfRuntimeThreadContext::RaiseException(Ptr<WfRuntimeExceptionInfo> info)
+			{
+				exceptionInfo = info;
+				status = info->fatal ? WfRuntimeExecutionStatus::FatalError : WfRuntimeExecutionStatus::RaisedException;
 				return WfRuntimeThreadContextError::Success;
 			}
 
