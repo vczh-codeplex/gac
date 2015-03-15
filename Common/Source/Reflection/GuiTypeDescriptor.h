@@ -40,10 +40,14 @@ Attribute
 			class IParameterInfo;
 			class IMethodInfo;
 			class IMethodGroupInfo;
+
 			class IValueFunctionProxy;
 			class IValueInterfaceProxy;
 			class IValueListener;
 			class IValueSubscription;
+
+			class IValueCallStack;
+			class IValueException;
 		}
 
 		class DescriptableObject
@@ -528,10 +532,36 @@ Interface Implementation Proxy (Implement)
 			};
 
 /***********************************************************************
+Runtime Exception
+***********************************************************************/
+
+			class IValueCallStack : public virtual IDescriptable, public Description<IValueCallStack>
+			{
+			public:
+				virtual Ptr<IValueReadonlyDictionary>	GetLocalVariables() = 0;
+				virtual Ptr<IValueReadonlyDictionary>	GetLocalArguments() = 0;
+				virtual Ptr<IValueReadonlyDictionary>	GetCapturedVariables() = 0;
+				virtual Ptr<IValueReadonlyDictionary>	GetGlobalVariables() = 0;
+				virtual WString							GetFunctionName() = 0;
+				virtual WString							GetSourceCodeBeforeCodegen() = 0;
+				virtual WString							GetSourceCodeAfterCodegen() = 0;
+				virtual vint							GetRowBeforeCodegen() = 0;
+				virtual vint							GetRowAfterCodegen() = 0;
+			};
+
+			class IValueException : public virtual IDescriptable, public Description<IValueException>
+			{
+			public:
+				virtual WString							GetMessage() = 0;
+				virtual bool							GetFatal() = 0;
+				virtual Ptr<IValueReadonlyList>			GetCallStack() = 0;
+			};
+
+/***********************************************************************
 Exceptions
 ***********************************************************************/
 
-			class TypeDescriptorException : public Exception
+			class TypeDescriptorException abstract : public Exception
 			{
 			public:
 				TypeDescriptorException(const WString& message)

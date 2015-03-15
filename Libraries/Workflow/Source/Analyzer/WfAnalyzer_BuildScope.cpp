@@ -223,9 +223,17 @@ BuildScopeForStatement
 						symbol->name = node->name.value;
 						symbol->creatorStatement = node;
 						{
-							Ptr<WfPredefinedType> type = new WfPredefinedType;
-							type->name = WfPredefinedTypeName::String;
-							symbol->type = type;
+							auto system = MakePtr<WfTopQualifiedType>();
+							system->name.value = L"system";
+
+							auto exception = MakePtr<WfChildType>();
+							exception->parent = system;
+							exception->name.value = L"Exception";
+
+							auto sharedPtr = MakePtr<WfSharedPointerType>();
+							sharedPtr->element = exception;
+
+							symbol->type = sharedPtr;
 						}
 						resultScope->symbols.Add(symbol->name, symbol);
 

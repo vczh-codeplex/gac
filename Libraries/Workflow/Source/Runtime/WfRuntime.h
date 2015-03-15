@@ -228,6 +228,10 @@ Instruction
 				#undef CTOR_TYPE
 			};
 
+/***********************************************************************
+Assembly
+***********************************************************************/
+
 			class WfAssemblyFunction : public Object
 			{
 			public:
@@ -271,7 +275,7 @@ Instruction
 			};
 
 /***********************************************************************
-Runtime
+RuntimeEnvironment
 ***********************************************************************/
 
 			class WfRuntimeVariableContext : public Object
@@ -307,6 +311,94 @@ Runtime
 				vint							instructionIndex = -1;
 				vint							stackPatternCount = -1;
 			};
+
+/***********************************************************************
+RuntimeException
+***********************************************************************/
+
+			class WfRuntimeCallStackInfo : public Object, public virtual reflection::description::IValueCallStack
+			{
+				using IValueReadonlyDictionary = reflection::description::IValueReadonlyDictionary;
+			protected:
+				Ptr<IValueReadonlyDictionary>	cachedLocalVariables;
+				Ptr<IValueReadonlyDictionary>	cachedLocalArguments;
+				Ptr<IValueReadonlyDictionary>	cachedCapturedVariables;
+				Ptr<IValueReadonlyDictionary>	cachedGlobalVariables;
+
+				Ptr<IValueReadonlyDictionary>	GetVariables(collections::List<WString>& names, Ptr<WfRuntimeVariableContext> context, Ptr<IValueReadonlyDictionary>& cache);
+			public:
+				Ptr<WfAssembly>					assembly;
+				Ptr<WfRuntimeVariableContext>	global;
+				Ptr<WfRuntimeVariableContext>	captured;
+				Ptr<WfRuntimeVariableContext>	arguments;
+				Ptr<WfRuntimeVariableContext>	localVariables;
+				vint							functionIndex = -1;
+				vint							instruction = -1;
+
+				Ptr<IValueReadonlyDictionary>	GetLocalVariables()override;
+				Ptr<IValueReadonlyDictionary>	GetLocalArguments()override;
+				Ptr<IValueReadonlyDictionary>	GetCapturedVariables()override;
+				Ptr<IValueReadonlyDictionary>	GetGlobalVariables()override;
+				WString							GetFunctionName()override;
+				WString							GetSourceCodeBeforeCodegen()override;
+				WString							GetSourceCodeAfterCodegen()override;
+				vint							GetRowBeforeCodegen()override;
+				vint							GetRowAfterCodegen()override;
+			};
+
+			class WfRuntimeExceptionInfo : public Object, public virtual reflection::description::IValueException
+			{
+				typedef collections::List<Ptr<WfRuntimeCallStackInfo>>		CallStackList;
+				using IValueReadonlyList = reflection::description::IValueReadonlyList;
+			protected:
+				Ptr<IValueReadonlyList>			cachedCallStack;
+
+			public:
+				WString							message;
+				bool							fatal = false;
+				CallStackList					callStack;
+
+				WfRuntimeExceptionInfo(const WString& _message, bool _fatal);
+				~WfRuntimeExceptionInfo();
+				
+				WString							GetMessage()override;
+				bool							GetFatal()override;
+				Ptr<IValueReadonlyList>			GetCallStack()override;
+			};
+
+			class WfRuntimeException : public reflection::description::TypeDescriptorException
+			{
+			protected:
+				Ptr<WfRuntimeExceptionInfo>		info;
+				bool							fatal = false;
+			public:
+				WfRuntimeException(Ptr<WfRuntimeExceptionInfo> _info)
+					:reflection::description::TypeDescriptorException(_info->message)
+					, info(_info)
+					, fatal(_info->fatal)
+				{
+				}
+
+				WfRuntimeException(const WString& _message, bool _fatal)
+					:reflection::description::TypeDescriptorException(_message)
+					, fatal(_fatal)
+				{
+				}
+
+				Ptr<WfRuntimeExceptionInfo> GetInfo()
+				{
+					return info;
+				}
+
+				bool IsFatal()
+				{
+					return fatal;
+				}
+			};
+
+/***********************************************************************
+RuntimeThreadContext
+***********************************************************************/
 
 			enum class WfRuntimeExecutionStatus
 			{
@@ -348,7 +440,7 @@ Runtime
 				typedef collections::List<WfRuntimeTrapFrame>					TrapFrameList;
 
 				Ptr<WfRuntimeGlobalContext>		globalContext;
-				WString							exceptionValue;
+				Ptr<WfRuntimeExceptionInfo>		exceptionInfo;
 				VariableList					stack;
 				StackFrameList					stackFrames;
 				TrapFrameList					trapFrames;
@@ -366,6 +458,7 @@ Runtime
 				WfRuntimeThreadContextError		PushValue(const reflection::description::Value& value);
 				WfRuntimeThreadContextError		PopValue(reflection::description::Value& value);
 				WfRuntimeThreadContextError		RaiseException(const WString& exception, bool fatalError);
+				WfRuntimeThreadContextError		RaiseException(Ptr<WfRuntimeExceptionInfo> info);
 
 				WfRuntimeThreadContextError		LoadStackValue(vint stackItemIndex, reflection::description::Value& value);
 				WfRuntimeThreadContextError		LoadGlobalVariable(vint variableIndex, reflection::description::Value& value);

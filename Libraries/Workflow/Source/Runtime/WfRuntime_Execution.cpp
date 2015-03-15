@@ -360,33 +360,24 @@ WfRuntimeThreadContext (Lambda)
 					}
 					
 					WString message;
-					if (context.PushStackFrame(functionIndex, count, capturedVariables) == WfRuntimeThreadContextError::Success)
+					if (context.PushStackFrame(functionIndex, count, capturedVariables) != WfRuntimeThreadContextError::Success)
 					{
-						context.ExecuteToEnd();
-
-						if (context.status == WfRuntimeExecutionStatus::Finished)
-						{
-							Value result;
-							if (context.PopValue(result) == WfRuntimeThreadContextError::Success)
-							{
-								return result;
-							}
-							else
-							{
-								message = L"Internal error: failed to pop the function result.";
-							}
-						}
-						else
-						{
-							message = context.exceptionValue;
-						}
-					}
-					else
-					{
-						message = L"Internal error: failed to invoke a function.";
+						throw WfRuntimeException(L"Internal error: failed to invoke a function.", true);
 					}
 
-					throw TypeDescriptorException(message);
+					context.ExecuteToEnd();
+					if (context.status != WfRuntimeExecutionStatus::Finished)
+					{
+						throw WfRuntimeException(context.exceptionInfo);
+					}
+
+					Value result;
+					if (context.PopValue(result) != WfRuntimeThreadContextError::Success)
+					{
+						throw WfRuntimeException(L"Internal error: failed to pop the function result.", true);
+					}
+					
+					return result;
 				}
 			};
 			
@@ -405,7 +396,7 @@ WfRuntimeThreadContext (Lambda)
 					vint index = functions.Keys().IndexOf(name);
 					if (index == -1)
 					{
-						throw TypeDescriptorException(L"Internal error: failed to invoke the interface method \"" + name + L"\"");
+						throw WfRuntimeException(L"Internal error: failed to invoke the interface method \"" + name + L"\"", true);
 					}
 					else
 					{
@@ -508,7 +499,7 @@ WfRuntimeThreadContext
 					}
 				case WfInsCode::LoadException:
 					{
-						PushValue(BoxValue(exceptionValue));
+						PushValue(BoxValue(exceptionInfo));
 						return WfRuntimeExecutionAction::ExecuteInstruction;
 					}
 				case WfInsCode::LoadLocalVar:
@@ -653,7 +644,7 @@ WfRuntimeThreadContext
 						{
 							WString from = result.IsNull() ? L"<null>" : L"<" + result.GetText() + L"> of " + result.GetTypeDescriptor()->GetTypeName();
 							WString to = ins.typeDescriptorParameter->GetTypeName();
-							throw TypeDescriptorException(L"Failed to convert from \"" + from + L"\" to \"" + to + L"\".");
+							RaiseException(L"Failed to convert from \"" + from + L"\" to \"" + to + L"\".", false);
 						}
 					}
 				case WfInsCode::TryConvertToType:
@@ -809,7 +800,18 @@ WfRuntimeThreadContext
 					{
 						Value operand;
 						CONTEXT_ACTION(PopValue(operand), L"failed to pop a value from the stack.");
-						RaiseException(operand.GetText(), false);
+						if (operand.GetValueType() == Value::Text)
+						{
+							RaiseException(operand.GetText(), false);
+						}
+						else if (auto info = operand.GetSharedPtr().Cast<WfRuntimeExceptionInfo>())
+						{
+							RaiseException(info);
+						}
+						else
+						{
+							INTERNAL_ERROR(L"failed to raise an exception which is neither a string nor a WfRuntimeExceptionInfo.");
+						}
 						return WfRuntimeExecutionAction::ExecuteInstruction;
 					}
 				case WfInsCode::TestElementInSet:
@@ -1187,6 +1189,18 @@ WfRuntimeThreadContext
 					default:;
 					}
 					return WfRuntimeExecutionAction::Nop;
+				}
+				catch (WfRuntimeException& ex)
+				{
+					if (ex.GetInfo())
+					{
+						RaiseException(ex.GetInfo());
+					}
+					else
+					{
+						RaiseException(ex.Message(), ex.IsFatal());
+					}
+					return WfRuntimeExecutionAction::ExecuteInstruction;
 				}
 				catch (const Exception& ex)
 				{

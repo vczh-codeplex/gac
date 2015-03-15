@@ -390,6 +390,8 @@ Predefined Types
 			DECL_TYPE_INFO(IValueFunctionProxy)
 			DECL_TYPE_INFO(IValueListener)
 			DECL_TYPE_INFO(IValueSubscription)
+			DECL_TYPE_INFO(IValueCallStack)
+			DECL_TYPE_INFO(IValueException)
 
 			DECL_TYPE_INFO(IValueSerializer)
 			DECL_TYPE_INFO(ITypeInfo)
