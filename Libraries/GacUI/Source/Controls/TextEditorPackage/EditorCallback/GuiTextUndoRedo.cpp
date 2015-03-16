@@ -1,6 +1,6 @@
 #include "GuiTextUndoRedo.h"
-#include "GuiTextCommonInterface.h"
-#include "GuiDocumentViewer.h"
+#include "../GuiTextCommonInterface.h"
+#include "../GuiDocumentViewer.h"
 
 namespace vl
 {

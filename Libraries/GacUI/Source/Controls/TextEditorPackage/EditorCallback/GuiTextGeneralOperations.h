@@ -9,7 +9,7 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
 #define VCZH_PRESENTATION_CONTROLS_GUITEXTELEMENTOPERATOR
 
-#include "../GuiContainerControls.h"
+#include "../../GuiContainerControls.h"
 
 namespace vl
 {

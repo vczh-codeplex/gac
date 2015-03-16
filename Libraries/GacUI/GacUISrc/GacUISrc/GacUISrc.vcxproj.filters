@@ -118,6 +118,9 @@
     <Filter Include="GacUI\Controls\Templates">
       <UniqueIdentifier>{9e56fefd-e958-41a3-954b-d905fca4d2e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Controls\TextEditorPackage\EditorCallback">
+      <UniqueIdentifier>{70d730e9-d2b3-4c4c-a2d3-79056277c2c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -378,12 +381,6 @@
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiListControls.cpp">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.cpp">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.cpp">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
@@ -423,9 +420,6 @@
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\ParsingTree.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.cpp">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\Common\Source\Parsing\Parsing.cpp">
       <Filter>Common\Parsing</Filter>
     </ClCompile>
@@ -464,9 +458,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Controls\GuiDateTimeControls.cpp">
       <Filter>GacUI\Controls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.cpp">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.cpp">
       <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
@@ -632,6 +623,18 @@
     </ClCompile>
     <ClCompile Include="TsfTestWindow.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextAutoComplete.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextColorizer.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextGeneralOperations.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextUndoRedo.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -959,12 +962,6 @@
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiListControls.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextColorizer.h">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextUndoRedo.h">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h">
       <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
@@ -982,9 +979,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\ParsingTree.h">
       <Filter>Common\Parsing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextGeneralOperations.h">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\Parsing\Parsing.h">
       <Filter>Common\Parsing</Filter>
@@ -1024,9 +1018,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\GuiDateTimeControls.h">
       <Filter>GacUI\Controls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextAutoComplete.h">
-      <Filter>GacUI\Controls\TextEditorPackage</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\GraphicsElement\WindowsGDI\GuiGraphicsUniscribe.h">
       <Filter>GacUI\GraphicsElement\WindowsGDI</Filter>
@@ -1135,6 +1126,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\Common\Source\FileSystem.h">
       <Filter>Common\Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextAutoComplete.h">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextColorizer.h">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextGeneralOperations.h">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextUndoRedo.h">
+      <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -10,7 +10,7 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUIDOCUMENTVIEWER
 
 #include "../GuiContainerControls.h"
-#include "GuiTextUndoRedo.h"
+#include "EditorCallback/GuiTextUndoRedo.h"
 
 namespace vl
 {
