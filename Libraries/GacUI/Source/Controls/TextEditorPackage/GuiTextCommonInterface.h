@@ -9,10 +9,10 @@ Interfaces:
 #ifndef VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
 #define VCZH_PRESENTATION_CONTROLS_GUITEXTCOMMONINTERFACE
 
-#include "GuiTextGeneralOperations.h"
-#include "GuiTextColorizer.h"
-#include "GuiTextAutoComplete.h"
-#include "GuiTextUndoRedo.h"
+#include "EditorCallback/GuiTextGeneralOperations.h"
+#include "EditorCallback/GuiTextColorizer.h"
+#include "EditorCallback/GuiTextAutoComplete.h"
+#include "EditorCallback/GuiTextUndoRedo.h"
 
 namespace vl
 {

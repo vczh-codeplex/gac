@@ -1,5 +1,5 @@
 #include "GuiTextGeneralOperations.h"
-#include "../../../../../Common/Source/Regex/RegexExpression.h"
+#include "../../../../../../Common/Source/Regex/RegexExpression.h"
 
 namespace vl
 {

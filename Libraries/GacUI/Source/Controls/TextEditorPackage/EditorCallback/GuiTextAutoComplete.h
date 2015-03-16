@@ -10,8 +10,8 @@ Interfaces:
 #define VCZH_PRESENTATION_CONTROLS_GUITEXTAUTOCOMPLETE
 
 #include "GuiTextGeneralOperations.h"
-#include "../ListControlPackage/GuiTextListControls.h"
-#include "../GuiWindowControls.h"
+#include "../../ListControlPackage/GuiTextListControls.h"
+#include "../../GuiWindowControls.h"
 
 namespace vl
 {
