@@ -338,6 +338,9 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.cpp" />
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.cpp" />
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.cpp" />
     <ClCompile Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.cpp" />
@@ -536,6 +539,9 @@
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiDocumentViewer.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextCommonInterface.h" />
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\GuiTextControls.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.h" />
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiMenuControls.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripCommand.h" />
     <ClInclude Include="..\..\Source\Controls\ToolstripPackage\GuiToolstripMenu.h" />
