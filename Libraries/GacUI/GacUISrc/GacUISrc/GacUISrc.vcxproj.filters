@@ -462,12 +462,6 @@
     <ClCompile Include="..\..\Source\Controls\ListControlPackage\GuiDataGridExtensions.cpp">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
     </ClCompile>
-    <ClCompile Include="TsfTestWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FileSystemInformation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Controls\GuiDateTimeControls.cpp">
       <Filter>GacUI\Controls</Filter>
     </ClCompile>
@@ -635,6 +629,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Workflow\Source\Runtime\WfRuntime_Debugger.cpp">
       <Filter>Workflow\Runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="TsfTestWindow.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1024,9 +1021,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\ListControlPackage\GuiDataGridExtensions.h">
       <Filter>GacUI\Controls\ListControlPackage</Filter>
-    </ClInclude>
-    <ClInclude Include="FileSystemInformation.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\GuiDateTimeControls.h">
       <Filter>GacUI\Controls</Filter>

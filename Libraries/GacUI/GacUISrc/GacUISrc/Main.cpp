@@ -7,24 +7,15 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "..\..\Source\GacUI.h"
-#include "..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h"
-#include "..\..\Source\Resources\GuiParserManager.h"
-#include "..\..\Source\Reflection\GuiInstanceLoader.h"
-#include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionControls.h"
-#include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionEvents.h"
-#include "..\..\Source\Reflection\TypeDescriptors\GuiReflectionTemplates.h"
+#include "..\..\..\..\Common\Source\Regex\RegexExpression.h"
 #include <Windows.h>
 
-using namespace vl::collections;
-using namespace vl::stream;
-using namespace vl::reflection::description;
+using namespace vl::regex;
+using namespace vl::regex_internal;
 using namespace vl::parsing;
-using namespace vl::parsing::xml;
-using namespace vl::workflow;
-using namespace vl::workflow::analyzer;
-using namespace vl::workflow::runtime;
-using namespace vl::presentation::controls::list;
-using namespace vl::presentation::templates;
+using namespace vl::parsing::definitions;
+using namespace vl::parsing::tabling;
+using namespace vl::stream;
 
 //#define GUI_GRAPHICS_RENDERER_GDI
 #define GUI_GRAPHICS_RENDERER_DIRECT2D
@@ -38,294 +29,575 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	int result = SetupWindowsDirect2DRenderer();
 #endif
 
+	ThreadLocalStorage::DisposeStorages();
 #if _DEBUG
 	_CrtDumpMemoryLeaks();
 #endif
 	return result;
 }
 
-#ifndef VCZH_DEBUG_NO_REFLECTION
+extern void UnitTestInGuiMain();
 
-namespace demos
+namespace autocomplete
 {
-	class Data : public Object, public Description<Data>
+
+
+/***********************************************************************
+SymbolLookup
+***********************************************************************/
+
+	Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder);
+	void CreateSubSymbols(ParsingScopeSymbol* symbol, Ptr<ParsingTreeObject> node, const WString& memberName, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder);
+
+	class GrammarSymbol : public ParsingScopeSymbol
 	{
 	public:
-		WString					name;
-		WString					organization;
-		WString					title;
-
-		Data()
+		GrammarSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder, const WString& semantic)
+			:ParsingScopeSymbol(finder->Node(node->GetMember(L"name")).Cast<ParsingTreeToken>()->GetValue(), executor->GetSemanticId(semantic))
 		{
-		}
-
-		Data(const WString& _name, const WString& _organization, const WString& _title)
-			:name(_name)
-			, organization(_organization)
-			, title(_title)
-		{
+			SetNode(node);
 		}
 	};
 
-	class DataViewModel : public Object, public Description<DataViewModel>
-	{
-	public:
-		ObservableList<Ptr<Data>>			people;
-		ObservableList<WString>				titles;
-	};
-
-	template<typename TImpl>
-	class MainWindow_ : public GuiWindow, public GuiInstancePartialClass<GuiWindow>, public Description<TImpl>
+	class EnumFieldSymbol : public GrammarSymbol
 	{
 	protected:
-		Ptr<DataViewModel>					ViewModel_;
-
-		void InitializeComponents(Ptr<DataViewModel> ViewModel)
+		WString GetDisplayInternal(vint semanticId)
 		{
-			ViewModel_ = ViewModel;
-			InitializeFromResource();
+			return literalString;
 		}
 	public:
-		MainWindow_()
-			:GuiWindow(GetCurrentTheme()->CreateWindowStyle())
-			,GuiInstancePartialClass<GuiWindow>(L"demos::MainWindow")
-		{
-		}
+		WString literalString;
 
-		Ptr<DataViewModel> GetViewModel()
+		EnumFieldSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:GrammarSymbol(node, executor, finder, L"EnumValue")
 		{
-			return ViewModel_;
+			WString value=finder->Node(node->GetMember(L"name")).Cast<ParsingTreeToken>()->GetValue();
+			literalString=SerializeString(value);
 		}
 	};
 
-	class MainWindow : public MainWindow_<MainWindow>
+	class ClassFieldSymbol : public GrammarSymbol
 	{
 	public:
-		MainWindow(Ptr<DataViewModel> ViewModel)
-		{
-			InitializeComponents(ViewModel);
-		}
-	};
-
-	template<typename TImpl>
-	class GridVisualizerTemplate_ : public GuiGridVisualizerTemplate, public GuiInstancePartialClass<GuiGridVisualizerTemplate>, public Description<TImpl>
-	{
-	protected:
-		void InitializeComponents()
-		{
-			InitializeFromResource();
-		}
-	public:
-		GridVisualizerTemplate_(const WString& className)
-			:GuiInstancePartialClass<GuiGridVisualizerTemplate>(className)
+		ClassFieldSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:GrammarSymbol(node, executor, finder, L"Field")
 		{
 		}
 	};
 
-	class BoldTextTemplate : public GridVisualizerTemplate_<BoldTextTemplate>
+	class TypeSymbol : public GrammarSymbol
 	{
 	public:
-		BoldTextTemplate()
-			:GridVisualizerTemplate_<BoldTextTemplate>(L"demos::BoldTextTemplate")
+		TypeSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:GrammarSymbol(node, executor, finder, L"Type")
 		{
-			InitializeComponents();
 		}
 	};
 
-	class NormalTextTemplate : public GridVisualizerTemplate_<NormalTextTemplate>
+	class EnumSymbol : public TypeSymbol
 	{
 	public:
-		NormalTextTemplate()
-			:GridVisualizerTemplate_<NormalTextTemplate>(L"demos::NormalTextTemplate")
+		EnumSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:TypeSymbol(node, executor, finder)
 		{
-			InitializeComponents();
+			CreateScope();
+			CreateSubSymbols(this, node, L"members", executor, finder);
 		}
 	};
 
-	class CellBorderTemplate : public GridVisualizerTemplate_<CellBorderTemplate>
+	class ClassSymbol : public TypeSymbol
 	{
 	public:
-		CellBorderTemplate()
-			:GridVisualizerTemplate_<CellBorderTemplate>(L"demos::CellBorderTemplate")
+		ClassSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:TypeSymbol(node, executor, finder)
 		{
-			InitializeComponents();
+			CreateScope();
+			CreateSubSymbols(this, node, L"members", executor, finder);
+			CreateSubSymbols(this, node, L"subTypes", executor, finder);
 		}
 	};
 
-	template<typename TImpl>
-	class GridEditorTemplate_ : public GuiGridEditorTemplate, public GuiInstancePartialClass<GuiGridEditorTemplate>, public Description<TImpl>
+	class TokenSymbol : public GrammarSymbol
 	{
 	protected:
-		Ptr<DataViewModel>					ViewModel_;
-
-		void InitializeComponents(Ptr<DataViewModel> ViewModel)
+		WString GetDisplayInternal(vint semanticId)
 		{
-			ViewModel_ = ViewModel;
-			InitializeFromResource();
+			return semanticId==literalId?literalString:ParsingScopeSymbol::GetDisplayInternal(semanticId);
 		}
 	public:
-		GridEditorTemplate_(const WString& className)
-			:GuiInstancePartialClass<GuiGridEditorTemplate>(className)
+		vint literalId;
+		WString literalString;
+
+		TokenSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:GrammarSymbol(node, executor, finder, L"Token")
+			,literalId(-1)
 		{
-		}
-
-		Ptr<DataViewModel> GetViewModel()
-		{
-			return ViewModel_;
-		}
-	};
-
-	class NameEditor : public GridEditorTemplate_<NameEditor>
-	{
-	public:
-		NameEditor(Ptr<DataViewModel> ViewModel)
-			:GridEditorTemplate_<NameEditor>(L"demos::NameEditor")
-		{
-			InitializeComponents(ViewModel);
-		}
-	};
-
-	class TitleEditor : public GridEditorTemplate_<TitleEditor>
-	{
-	public:
-		TitleEditor(Ptr<DataViewModel> ViewModel)
-			:GridEditorTemplate_<TitleEditor>(L"demos::TitleEditor")
-		{
-			InitializeComponents(ViewModel);
-		}
-	};
-}
-
-namespace vl
-{
-	namespace reflection
-	{
-		namespace description
-		{
-#define DEMO_TYPES(F)\
-			F(demos::Data)\
-			F(demos::DataViewModel)\
-			F(demos::MainWindow)\
-			F(demos::BoldTextTemplate)\
-			F(demos::NormalTextTemplate)\
-			F(demos::CellBorderTemplate)\
-			F(demos::NameEditor)\
-			F(demos::TitleEditor)\
-
-			DEMO_TYPES(DECL_TYPE_INFO)
-			DEMO_TYPES(IMPL_CPP_TYPE_INFO)
-
-			BEGIN_CLASS_MEMBER(demos::Data)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<demos::Data>(), NO_PARAMETER)
-
-				CLASS_MEMBER_FIELD(name)
-				CLASS_MEMBER_FIELD(organization)
-				CLASS_MEMBER_FIELD(title)
-			END_CLASS_MEMBER(demos::Data)
-
-			BEGIN_CLASS_MEMBER(demos::DataViewModel)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<demos::DataViewModel>(), NO_PARAMETER)
-
-				CLASS_MEMBER_FIELD(people)
-				CLASS_MEMBER_FIELD(titles)
-			END_CLASS_MEMBER(demos::DataViewModel)
-
-			BEGIN_CLASS_MEMBER(demos::MainWindow)
-				CLASS_MEMBER_BASE(GuiWindow)
-				CLASS_MEMBER_CONSTRUCTOR(demos::MainWindow*(Ptr<demos::DataViewModel>), {L"ViewModel"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
-			END_CLASS_MEMBER(demos::MainWindow)
-
-			BEGIN_CLASS_MEMBER(demos::BoldTextTemplate)
-				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::BoldTextTemplate*(), NO_PARAMETER)
-			END_CLASS_MEMBER(demos::BoldTextTemplate)
-
-			BEGIN_CLASS_MEMBER(demos::NormalTextTemplate)
-				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::NormalTextTemplate*(), NO_PARAMETER)
-			END_CLASS_MEMBER(demos::NormalTextTemplate)
-
-			BEGIN_CLASS_MEMBER(demos::CellBorderTemplate)
-				CLASS_MEMBER_BASE(GuiGridVisualizerTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::CellBorderTemplate*(), NO_PARAMETER)
-			END_CLASS_MEMBER(demos::CellBorderTemplate)
-
-			BEGIN_CLASS_MEMBER(demos::NameEditor)
-				CLASS_MEMBER_BASE(GuiGridEditorTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::NameEditor*(Ptr<demos::DataViewModel>), {L"ViewModel"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
-			END_CLASS_MEMBER(demos::NameEditor)
-
-			BEGIN_CLASS_MEMBER(demos::TitleEditor)
-				CLASS_MEMBER_BASE(GuiGridEditorTemplate)
-				CLASS_MEMBER_CONSTRUCTOR(demos::TitleEditor*(Ptr<demos::DataViewModel>), {L"ViewModel"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ViewModel)
-			END_CLASS_MEMBER(demos::TitleEditor)
-
-			class DemoResourceLoader : public Object, public ITypeLoader
+			WString value=finder->Node(node->GetMember(L"regex")).Cast<ParsingTreeToken>()->GetValue();
+			WString regex=DeserializeString(value);
+			if(IsRegexEscapedListeralString(regex))
 			{
-			public:
-				void Load(ITypeManager* manager)
-				{
-					DEMO_TYPES(ADD_TYPE_INFO)
-				}
+				literalString=SerializeString(UnescapeTextForRegex(regex));
+				AddSemanticId(literalId=executor->GetSemanticId(L"Literal"));
+			}
+		}
+	};
 
-				void Unload(ITypeManager* manager)
-				{
-				}
-			};
+	class RuleSymbol : public GrammarSymbol
+	{
+	public:
+		RuleSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+			:GrammarSymbol(node, executor, finder, L"Rule")
+		{
+		}
+	};
 
-			class DemoResourcePlugin : public Object, public IGuiPlugin
+	class ParserDefSymbol : public ParsingScopeSymbol
+	{
+	public:
+		ParserDefSymbol(Ptr<ParsingTreeObject> node, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+		{
+			SetNode(node.Obj());
+			CreateScope();
+			CreateSubSymbols(this, node, L"definitions", executor, finder);
+		}
+	};
+
+
+	void CreateSubSymbols(ParsingScopeSymbol* symbol, Ptr<ParsingTreeObject> node, const WString& memberName, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+	{
+		if(Ptr<ParsingTreeArray> members=finder->Node(node->GetMember(memberName)).Cast<ParsingTreeArray>())
+		{
+			FOREACH(Ptr<ParsingTreeNode>, node, members->GetItems())
 			{
-			public:
-				void Load()override
+				if(Ptr<ParsingTreeObject> obj=finder->Node(node).Cast<ParsingTreeObject>())
 				{
-					GetGlobalTypeManager()->AddTypeLoader(new DemoResourceLoader);
+					symbol->GetScope()->AddSymbol(CreateSymbolFromNode(obj, executor, finder));
 				}
-
-				void AfterLoad()override
-				{
-				}
-
-				void Unload()override
-				{
-				}
-			};
-			GUI_REGISTER_PLUGIN(DemoResourcePlugin)
+			}
 		}
 	}
+
+	Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+	{
+		if(obj->GetType()==L"EnumMemberDef")
+		{
+			return new EnumFieldSymbol(obj, executor, finder);
+		}
+		else if(obj->GetType()==L"EnumTypeDef")
+		{
+			return new EnumSymbol(obj, executor, finder);
+		}
+		else if(obj->GetType()==L"ClassMemberDef")
+		{
+			return new ClassFieldSymbol(obj, executor, finder);
+		}
+		else if(obj->GetType()==L"ClassTypeDef")
+		{
+			return new ClassSymbol(obj, executor, finder);
+		}
+		else if(obj->GetType()==L"TokenDef")
+		{
+			return new TokenSymbol(obj, executor, finder);
+		}
+		else if(obj->GetType()==L"RuleDef")
+		{
+			return new RuleSymbol(obj, executor, finder);
+		}
+		else if(obj->GetType()==L"ParserDef")
+		{
+			return new ParserDefSymbol(obj, executor, finder);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, ParsingScopeFinder* finder)
+	{
+		ParsingScope* scope=finder->GetScopeFromNode(obj);
+		if(obj->GetType()==L"PrimitiveTypeObj")
+		{
+			WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+			return finder->GetSymbolsRecursively(scope, name);
+		}
+		else if(obj->GetType()==L"SubTypeObj")
+		{
+			if(Ptr<ParsingTreeObject> parentType=obj->GetMember(L"parentType").Cast<ParsingTreeObject>())
+			{
+				WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+				LazyList<Ptr<ParsingScopeSymbol>> types=FindReferencedSymbols(parentType.Obj(), finder);
+				return types
+					.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+					{
+						return finder->GetSymbols(type->GetScope(), name);
+					});
+			}
+		}
+		else if(obj->GetType()==L"PrimitiveGrammarDef")
+		{
+			WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+			return finder->GetSymbolsRecursively(scope, name);
+		}
+		return LazyList<Ptr<ParsingScopeSymbol>>();
+	}
+
+	typedef List<Ptr<ParsingScopeSymbol>> TypeList;
+	typedef Ptr<TypeList> PtrTypeList;
+
+	PtrTypeList SearchAllTypes(ParsingTreeObject* obj, ParsingScopeFinder* finder)
+	{
+		PtrTypeList allTypes=new TypeList;
+		ParsingScope* scope=finder->GetScopeFromNode(obj);
+		while(scope)
+		{
+			ParsingScope* parentScope=finder->ParentScope(scope->GetOwnerSymbol());
+			if(parentScope)
+			{
+				scope=parentScope;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		CopyFrom(
+			*allTypes.Obj(),
+			From(finder->GetSymbolsRecursively(scope))
+				.Where([](Ptr<ParsingScopeSymbol> symbol)
+				{
+					return symbol.Cast<TypeSymbol>();
+				})
+			);
+		vint last=0;
+
+		while(true)
+		{
+			vint count=allTypes->Count();
+			CopyFrom(
+				*allTypes.Obj(),
+				From(*allTypes.Obj())
+					.Skip(last)
+					.SelectMany([=](Ptr<ParsingScopeSymbol> symbol)
+					{
+						return finder->GetSymbols(symbol->GetScope());
+					})
+					.Where([](Ptr<ParsingScopeSymbol> symbol)
+					{
+						return symbol.Cast<TypeSymbol>();
+					}),
+				true
+				);
+			if(allTypes->Count()==count)
+			{
+				break;
+			}
+			last=count;
+		}
+
+		return allTypes;
+	}
+
+	PtrTypeList IntersectTypes(PtrTypeList firstTypes, PtrTypeList secondTypes)
+	{
+		if(!firstTypes)
+		{
+			return secondTypes;
+		}
+		else if(!secondTypes)
+		{
+			return firstTypes;
+		}
+		else
+		{
+			PtrTypeList types=new TypeList;
+			CopyFrom(*types.Obj(), From(*firstTypes.Obj()).Intersect(*secondTypes.Obj()));
+			return types;
+		}
+	}
+
+	PtrTypeList SearchGrammarTypes(ParsingTreeObject* obj, ParsingScopeFinder* finder)
+	{
+		if(obj->GetType()==L"SequenceGrammarDef" || obj->GetType()==L"AlternativeGrammarDef")
+		{
+			PtrTypeList firstTypes=SearchGrammarTypes(finder->Node(obj->GetMember(L"first")).Cast<ParsingTreeObject>().Obj(), finder);
+			PtrTypeList secondTypes=SearchGrammarTypes(finder->Node(obj->GetMember(L"second")).Cast<ParsingTreeObject>().Obj(), finder);
+			return IntersectTypes(firstTypes, secondTypes);
+		}
+		else if(
+			obj->GetType()==L"LoopGrammarDef"
+			|| obj->GetType()==L"OptionalGrammarDef"
+			|| obj->GetType()==L"AssignGrammarDef"
+			|| obj->GetType()==L"UseGrammarDef"
+			|| obj->GetType()==L"SetterGrammarDef")
+		{
+			return SearchGrammarTypes(finder->Node(obj->GetMember(L"grammar")).Cast<ParsingTreeObject>().Obj(), finder);
+		}
+		else if(obj->GetType()==L"CreateGrammarDef")
+		{
+			Ptr<ParsingScopeSymbol> type=FindReferencedSymbols(finder->Node(obj->GetMember(L"type")).Cast<ParsingTreeObject>().Obj(), finder)
+				.Where([](Ptr<ParsingScopeSymbol> symbol)
+				{
+					return symbol.Cast<TypeSymbol>();
+				})
+				.First(0);
+			if(type)
+			{
+				PtrTypeList types=new List<Ptr<ParsingScopeSymbol>>;
+				types->Add(type);
+				return types;
+			}
+		}
+		return 0;
+	}
+
+	LazyList<Ptr<ParsingScopeSymbol>> DetermineGrammarTypes(ParsingTreeObject* obj, ParsingScopeFinder* finder)
+	{
+		PtrTypeList selectedTypes;
+		ParsingTreeObject* currentObj=obj;
+		ParsingTreeObject* lastObj=0;
+		while(currentObj)
+		{
+			if(currentObj->GetType()==L"SequenceGrammarDef")
+			{
+				ParsingTreeObject* first=dynamic_cast<ParsingTreeObject*>(finder->Node(currentObj->GetMember(L"first").Obj()));
+				ParsingTreeObject* second=dynamic_cast<ParsingTreeObject*>(finder->Node(currentObj->GetMember(L"second").Obj()));
+				PtrTypeList alternativeTypes=lastObj==first?SearchGrammarTypes(second, finder):SearchGrammarTypes(first, finder);
+				selectedTypes=IntersectTypes(selectedTypes, alternativeTypes);
+			}
+			else if(currentObj->GetType()==L"CreateGrammarDef")
+			{
+				Ptr<ParsingScopeSymbol> type=FindReferencedSymbols(finder->Node(currentObj->GetMember(L"type")).Cast<ParsingTreeObject>().Obj(), finder)
+					.Where([](Ptr<ParsingScopeSymbol> symbol)
+					{
+						return symbol.Cast<TypeSymbol>();
+					})
+					.First(0);
+				if(type)
+				{
+					PtrTypeList types=new List<Ptr<ParsingScopeSymbol>>;
+					types->Add(type);
+					selectedTypes=types;
+				}
+			}
+			else if(currentObj->GetType()==L"AssignGrammarDef" || currentObj->GetType()==L"SetterGrammarDef")
+			{
+				ParsingTreeObject* grammar=dynamic_cast<ParsingTreeObject*>(finder->Node(currentObj->GetMember(L"grammar").Obj()));
+				PtrTypeList alternativeTypes=SearchGrammarTypes(grammar, finder);
+				selectedTypes=IntersectTypes(selectedTypes, alternativeTypes);
+			}
+			lastObj=currentObj;
+			currentObj=dynamic_cast<ParsingTreeObject*>(finder->ParentNode(currentObj));
+		}
+
+		return selectedTypes?selectedTypes:SearchAllTypes(obj, finder);
+	}
+
+	LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)
+	{
+		ParsingScope* scope=finder->GetScopeFromNode(obj);
+		if(obj->GetType()==L"PrimitiveTypeObj")
+		{
+			if(field==L"name")
+			{
+				return finder->GetSymbolsRecursively(scope);
+			}
+		}
+		else if(obj->GetType()==L"SubTypeObj")
+		{
+			if(field==L"name")
+			{
+				if(Ptr<ParsingTreeObject> parentType=obj->GetMember(L"parentType").Cast<ParsingTreeObject>())
+				{
+					WString name=obj->GetMember(L"name").Cast<ParsingTreeToken>()->GetValue();
+					LazyList<Ptr<ParsingScopeSymbol>> types=FindReferencedSymbols(parentType.Obj(), finder);
+					return types
+						.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+						{
+							return finder->GetSymbols(type->GetScope());
+						});
+				}
+			}
+		}
+		else if(obj->GetType()==L"PrimitiveGrammarDef")
+		{
+			if(field==L"name")
+			{
+				return finder->GetSymbolsRecursively(scope);
+			}
+		}
+		else if(obj->GetType()==L"TextGrammarDef")
+		{
+			if(field==L"text")
+			{
+				return From(finder->GetSymbolsRecursively(scope))
+					.Where([](Ptr<ParsingScopeSymbol> symbol)
+					{
+						return symbol.Cast<TokenSymbol>();
+					});
+			}
+		}
+		else if(obj->GetType()==L"AssignGrammarDef")
+		{
+			if(field==L"memberName")
+			{
+				return DetermineGrammarTypes(obj, finder)
+					.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+					{
+						return finder->GetSymbols(type->GetScope());
+					})
+					.Where([](Ptr<ParsingScopeSymbol> type)
+					{
+						return type.Cast<ClassFieldSymbol>();
+					});
+			}
+		}
+		else if(obj->GetType()==L"SetterGrammarDef")
+		{
+			if(field==L"memberName")
+			{
+				return DetermineGrammarTypes(obj, finder)
+					.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+					{
+						return finder->GetSymbols(type->GetScope());
+					})
+					.Where([](Ptr<ParsingScopeSymbol> type)
+					{
+						return type.Cast<ClassFieldSymbol>();
+					});
+			}
+			else if(field==L"value")
+			{
+				WString memberName=finder->Node(obj->GetMember(L"memberName")).Cast<ParsingTreeToken>()->GetValue();
+				Ptr<ParsingScopeSymbol> field=FindPossibleSymbols(obj, L"memberName", finder)
+					.Where([=](Ptr<ParsingScopeSymbol> type)
+					{
+						return type->GetName()==memberName;
+					})
+					.First(0);
+				if(field)
+				{
+					Ptr<ParsingTreeObject> type=finder->Node(field->GetNode()->GetMember(L"type")).Cast<ParsingTreeObject>();
+					return FindReferencedSymbols(type.Obj(), finder)
+						.SelectMany([=](Ptr<ParsingScopeSymbol> type)
+						{
+							return finder->GetSymbols(type->GetScope());
+						})
+						.Where([](Ptr<ParsingScopeSymbol> type)
+						{
+							return type.Cast<EnumFieldSymbol>();
+						});
+				}
+			}
+		}
+		return LazyList<Ptr<ParsingScopeSymbol>>();
+	}
+
+/***********************************************************************
+GrammarLanguageProvider
+***********************************************************************/
+
+	class GrammarLanguageProvider : public Object, public ILanguageProvider
+	{
+	public:
+		Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)
+		{
+			return autocomplete::CreateSymbolFromNode(obj, executor, finder);
+		}
+
+		LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)
+		{
+			return autocomplete::FindReferencedSymbols(obj, finder);
+		}
+
+		LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)
+		{
+			return autocomplete::FindPossibleSymbols(obj, field, finder);
+		}
+	};
+
+/***********************************************************************
+ParserGrammarExecutor
+***********************************************************************/
+
+	class ParserGrammarExecutor : public RepeatingParsingExecutor
+	{
+	protected:
+
+		void OnContextFinishedAsync(RepeatingParsingOutput& context)override
+		{
+			context.finder=new ParsingScopeFinder();
+			context.symbol=CreateSymbolFromNode(context.node, this, context.finder.Obj());
+			context.finder->InitializeQueryCache(context.symbol.Obj());
+		}
+	public:
+		ParserGrammarExecutor()
+			:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl", new GrammarLanguageProvider)
+		{
+		}
+	};
+
+/***********************************************************************
+ParserGrammarColorizer
+***********************************************************************/
+
+class ParserGrammarColorizer : public GuiGrammarColorizer
+{
+public:
+	ParserGrammarColorizer(Ptr<ParserGrammarExecutor> executor)
+		:GuiGrammarColorizer(executor)
+	{
+		SetColor(L"Keyword", Color(0, 0, 255));
+		SetColor(L"Attribute", Color(0, 0, 255));
+		SetColor(L"String", Color(163, 21, 21));
+		SetColor(L"Type", Color(43, 145, 175));
+		SetColor(L"Token", Color(163, 73, 164));
+		SetColor(L"Rule", Color(255, 127, 39));
+		EndSetColors();
+	}
+};
+
+/***********************************************************************
+ParserGrammarAutoComplete
+***********************************************************************/
+
+class ParserGrammarAutoComplete : public GuiGrammarAutoComplete
+{
+public:
+	ParserGrammarAutoComplete(Ptr<ParserGrammarExecutor> executor)
+		:GuiGrammarAutoComplete(executor)
+	{
+	}
+};
 }
-
-#endif
-
-extern void UnitTestInGuiMain();
+using namespace autocomplete;
 
 void GuiMain()
 {
-#ifndef VCZH_DEBUG_NO_REFLECTION
+	GuiWindow window(GetCurrentTheme()->CreateWindowStyle());
+	window.GetContainerComposition()->SetPreferredMinSize(Size(600, 480));
 	{
-		List<WString> errors;
-		auto resource = GuiResource::LoadFromXml(L"..\\GacUISrcCodepackedTest\\Resources\\XmlWindowResource.xml", errors);
-		GetInstanceLoaderManager()->SetResource(L"Demo", resource);
+		auto executor = MakePtr<ParserGrammarExecutor>();
+		auto colorizer = MakePtr<ParserGrammarColorizer>(executor);
+		auto autoComplete = MakePtr<ParserGrammarAutoComplete>(executor);
+		
+		auto textBox = g::NewMultilineTextBox();
+		textBox->SetColorizer(colorizer);
+		textBox->SetAutoComplete(autoComplete);
+		
+		FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
+		BomDecoder decoder;
+		DecoderStream decoderStream(fileStream, decoder);
+		StreamReader reader(decoderStream);
+		textBox->SetText(reader.ReadToEnd());
+		textBox->Select(TextPos(), TextPos());
+
+		textBox->GetBoundsComposition()->SetAlignmentToParent(Margin(5, 5, 5, 5));
+		window.AddChild(textBox);
 	}
-
-	auto viewModel = MakePtr<demos::DataViewModel>();
-	viewModel->titles.Add(L"CAO (Chief Algorithm Officer)");
-	viewModel->titles.Add(L"Principal Fisher");
-	viewModel->titles.Add(L"Software Engineer");
-	viewModel->titles.Add(L"Sponsor");
-	viewModel->people.Add(new demos::Data(L"Kula", L"Opera", L"CAO (Chief Algorithm Officer)"));
-	viewModel->people.Add(new demos::Data(L"JeffChen", L"Tencent", L"Principal Fisher"));
-	viewModel->people.Add(new demos::Data(L"MiliMeow", L"Microsoft", L"Software Engineer"));
-	viewModel->people.Add(new demos::Data(L"Skogkatt", L"360", L"Sponsor"));
-
-	demos::MainWindow window(viewModel);
 	window.ForceCalculateSizeImmediately();
 	window.MoveToScreenCenter();
 	GetApplication()->Run(&window);
-#endif
 }
