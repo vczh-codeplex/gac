@@ -8,6 +8,8 @@
 
 #include "..\..\Source\GacUI.h"
 #include "..\..\..\..\Common\Source\Regex\RegexExpression.h"
+#include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.h"
+#include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.h"
 #include <Windows.h>
 
 using namespace vl::regex;
@@ -507,7 +509,7 @@ GrammarLanguageProvider
 			return autocomplete::CreateSymbolFromNode(obj, executor, finder);
 		}
 
-		LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)
+		LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(ParsingTreeObject* obj, ParsingScopeFinder* finder)
 		{
 			return autocomplete::FindReferencedSymbols(obj, finder);
 		}

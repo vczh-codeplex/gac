@@ -121,6 +121,9 @@
     <Filter Include="GacUI\Controls\TextEditorPackage\EditorCallback">
       <UniqueIdentifier>{70d730e9-d2b3-4c4c-a2d3-79056277c2c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GacUI\Controls\TextEditorPackage\LanguageService">
+      <UniqueIdentifier>{c798ad45-bfb9-4c86-98ef-9bbda7accb61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -636,6 +639,15 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextUndoRedo.cpp">
       <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.cpp">
+      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1138,6 +1150,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\EditorCallback\GuiTextUndoRedo.h">
       <Filter>GacUI\Controls\TextEditorPackage\EditorCallback</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.h">
+      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.h">
+      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.h">
+      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

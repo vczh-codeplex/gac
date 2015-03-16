@@ -11,6 +11,8 @@ Interfaces:
 
 #include "GuiReflectionElements.h"
 #include "GuiReflectionCompositions.h"
+#include "../../Controls/TextEditorPackage/LanguageService/GuiLanguageColorizer.h"
+#include "../../Controls/TextEditorPackage/LanguageService/GuiLanguageAutoComplete.h"
 
 namespace vl
 {
@@ -156,6 +158,9 @@ Type List
 			F(presentation::controls::GuiDocumentLabel)\
 			F(presentation::controls::GuiDocumentLabel::IStyleController)\
 			F(presentation::controls::GuiTextBoxCommonInterface)\
+			F(presentation::controls::ParsingScope)\
+			F(presentation::controls::ParsingScopeSymbol)\
+			F(presentation::controls::ParsingScopeFinder)\
 			F(presentation::controls::ILanguageProvider)\
 			F(presentation::controls::RepeatingParsingExecutor)\
 			F(presentation::controls::GuiTextBoxColorizerBase)\
@@ -2079,17 +2084,17 @@ Interface Proxy
 						return new controls_ILanguageProvider(_proxy);
 					}
 
-					Ptr<parsing::ParsingScopeSymbol> CreateSymbolFromNode(Ptr<parsing::ParsingTreeObject> obj, RepeatingParsingExecutor* executor, parsing::ParsingScopeFinder* finder)override
+					Ptr<ParsingScopeSymbol> CreateSymbolFromNode(Ptr<parsing::ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(CreateSymbolFromNode, obj, executor, finder);
 					}
 
-					collections::LazyList<Ptr<parsing::ParsingScopeSymbol>> FindReferencedSymbols(parsing::ParsingTreeObject* obj, parsing::ParsingScopeFinder* finder)override
+					collections::LazyList<Ptr<ParsingScopeSymbol>> FindReferencedSymbols(parsing::ParsingTreeObject* obj, ParsingScopeFinder* finder)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(FindReferencedSymbols, obj, finder);
 					}
 
-					collections::LazyList<Ptr<parsing::ParsingScopeSymbol>> FindPossibleSymbols(parsing::ParsingTreeObject* obj, const WString& field, parsing::ParsingScopeFinder* finder)override
+					collections::LazyList<Ptr<ParsingScopeSymbol>> FindPossibleSymbols(parsing::ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)override
 					{
 						return INVOKEGET_INTERFACE_PROXY(FindPossibleSymbols, obj, field, finder);
 					}
