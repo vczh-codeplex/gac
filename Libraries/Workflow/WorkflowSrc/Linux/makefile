@@ -1,10 +1,13 @@
 # This file is generated from "./makefile.debug-clang.makegen" by Vczh Makefile Generator
 
+# Config
 .PHONY : all clean
 
+# Targets
 bin_TARGET = ././Bin/
 obj_TARGET = ././Obj/
 
+# Folders
 UNITTEST_DIR = ./../WorkflowSrc/
 UNITTEST_cpp = $(wildcard $(UNITTEST_DIR)*.cpp)
 VLPP_BASIC_DIR = ./../../Source/../../../Common/Source/./
@@ -46,6 +49,7 @@ WORKFLOW_RUNTIME_DIR = ./../../Source/./Runtime/
 WORKFLOW_RUNTIME_cpp = $(wildcard $(WORKFLOW_RUNTIME_DIR)*.cpp)
 WORKFLOW_RUNTIME_h = $(wildcard $(WORKFLOW_RUNTIME_DIR)*.h)
 
+# Output Categories
 UNITTEST_o = $(patsubst $(UNITTEST_DIR)%.cpp, $(obj_TARGET)%.o, $(UNITTEST_cpp))
 VLPP_BASIC_o = $(patsubst $(VLPP_BASIC_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_BASIC_cpp))
 VLPP_COLLECTIONS_o = $(patsubst $(VLPP_COLLECTIONS_DIR)%.cpp, $(obj_TARGET)%.o, $(VLPP_COLLECTIONS_cpp))
@@ -60,62 +64,66 @@ WORKFLOW_ANALYZER_o = $(patsubst $(WORKFLOW_ANALYZER_DIR)%.cpp, $(obj_TARGET)%.o
 WORKFLOW_EXPRESSION_o = $(patsubst $(WORKFLOW_EXPRESSION_DIR)%.cpp, $(obj_TARGET)%.o, $(WORKFLOW_EXPRESSION_cpp))
 WORKFLOW_RUNTIME_o = $(patsubst $(WORKFLOW_RUNTIME_DIR)%.cpp, $(obj_TARGET)%.o, $(WORKFLOW_RUNTIME_cpp))
 
+# All
 ALL_o = $(VLPP_BASIC_o) $(VLPP_COLLECTIONS_o) $(VLPP_JSON_o) $(VLPP_PARSING_o) $(VLPP_REFLECTION_o) $(VLPP_REGEX_o) $(VLPP_STREAM_o) $(VLPP_UNITTEST_o) $(VLPP_XML_o) $(WORKFLOW_ANALYZER_o) $(WORKFLOW_EXPRESSION_o) $(WORKFLOW_RUNTIME_o) $(UNITTEST_o)
 all : $(ALL_o)
 	clang++ -std=c++11 -g -pthread -fprofile-arcs -o $(bin_TARGET)UnitTest $(ALL_o)
 
-$(VLPP_COLLECTIONS_h) : $(VLPP_BASIC_h)
-$(VLPP_STREAM_h) : $(VLPP_COLLECTIONS_h)
-$(VLPP_PARSING_h) : $(VLPP_STREAM_h)
-$(VLPP_REFLECTION_h) : $(VLPP_STREAM_h)
-$(VLPP_XML_h) : $(VLPP_PARSING_h)
-$(VLPP_UNITTEST_h) : $(VLPP_BASIC_h)
-$(VLPP_JSON_h) : $(VLPP_PARSING_h)
-$(VLPP_BASIC_cpp) : $(VLPP_BASIC_h)
-$(VLPP_COLLECTIONS_cpp) : $(VLPP_COLLECTIONS_h)
-$(VLPP_JSON_cpp) : $(VLPP_JSON_h)
-$(VLPP_PARSING_cpp) : $(VLPP_PARSING_h)
-$(VLPP_REFLECTION_cpp) : $(VLPP_REFLECTION_h)
-$(VLPP_REGEX_cpp) : $(VLPP_REGEX_h)
-$(VLPP_STREAM_cpp) : $(VLPP_STREAM_h)
-$(VLPP_UNITTEST_cpp) : $(VLPP_UNITTEST_h)
-$(VLPP_XML_cpp) : $(VLPP_XML_h)
-$(WORKFLOW_BASIC_h) : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
-$(WORKFLOW_EXPRESSION_h) : $(WORKFLOW_BASIC_h)
-$(WORKFLOW_RUNTIME_h) : $(WORKFLOW_BASIC_h)
-$(WORKFLOW_ANALYZER_h) : $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
-$(WORKFLOW_ANALYZER_cpp) : $(WORKFLOW_ANALYZER_h)
-$(WORKFLOW_EXPRESSION_cpp) : $(WORKFLOW_EXPRESSION_h)
-$(WORKFLOW_RUNTIME_cpp) : $(WORKFLOW_RUNTIME_h)
-$(UNITTEST_cpp) : $(WORKFLOW_ANALYZER_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
+# Dependencies
+# $(VLPP_COLLECTIONS_h) : $(VLPP_BASIC_h)
+# $(VLPP_STREAM_h) : $(VLPP_COLLECTIONS_h)
+# $(VLPP_PARSING_h) : $(VLPP_STREAM_h)
+# $(VLPP_REFLECTION_h) : $(VLPP_STREAM_h)
+# $(VLPP_XML_h) : $(VLPP_PARSING_h)
+# $(VLPP_UNITTEST_h) : $(VLPP_BASIC_h)
+# $(VLPP_JSON_h) : $(VLPP_PARSING_h)
+# $(VLPP_BASIC_cpp) : $(VLPP_BASIC_h)
+# $(VLPP_COLLECTIONS_cpp) : $(VLPP_COLLECTIONS_h)
+# $(VLPP_JSON_cpp) : $(VLPP_JSON_h)
+# $(VLPP_PARSING_cpp) : $(VLPP_PARSING_h)
+# $(VLPP_REFLECTION_cpp) : $(VLPP_REFLECTION_h)
+# $(VLPP_REGEX_cpp) : $(VLPP_REGEX_h)
+# $(VLPP_STREAM_cpp) : $(VLPP_STREAM_h)
+# $(VLPP_UNITTEST_cpp) : $(VLPP_UNITTEST_h)
+# $(VLPP_XML_cpp) : $(VLPP_XML_h)
+# $(WORKFLOW_BASIC_h) : $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
+# $(WORKFLOW_EXPRESSION_h) : $(WORKFLOW_BASIC_h)
+# $(WORKFLOW_RUNTIME_h) : $(WORKFLOW_BASIC_h)
+# $(WORKFLOW_ANALYZER_h) : $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
+# $(WORKFLOW_ANALYZER_cpp) : $(WORKFLOW_ANALYZER_h)
+# $(WORKFLOW_EXPRESSION_cpp) : $(WORKFLOW_EXPRESSION_h)
+# $(WORKFLOW_RUNTIME_cpp) : $(WORKFLOW_RUNTIME_h)
+# $(UNITTEST_cpp) : $(WORKFLOW_ANALYZER_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
 
-$(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp
+# Rules
+$(VLPP_BASIC_o) : $(obj_TARGET)%.o : $(VLPP_BASIC_DIR)%.cpp $(VLPP_BASIC_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_COLLECTIONS_o) : $(obj_TARGET)%.o : $(VLPP_COLLECTIONS_DIR)%.cpp
+$(VLPP_COLLECTIONS_o) : $(obj_TARGET)%.o : $(VLPP_COLLECTIONS_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_JSON_o) : $(obj_TARGET)%.o : $(VLPP_JSON_DIR)%.cpp
+$(VLPP_JSON_o) : $(obj_TARGET)%.o : $(VLPP_JSON_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_STREAM_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_PARSING_o) : $(obj_TARGET)%.o : $(VLPP_PARSING_DIR)%.cpp
+$(VLPP_PARSING_o) : $(obj_TARGET)%.o : $(VLPP_PARSING_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_PARSING_h) $(VLPP_STREAM_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_REFLECTION_o) : $(obj_TARGET)%.o : $(VLPP_REFLECTION_DIR)%.cpp
+$(VLPP_REFLECTION_o) : $(obj_TARGET)%.o : $(VLPP_REFLECTION_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_REFLECTION_h) $(VLPP_STREAM_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_REGEX_o) : $(obj_TARGET)%.o : $(VLPP_REGEX_DIR)%.cpp
+$(VLPP_REGEX_o) : $(obj_TARGET)%.o : $(VLPP_REGEX_DIR)%.cpp $(VLPP_REGEX_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_STREAM_o) : $(obj_TARGET)%.o : $(VLPP_STREAM_DIR)%.cpp
+$(VLPP_STREAM_o) : $(obj_TARGET)%.o : $(VLPP_STREAM_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_STREAM_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_UNITTEST_o) : $(obj_TARGET)%.o : $(VLPP_UNITTEST_DIR)%.cpp
+$(VLPP_UNITTEST_o) : $(obj_TARGET)%.o : $(VLPP_UNITTEST_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_UNITTEST_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(VLPP_XML_o) : $(obj_TARGET)%.o : $(VLPP_XML_DIR)%.cpp
+$(VLPP_XML_o) : $(obj_TARGET)%.o : $(VLPP_XML_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_PARSING_h) $(VLPP_STREAM_h) $(VLPP_XML_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(WORKFLOW_ANALYZER_o) : $(obj_TARGET)%.o : $(WORKFLOW_ANALYZER_DIR)%.cpp
+$(WORKFLOW_ANALYZER_o) : $(obj_TARGET)%.o : $(WORKFLOW_ANALYZER_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h) $(WORKFLOW_ANALYZER_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(WORKFLOW_EXPRESSION_o) : $(obj_TARGET)%.o : $(WORKFLOW_EXPRESSION_DIR)%.cpp
+$(WORKFLOW_EXPRESSION_o) : $(obj_TARGET)%.o : $(WORKFLOW_EXPRESSION_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(WORKFLOW_RUNTIME_o) : $(obj_TARGET)%.o : $(WORKFLOW_RUNTIME_DIR)%.cpp
+$(WORKFLOW_RUNTIME_o) : $(obj_TARGET)%.o : $(WORKFLOW_RUNTIME_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_RUNTIME_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
-$(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp
+$(UNITTEST_o) : $(obj_TARGET)%.o : $(UNITTEST_DIR)%.cpp $(VLPP_BASIC_h) $(VLPP_COLLECTIONS_h) $(VLPP_JSON_h) $(VLPP_PARSING_h) $(VLPP_REFLECTION_h) $(VLPP_REGEX_h) $(VLPP_STREAM_h) $(VLPP_XML_h) $(WORKFLOW_ANALYZER_h) $(WORKFLOW_BASIC_h) $(WORKFLOW_EXPRESSION_h) $(WORKFLOW_RUNTIME_h)
 	clang++ -std=c++11 -g -fprofile-arcs -ftest-coverage -o $@ -c $<
 
+# Clean
 clean:
 	rm $(bin_TARGET)* -rf
 	rm $(obj_TARGET)* -rf

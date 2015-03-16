@@ -533,6 +533,34 @@ void ExpandDependency(Ptr<MakeGenConfig> config, const List<DependencyItem>& inp
 	}
 }
 
+void ExpandDependencyRecursively(Ptr<MakeGenConfig> config, const List<DependencyItem>& inputItems, SortedList<DependencyItem>& outputItems)
+{
+	List<DependencyItem> traversedItems;
+	CopyFrom(traversedItems, inputItems);
+	vint current = 0;
+
+	while (current < traversedItems.Count())
+	{
+		auto inputItem = traversedItems[current++];
+		auto index = config->dependencies.Keys().IndexOf(inputItem);
+		if (index == -1)
+		{
+			continue;
+		}
+		ExpandDependency(config, config->dependencies.GetByIndex(index), outputItems);
+
+		FOREACH(DependencyItem, item, outputItems)
+		{
+			if (!traversedItems.Contains(item))
+			{
+				traversedItems.Add(item);
+			}
+		}
+	}
+
+	CopyFrom(outputItems, From(traversedItems).Skip(inputItems.Count()));
+}
+
 WString BuildCommand(const WString& command, const WString& input, const WString& output)
 {
 	auto buffer=command.Buffer();
@@ -573,10 +601,12 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	writer.WriteLine(L"");
 
 	// write config
+	writer.WriteLine(L"# Config");
 	writer.WriteLine(L".PHONY : all clean");
 	writer.WriteLine(L"");
 
 	// write targets
+	writer.WriteLine(L"# Targets");
 	for(vint i=0;i<config->targets.Count();i++)
 	{
 		auto key=config->targets.Keys()[i];
@@ -586,6 +616,7 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	writer.WriteLine(L"");
 
 	// write folders
+	writer.WriteLine(L"# Folders");
 	FOREACH(Ptr<FolderConfig>, folder, config->folders.Values())
 	{
 		if (folder->path==L"") continue;
@@ -611,6 +642,7 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	writer.WriteLine(L"");
 
 	// write output categories
+	writer.WriteLine(L"# Output Categories");
 	FOREACH(Ptr<BuildingConfig>, building, config->buildings)
 	{
 		if(!building->aggregation)
@@ -634,6 +666,7 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	writer.WriteLine(L"");
 	
 	// write all
+	writer.WriteLine(L"# All");
 	Group<WString, WString> linkingDependencies;
 	FOREACH(Ptr<BuildingConfig>, building, config->buildings)
 	{
@@ -700,11 +733,13 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	writer.WriteLine(L"");
 
 	// write dependencies
+	writer.WriteLine(L"# Dependencies");
 	FOREACH(DependencyItem, di1, config->dependencyOrder)
 	{
 		vint index=config->dependencies.Keys().IndexOf(di1);
 		if(index==-1) continue;
 		const auto& di2s=config->dependencies.GetByIndex(index);
+		writer.WriteString(L"# ");
 		{
 			List<DependencyItem> inputItems;
 			SortedList<DependencyItem> outputItems;
@@ -729,6 +764,7 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	writer.WriteLine(L"");
 	
 	// write rules
+	writer.WriteLine(L"# Rules");
 	FOREACH(WString, outputCategory, config->mappingOrder)
 	{
 		bool found=false;
@@ -751,7 +787,23 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 									if(config->categoryFolders.Contains(inputCategory, folder))
 									{
 										found=true;
-										writer.WriteLine(L"$("+folder+L"_"+outputCategory+L") : $("+output->target+L"_TARGET)"+output->outputPattern+L" : "+L"$("+folder+L"_DIR)"+building->inputPattern);
+										writer.WriteString(L"$("+folder+L"_"+outputCategory+L") : $("+output->target+L"_TARGET)"+output->outputPattern+L" : "+L"$("+folder+L"_DIR)"+building->inputPattern);
+
+										List<DependencyItem> inputItems;
+										SortedList<DependencyItem> outputItems;
+										{
+											DependencyItem item;
+											item.folder = folder;
+											item.category = inputCategory;
+											inputItems.Add(item);
+										}
+										ExpandDependencyRecursively(config, inputItems, outputItems);
+										FOREACH(DependencyItem, item, outputItems)
+										{
+											writer.WriteString(L" $(" + item.folder + L"_" + item.category + L")");
+										}
+
+										writer.WriteLine(L"");
 										FOREACH(WString, command, building->commands)
 										{
 											writer.WriteLine(L"\t"+BuildCommand(command, L"$<", L"$@"));
@@ -771,6 +823,7 @@ void PrintMakeFile(Ptr<MakeGenConfig> config, const WString& intputFileName, con
 	}
 	
 	// write clean
+	writer.WriteLine(L"# Clean");
 	writer.WriteLine(L"clean:");
 	FOREACH(WString, target, config->targets.Keys())
 	{
