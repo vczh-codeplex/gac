@@ -7,4 +7,4 @@ map cpp : %.cpp
 
 link o :
 	> exe : bin ParserGen
-	g++ -std=c++11 -g -o $(OUT) $(IN)
+	g++ -std=c++11 -g -pthread -o $(OUT) $(IN)
