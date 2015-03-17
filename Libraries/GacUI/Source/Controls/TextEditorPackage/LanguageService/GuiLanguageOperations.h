@@ -75,7 +75,7 @@ PartialParsingOutput
 PartialParsingOutput
 ***********************************************************************/
 
-			/// <summary>The candidate item data.</summary>
+			/// <summary>A data structure storing the information for a candidate item.</summary>
 			struct ParsingCandidateItem
 			{
 				/// <summary>Semantic id.</summary>
@@ -88,6 +88,7 @@ PartialParsingOutput
 ParsingContext
 ***********************************************************************/
 
+			/// <summary>A data structure storing the context of a token.</summary>
 			struct ParsingTokenContext
 			{
 				/// <summary>Token syntax tree for the selected token.</summary>
