@@ -28,8 +28,8 @@ GuiGrammarAutoComplete
 				, private RepeatingParsingExecutor::CallbackBase
 				, private RepeatingTaskExecutor<RepeatingParsingOutput>
 			{
-				typedef collections::List<Ptr<ParsingScopeSymbol>>		ParsingScopeSymbolList;
 			public:
+
 				/// <summary>The auto complete list data.</summary>
 				struct AutoCompleteData : ParsingContext
 				{
@@ -37,36 +37,19 @@ GuiGrammarAutoComplete
 					collections::List<vint>							candidates;
 					/// <summary>Available candidate tokens (in lexer token index) that marked with @AutoCompleteCandidate().</summary>
 					collections::List<vint>							shownCandidates;
-					/// <summary>Candidate symbols.</summary>
-					ParsingScopeSymbolList							candidateSymbols;
+					/// <summary>Candidate items.</summary>
+					collections::List<ParsingCandidateItem>			candidateItems;
 					/// <summary>The start position of the editing token in global coordination.</summary>
 					TextPos											startPosition;
 				};
 
 				/// <summary>The analysed data from an input code.</summary>
-				struct Context
+				struct AutoCompleteContext : RepeatingPartialParsingOutput
 				{
-					/// <summary>The input data.</summary>
-					RepeatingParsingOutput							input;
-					/// <summary>The rule name that can parse the code of the selected context.</summary>
-					WString											rule;
-					/// <summary>Range of the original context in the input.</summary>
-					parsing::ParsingTextRange						originalRange;
-					/// <summary>The original context in the syntax tree.</summary>
-					Ptr<parsing::ParsingTreeObject>					originalNode;
-					/// <summary>The modified context in the syntax tree.</summary>
-					Ptr<parsing::ParsingTreeObject>					modifiedNode;
-					/// <summary>The modified code of the selected context.</summary>
-					WString											modifiedCode;
 					/// <summary>The edit version of modified code.</summary>
-					vuint											modifiedEditVersion;
+					vuint											modifiedEditVersion = 0;
 					/// <summary>The analysed auto complete list data.</summary>
 					Ptr<AutoCompleteData>							autoComplete;
-
-					Context()
-						:modifiedEditVersion(0)
-					{
-					}
 				};
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>			grammarParser;
@@ -77,7 +60,7 @@ GuiGrammarAutoComplete
 				collections::List<TextEditNotifyStruct>				editTrace;
 
 				SpinLock											contextLock;
-				Context												context;
+				AutoCompleteContext									context;
 				
 				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
 				void												Detach()override;
@@ -90,10 +73,10 @@ GuiGrammarAutoComplete
 
 				vint												UnsafeGetEditTraceIndex(vuint editVersion);
 				TextPos												ChooseCorrectTextPos(TextPos pos, const regex::RegexTokens& tokens);
-				void												ExecuteRefresh(Context& newContext);
+				void												ExecuteRefresh(AutoCompleteContext& newContext);
 
-				bool												NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos);
-				void												ExecuteEdit(Context& newContext);
+				bool												NormalizeTextPos(AutoCompleteContext& newContext, elements::text::TextLines& lines, TextPos& pos);
+				void												ExecuteEdit(AutoCompleteContext& newContext);
 
 				void												DeleteFutures(collections::List<parsing::tabling::ParsingState::Future*>& futures);
 				regex::RegexToken*									TraverseTransitions(
@@ -107,22 +90,22 @@ GuiGrammarAutoComplete
 																		parsing::tabling::ParsingState& state,
 																		parsing::tabling::ParsingTransitionCollector& transitionCollector,
 																		TextPos stopPosition,
-																		Context& newContext,
+																		AutoCompleteContext& newContext,
 																		collections::SortedList<vint>& tableTokenIndices
 																		);
 
-				TextPos												GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos);
-				TextPos												ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos);
-				void												ExecuteCalculateList(Context& newContext);
+				TextPos												GlobalTextPosToModifiedTextPos(AutoCompleteContext& newContext, TextPos pos);
+				TextPos												ModifiedTextPosToGlobalTextPos(AutoCompleteContext& newContext, TextPos pos);
+				void												ExecuteCalculateList(AutoCompleteContext& newContext);
 
 				void												Execute(const RepeatingParsingOutput& input)override;
-				void												PostList(const Context& newContext, bool byGlobalCorrection);
+				void												PostList(const AutoCompleteContext& newContext, bool byGlobalCorrection);
 				void												Initialize();
 			protected:
 
-				/// <summary>Called when the context of the code is selected. It is encouraged to set the "candidateSymbols" field in "context.autoComplete". If there is a <see cref="ILanguageProvider"/> binded to the <see cref="RepeatingParsingExecutor"/>, this function can be automatically done.</summary>
+				/// <summary>Called when the context of the code is selected. It is encouraged to set the "candidateItems" field in "context.autoComplete" during the call. If there is an <see cref="RepeatingParsingExecutor::IParsingAnalyzer"/> binded to the <see cref="RepeatingParsingExecutor"/>, this function can be automatically done.</summary>
 				/// <param name="context">The selected context.</param>
-				virtual void										OnContextFinishedAsync(Context& context);
+				virtual void										OnContextFinishedAsync(AutoCompleteContext& context);
 
 				/// <summary>Call this function in the derived class's destructor when it overrided <see cref="OnContextFinishedAsync"/>.</summary>
 				void												EnsureAutoCompleteFinished();
