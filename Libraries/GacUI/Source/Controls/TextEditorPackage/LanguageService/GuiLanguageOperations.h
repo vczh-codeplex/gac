@@ -212,7 +212,7 @@ RepeatingParsingExecutor
 				void														Execute(const RepeatingParsingInput& input)override;
 				void														PrepareMetaData();
 
-				/// <summary>Called when semantic analyzing is needed. It is encouraged to set the "symbol" and "finder" fields in "context" argument.</summary>
+				/// <summary>Called when semantic analyzing is needed. It is encouraged to set the "cache" fields in "context" argument. If there is an <see cref="RepeatingParsingExecutor::IParsingAnalyzer"/> binded to the <see cref="RepeatingParsingExecutor"/>, this function can be automatically done.</summary>
 				/// <param name="context">The parsing result.</param>
 				virtual void												OnContextFinishedAsync(RepeatingParsingOutput& context);
 			public:
