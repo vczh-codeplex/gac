@@ -88,28 +88,22 @@ PartialParsingOutput
 ParsingContext
 ***********************************************************************/
 
-			struct ParsingContext
+			struct ParsingTokenContext
 			{
 				/// <summary>Token syntax tree for the selected token.</summary>
-				parsing::ParsingTreeToken*								foundToken;
+				parsing::ParsingTreeToken*								foundToken = nullptr;
 				/// <summary>The object syntax tree parent of the token.</summary>
-				parsing::ParsingTreeObject*								tokenParent;
+				parsing::ParsingTreeObject*								tokenParent = nullptr;
 				/// <summary>Type of the parent.</summary>
 				WString													type;
 				/// <summary>Field of the parent that contains the token.</summary>
 				WString													field;
 				/// <summary>All acceptable semantic ids.</summary>
 				Ptr<collections::List<vint>>							acceptableSemanticIds;
-				
-				ParsingContext()
-					:foundToken(0)
-					,tokenParent(0)
-				{
-				}
 
-				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
-				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
-				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingTokenContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingTokenContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingTokenContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 			};
 
 /***********************************************************************
@@ -153,9 +147,9 @@ RepeatingParsingExecutor
 					/// <param name="tokenContext">The token context.</param>
 					/// <param name="output">The current parsing result.</param>
 					/// <returns>The semantic id.</returns>
-					virtual vint											GetSemanticIdForToken(const ParsingContext& tokenContext, const RepeatingParsingOutput& output) = 0;
+					virtual vint											GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output) = 0;
 
-					virtual void											GetCandidateItems(const ParsingContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
+					virtual void											GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
 				};
 
 				/// <summary>A base class for implementing a callback.</summary>

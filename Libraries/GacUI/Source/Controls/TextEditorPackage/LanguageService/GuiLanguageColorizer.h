@@ -32,7 +32,7 @@ GuiGrammarColorizer
 				typedef elements::text::ColorEntry							ColorEntry;
 			public:
 				/// <summary>Context for doing semantic colorizing.</summary>
-				struct SemanticColorizeContext : ParsingContext
+				struct SemanticColorizeContext : ParsingTokenContext
 				{
 					/// <summary>Output semantic id that comes from one the argument in the @Semantic attribute.</summary>
 					vint													semanticId;

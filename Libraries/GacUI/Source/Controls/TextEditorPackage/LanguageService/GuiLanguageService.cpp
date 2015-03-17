@@ -442,7 +442,7 @@ ParsingAnalyzer
 				return cache;
 			}
 
-			vint ParsingAnalyzer::GetSemanticIdForToken(const ParsingContext& tokenContext, const RepeatingParsingOutput& output)
+			vint ParsingAnalyzer::GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
 			{
 				auto cache = output.cache.Cast<Cache>();
 				vint semanticId = -1;
@@ -455,7 +455,7 @@ ParsingAnalyzer
 				return semanticId;
 			}
 
-			void ParsingAnalyzer::GetCandidateItems(const ParsingContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
+			void ParsingAnalyzer::GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 			{
 				auto cache = partialOutput.input.cache.Cast<Cache>();
 				ParsingTreeObject* originalNode=partialOutput.originalNode.Obj();

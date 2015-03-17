@@ -15,7 +15,7 @@ namespace vl
 ParsingContext
 ***********************************************************************/
 
-			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor)
+			bool ParsingTokenContext::RetriveContext(ParsingTokenContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor)
 			{
 				ParsingTreeToken* foundToken=dynamic_cast<ParsingTreeToken*>(foundNode);
 				if(!foundToken) return false;
@@ -36,14 +36,14 @@ ParsingContext
 				return true;
 			}
 
-			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
+			bool ParsingTokenContext::RetriveContext(ParsingTokenContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
 			{
 				ParsingTreeNode* foundNode=rootNode->FindDeepestNode(pos);
 				if(!foundNode) return false;
 				return RetriveContext(output, foundNode, executor);
 			}
 
-			bool ParsingContext::RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
+			bool ParsingTokenContext::RetriveContext(ParsingTokenContext& output, parsing::ParsingTextRange range, ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor)
 			{
 				ParsingTreeNode* foundNode=rootNode->FindDeepestNode(range);
 				if(!foundNode) return false;
