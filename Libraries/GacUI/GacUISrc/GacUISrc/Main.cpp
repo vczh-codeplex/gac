@@ -10,6 +10,7 @@
 #include "..\..\..\..\Common\Source\Regex\RegexExpression.h"
 #include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.h"
 #include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.h"
+#include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageService.h"
 #include <Windows.h>
 
 using namespace vl::regex;
@@ -526,17 +527,9 @@ ParserGrammarExecutor
 
 	class ParserGrammarExecutor : public RepeatingParsingExecutor
 	{
-	protected:
-
-		void OnContextFinishedAsync(RepeatingParsingOutput& context)override
-		{
-			context.finder=new ParsingScopeFinder();
-			context.symbol=CreateSymbolFromNode(context.node, this, context.finder.Obj());
-			context.finder->InitializeQueryCache(context.symbol.Obj());
-		}
 	public:
 		ParserGrammarExecutor()
-			:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl", new GrammarLanguageProvider)
+			:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl", new ParsingAnalyzer(new GrammarLanguageProvider))
 		{
 		}
 	};

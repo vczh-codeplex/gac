@@ -120,7 +120,7 @@ GuiGrammarAutoComplete
 								input.editVersion=context.input.editVersion;
 								SubmitTask(input);
 							}
-							else if(context.input.editVersion==arguments.editVersion)
+							else if(context.input.editVersion == arguments.editVersion)
 							{
 								// if the current caret changing is not caused by editing
 								// submit a task with the previous input
@@ -247,7 +247,7 @@ GuiGrammarAutoComplete
 				return pos;
 			}
 
-			void GuiGrammarAutoComplete::ExecuteRefresh(Context& newContext)
+			void GuiGrammarAutoComplete::ExecuteRefresh(AutoCompleteContext& newContext)
 			{
 				// process the input of a task is submitted not by text editing
 				// find the text selection by the edit version of the input
@@ -348,7 +348,7 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			bool GuiGrammarAutoComplete::NormalizeTextPos(Context& newContext, elements::text::TextLines& lines, TextPos& pos)
+			bool GuiGrammarAutoComplete::NormalizeTextPos(AutoCompleteContext& newContext, elements::text::TextLines& lines, TextPos& pos)
 			{
 				// get the start position
 				TextPos start(newContext.originalRange.start.row, newContext.originalRange.start.column);
@@ -377,9 +377,9 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::ExecuteEdit(Context& newContext)
+			void GuiGrammarAutoComplete::ExecuteEdit(AutoCompleteContext& newContext)
 			{
-				// process the input of a task is submitted by text editing
+				// process the input of a task that is submitted by text editing
 				// this function make an approximiation to the context if the RepeatingParsingExecutor is not fast enough
 				// copy all TextEditNotifyStruct that is caused by a text editing before (and including) the edit version of the input
 				List<TextEditNotifyStruct> usedTrace;
@@ -398,7 +398,7 @@ GuiGrammarAutoComplete
 				}
 
 				// apply all modification to get the new modifiedCode
-				bool failed=false;
+				bool failed = false;
 				if(usedTrace.Count()>0)
 				{
 					if(usedTrace[0].editVersion!=newContext.modifiedEditVersion+1)
@@ -593,7 +593,7 @@ GuiGrammarAutoComplete
 				parsing::tabling::ParsingState& state,
 				parsing::tabling::ParsingTransitionCollector& transitionCollector,
 				TextPos stopPosition,
-				Context& newContext,
+				AutoCompleteContext& newContext,
 				collections::SortedList<vint>& tableTokenIndices
 				)
 			{
@@ -636,7 +636,7 @@ GuiGrammarAutoComplete
 				return token;
 			}
 
-			TextPos GuiGrammarAutoComplete::GlobalTextPosToModifiedTextPos(Context& newContext, TextPos pos)
+			TextPos GuiGrammarAutoComplete::GlobalTextPosToModifiedTextPos(AutoCompleteContext& newContext, TextPos pos)
 			{
 				pos.row-=newContext.originalRange.start.row;
 				if(pos.row==0)
@@ -646,7 +646,7 @@ GuiGrammarAutoComplete
 				return pos;
 			}
 
-			TextPos GuiGrammarAutoComplete::ModifiedTextPosToGlobalTextPos(Context& newContext, TextPos pos)
+			TextPos GuiGrammarAutoComplete::ModifiedTextPosToGlobalTextPos(AutoCompleteContext& newContext, TextPos pos)
 			{
 				if(pos.row==0)
 				{
@@ -656,7 +656,7 @@ GuiGrammarAutoComplete
 				return pos;
 			}
 
-			void GuiGrammarAutoComplete::ExecuteCalculateList(Context& newContext)
+			void GuiGrammarAutoComplete::ExecuteCalculateList(AutoCompleteContext& newContext)
 			{
 				// calcuate the content of the auto complete list
 				// it is sad that, because the parser's algorithm is too complex
@@ -784,7 +784,7 @@ GuiGrammarAutoComplete
 						return;
 					}
 				}
-				Context newContext;
+				AutoCompleteContext newContext;
 				bool byGlobalCorrection=false;
 
 				if(input.node)
@@ -826,7 +826,7 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::PostList(const Context& newContext, bool byGlobalCorrection)
+			void GuiGrammarAutoComplete::PostList(const AutoCompleteContext& newContext, bool byGlobalCorrection)
 			{
 				bool openList=true;			// true: make the list visible
 				bool keepListState=false;	// true: don't change the list visibility
@@ -839,7 +839,7 @@ GuiGrammarAutoComplete
 				}
 				if(openList)
 				{
-					if(autoComplete->shownCandidates.Count()+autoComplete->candidateSymbols.Count()==0)
+					if (autoComplete->shownCandidates.Count() + autoComplete->candidateItems.Count() == 0)
 					{
 						openList=false;
 					}
@@ -922,6 +922,7 @@ GuiGrammarAutoComplete
 				if((!keepListState && openList) || IsListOpening())
 				{
 					SortedList<WString> items;
+
 					// copy all candidate keywords
 					FOREACH(vint, token, autoComplete->shownCandidates)
 					{
@@ -931,26 +932,24 @@ GuiGrammarAutoComplete
 							items.Add(literal);
 						}
 					}
+
 					// copy all candidate symbols
 					if(autoComplete->acceptableSemanticIds)
 					{
-						FOREACH(Ptr<ParsingScopeSymbol>, symbol, autoComplete->candidateSymbols)
+						FOREACH(ParsingCandidateItem, item, autoComplete->candidateItems)
 						{
-							FOREACH(vint, semanticId, symbol->GetSemanticIds())
+							if(autoComplete->acceptableSemanticIds->Contains(item.semanticId))
 							{
-								if(autoComplete->acceptableSemanticIds->Contains(semanticId))
+								// add all acceptable display of a symbol
+								// because a symbol can has multiple representation in different places
+								if (item.name != L"" && !items.Contains(item.name))
 								{
-									// add all acceptable display of a symbol
-									// because a symbol can has multiple representation in different places
-									WString literal=symbol->GetDisplay(semanticId);
-									if(literal!=L"" && !items.Contains(literal))
-									{
-										items.Add(literal);
-									}
+									items.Add(item.name);
 								}
 							}
 						}
 					}
+
 					// fill the list
 					SetListContent(items);
 				}
@@ -974,44 +973,20 @@ GuiGrammarAutoComplete
 				}
 			}
 
-			void GuiGrammarAutoComplete::OnContextFinishedAsync(Context& context)
+			void GuiGrammarAutoComplete::Initialize()
 			{
-				Ptr<ILanguageProvider> languageProvider=parsingExecutor->GetLanguageProvider();
-				if(languageProvider)
+				grammarParser=CreateAutoRecoverParser(parsingExecutor->GetParser()->GetTable());
+				CollectLeftRecursiveRules();
+				parsingExecutor->AttachCallback(this);
+			}
+
+			void GuiGrammarAutoComplete::OnContextFinishedAsync(AutoCompleteContext& context)
+			{
+				if (auto analyzer = parsingExecutor->GetAnalyzer())
 				{
-					if(context.autoComplete && context.autoComplete->acceptableSemanticIds)
+					if (context.autoComplete && context.autoComplete->acceptableSemanticIds)
 					{
-						ParsingTreeObject* originalNode=context.originalNode.Obj();
-						ParsingTreeObject* replacedNode=context.modifiedNode.Obj();
-						ParsingScopeSymbol* originalSymbol=0;
-						{
-							ParsingTreeNode* originalSymbolNode=originalNode;
-							while(originalSymbolNode && !originalSymbol)
-							{
-								originalSymbol=context.input.finder->GetSymbolFromNode(dynamic_cast<ParsingTreeObject*>(originalSymbolNode));
-								originalSymbolNode=originalSymbolNode->GetParent();
-							}
-						}
-						if(originalSymbol)
-						{
-							Ptr<ParsingScopeFinder> newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(0, 0, originalNode, replacedNode));
-							Ptr<ParsingScopeSymbol> replacedSymbol=languageProvider->CreateSymbolFromNode(newFinder->Obj(originalSymbol->GetNode()), GetParsingExecutor().Obj(), newFinder.Obj());
-				
-							if(replacedSymbol)
-							{
-								newFinder=new ParsingScopeFinder(new ParsingScopeFinder::IndirectSymbolMapper(originalSymbol, replacedSymbol.Obj(), originalNode, replacedNode));
-								newFinder->InitializeQueryCache(replacedSymbol.Obj(), context.input.finder.Obj());
-								LazyList<Ptr<ParsingScopeSymbol>> symbols=languageProvider->FindPossibleSymbols(context.autoComplete->tokenParent, context.autoComplete->field, newFinder.Obj());
-								CopyFrom(
-									context.autoComplete->candidateSymbols,
-									From(symbols)
-										.Where([&context](Ptr<ParsingScopeSymbol> symbol)
-										{
-											return From(symbol->GetSemanticIds()).Intersect(*context.autoComplete->acceptableSemanticIds.Obj()).First(-1)!=-1;
-										})
-									);
-							}
-						}
+						analyzer->GetCandidateItems(*context.autoComplete.Obj(), context, context.autoComplete->candidateItems);
 					}
 				}
 			}
@@ -1021,15 +996,8 @@ GuiGrammarAutoComplete
 				parsingExecutor->EnsureTaskFinished();
 				SPIN_LOCK(contextLock)
 				{
-					context=Context();
+					context = AutoCompleteContext();
 				}
-			}
-
-			void GuiGrammarAutoComplete::Initialize()
-			{
-				grammarParser=CreateAutoRecoverParser(parsingExecutor->GetParser()->GetTable());
-				CollectLeftRecursiveRules();
-				parsingExecutor->AttachCallback(this);
 			}
 
 			GuiGrammarAutoComplete::GuiGrammarAutoComplete(Ptr<RepeatingParsingExecutor> _parsingExecutor)

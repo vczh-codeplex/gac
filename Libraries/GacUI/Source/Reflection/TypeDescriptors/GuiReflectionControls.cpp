@@ -41,17 +41,6 @@ External Functions
 				return thisObject->GetItemContent<ListViewItemStyleProvider::IListViewItemContent>(itemStyleController);
 			}
 
-			Ptr<RepeatingParsingExecutor> CreateRepeatingParsingExecutor(const WString& grammar, bool enableAmbiguity, const WString& rule, Ptr<ILanguageProvider> provider)
-			{
-			    Ptr<ParsingGeneralParser> parser=CreateBootstrapStrictParser();
-			    List<Ptr<ParsingError>> errors;
-			    Ptr<ParsingTreeNode> definitionNode=parser->Parse(grammar, L"ParserDecl", errors);
-			    Ptr<ParsingDefinition> definition=DeserializeDefinition(definitionNode);
-			    Ptr<ParsingTable> table=GenerateTable(definition, enableAmbiguity, errors);
-				Ptr<ParsingGeneralParser> grammarParser=CreateAutoRecoverParser(table);
-				return new RepeatingParsingExecutor(grammarParser, rule, provider);
-			}
-
 /***********************************************************************
 Type Declaration
 ***********************************************************************/
@@ -1410,70 +1399,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Redo, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxCommonInterface)
 
-			BEGIN_CLASS_MEMBER(ParsingScope)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingScope>(ParsingScopeSymbol*), {L"ownerSymbol"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(OwnerSymbol)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(SymbolNames)
-
-				CLASS_MEMBER_METHOD(AddSymbol, {L"value"})
-				CLASS_MEMBER_METHOD(RemoveSymbol, {L"value"})
-				CLASS_MEMBER_METHOD(GetSymbols, {L"name"})
-			END_CLASS_MEMBER(ParsingScope)
-
-			BEGIN_CLASS_MEMBER(ParsingScopeSymbol)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<ParsingScopeSymbol>(const WString&, vint), {L"name" _ L"semanticId"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParentScope)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Name)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(SemanticIds)
-				CLASS_MEMBER_PROPERTY_FAST(Node)
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(Scope)
-
-				CLASS_MEMBER_METHOD(AddSemanticId, {L"semanticId"})
-				CLASS_MEMBER_METHOD(CreateScope, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(DestroyScope, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(GetDisplay, {L"semanticId"})
-			END_CLASS_MEMBER(ParsingScopeSymbol)
-
-			typedef collections::LazyList<Ptr<ParsingScopeSymbol>> LazySymbolList;
-
-			BEGIN_CLASS_MEMBER(ParsingScopeFinder)
-				CLASS_MEMBER_METHOD_OVERLOAD(ParentNode, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(ParsingTreeNode*))
-				CLASS_MEMBER_METHOD_OVERLOAD(ParentNode, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(Ptr<ParsingTreeNode>))
-				CLASS_MEMBER_METHOD_OVERLOAD(Node, {L"node"}, ParsingTreeNode*(ParsingScopeFinder::*)(ParsingTreeNode*))
-				CLASS_MEMBER_METHOD_OVERLOAD(Node, {L"node"}, Ptr<ParsingTreeNode>(ParsingScopeFinder::*)(Ptr<ParsingTreeNode>))
-				CLASS_MEMBER_METHOD_OVERLOAD(ParentScope, {L"symbol"}, ParsingScope*(ParsingScopeFinder::*)(ParsingScopeSymbol*))
-				CLASS_MEMBER_METHOD_OVERLOAD(ParentScope, {L"symbol"}, ParsingScope*(ParsingScopeFinder::*)(Ptr<ParsingScopeSymbol>))
-				CLASS_MEMBER_METHOD_OVERLOAD(Symbol, {L"symbol"}, ParsingScopeSymbol*(ParsingScopeFinder::*)(ParsingScopeSymbol*))
-				CLASS_MEMBER_METHOD_OVERLOAD(Symbol, {L"symbol"}, Ptr<ParsingScopeSymbol>(ParsingScopeFinder::*)(Ptr<ParsingScopeSymbol>))
-				CLASS_MEMBER_METHOD(Symbols, {L"symbols"})
-
-				CLASS_MEMBER_METHOD(GetSymbolFromNode, {L"node"})
-				CLASS_MEMBER_METHOD(GetScopeFromNode, {L"node"})
-				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbols, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
-				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbols, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
-				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope" _ L"name"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*, const WString&))
-				CLASS_MEMBER_METHOD_OVERLOAD(GetSymbolsRecursively, {L"scope"}, LazySymbolList(ParsingScopeFinder::*)(ParsingScope*))
-			END_CLASS_MEMBER(ParsingScopeFinder)
-
-			BEGIN_CLASS_MEMBER(ILanguageProvider)
-				CLASS_MEMBER_BASE(IDescriptable)
-				INTERFACE_EXTERNALCTOR(controls, ILanguageProvider)
-
-				CLASS_MEMBER_METHOD(CreateSymbolFromNode, {L"obj" _ L"executor" _ L"finder"})
-				CLASS_MEMBER_METHOD(FindReferencedSymbols, {L"obj" _  L"finder"})
-				CLASS_MEMBER_METHOD(FindPossibleSymbols, {L"obj" _ L"field" _ L"finder"})
-			END_CLASS_MEMBER(ILanguageProvider)
-
-			BEGIN_CLASS_MEMBER(RepeatingParsingExecutor)
-				CLASS_MEMBER_EXTERNALCTOR(Ptr<RepeatingParsingExecutor>(const WString&, bool, const WString&, Ptr<ILanguageProvider>), {L"grammar" _ L"enableAmbiguity" _ L"rule" _ L"provider"}, &CreateRepeatingParsingExecutor)
-				
-				CLASS_MEMBER_METHOD(GetTokenIndex, {L"tokenName"})
-				CLASS_MEMBER_METHOD(GetSemanticId, {L"name"})
-				CLASS_MEMBER_METHOD(GetSemanticName, {L"id"})
-			END_CLASS_MEMBER(RepeatingParsingExecutor)
-
 			BEGIN_CLASS_MEMBER(GuiTextBoxColorizerBase)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(LexerStartState)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ContextStartState)
@@ -1498,20 +1423,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(Setup, NO_PARAMETER)
 			END_CLASS_MEMBER(GuiTextBoxRegexColorizer)
 
-			BEGIN_CLASS_MEMBER(GuiGrammarColorizer)
-				CLASS_MEMBER_BASE(GuiTextBoxRegexColorizer)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiGrammarColorizer>(Ptr<RepeatingParsingExecutor>), {L"parsingExecutor"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParsingExecutor)
-
-				CLASS_MEMBER_METHOD(BeginSetColors, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(GetColorNames, NO_PARAMETER)
-				CLASS_MEMBER_METHOD(GetColor, {L"name"})
-				CLASS_MEMBER_METHOD_OVERLOAD(SetColor, {L"name" _ L"color"}, void(GuiGrammarColorizer::*)(const WString&, const ColorEntry&))
-				CLASS_MEMBER_METHOD_OVERLOAD(SetColor, {L"name" _ L"color"}, void(GuiGrammarColorizer::*)(const WString&, const Color&))
-				CLASS_MEMBER_METHOD(EndSetColors, NO_PARAMETER)
-			END_CLASS_MEMBER(GuiGrammarColorizer)
-
 			BEGIN_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(ListStartPosition)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(SelectedListItem)
@@ -1525,13 +1436,6 @@ Type Declaration
 				CLASS_MEMBER_METHOD(ApplySelectedListItem, NO_PARAMETER)
 				CLASS_MEMBER_METHOD(HighlightList, {L"editingText"})
 			END_CLASS_MEMBER(GuiTextBoxAutoCompleteBase)
-
-			BEGIN_CLASS_MEMBER(GuiGrammarAutoComplete)
-				CLASS_MEMBER_BASE(GuiTextBoxAutoCompleteBase)
-				CLASS_MEMBER_CONSTRUCTOR(Ptr<GuiGrammarAutoComplete>(Ptr<RepeatingParsingExecutor>), {L"parsingExecutor"})
-
-				CLASS_MEMBER_PROPERTY_READONLY_FAST(ParsingExecutor)
-			END_CLASS_MEMBER(GuiGrammarAutoComplete)
 
 			BEGIN_CLASS_MEMBER(GuiMultilineTextBox)
 				CLASS_MEMBER_BASE(GuiScrollView)

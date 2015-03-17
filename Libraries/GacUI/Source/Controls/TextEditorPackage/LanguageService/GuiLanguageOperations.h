@@ -19,212 +19,102 @@ namespace vl
 		{
 
 /***********************************************************************
-Scope
+ParsingInput
 ***********************************************************************/
 
-			class ParsingScope;
-			class ParsingScopeSymbol;
-			class ParsingScopeFinder;
-
-			class ParsingScope : public Object, public reflection::Description<ParsingScope>
-			{
-				typedef collections::SortedList<WString>							SymbolKeyList;
-				typedef collections::List<Ptr<ParsingScopeSymbol>>					SymbolList;
-				typedef collections::Group<WString, Ptr<ParsingScopeSymbol>>		SymbolGroup;
-
-				friend class ParsingScopeSymbol;
-				friend class ParsingScopeFinder;
-			protected:
-				static const SymbolList					emptySymbolList;
-
-				ParsingScopeSymbol*						ownerSymbol;
-				SymbolGroup								symbols;
-
-			public:
-				ParsingScope(ParsingScopeSymbol* _ownerSymbol);
-				~ParsingScope();
-
-				ParsingScopeSymbol*						GetOwnerSymbol();
-				bool									AddSymbol(Ptr<ParsingScopeSymbol> value);
-				bool									RemoveSymbol(Ptr<ParsingScopeSymbol> value);
-				const SymbolKeyList&					GetSymbolNames();
-				const SymbolList&						GetSymbols(const WString& name);
-			};
-
-			class ParsingScopeSymbol : public Object, public reflection::Description<ParsingScopeSymbol>
-			{
-				friend class ParsingScope;
-			protected:
-				ParsingScope*							parentScope;
-				WString									name;
-				collections::List<vint>					semanticIds;
-				Ptr<parsing::ParsingTreeObject>			node;
-				Ptr<ParsingScope>						scope;
-
-				virtual WString							GetDisplayInternal(vint semanticId);
-			public:
-				ParsingScopeSymbol(const WString& _name=L"", vint _semanticId=-1);
-				~ParsingScopeSymbol();
-
-				ParsingScope*							GetParentScope();
-				const WString&							GetName();
-				const collections::List<vint>&			GetSemanticIds();
-				bool									AddSemanticId(vint semanticId);
-				Ptr<parsing::ParsingTreeObject>			GetNode();
-				void									SetNode(Ptr<parsing::ParsingTreeObject> value);
-				bool									CreateScope();
-				bool									DestroyScope();
-				ParsingScope*							GetScope();
-				WString									GetDisplay(vint semanticId);
-			};
-
-			class ParsingScopeFinder : public Object, public reflection::Description<ParsingScopeFinder>
-			{
-				typedef collections::Dictionary<parsing::ParsingTreeObject*, ParsingScopeSymbol*>	NodeSymbolMap;
-				typedef collections::LazyList<Ptr<ParsingScopeSymbol>>								LazySymbolList;
-			public:
-				class SymbolMapper : public Object, public reflection::Description<SymbolMapper>
-				{
-				public:
-					virtual parsing::ParsingTreeNode*	ParentNode(parsing::ParsingTreeNode* node)=0;
-					virtual parsing::ParsingTreeNode*	Node(parsing::ParsingTreeNode* node)=0;
-					virtual ParsingScope*				ParentScope(ParsingScopeSymbol* symbol)=0;
-					virtual ParsingScopeSymbol*			Symbol(ParsingScopeSymbol* symbol)=0;
-				};
-
-				class DirectSymbolMapper : public SymbolMapper, public reflection::Description<DirectSymbolMapper>
-				{
-				public:
-					DirectSymbolMapper();
-					~DirectSymbolMapper();
-
-					parsing::ParsingTreeNode*			ParentNode(parsing::ParsingTreeNode* node)override;
-					parsing::ParsingTreeNode*			Node(parsing::ParsingTreeNode* node)override;
-					ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
-					ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
-				};
-
-				class IndirectSymbolMapper  : public SymbolMapper, public reflection::Description<IndirectSymbolMapper>
-				{
-				protected:
-					ParsingScopeSymbol*					originalSymbol;
-					ParsingScopeSymbol*					replacedSymbol;
-					parsing::ParsingTreeNode*			originalNode;
-					parsing::ParsingTreeNode*			replacedNode;
-				public:
-					IndirectSymbolMapper(ParsingScopeSymbol* _originalSymbol, ParsingScopeSymbol* _replacedSymbol, parsing::ParsingTreeNode* _originalNode, parsing::ParsingTreeNode* _replacedNode);
-					~IndirectSymbolMapper();
-
-					parsing::ParsingTreeNode*			ParentNode(parsing::ParsingTreeNode* node)override;
-					parsing::ParsingTreeNode*			Node(parsing::ParsingTreeNode* node)override;
-					ParsingScope*						ParentScope(ParsingScopeSymbol* symbol)override;
-					ParsingScopeSymbol*					Symbol(ParsingScopeSymbol* symbol)override;
-				};
-			protected:
-				NodeSymbolMap							nodeSymbols;
-				Ptr<SymbolMapper>						symbolMapper;
-				ParsingScopeFinder*						previousFinder;
-
-				void									InitializeQueryCacheInternal(ParsingScopeSymbol* symbol);
-			public:
-				ParsingScopeFinder(Ptr<SymbolMapper> _symbolMapper=new DirectSymbolMapper);
-				~ParsingScopeFinder();
-
-				parsing::ParsingTreeNode*				ParentNode(parsing::ParsingTreeNode* node);
-				parsing::ParsingTreeNode*				ParentNode(Ptr<parsing::ParsingTreeNode> node);
-				parsing::ParsingTreeNode*				Node(parsing::ParsingTreeNode* node);
-				Ptr<parsing::ParsingTreeNode>			Node(Ptr<parsing::ParsingTreeNode> node);
-				ParsingScope*							ParentScope(ParsingScopeSymbol* symbol);
-				ParsingScope*							ParentScope(Ptr<ParsingScopeSymbol> symbol);
-				ParsingScopeSymbol*						Symbol(ParsingScopeSymbol* symbol);
-				Ptr<ParsingScopeSymbol>					Symbol(Ptr<ParsingScopeSymbol> symbol);
-				LazySymbolList							Symbols(const ParsingScope::SymbolList& symbols);
-
-				template<typename T>
-				T* Obj(T* node)
-				{
-					return dynamic_cast<T*>(Node(node));
-				}
-
-				template<typename T>
-				Ptr<T> Obj(Ptr<T> node)
-				{
-					return Node(node).template Cast<T>();
-				}
-			
-				void									InitializeQueryCache(ParsingScopeSymbol* symbol, ParsingScopeFinder* _previousFinder=0);
-				ParsingScopeSymbol*						GetSymbolFromNode(parsing::ParsingTreeObject* node);
-				ParsingScope*							GetScopeFromNode(parsing::ParsingTreeNode* node);
-				LazySymbolList							GetSymbols(ParsingScope* scope, const WString& name);
-				LazySymbolList							GetSymbols(ParsingScope* scope);
-				LazySymbolList							GetSymbolsRecursively(ParsingScope* scope, const WString& name);
-				LazySymbolList							GetSymbolsRecursively(ParsingScope* scope);
-			};
-
-/***********************************************************************
-RepeatingParsingExecutor
-***********************************************************************/
+			class RepeatingParsingExecutor;
 
 			/// <summary>A data structure storing the parsing input for text box control.</summary>
 			struct RepeatingParsingInput
 			{
 				/// <summary>The text box edit version of the code.</summary>
-				vuint									editVersion;
+				vuint													editVersion = 0;
 				/// <summary>The code.</summary>
-				WString									code;
-
-				RepeatingParsingInput()
-					:editVersion(0)
-				{
-				}
+				WString													code;
 			};
+
+/***********************************************************************
+ParsingOutput
+***********************************************************************/
 
 			/// <summary>A data structure storing the parsing result for text box control.</summary>
 			struct RepeatingParsingOutput
 			{
 				/// <summary>The parsed syntax tree.</summary>
-				Ptr<parsing::ParsingTreeObject>			node;
+				Ptr<parsing::ParsingTreeObject>							node;
 				/// <summary>The text box edit version of the code.</summary>
-				vuint									editVersion;
+				vuint													editVersion = 0;
 				/// <summary>The code.</summary>
-				WString									code;
-				/// <summary>The root symbol from semantic analyzing.</summary>
-				Ptr<ParsingScopeSymbol>					symbol;
-				/// <summary>The finder for the root symbol from semantic analyzing.</summary>
-				Ptr<ParsingScopeFinder>					finder;
+				WString													code;
+				/// <summary>The cache created from [T:vl.presentation.controls.RepeatingParsingExecutor.IParsingAnalyzer].</summary>
+				Ptr<Object>												cache;
+			};
 
-				RepeatingParsingOutput()
-					:editVersion(0)
+/***********************************************************************
+PartialParsingOutput
+***********************************************************************/
+			
+			/// <summary>A data structure storing the parsing result for partial updating when a text box control is modified.</summary>
+			struct RepeatingPartialParsingOutput
+			{
+				/// <summary>The input data.</summary>
+				RepeatingParsingOutput									input;
+				/// <summary>The rule name that can parse the code of the selected context.</summary>
+				WString													rule;
+				/// <summary>Range of the original context in the input.</summary>
+				parsing::ParsingTextRange								originalRange;
+				/// <summary>The original context in the syntax tree.</summary>
+				Ptr<parsing::ParsingTreeObject>							originalNode;
+				/// <summary>The modified context in the syntax tree.</summary>
+				Ptr<parsing::ParsingTreeObject>							modifiedNode;
+				/// <summary>The modified code of the selected context.</summary>
+				WString													modifiedCode;
+			};
+
+/***********************************************************************
+PartialParsingOutput
+***********************************************************************/
+
+			/// <summary>The candidate item data.</summary>
+			struct ParsingCandidateItem
+			{
+				/// <summary>Semantic id.</summary>
+				vint													semanticId = -1;
+				/// <summary>Display name.</summary>
+				WString													name;
+			};
+
+/***********************************************************************
+ParsingContext
+***********************************************************************/
+
+			struct ParsingContext
+			{
+				/// <summary>Token syntax tree for the selected token.</summary>
+				parsing::ParsingTreeToken*								foundToken;
+				/// <summary>The object syntax tree parent of the token.</summary>
+				parsing::ParsingTreeObject*								tokenParent;
+				/// <summary>Type of the parent.</summary>
+				WString													type;
+				/// <summary>Field of the parent that contains the token.</summary>
+				WString													field;
+				/// <summary>All acceptable semantic ids.</summary>
+				Ptr<collections::List<vint>>							acceptableSemanticIds;
+				
+				ParsingContext()
+					:foundToken(0)
+					,tokenParent(0)
 				{
 				}
+
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
+				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 			};
 
-			class RepeatingParsingExecutor;
-
-			/// <summary>Language semantic metadata provider for text box that editing code.</summary>
-			class ILanguageProvider : public IDescriptable, public Description<ILanguageProvider>
-			{
-			public:
-				/// <summary>Create a symbol from a node.</summary>
-				/// <param name="obj">The node.</param>
-				/// <param name="executor">The executor storing metadatas for a grammar.</param>
-				/// <param name="finder">The finder for traversing nodes and symbols.</param>
-				/// <returns>The created symbol.</returns>
-				virtual Ptr<ParsingScopeSymbol>								CreateSymbolFromNode(Ptr<parsing::ParsingTreeObject> obj, RepeatingParsingExecutor* executor, ParsingScopeFinder* finder)=0;
-				
-				/// <summary>Get all referenced symbols (in most cases, one) for a node.</summary>
-				/// <param name="obj">The node.</param>
-				/// <param name="finder">The finder for traversing nodes and symbols.</param>
-				/// <returns>All referenced symbols.</returns>
-				virtual collections::LazyList<Ptr<ParsingScopeSymbol>>		FindReferencedSymbols(parsing::ParsingTreeObject* obj, ParsingScopeFinder* finder)=0;
-				
-				/// <summary>Get all possible symbols for a specified field of a node.</summary>
-				/// <param name="obj">The node.</param>
-				/// <param name="field">The field name.</param>
-				/// <param name="finder">The finder for traversing nodes and symbols.</param>
-				/// <returns>All possible symbols.</returns>
-				virtual collections::LazyList<Ptr<ParsingScopeSymbol>>		FindPossibleSymbols(parsing::ParsingTreeObject* obj, const WString& field, ParsingScopeFinder* finder)=0;
-			};
+/***********************************************************************
+RepeatingParsingExecutor
+***********************************************************************/
 
 			/// <summary>Repeating parsing executor.</summary>
 			class RepeatingParsingExecutor : public RepeatingTaskExecutor<RepeatingParsingInput>, public Description<RepeatingParsingExecutor>
@@ -240,6 +130,32 @@ RepeatingParsingExecutor
 					/// <summary>Callback when <see cref="RepeatingParsingExecutor"/> requires enabling or disabling automatically repeating calling to the SubmitTask function.</summary>
 					/// <param name="enabled">Set to true to require an automatically repeating calling to the SubmitTask function</param>
 					virtual void											RequireAutoSubmitTask(bool enabled)=0;
+				};
+
+				/// <summary>Parsing analyzer.</summary>
+				class IParsingAnalyzer : public virtual Interface
+				{
+				public:
+					/// <summary>Called when a <see cref="RepeatingParsingExecutor"/> is created.</summary>
+					/// <param name="executor">The releated <see cref="RepeatingParsingExecutor"/>.</param>
+					virtual void											Attach(RepeatingParsingExecutor* executor) = 0;
+
+					/// <summary>Called when a <see cref="RepeatingParsingExecutor"/> is destroyed.</summary>
+					/// <param name="executor">The releated <see cref="RepeatingParsingExecutor"/>.</param>
+					virtual void											Detach(RepeatingParsingExecutor* executor) = 0;
+
+					/// <summary>Called when a new parsing result is produced. A parsing analyzer can create a cache to be attached to the output containing anything necessary.</summary>
+					/// <param name="output">The new parsing result.</param>
+					/// <returns>The created cache object, which can be null.</returns>
+					virtual Ptr<Object>										CreateCache(const RepeatingParsingOutput& output) = 0;
+
+					/// <summary>Called when an semantic id for a token is needed. If an semantic id is returned, a context sensitive color can be assigned to this token.</summary>
+					/// <param name="tokenContext">The token context.</param>
+					/// <param name="output">The current parsing result.</param>
+					/// <returns>The semantic id.</returns>
+					virtual vint											GetSemanticIdForToken(const ParsingContext& tokenContext, const RepeatingParsingOutput& output) = 0;
+
+					virtual void											GetCandidateItems(const ParsingContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
 				};
 
 				/// <summary>A base class for implementing a callback.</summary>
@@ -285,7 +201,7 @@ RepeatingParsingExecutor
 			private:
 				Ptr<parsing::tabling::ParsingGeneralParser>					grammarParser;
 				WString														grammarRule;
-				Ptr<ILanguageProvider>										languageProvider;
+				Ptr<IParsingAnalyzer>										analyzer;
 				collections::List<ICallback*>								callbacks;
 				collections::List<ICallback*>								activatedCallbacks;
 				ICallback*													autoPushingCallback;
@@ -308,8 +224,8 @@ RepeatingParsingExecutor
 				/// <summary>Initialize the parsing executor.</summary>
 				/// <param name="_grammarParser">Parser generated from a grammar.</param>
 				/// <param name="_grammarRule">The rule name to parse a complete code.</param>
-				/// <param name="_languageProvider">The language provider to create semantic metadats, it can be null.</param>
-				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule, Ptr<ILanguageProvider> _languageProvider=0);
+				/// <param name="_analyzer">The parsing analyzer to create semantic metadatas, it can be null.</param>
+				RepeatingParsingExecutor(Ptr<parsing::tabling::ParsingGeneralParser> _grammarParser, const WString& _grammarRule, Ptr<IParsingAnalyzer> _analyzer = 0);
 				~RepeatingParsingExecutor();
 				
 				/// <summary>Get the internal parser that parse the text.</summary>
@@ -330,9 +246,9 @@ RepeatingParsingExecutor
 				/// <returns>Returns true if this operation succeeded.</returns>
 				/// <param name="value">The callback.</param>
 				bool														DeactivateCallback(ICallback* value);
-				/// <summary>Get the language provider.</summary>
-				/// <returns>The language provider.</returns>
-				Ptr<ILanguageProvider>										GetLanguageProvider();
+				/// <summary>Get the parsing analyzer.</summary>
+				/// <returns>The parsing analyzer.</returns>
+				Ptr<IParsingAnalyzer>										GetAnalyzer();
 
 				vint														GetTokenIndex(const WString& tokenName);
 				vint														GetSemanticId(const WString& name);
@@ -360,34 +276,6 @@ RepeatingParsingExecutor
 				@AutoComplete()
 					token:	when the token is editing, an auto complete list will appear if possible
 				*/
-			};
-
-/***********************************************************************
-ParsingContext
-***********************************************************************/
-
-			struct ParsingContext
-			{
-				/// <summary>Token syntax tree for the selected token.</summary>
-				parsing::ParsingTreeToken*								foundToken;
-				/// <summary>The object syntax tree parent of the token.</summary>
-				parsing::ParsingTreeObject*								tokenParent;
-				/// <summary>Type of the parent.</summary>
-				WString													type;
-				/// <summary>Field of the parent that contains the token.</summary>
-				WString													field;
-				/// <summary>All acceptable semantic ids.</summary>
-				Ptr<collections::List<vint>>							acceptableSemanticIds;
-				
-				ParsingContext()
-					:foundToken(0)
-					,tokenParent(0)
-				{
-				}
-
-				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTreeNode* foundNode, RepeatingParsingExecutor* executor);
-				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextPos pos, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
-				static bool												RetriveContext(ParsingContext& output, parsing::ParsingTextRange range, parsing::ParsingTreeObject* rootNode, RepeatingParsingExecutor* executor);
 			};
 		}
 	}
