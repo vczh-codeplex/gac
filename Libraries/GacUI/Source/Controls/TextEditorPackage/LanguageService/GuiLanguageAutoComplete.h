@@ -31,7 +31,7 @@ GuiGrammarAutoComplete
 			public:
 
 				/// <summary>The auto complete list data.</summary>
-				struct AutoCompleteData : ParsingContext
+				struct AutoCompleteData : ParsingTokenContext
 				{
 					/// <summary>Available candidate tokens (in lexer token index).</summary>
 					collections::List<vint>							candidates;

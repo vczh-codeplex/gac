@@ -214,8 +214,8 @@ ParsingAnalyzer
 				void										Attach(RepeatingParsingExecutor* _executor)override;
 				void										Detach(RepeatingParsingExecutor* _executor)override;
 				Ptr<Object>									CreateCache(const RepeatingParsingOutput& output)override;
-				vint										GetSemanticIdForToken(const ParsingContext& tokenContext, const RepeatingParsingOutput& output)override;
-				void										GetCandidateItems(const ParsingContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)override;
+				vint										GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)override;
+				void										GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)override;
 			};
 		}
 	}
