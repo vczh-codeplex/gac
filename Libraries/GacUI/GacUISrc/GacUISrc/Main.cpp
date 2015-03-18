@@ -522,6 +522,94 @@ GrammarLanguageProvider
 	};
 
 /***********************************************************************
+ParserParsingAnalyzer
+***********************************************************************/
+
+	class ParserParsingAnalyzer : public RepeatingParsingExecutor::IParsingAnalyzer
+	{
+	protected:
+		RepeatingParsingExecutor*		executor;
+		vint							_type = -1, _token = -1, _rule = -1, _field = -1, _enumValue = -1, _literal = -1;
+	public:
+		void Attach(RepeatingParsingExecutor* _executor)
+		{
+			executor = _executor;
+			_type = executor->GetSemanticId(L"Type");
+			_token = executor->GetSemanticId(L"Token");
+			_rule = executor->GetSemanticId(L"Rule");
+			_field = executor->GetSemanticId(L"Field");
+			_enumValue = executor->GetSemanticId(L"EnumValue");
+			_literal = executor->GetSemanticId(L"Literal");
+		}
+
+		void Detach(RepeatingParsingExecutor* _executor)
+		{
+			executor = nullptr;
+		}
+
+		Ptr<Object> CreateCache(const RepeatingParsingOutput& output)
+		{
+			return nullptr;
+		}
+
+		vint GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
+		{
+			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")
+			{
+				if (tokenContext.field == L"name")
+				{
+					// @Semantic("Type")
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"SubTypeObj")
+			{
+				if (tokenContext.field == L"name")
+				{
+					// @Semantic("Type")
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"PrimitiveGrammarDef")
+			{
+				if (tokenContext.field == L"name")
+				{
+					// @Semantic("Token")
+					// @Semantic("Rule")
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"TextGrammarDef")
+			{
+				if (tokenContext.field == L"text")
+				{
+					// @Semantic("Literal")
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"AssignGrammarDef")
+			{
+				if (tokenContext.field == L"memberName")
+				{
+					// @Semantic("Field")
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"SetterGrammarDef")
+			{
+				if (tokenContext.field == L"memberName")
+				{
+					// @Semantic("Field")
+				}
+				else if (tokenContext.field == L"value")
+				{
+					// @Semantic("EnumValue")
+				}
+			}
+			return -1;
+		}
+
+		void GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
+		{
+		}
+	};
+
+/***********************************************************************
 ParserGrammarExecutor
 ***********************************************************************/
 
@@ -529,7 +617,7 @@ ParserGrammarExecutor
 	{
 	public:
 		ParserGrammarExecutor()
-			:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl", new ParsingAnalyzer(new GrammarLanguageProvider))
+			:RepeatingParsingExecutor(CreateBootstrapAutoRecoverParser(), L"ParserDecl", new ParserParsingAnalyzer)
 		{
 		}
 	};
@@ -582,10 +670,14 @@ void GuiMain()
 		textBox->SetColorizer(colorizer);
 		textBox->SetAutoComplete(autoComplete);
 		
-		FileStream fileStream(L"..\\GacUISrcCodepackedTest\\Resources\\CalculatorDefinition.txt", FileStream::ReadOnly);
-		BomDecoder decoder;
-		DecoderStream decoderStream(fileStream, decoder);
-		StreamReader reader(decoderStream);
+		MemoryStream memoryStream;
+		{
+			auto def = CreateParserDefinition();
+			StreamWriter writer(memoryStream);
+			Log(def, writer);
+		}
+		memoryStream.SeekFromBegin(0);
+		StreamReader reader(memoryStream);
 		textBox->SetText(reader.ReadToEnd());
 		textBox->Select(TextPos(), TextPos());
 
