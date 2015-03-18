@@ -530,6 +530,14 @@ ParserParsingAnalyzer
 	protected:
 		RepeatingParsingExecutor*		executor;
 		vint							_type = -1, _token = -1, _rule = -1, _field = -1, _enumValue = -1, _literal = -1;
+
+		class Cache : public Object
+		{
+		public:
+			Group<WString, WString>		typeNames;
+			SortedList<WString>			tokenNames;
+			SortedList<WString>			ruleNames;
+		};
 	public:
 		void Attach(RepeatingParsingExecutor* _executor)
 		{
@@ -547,9 +555,58 @@ ParserParsingAnalyzer
 			executor = nullptr;
 		}
 
+		void CreateCache_SearchTypes(Ptr<Cache> cache, const WString prefix, Ptr<ParsingTreeObject> typeDef)
+		{
+			if (auto name = typeDef->GetMember(L"name").Cast<ParsingTreeToken>())
+			{
+				cache->typeNames.Add(prefix, name->GetValue());
+				if (typeDef->GetType() == L"ClassTypeDef")
+				{
+					if (auto members = typeDef->GetMember(L"subTypes").Cast<ParsingTreeArray>())
+					{
+						FOREACH(Ptr<ParsingTreeNode>, subNode, members->GetItems())
+						{
+							if (auto obj = subNode.Cast<ParsingTreeObject>())
+							{
+								CreateCache_SearchTypes(cache, prefix + name->GetValue() + L".", obj);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		Ptr<Object> CreateCache(const RepeatingParsingOutput& output)
 		{
-			return nullptr;
+			auto cache = MakePtr<Cache>();
+			if (auto definitions = output.node->GetMember(L"definitions").Cast<ParsingTreeArray>())
+			{
+				FOREACH(Ptr<ParsingTreeNode>, subNode, definitions->GetItems())
+				{
+					if (auto obj = subNode.Cast<ParsingTreeObject>())
+					{
+						if (obj->GetType() == L"TokenDef")
+						{
+							if (auto name = obj->GetMember(L"name").Cast<ParsingTreeToken>())
+							{
+								cache->tokenNames.Add(name->GetValue());
+							}
+						}
+						else if (obj->GetType() == L"RuleDef")
+						{
+							if (auto name = obj->GetMember(L"name").Cast<ParsingTreeToken>())
+							{
+								cache->ruleNames.Add(name->GetValue());
+							}
+						}
+						else
+						{
+							CreateCache_SearchTypes(cache, L"", obj);
+						}
+					}
+				}
+			}
+			return cache;
 		}
 
 		vint GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
