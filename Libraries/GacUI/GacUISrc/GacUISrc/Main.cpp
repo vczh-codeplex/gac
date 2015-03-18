@@ -77,6 +77,10 @@ ParserParsingAnalyzer
 			executor = nullptr;
 		}
 
+		/***********************************************************************
+		CreateCache
+		***********************************************************************/
+
 		void CreateCache_SearchTypes(Ptr<Cache> cache, const WString prefix, Ptr<ParsingTreeObject> typeDef)
 		{
 			if (auto name = typeDef->GetMember(L"name").Cast<ParsingTreeToken>())
@@ -130,6 +134,10 @@ ParserParsingAnalyzer
 			}
 			return cache;
 		}
+
+		/***********************************************************************
+		GetSemanticIdForToken
+		***********************************************************************/
 
 		WString ResolveType(ParsingTreeObject* typeObj, Ptr<Cache> cache)
 		{
@@ -212,6 +220,10 @@ ParserParsingAnalyzer
 			}
 			return -1;
 		}
+
+		/***********************************************************************
+		GetCandidateItems
+		***********************************************************************/
 
 		void GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 		{
