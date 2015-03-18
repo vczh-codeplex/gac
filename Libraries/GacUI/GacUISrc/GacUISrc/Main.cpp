@@ -609,23 +609,41 @@ ParserParsingAnalyzer
 			return cache;
 		}
 
-		vint GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
+		WString ResolveType(ParsingTreeObject* typeObj, Ptr<Cache> cache)
 		{
-			auto cache = output.cache.Cast<Cache>();
-			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")
+			if (auto nameToken = typeObj->GetMember(L"name").Cast<ParsingTreeToken>())
 			{
-				if (tokenContext.field == L"name") // Type
+				auto name = nameToken->GetValue();
+				if (typeObj->GetType() == L"PrimitiveTypeObj")
 				{
-					if (cache->typeNames[L""].Contains(tokenContext.foundToken->GetValue()))
+					if (cache->typeNames.Contains(L"", name))
 					{
-						return _type;
+						return name;
+					}
+				}
+				else if (typeObj->GetType() == L"SubTypeObj")
+				{
+					auto resolvedType = ResolveType(typeObj, cache);
+					if (cache->typeNames.Contains(resolvedType, name))
+					{
+						return resolvedType + L"." + name;
 					}
 				}
 			}
-			else if (tokenContext.tokenParent->GetType() == L"SubTypeObj")
+			return L"";
+		}
+
+		vint GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
+		{
+			auto cache = output.cache.Cast<Cache>();
+			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj" || tokenContext.tokenParent->GetType() == L"SubTypeObj")
 			{
 				if (tokenContext.field == L"name") // Type
 				{
+					if (ResolveType(tokenContext.tokenParent, cache) != L"")
+					{
+						return _type;
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"PrimitiveGrammarDef")
