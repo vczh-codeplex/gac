@@ -648,9 +648,6 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.cpp">
       <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageService.cpp">
-      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1161,9 +1158,6 @@
       <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.h">
-      <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageService.h">
       <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
     </ClInclude>
   </ItemGroup>
