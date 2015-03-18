@@ -611,51 +611,36 @@ ParserParsingAnalyzer
 
 		vint GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
 		{
+			auto cache = output.cache.Cast<Cache>();
 			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")
 			{
-				if (tokenContext.field == L"name")
+				if (tokenContext.field == L"name") // Type
 				{
-					// @Semantic("Type")
+					if (cache->typeNames[L""].Contains(tokenContext.foundToken->GetValue()))
+					{
+						return _type;
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"SubTypeObj")
 			{
-				if (tokenContext.field == L"name")
+				if (tokenContext.field == L"name") // Type
 				{
-					// @Semantic("Type")
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"PrimitiveGrammarDef")
 			{
-				if (tokenContext.field == L"name")
+				if (tokenContext.field == L"name") // Token, Rule
 				{
-					// @Semantic("Token")
-					// @Semantic("Rule")
-				}
-			}
-			else if (tokenContext.tokenParent->GetType() == L"TextGrammarDef")
-			{
-				if (tokenContext.field == L"text")
-				{
-					// @Semantic("Literal")
-				}
-			}
-			else if (tokenContext.tokenParent->GetType() == L"AssignGrammarDef")
-			{
-				if (tokenContext.field == L"memberName")
-				{
-					// @Semantic("Field")
-				}
-			}
-			else if (tokenContext.tokenParent->GetType() == L"SetterGrammarDef")
-			{
-				if (tokenContext.field == L"memberName")
-				{
-					// @Semantic("Field")
-				}
-				else if (tokenContext.field == L"value")
-				{
-					// @Semantic("EnumValue")
+					auto value = tokenContext.foundToken->GetValue();
+					if (cache->tokenNames.Contains(value))
+					{
+						return _token;
+					}
+					else if (cache->ruleNames.Contains(value))
+					{
+						return _rule;
+					}
 				}
 			}
 			return -1;
@@ -663,6 +648,46 @@ ParserParsingAnalyzer
 
 		void GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 		{
+			auto cache = partialOutput.input.cache.Cast<Cache>();
+			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")
+			{
+				if (tokenContext.field == L"name") // Type
+				{
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"SubTypeObj")
+			{
+				if (tokenContext.field == L"name") // Type
+				{
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"PrimitiveGrammarDef")
+			{
+				if (tokenContext.field == L"name") // Token, Rule
+				{
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"TextGrammarDef")
+			{
+				if (tokenContext.field == L"text") // Literal
+				{
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"AssignGrammarDef")
+			{
+				if (tokenContext.field == L"memberName") // Field
+				{
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"SetterGrammarDef")
+			{
+				if (tokenContext.field == L"memberName") // Field
+				{
+				}
+				else if (tokenContext.field == L"value") // EnumValue
+				{
+				}
+			}
 		}
 	};
 
