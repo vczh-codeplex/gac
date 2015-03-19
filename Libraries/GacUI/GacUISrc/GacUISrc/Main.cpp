@@ -170,7 +170,7 @@ ParserParsingAnalyzer
 				{
 					if (auto parentType = typeDef->GetMember(L"parentType").Cast<ParsingTreeObject>())
 					{
-						auto resolvedType = ResolveType(parentType.Obj(), cache);
+						auto resolvedType = ResolveType(parentType.Obj(), cache, nullptr);
 						if (resolvedType != L"")
 						{
 							cache->inheritedTypes.Add(resolvedType, prefix + name->GetValue());
@@ -187,7 +187,7 @@ ParserParsingAnalyzer
 								auto nameToken = field->GetMember(L"name").Cast<ParsingTreeToken>();
 								if (typeNode && nameToken)
 								{
-									auto resolvedType = ResolveType(typeNode.Obj(), cache);
+									auto resolvedType = ResolveType(typeNode.Obj(), cache, nullptr);
 									cache->classFields.Add(typePrefix, Tuple<WString, WString>(nameToken->GetValue(), resolvedType));
 								}
 							}
@@ -236,17 +236,51 @@ ParserParsingAnalyzer
 		GetSemanticIdForToken
 		***********************************************************************/
 
-		void GetTypeScopes(ParsingTreeObject* typeObj, List<WString>& typeScopes)
+		ParsingTreeNode* ToParent(ParsingTreeNode* node, const RepeatingPartialParsingOutput* output)
+		{
+			if (!output) return node;
+			return node == output->modifiedNode.Obj()
+				? output->originalNode.Obj()
+				: node;
+		}
+
+		ParsingTreeObject* ToChild(ParsingTreeObject* node, const RepeatingPartialParsingOutput* output)
+		{
+			if (!output) return node;
+			return node == output->originalNode.Obj()
+				? output->modifiedNode.Obj()
+				: node;
+		}
+
+		Ptr<ParsingTreeNode> ToChild(Ptr<ParsingTreeNode> node, const RepeatingPartialParsingOutput* output)
+		{
+			if (!output) return node;
+			return node == output->originalNode
+				? output->modifiedNode.Cast<ParsingTreeNode>()
+				: node;
+		}
+
+		ParsingTreeNode* GetParent(ParsingTreeNode* node, const RepeatingPartialParsingOutput* output)
+		{
+			return ToParent(node, output)->GetParent();
+		}
+
+		Ptr<ParsingTreeNode> GetMember(ParsingTreeObject* node, const WString& name, const RepeatingPartialParsingOutput* output)
+		{
+			return ToChild(ToChild(node, output)->GetMember(name), output);
+		}
+
+		void GetTypeScopes(ParsingTreeObject* typeObj, List<WString>& typeScopes, const RepeatingPartialParsingOutput* output)
 		{
 			typeScopes.Add(L"");
-			auto typeScope = typeObj->GetParent();
+			auto typeScope = GetParent(typeObj, output);
 			while (typeScope)
 			{
 				if (auto typeScopeObj = dynamic_cast<ParsingTreeObject*>(typeScope))
 				{
 					if (typeScopeObj->GetType() == L"ClassTypeDef")
 					{
-						if (auto classNameToken = typeScopeObj->GetMember(L"name").Cast<ParsingTreeToken>())
+						if (auto classNameToken = GetMember(typeScopeObj, L"name", output).Cast<ParsingTreeToken>())
 						{
 							auto className = classNameToken->GetValue();
 							for (vint i = 0; i < typeScopes.Count(); i++)
@@ -257,19 +291,19 @@ ParserParsingAnalyzer
 						}
 					}
 				}
-				typeScope = typeScope->GetParent();
+				typeScope = GetParent(typeScope, output);
 			}
 		}
 
-		WString ResolveType(ParsingTreeObject* typeObj, Ptr<Cache> cache)
+		WString ResolveType(ParsingTreeObject* typeObj, Ptr<Cache> cache, const RepeatingPartialParsingOutput* output)
 		{
-			if (auto nameToken = typeObj->GetMember(L"name").Cast<ParsingTreeToken>())
+			if (auto nameToken = GetMember(typeObj, L"name", output).Cast<ParsingTreeToken>())
 			{
 				auto name = nameToken->GetValue();
 				if (typeObj->GetType() == L"PrimitiveTypeObj")
 				{
 					List<WString> typeScopes;
-					GetTypeScopes(typeObj, typeScopes);
+					GetTypeScopes(typeObj, typeScopes, output);
 
 					FOREACH(WString, typeScope, typeScopes)
 					{
@@ -281,9 +315,9 @@ ParserParsingAnalyzer
 				}
 				else if (typeObj->GetType() == L"SubTypeObj")
 				{
-					if (auto parentTypeObj = typeObj->GetMember(L"parentType").Cast<ParsingTreeObject>())
+					if (auto parentTypeObj = GetMember(typeObj, L"parentType", output).Cast<ParsingTreeObject>())
 					{
-						auto resolvedType = ResolveType(parentTypeObj.Obj(), cache);
+						auto resolvedType = ResolveType(parentTypeObj.Obj(), cache, output);
 						if (cache->typeNames.Contains(resolvedType + L".", name))
 						{
 							return resolvedType + L"." + name;
@@ -301,7 +335,7 @@ ParserParsingAnalyzer
 			{
 				if (tokenContext.field == L"name") // Type
 				{
-					if (ResolveType(tokenContext.tokenParent, cache) != L"")
+					if (ResolveType(tokenContext.tokenParent, cache, nullptr) != L"")
 					{
 						return _type;
 					}
@@ -329,15 +363,15 @@ ParserParsingAnalyzer
 		GetCandidateItems
 		***********************************************************************/
 
-		void FindRootGrammar(ParsingTreeObject* grammarDef, ParsingTreeObject*& rootGrammarDef, ParsingTreeObject*& ruleDef)
+		void FindRootGrammar(ParsingTreeObject* grammarDef, ParsingTreeObject*& rootGrammarDef, ParsingTreeObject*& ruleDef, const RepeatingPartialParsingOutput* output)
 		{
 			ParsingTreeObject* lastGrammar = grammarDef;
-			ParsingTreeNode* current = grammarDef->GetParent();
+			ParsingTreeNode* current = GetParent(grammarDef, output);
 			while (lastGrammar && current)
 			{
 				if (auto grammars = dynamic_cast<ParsingTreeArray*>(current))
 				{
-					if (auto grammarsParent = dynamic_cast<ParsingTreeObject*>(grammars->GetParent()))
+					if (auto grammarsParent = dynamic_cast<ParsingTreeObject*>(GetParent(grammars, output)))
 					{
 						if (grammarsParent->GetType() == L"RuleDef")
 						{
@@ -348,27 +382,27 @@ ParserParsingAnalyzer
 					return;
 				}
 				lastGrammar = dynamic_cast<ParsingTreeObject*>(current);
-				current = current->GetParent();
+				current = GetParent(current, output);
 			}
 		}
 
-		WString ResolveRuleType(ParsingTreeObject* ruleDef, Ptr<Cache> cache)
+		WString ResolveRuleType(ParsingTreeObject* ruleDef, Ptr<Cache> cache, const RepeatingPartialParsingOutput* output)
 		{
-			if (auto typeObj = ruleDef->GetMember(L"type").Cast<ParsingTreeObject>())
+			if (auto typeObj = GetMember(ruleDef, L"type", output).Cast<ParsingTreeObject>())
 			{
-				return ResolveType(typeObj.Obj(), cache);
+				return ResolveType(typeObj.Obj(), cache, output);
 			}
 			return L"";
 		}
 
-		WString ResolveGrammarType(ParsingTreeObject* grammarDef, Ptr<Cache> cache)
+		WString ResolveGrammarType(ParsingTreeObject* grammarDef, Ptr<Cache> cache, const RepeatingPartialParsingOutput* output)
 		{
 			List<WString> members;
 			if (grammarDef->GetType() == L"CreateGrammarDef")
 			{
-				if (auto typeObj = grammarDef->GetMember(L"type").Cast<ParsingTreeObject>())
+				if (auto typeObj = GetMember(grammarDef, L"type", output).Cast<ParsingTreeObject>())
 				{
-					auto resolvedType = ResolveType(typeObj.Obj(), cache);
+					auto resolvedType = ResolveType(typeObj.Obj(), cache, output);
 					if (resolvedType != L"")
 					{
 						return resolvedType;
@@ -396,9 +430,9 @@ ParserParsingAnalyzer
 
 			FOREACH(WString, member, members)
 			{
-				if (auto subGrammarDef = grammarDef->GetMember(member).Cast<ParsingTreeObject>())
+				if (auto subGrammarDef = GetMember(grammarDef, member, output).Cast<ParsingTreeObject>())
 				{
-					auto resolvedType = ResolveGrammarType(subGrammarDef.Obj(), cache);
+					auto resolvedType = ResolveGrammarType(subGrammarDef.Obj(), cache, output);
 					if (resolvedType != L"")
 					{
 						return resolvedType;
@@ -408,19 +442,19 @@ ParserParsingAnalyzer
 			return L"";
 		}
 
-		void FindAvailableFields(ParsingTreeObject* grammarDef, Ptr<Cache> cache, List<Tuple<WString, WString, WString>>& fields)
+		void FindAvailableFields(ParsingTreeObject* grammarDef, Ptr<Cache> cache, List<Tuple<WString, WString, WString>>& fields, const RepeatingPartialParsingOutput* output)
 		{
 			ParsingTreeObject* rootGrammarDef = nullptr;
 			ParsingTreeObject* ruleDef = nullptr;
-			FindRootGrammar(grammarDef, rootGrammarDef, ruleDef);
+			FindRootGrammar(grammarDef, rootGrammarDef, ruleDef, output);
 					
 			if (rootGrammarDef && ruleDef)
 			{
-				auto resolvedType = ResolveGrammarType(rootGrammarDef, cache);
+				auto resolvedType = ResolveGrammarType(rootGrammarDef, cache, output);
 				auto needInheritedType = false;
 				if (resolvedType == L"")
 				{
-					resolvedType = ResolveRuleType(ruleDef, cache);
+					resolvedType = ResolveRuleType(ruleDef, cache, output);
 					needInheritedType = true;
 				}
 
@@ -471,7 +505,7 @@ ParserParsingAnalyzer
 				if (tokenContext.field == L"name") // Type
 				{
 					List<WString> typeScopes;
-					GetTypeScopes(tokenContext.tokenParent, typeScopes);
+					GetTypeScopes(tokenContext.tokenParent, typeScopes, &partialOutput);
 					FOREACH(WString, typeName, From(typeScopes)
 						.SelectMany([=](const WString& typeScope)
 						{
@@ -498,9 +532,9 @@ ParserParsingAnalyzer
 			{
 				if (tokenContext.field == L"name") // Type
 				{
-					if (auto parentTypeObj = tokenContext.tokenParent->GetMember(L"parentType").Cast<ParsingTreeObject>())
+					if (auto parentTypeObj = GetMember(tokenContext.tokenParent, L"parentType", &partialOutput).Cast<ParsingTreeObject>())
 					{
-						auto resolvedType = ResolveType(parentTypeObj.Obj(), cache);
+						auto resolvedType = ResolveType(parentTypeObj.Obj(), cache, &partialOutput);
 						vint index = cache->typeNames.Keys().IndexOf(resolvedType + L".");
 						if (index != -1)
 						{
@@ -553,7 +587,7 @@ ParserParsingAnalyzer
 				if (tokenContext.field == L"memberName") // Field
 				{
 					List<Tuple<WString, WString, WString>> fields;
-					FindAvailableFields(tokenContext.tokenParent, cache, fields);
+					FindAvailableFields(tokenContext.tokenParent, cache, fields, &partialOutput);
 
 					for (vint i = 0; i < fields.Count(); i++)
 					{
