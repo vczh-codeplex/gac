@@ -198,7 +198,7 @@ ParserParsingAnalyzer
 			}
 		}
 
-		Ptr<Object> CreateCache(const RepeatingParsingOutput& output)
+		Ptr<Object> CreateCacheAsync(const RepeatingParsingOutput& output)
 		{
 			auto cache = MakePtr<Cache>();
 			if (auto definitions = output.node->GetMember(L"definitions").Cast<ParsingTreeArray>())
@@ -284,7 +284,7 @@ ParserParsingAnalyzer
 			return L"";
 		}
 
-		vint GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
+		vint GetSemanticIdForTokenAsync(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
 		{
 			auto cache = output.cache.Cast<Cache>();
 			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj" || tokenContext.tokenParent->GetType() == L"SubTypeObj")
@@ -319,7 +319,7 @@ ParserParsingAnalyzer
 		GetCandidateItems
 		***********************************************************************/
 
-		void GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
+		void GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 		{
 			auto cache = partialOutput.input.cache.Cast<Cache>();
 			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")

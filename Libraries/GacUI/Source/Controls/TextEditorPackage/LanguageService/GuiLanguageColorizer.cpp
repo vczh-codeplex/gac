@@ -76,7 +76,7 @@ GuiGrammarColorizer
 			{
 				if (auto analyzer = parsingExecutor->GetAnalyzer())
 				{
-					auto semanticId = analyzer->GetSemanticIdForToken(context, input);
+					auto semanticId = analyzer->GetSemanticIdForTokenAsync(context, input);
 					if(semanticId!=-1)
 					{
 						context.semanticId=semanticId;

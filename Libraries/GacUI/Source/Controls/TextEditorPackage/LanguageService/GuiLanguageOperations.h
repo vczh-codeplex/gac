@@ -142,19 +142,19 @@ RepeatingParsingExecutor
 					/// <summary>Called when a new parsing result is produced. A parsing analyzer can create a cache to be attached to the output containing anything necessary. This function does not run in UI thread.</summary>
 					/// <param name="output">The new parsing result.</param>
 					/// <returns>The created cache object, which can be null.</returns>
-					virtual Ptr<Object>										CreateCache(const RepeatingParsingOutput& output) = 0;
+					virtual Ptr<Object>										CreateCacheAsync(const RepeatingParsingOutput& output) = 0;
 
 					/// <summary>Called when an semantic id for a token is needed. If an semantic id is returned, a context sensitive color can be assigned to this token. This functio does not run in UI thread, but it will only be called (for several times) after the cache object is initialized.</summary>
 					/// <param name="tokenContext">The token context.</param>
 					/// <param name="output">The current parsing result.</param>
 					/// <returns>The semantic id.</returns>
-					virtual vint											GetSemanticIdForToken(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output) = 0;
+					virtual vint											GetSemanticIdForTokenAsync(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output) = 0;
 
 					/// <summary>Called when multiple auto complete candidate items for a token is needed. If nothing is written into the "candidateItems" parameter and the grammar also doesn't provide static candidate items, nothing will popup. This functio does not run in UI thread, but it will only be called (for several times) after the cache object is initialized.</summary>
 					/// <param name="tokenContext">The token context.</param>
 					/// <param name="partialOutput">The partial parsing result. It contains the current parsing result, and an incremental parsing result. If the calculation of candidate items are is very context sensitive, then you should be very careful when traversing the syntax tree, by carefully looking at the "originalNode" and the "modifiedNode" in the "partialOutput" parameter.</param>
 					/// <param name="candidateItems">The candidate items.</param>
-					virtual void											GetCandidateItems(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
+					virtual void											GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
 				};
 
 				/// <summary>A base class for implementing a callback.</summary>
