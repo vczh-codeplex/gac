@@ -7,6 +7,7 @@
 #pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include "..\..\Source\GacUI.h"
+#include "..\..\..\..\Common\Source\Tuple.h"
 #include "..\..\..\..\Common\Source\Regex\RegexExpression.h"
 #include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageColorizer.h"
 #include "..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageAutoComplete.h"
@@ -56,10 +57,12 @@ ParserParsingAnalyzer
 		class Cache : public Object
 		{
 		public:
-			Group<WString, WString>		typeNames;
-			SortedList<WString>			tokenNames;
-			SortedList<WString>			literalNames;
-			SortedList<WString>			ruleNames;
+			Group<WString, WString>						typeNames;
+			SortedList<WString>							tokenNames;
+			SortedList<WString>							literalNames;
+			SortedList<WString>							ruleNames;
+			Group<WString, WString>						enumItems;
+			Group<WString, Tuple<WString, WString>>		classFields;
 		};
 	public:
 		void Attach(RepeatingParsingExecutor* _executor)
@@ -82,7 +85,7 @@ ParserParsingAnalyzer
 		CreateCache
 		***********************************************************************/
 
-		void CreateCache_SearchTypes(Ptr<Cache> cache, const WString prefix, Ptr<ParsingTreeObject> typeDef)
+		void CreateCache_SearchSubTypes(Ptr<Cache> cache, const WString prefix, Ptr<ParsingTreeObject> typeDef)
 		{
 			if (auto name = typeDef->GetMember(L"name").Cast<ParsingTreeToken>())
 			{
@@ -93,9 +96,101 @@ ParserParsingAnalyzer
 					{
 						FOREACH(Ptr<ParsingTreeNode>, subNode, members->GetItems())
 						{
-							if (auto obj = subNode.Cast<ParsingTreeObject>())
+							if (auto subType = subNode.Cast<ParsingTreeObject>())
 							{
-								CreateCache_SearchTypes(cache, prefix + name->GetValue() + L".", obj);
+								CreateCache_SearchSubTypes(cache, prefix + name->GetValue() + L".", subType);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		void CreateCache_CreateSymbols(Ptr<Cache> cache, Ptr<ParsingTreeObject> def)
+		{
+			if (def->GetType() == L"TokenDef")
+			{
+				if (auto name = def->GetMember(L"name").Cast<ParsingTreeToken>())
+				{
+					cache->tokenNames.Add(name->GetValue());
+				}
+
+				if (auto discard = def->GetMember(L"discard").Cast<ParsingTreeToken>())
+				{
+					if (discard->GetValue() == L"DiscardToken")
+					{
+						return;
+					}
+				}
+				if (auto regex = def->GetMember(L"regex").Cast<ParsingTreeToken>())
+				{
+					auto escaped = DeserializeString(regex->GetValue());
+					if (IsRegexEscapedLiteralString(escaped))
+					{
+						cache->literalNames.Add(SerializeString(UnescapeTextForRegex(escaped)));
+					}
+				}
+			}
+			else if (def->GetType() == L"RuleDef")
+			{
+				if (auto name = def->GetMember(L"name").Cast<ParsingTreeToken>())
+				{
+					cache->ruleNames.Add(name->GetValue());
+				}
+			}
+			else
+			{
+				CreateCache_SearchSubTypes(cache, L"", def);
+			}
+		}
+
+		void CreateCache_ResolveSymbols(Ptr<Cache> cache, const WString& prefix, Ptr<ParsingTreeObject> typeDef)
+		{
+			if (auto name = typeDef->GetMember(L"name").Cast<ParsingTreeToken>())
+			{
+				auto typePrefix = prefix + name->GetValue() + L".";
+				if (typeDef->GetType() == L"EnumTypeDef")
+				{
+					if (auto members = typeDef->GetMember(L"members").Cast<ParsingTreeArray>())
+					{
+						FOREACH(Ptr<ParsingTreeNode>, subNode, members->GetItems())
+						{
+							if (auto member = subNode.Cast<ParsingTreeObject>())
+							{
+								if (auto nameToken = member->GetMember(L"name").Cast<ParsingTreeToken>())
+								{
+									cache->enumItems.Add(typePrefix, nameToken->GetValue());
+								}
+							}
+						}
+					}
+				}
+				else if (typeDef->GetType() == L"ClassTypeDef")
+				{
+					if (auto members = typeDef->GetMember(L"members").Cast<ParsingTreeArray>())
+					{
+						FOREACH(Ptr<ParsingTreeNode>, subNode, members->GetItems())
+						{
+							if (auto field = subNode.Cast<ParsingTreeObject>())
+							{
+								auto typeNode = field->GetMember(L"type").Cast<ParsingTreeObject>();
+								auto nameToken = field->GetMember(L"name").Cast<ParsingTreeToken>();
+								if (typeNode && nameToken)
+								{
+									auto resolvedType = ResolveType(typeNode.Obj(), cache);
+									cache->classFields.Add(typePrefix, Tuple<WString, WString>(nameToken->GetValue(), resolvedType));
+								}
+							}
+						}
+					}
+
+					if (auto members = typeDef->GetMember(L"subTypes").Cast<ParsingTreeArray>())
+					{
+						FOREACH(Ptr<ParsingTreeNode>, subNode, members->GetItems())
+						{
+							if (auto subType = subNode.Cast<ParsingTreeObject>())
+							{
+								CreateCache_ResolveSymbols(cache, typePrefix, subType);
 							}
 						}
 					}
@@ -112,40 +207,15 @@ ParserParsingAnalyzer
 				{
 					if (auto obj = subNode.Cast<ParsingTreeObject>())
 					{
-						if (obj->GetType() == L"TokenDef")
-						{
-							if (auto name = obj->GetMember(L"name").Cast<ParsingTreeToken>())
-							{
-								cache->tokenNames.Add(name->GetValue());
-							}
-
-							if (auto discard = obj->GetMember(L"discard").Cast<ParsingTreeToken>())
-							{
-								if (discard->GetValue() == L"DiscardToken")
-								{
-									continue;
-								}
-							}
-							if (auto regex = obj->GetMember(L"regex").Cast<ParsingTreeToken>())
-							{
-								auto escaped = DeserializeString(regex->GetValue());
-								if (IsRegexEscapedLiteralString(escaped))
-								{
-									cache->literalNames.Add(SerializeString(UnescapeTextForRegex(escaped)));
-								}
-							}
-						}
-						else if (obj->GetType() == L"RuleDef")
-						{
-							if (auto name = obj->GetMember(L"name").Cast<ParsingTreeToken>())
-							{
-								cache->ruleNames.Add(name->GetValue());
-							}
-						}
-						else
-						{
-							CreateCache_SearchTypes(cache, L"", obj);
-						}
+						CreateCache_CreateSymbols(cache, obj);
+					}
+				}
+				
+				FOREACH(Ptr<ParsingTreeNode>, subNode, definitions->GetItems())
+				{
+					if (auto obj = subNode.Cast<ParsingTreeObject>())
+					{
+						CreateCache_ResolveSymbols(cache, L"", obj);
 					}
 				}
 			}
