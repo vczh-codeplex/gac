@@ -408,6 +408,61 @@ ParserParsingAnalyzer
 			return L"";
 		}
 
+		void FindAvailableFields(ParsingTreeObject* grammarDef, Ptr<Cache> cache, List<Tuple<WString, WString, WString>>& fields)
+		{
+			ParsingTreeObject* rootGrammarDef = nullptr;
+			ParsingTreeObject* ruleDef = nullptr;
+			FindRootGrammar(grammarDef, rootGrammarDef, ruleDef);
+					
+			if (rootGrammarDef && ruleDef)
+			{
+				auto resolvedType = ResolveGrammarType(rootGrammarDef, cache);
+				auto needInheritedType = false;
+				if (resolvedType == L"")
+				{
+					resolvedType = ResolveRuleType(ruleDef, cache);
+					needInheritedType = true;
+				}
+
+				if (resolvedType != L"")
+				{
+					List<WString> types;
+					types.Add(resolvedType);
+					vint current = 0;
+
+					while (current < types.Count())
+					{
+						auto type = types[current++];
+						vint index = cache->classFields.Keys().IndexOf(type + L".");
+						if (index != -1)
+						{
+							const auto& values = cache->classFields.GetByIndex(index);
+							for (vint i = 0; i < values.Count(); i++)
+							{
+								auto& value = values[i];
+								fields.Add(Tuple<WString, WString, WString>(type, value.f0, value.f1));
+							}
+						}
+
+						if (needInheritedType)
+						{
+							index = cache->inheritedTypes.Keys().IndexOf(type);
+							if (index != -1)
+							{
+								FOREACH(WString, inheritedType, cache->inheritedTypes.GetByIndex(index))
+								{
+									if (!types.Contains(inheritedType))
+									{
+										types.Add(inheritedType);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		void GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 		{
 			auto cache = partialOutput.input.cache.Cast<Cache>();
@@ -497,6 +552,16 @@ ParserParsingAnalyzer
 			{
 				if (tokenContext.field == L"memberName") // Field
 				{
+					List<Tuple<WString, WString, WString>> fields;
+					FindAvailableFields(tokenContext.tokenParent, cache, fields);
+
+					for (vint i = 0; i < fields.Count(); i++)
+					{
+						ParsingCandidateItem item;
+						item.semanticId = _field;
+						item.name = fields[i].f1;
+						candidateItems.Add(item);
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"SetterGrammarDef")
