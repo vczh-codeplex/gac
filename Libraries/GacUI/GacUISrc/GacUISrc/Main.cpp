@@ -602,6 +602,19 @@ ParserParsingAnalyzer
 			{
 				if (tokenContext.field == L"memberName") // Field
 				{
+					List<Tuple<WString, WString, WString>> fields;
+					FindAvailableFields(tokenContext.tokenParent, cache, fields, &partialOutput);
+
+					for (vint i = 0; i < fields.Count(); i++)
+					{
+						if (cache->enumItems.Keys().Contains(fields[i].f2))
+						{
+							ParsingCandidateItem item;
+							item.semanticId = _field;
+							item.name = fields[i].f1;
+							candidateItems.Add(item);
+						}
+					}
 				}
 				else if (tokenContext.field == L"value") // EnumValue
 				{
