@@ -297,7 +297,7 @@ RepeatingParsingExecutor
 			{
 				if(analyzer)
 				{
-					context.cache = analyzer->CreateCache(context);
+					context.cache = analyzer->CreateCacheAsync(context);
 				}
 			}
 

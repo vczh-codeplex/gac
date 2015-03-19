@@ -986,7 +986,7 @@ GuiGrammarAutoComplete
 				{
 					if (context.autoComplete && context.autoComplete->acceptableSemanticIds)
 					{
-						analyzer->GetCandidateItems(*context.autoComplete.Obj(), context, context.autoComplete->candidateItems);
+						analyzer->GetCandidateItemsAsync(*context.autoComplete.Obj(), context, context.autoComplete->candidateItems);
 					}
 				}
 			}
