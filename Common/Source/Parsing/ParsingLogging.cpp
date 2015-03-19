@@ -605,7 +605,7 @@ Logger (Automaton)
 					writer.WriteString(symbol->GetName());
 
 					WString regex=symbol->GetDescriptorString();
-					if(regex_internal::IsRegexEscapedListeralString(regex))
+					if(regex_internal::IsRegexEscapedLiteralString(regex))
 					{
 						writer.WriteString(L" ");
 						definitions::LogString(regex_internal::UnescapeTextForRegex(regex), writer);

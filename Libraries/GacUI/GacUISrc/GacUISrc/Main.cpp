@@ -58,6 +58,7 @@ ParserParsingAnalyzer
 		public:
 			Group<WString, WString>		typeNames;
 			SortedList<WString>			tokenNames;
+			SortedList<WString>			literalNames;
 			SortedList<WString>			ruleNames;
 		};
 	public:
@@ -116,6 +117,22 @@ ParserParsingAnalyzer
 							if (auto name = obj->GetMember(L"name").Cast<ParsingTreeToken>())
 							{
 								cache->tokenNames.Add(name->GetValue());
+							}
+
+							if (auto discard = obj->GetMember(L"discard").Cast<ParsingTreeToken>())
+							{
+								if (discard->GetValue() == L"DiscardToken")
+								{
+									continue;
+								}
+							}
+							if (auto regex = obj->GetMember(L"regex").Cast<ParsingTreeToken>())
+							{
+								auto escaped = DeserializeString(regex->GetValue());
+								if (IsRegexEscapedLiteralString(escaped))
+								{
+									cache->literalNames.Add(SerializeString(UnescapeTextForRegex(escaped)));
+								}
 							}
 						}
 						else if (obj->GetType() == L"RuleDef")
@@ -253,7 +270,8 @@ ParserParsingAnalyzer
 							{
 								return LazyList<WString>(cache->typeNames.GetByIndex(index));
 							}
-						}))
+						})
+						.Distinct())
 					{
 						ParsingCandidateItem item;
 						item.semanticId = _type;
@@ -307,6 +325,13 @@ ParserParsingAnalyzer
 			{
 				if (tokenContext.field == L"text") // Literal
 				{
+					FOREACH(WString, name, cache->literalNames)
+					{
+						ParsingCandidateItem item;
+						item.semanticId = _literal;
+						item.name = name;
+						candidateItems.Add(item);
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"AssignGrammarDef")
