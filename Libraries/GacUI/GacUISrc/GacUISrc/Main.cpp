@@ -139,6 +139,31 @@ ParserParsingAnalyzer
 		GetSemanticIdForToken
 		***********************************************************************/
 
+		void GetTypeScopes(ParsingTreeObject* typeObj, List<WString>& typeScopes)
+		{
+			typeScopes.Add(L"");
+			auto typeScope = typeObj->GetParent();
+			while (typeScope)
+			{
+				if (auto typeScopeObj = dynamic_cast<ParsingTreeObject*>(typeScope))
+				{
+					if (typeScopeObj->GetType() == L"ClassTypeDef")
+					{
+						if (auto classNameToken = typeScopeObj->GetMember(L"name").Cast<ParsingTreeToken>())
+						{
+							auto className = classNameToken->GetValue();
+							for (vint i = 0; i < typeScopes.Count(); i++)
+							{
+								typeScopes[i] = className + L"." + typeScopes[i];
+							}
+							typeScopes.Add(L"");
+						}
+					}
+				}
+				typeScope = typeScope->GetParent();
+			}
+		}
+
 		WString ResolveType(ParsingTreeObject* typeObj, Ptr<Cache> cache)
 		{
 			if (auto nameToken = typeObj->GetMember(L"name").Cast<ParsingTreeToken>())
@@ -147,28 +172,7 @@ ParserParsingAnalyzer
 				if (typeObj->GetType() == L"PrimitiveTypeObj")
 				{
 					List<WString> typeScopes;
-					typeScopes.Add(L"");
-
-					auto typeScope = typeObj->GetParent();
-					while (typeScope)
-					{
-						if (auto typeScopeObj = dynamic_cast<ParsingTreeObject*>(typeScope))
-						{
-							if (typeScopeObj->GetType() == L"ClassTypeDef")
-							{
-								if (auto classNameToken = typeScopeObj->GetMember(L"name").Cast<ParsingTreeToken>())
-								{
-									auto className = classNameToken->GetValue();
-									for (vint i = 0; i < typeScopes.Count(); i++)
-									{
-										typeScopes[i] = className + L"." + typeScopes[i];
-									}
-									typeScopes.Add(L"");
-								}
-							}
-						}
-						typeScope = typeScope->GetParent();
-					}
+					GetTypeScopes(typeObj, typeScopes);
 
 					FOREACH(WString, typeScope, typeScopes)
 					{
@@ -180,10 +184,13 @@ ParserParsingAnalyzer
 				}
 				else if (typeObj->GetType() == L"SubTypeObj")
 				{
-					auto resolvedType = ResolveType(typeObj, cache);
-					if (cache->typeNames.Contains(resolvedType, name))
+					if (auto parentTypeObj = typeObj->GetMember(L"parentType").Cast<ParsingTreeObject>())
 					{
-						return resolvedType + L"." + name;
+						auto resolvedType = ResolveType(parentTypeObj.Obj(), cache);
+						if (cache->typeNames.Contains(resolvedType + L".", name))
+						{
+							return resolvedType + L"." + name;
+						}
 					}
 				}
 			}
@@ -232,18 +239,68 @@ ParserParsingAnalyzer
 			{
 				if (tokenContext.field == L"name") // Type
 				{
+					List<WString> typeScopes;
+					GetTypeScopes(tokenContext.tokenParent, typeScopes);
+					FOREACH(WString, typeName, From(typeScopes)
+						.SelectMany([=](const WString& typeScope)
+						{
+							vint index = cache->typeNames.Keys().IndexOf(typeScope);
+							if (index == -1)
+							{
+								return LazyList<WString>();
+							}
+							else
+							{
+								return LazyList<WString>(cache->typeNames.GetByIndex(index));
+							}
+						}))
+					{
+						ParsingCandidateItem item;
+						item.semanticId = _type;
+						item.name = typeName;
+						candidateItems.Add(item);
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"SubTypeObj")
 			{
 				if (tokenContext.field == L"name") // Type
 				{
+					if (auto parentTypeObj = tokenContext.tokenParent->GetMember(L"parentType").Cast<ParsingTreeObject>())
+					{
+						auto resolvedType = ResolveType(parentTypeObj.Obj(), cache);
+						vint index = cache->typeNames.Keys().IndexOf(resolvedType + L".");
+						if (index != -1)
+						{
+							FOREACH(WString, typeName, cache->typeNames.GetByIndex(index))
+							{
+								ParsingCandidateItem item;
+								item.semanticId = _type;
+								item.name = typeName;
+								candidateItems.Add(item);
+							}
+						}
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"PrimitiveGrammarDef")
 			{
 				if (tokenContext.field == L"name") // Token, Rule
 				{
+					FOREACH(WString, name, cache->tokenNames)
+					{
+						ParsingCandidateItem item;
+						item.semanticId = _token;
+						item.name = name;
+						candidateItems.Add(item);
+					}
+					FOREACH(WString, name, cache->ruleNames)
+					{
+						ParsingCandidateItem item;
+						item.semanticId = _rule;
+						item.name = name;
+						candidateItems.Add(item);
+					}
 				}
 			}
 			else if (tokenContext.tokenParent->GetType() == L"TextGrammarDef")
