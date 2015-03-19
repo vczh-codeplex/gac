@@ -191,6 +191,7 @@
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.Controls.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ControlTemplate.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.DataBinding.jpg" />
+    <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.DataGridModel.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ItemTemplate.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ListViewModel.jpg" />
     <Content Include="Content\Demos\Demos.Persistant.LoadFromXml.ViewModel.jpg" />
@@ -290,6 +291,11 @@
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\DXGUI_92.jpg" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\Main.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.DataBinding\XmlWindowResourceDataBinding.xml" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.DataGridModel\DXGUI_100.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.DataGridModel\DXGUI_98.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.DataGridModel\DXGUI_99.jpg" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.DataGridModel\Main.cpp" />
+    <Content Include="Content\Demos\Persistant.LoadFromXml.DataGridModel\XmlWindowDataGridModel.xml" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated%29Demo.h" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated%29DemoPartialClasses.cpp" />
     <Content Include="Content\Demos\Persistant.LoadFromXml.ItemTemplate\%28Generated%29DemoPartialClasses.h" />
@@ -455,6 +461,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\GettingStart_6.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Demos\Persistant.LoadFromXml.DataGridModel\Codegen.bat" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

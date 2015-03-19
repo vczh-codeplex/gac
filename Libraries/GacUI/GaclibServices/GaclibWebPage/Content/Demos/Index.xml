@@ -327,5 +327,15 @@
       <cpp src="(Generated, Modifiable)VTrackerTemplate.cpp" />
       <description>This demo shows how to apply a customized control template (skin) to all controls using XML, including a customized border window.</description>
     </demo>
+    <demo name="LoadFromXml.DataGridModel">
+      <date>2015/3/19</date>
+      <image src="DXGUI_98.jpg"/>
+      <image src="DXGUI_99.jpg"/>
+      <image src="DXGUI_100.jpg"/>
+      <cpp src="Main.cpp" />
+      <cpp src="Codegen.bat" />
+      <cpp src="XmlWindowDataGridModel.xml" />
+      <description>This demo shows how to do bind a view model to an editable DataGrid control.</description>
+    </demo>
   </category>
 </demos>
