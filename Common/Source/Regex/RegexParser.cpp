@@ -670,7 +670,7 @@ namespace vl
 			return result;
 		}
 
-		bool IsRegexEscapedListeralString(const WString& regex)
+		bool IsRegexEscapedLiteralString(const WString& regex)
 		{
 			for(vint i=0;i<regex.Length();i++)
 			{

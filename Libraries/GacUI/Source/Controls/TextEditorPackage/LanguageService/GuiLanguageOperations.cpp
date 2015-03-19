@@ -253,7 +253,7 @@ RepeatingParsingExecutor
 					if((md.isCandidate=tokenCandidateAtts.Keys().Contains(tokenIndex)))
 					{
 						const ParsingTable::TokenInfo& tokenInfo=table->GetTokenInfo(md.tableTokenIndex);
-						if(IsRegexEscapedListeralString(tokenInfo.regex))
+						if(IsRegexEscapedLiteralString(tokenInfo.regex))
 						{
 							md.unescapedRegexText=UnescapeTextForRegex(tokenInfo.regex);
 						}

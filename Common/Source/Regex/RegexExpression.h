@@ -374,7 +374,7 @@ namespace vl
 		extern WString					EscapeTextForRegex(const WString& literalString);
 		extern WString					UnescapeTextForRegex(const WString& escapedText);
 		extern WString					NormalizeEscapedTextForRegex(const WString& escapedText);
-		extern bool						IsRegexEscapedListeralString(const WString& regex);
+		extern bool						IsRegexEscapedLiteralString(const WString& regex);
 	}
 }
 
