@@ -61,6 +61,7 @@ ParserParsingAnalyzer
 			SortedList<WString>							tokenNames;
 			SortedList<WString>							literalNames;
 			SortedList<WString>							ruleNames;
+			Group<WString, WString>						inheritedTypes;
 			Group<WString, WString>						enumItems;
 			Group<WString, Tuple<WString, WString>>		classFields;
 		};
@@ -167,6 +168,15 @@ ParserParsingAnalyzer
 				}
 				else if (typeDef->GetType() == L"ClassTypeDef")
 				{
+					if (auto parentType = typeDef->GetMember(L"parentType").Cast<ParsingTreeObject>())
+					{
+						auto resolvedType = ResolveType(parentType.Obj(), cache);
+						if (resolvedType != L"")
+						{
+							cache->inheritedTypes.Add(resolvedType, prefix + name->GetValue());
+						}
+					}
+
 					if (auto members = typeDef->GetMember(L"members").Cast<ParsingTreeArray>())
 					{
 						FOREACH(Ptr<ParsingTreeNode>, subNode, members->GetItems())
@@ -318,6 +328,85 @@ ParserParsingAnalyzer
 		/***********************************************************************
 		GetCandidateItems
 		***********************************************************************/
+
+		void FindRootGrammar(ParsingTreeObject* grammarDef, ParsingTreeObject*& rootGrammarDef, ParsingTreeObject*& ruleDef)
+		{
+			ParsingTreeObject* lastGrammar = grammarDef;
+			ParsingTreeNode* current = grammarDef->GetParent();
+			while (lastGrammar && current)
+			{
+				if (auto grammars = dynamic_cast<ParsingTreeArray*>(current))
+				{
+					if (auto grammarsParent = dynamic_cast<ParsingTreeObject*>(grammars->GetParent()))
+					{
+						if (grammarsParent->GetType() == L"RuleDef")
+						{
+							rootGrammarDef = lastGrammar;
+							ruleDef = grammarsParent;
+						}
+					}
+					return;
+				}
+				lastGrammar = dynamic_cast<ParsingTreeObject*>(current);
+				current = current->GetParent();
+			}
+		}
+
+		WString ResolveRuleType(ParsingTreeObject* ruleDef, Ptr<Cache> cache)
+		{
+			if (auto typeObj = ruleDef->GetMember(L"type").Cast<ParsingTreeObject>())
+			{
+				return ResolveType(typeObj.Obj(), cache);
+			}
+			return L"";
+		}
+
+		WString ResolveGrammarType(ParsingTreeObject* grammarDef, Ptr<Cache> cache)
+		{
+			List<WString> members;
+			if (grammarDef->GetType() == L"CreateGrammarDef")
+			{
+				if (auto typeObj = grammarDef->GetMember(L"type").Cast<ParsingTreeObject>())
+				{
+					auto resolvedType = ResolveType(typeObj.Obj(), cache);
+					if (resolvedType != L"")
+					{
+						return resolvedType;
+					}
+				}
+			}
+
+			if (
+				grammarDef->GetType() == L"LoopGrammarDef" ||
+				grammarDef->GetType() == L"OptionalGrammarDef" ||
+				grammarDef->GetType() == L"CreateGrammarDef" ||
+				grammarDef->GetType() == L"AssignGrammarDef" ||
+				grammarDef->GetType() == L"UseGrammarDef" ||
+				grammarDef->GetType() == L"SetterGrammarDef")
+			{
+				members.Add(L"grammar");
+			}
+			else if (
+				grammarDef->GetType() == L"SequenceGrammarDef" ||
+				grammarDef->GetType() == L"AlternativeGrammarDef")
+			{
+				members.Add(L"first");
+				members.Add(L"second");
+			}
+
+			FOREACH(WString, member, members)
+			{
+				if (auto subGrammarDef = grammarDef->GetMember(member).Cast<ParsingTreeObject>())
+				{
+					auto resolvedType = ResolveGrammarType(subGrammarDef.Obj(), cache);
+					if (resolvedType != L"")
+					{
+						return resolvedType;
+					}
+				}
+			}
+			return L"";
+		}
 
 		void GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 		{
