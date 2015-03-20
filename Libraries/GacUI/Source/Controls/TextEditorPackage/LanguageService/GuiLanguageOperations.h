@@ -130,6 +130,25 @@ RepeatingParsingExecutor
 				/// <summary>Parsing analyzer.</summary>
 				class IParsingAnalyzer : public virtual Interface
 				{
+				private:
+					parsing::ParsingTreeNode*								ToParent(parsing::ParsingTreeNode* node, const RepeatingPartialParsingOutput* output);
+					parsing::ParsingTreeObject*								ToChild(parsing::ParsingTreeObject* node, const RepeatingPartialParsingOutput* output);
+					Ptr<parsing::ParsingTreeNode>							ToChild(Ptr<parsing::ParsingTreeNode> node, const RepeatingPartialParsingOutput* output);
+
+				protected:
+					/// <summary>Get a syntax tree node's parent when the whole tree is in a partial modified state. You should use this function instead of <see cref="parsing::ParsingTreeNode::GetParent"/> when implementing this interface.</summary>
+					/// <param name="node">The node.</param>
+					/// <param name="output">The partial parsing output, which describes how the whole tree is partial modified.</param>
+					parsing::ParsingTreeNode*								GetParent(parsing::ParsingTreeNode* node, const RepeatingPartialParsingOutput* output);
+					/// <summary>Get a syntax tree node's member when the whole tree is in a partial modified state. You should use this function instead of <see cref="parsing::ParsingTreeObject::GetMember"/> when implementing this interface.</summary>
+					/// <param name="node">The node.</param>
+					/// <param name="output">The partial parsing output, which describes how the whole tree is partial modified.</param>
+					Ptr<parsing::ParsingTreeNode>							GetMember(parsing::ParsingTreeObject* node, const WString& name, const RepeatingPartialParsingOutput* output);
+					/// <summary>Get a syntax tree node's item when the whole tree is in a partial modified state. You should use this function instead of <see cref="parsing::ParsingTreeArray::GetItem"/> when implementing this interface.</summary>
+					/// <param name="node">The node.</param>
+					/// <param name="output">The partial parsing output, which describes how the whole tree is partial modified.</param>
+					Ptr<parsing::ParsingTreeNode>							GetItem(parsing::ParsingTreeArray* node, vint index, const RepeatingPartialParsingOutput* output);
+
 				public:
 					/// <summary>Called when a <see cref="RepeatingParsingExecutor"/> is created.</summary>
 					/// <param name="executor">The releated <see cref="RepeatingParsingExecutor"/>.</param>

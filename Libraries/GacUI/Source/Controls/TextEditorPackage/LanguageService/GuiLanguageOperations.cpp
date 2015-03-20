@@ -51,6 +51,49 @@ ParsingContext
 			}
 
 /***********************************************************************
+RepeatingParsingExecutor::IParsingAnalyzer
+***********************************************************************/
+
+		parsing::ParsingTreeNode* RepeatingParsingExecutor::IParsingAnalyzer::ToParent(parsing::ParsingTreeNode* node, const RepeatingPartialParsingOutput* output)
+		{
+			if (!output || !output->modifiedNode) return node;
+			return node == output->modifiedNode.Obj()
+				? output->originalNode.Obj()
+				: node;
+		}
+
+		parsing::ParsingTreeObject* RepeatingParsingExecutor::IParsingAnalyzer::ToChild(parsing::ParsingTreeObject* node, const RepeatingPartialParsingOutput* output)
+		{
+			if (!output || !output->modifiedNode) return node;
+			return node == output->originalNode.Obj()
+				? output->modifiedNode.Obj()
+				: node;
+		}
+
+		Ptr<parsing::ParsingTreeNode> RepeatingParsingExecutor::IParsingAnalyzer::ToChild(Ptr<parsing::ParsingTreeNode> node, const RepeatingPartialParsingOutput* output)
+		{
+			if (!output) return node;
+			return node == output->originalNode
+				? output->modifiedNode.Cast<ParsingTreeNode>()
+				: node;
+		}
+
+		parsing::ParsingTreeNode* RepeatingParsingExecutor::IParsingAnalyzer::GetParent(parsing::ParsingTreeNode* node, const RepeatingPartialParsingOutput* output)
+		{
+			return ToParent(node, output)->GetParent();
+		}
+
+		Ptr<parsing::ParsingTreeNode> RepeatingParsingExecutor::IParsingAnalyzer::GetMember(parsing::ParsingTreeObject* node, const WString& name, const RepeatingPartialParsingOutput* output)
+		{
+			return ToChild(ToChild(node, output)->GetMember(name), output);
+		}
+
+		Ptr<parsing::ParsingTreeNode> RepeatingParsingExecutor::IParsingAnalyzer::GetItem(parsing::ParsingTreeArray* node, vint index, const RepeatingPartialParsingOutput* output)
+		{
+			return ToChild(node->GetItem(index), output);
+		}
+
+/***********************************************************************
 RepeatingParsingExecutor::CallbackBase
 ***********************************************************************/
 
