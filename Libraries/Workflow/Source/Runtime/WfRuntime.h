@@ -366,7 +366,12 @@ RuntimeException
 				WfRuntimeExceptionInfo(const WString& _message, bool _fatal);
 				~WfRuntimeExceptionInfo();
 				
+#pragma push_macro("GetMessage")
+#if defined GetMessage
+#undef GetMessage
+#endif
 				WString							GetMessage()override;
+#pragma pop_macro("GetMessage")
 				bool							GetFatal()override;
 				Ptr<IValueReadonlyList>			GetCallStack()override;
 			};

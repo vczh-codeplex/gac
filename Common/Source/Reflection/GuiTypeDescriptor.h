@@ -552,7 +552,12 @@ Runtime Exception
 			class IValueException : public virtual IDescriptable, public Description<IValueException>
 			{
 			public:
+#pragma push_macro("GetMessage")
+#if defined GetMessage
+#undef GetMessage
+#endif
 				virtual WString							GetMessage() = 0;
+#pragma pop_macro("GetMessage")
 				virtual bool							GetFatal() = 0;
 				virtual Ptr<IValueReadonlyList>			GetCallStack() = 0;
 			};
