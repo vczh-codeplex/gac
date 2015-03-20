@@ -573,7 +573,7 @@ ParserParsingAnalyzer
 
 					for (vint i = 0; i < fields.Count(); i++)
 					{
-						if (cache->enumItems.Keys().Contains(fields[i].f2))
+						if (cache->enumItems.Keys().Contains(fields[i].f2 + L"."))
 						{
 							ParsingCandidateItem item;
 							item.semanticId = _field;
