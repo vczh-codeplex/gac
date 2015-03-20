@@ -1036,7 +1036,12 @@ Collections
 
 			BEGIN_CLASS_MEMBER(IValueException)
 				CLASS_MEMBER_BASE(IDescriptable)
+#pragma push_macro("GetMessage")
+#if defined GetMessage
+#undef GetMessage
+#endif
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Message)
+#pragma pop_macro("GetMessage")
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(Fatal)
 				CLASS_MEMBER_PROPERTY_READONLY_FAST(CallStack)
 			END_CLASS_MEMBER(IValueException)
