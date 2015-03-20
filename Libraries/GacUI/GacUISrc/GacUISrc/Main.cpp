@@ -606,6 +606,32 @@ ParserParsingAnalyzer
 				}
 				else if (tokenContext.field == L"value") // EnumValue
 				{
+					if (auto memberNameToken = GetMember(tokenContext.tokenParent, L"memberName", &partialOutput).Cast<ParsingTreeToken>())
+					{
+						auto memberName = memberNameToken->GetValue();
+						List<Tuple<WString, WString, WString>> fields;
+						FindAvailableFields(tokenContext.tokenParent, cache, fields, &partialOutput);
+						
+						for (vint i = 0; i < fields.Count(); i++)
+						{
+							if (memberName == fields[i].f1)
+							{
+								vint index = cache->enumItems.Keys().IndexOf(fields[i].f2 + L".");
+								if (index != -1)
+								{
+									const auto& members = cache->enumItems.GetByIndex(index);
+									FOREACH(WString, member, members)
+									{
+										ParsingCandidateItem item;
+										item.semanticId = _enumValue;
+										item.name = SerializeString(member);
+										candidateItems.Add(item);
+									}
+								}
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
