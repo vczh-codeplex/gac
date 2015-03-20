@@ -236,40 +236,6 @@ ParserParsingAnalyzer
 		GetSemanticIdForToken
 		***********************************************************************/
 
-		ParsingTreeNode* ToParent(ParsingTreeNode* node, const RepeatingPartialParsingOutput* output)
-		{
-			if (!output) return node;
-			return node == output->modifiedNode.Obj()
-				? output->originalNode.Obj()
-				: node;
-		}
-
-		ParsingTreeObject* ToChild(ParsingTreeObject* node, const RepeatingPartialParsingOutput* output)
-		{
-			if (!output) return node;
-			return node == output->originalNode.Obj()
-				? output->modifiedNode.Obj()
-				: node;
-		}
-
-		Ptr<ParsingTreeNode> ToChild(Ptr<ParsingTreeNode> node, const RepeatingPartialParsingOutput* output)
-		{
-			if (!output) return node;
-			return node == output->originalNode
-				? output->modifiedNode.Cast<ParsingTreeNode>()
-				: node;
-		}
-
-		ParsingTreeNode* GetParent(ParsingTreeNode* node, const RepeatingPartialParsingOutput* output)
-		{
-			return ToParent(node, output)->GetParent();
-		}
-
-		Ptr<ParsingTreeNode> GetMember(ParsingTreeObject* node, const WString& name, const RepeatingPartialParsingOutput* output)
-		{
-			return ToChild(ToChild(node, output)->GetMember(name), output);
-		}
-
 		void GetTypeScopes(ParsingTreeObject* typeObj, List<WString>& typeScopes, const RepeatingPartialParsingOutput* output)
 		{
 			typeScopes.Add(L"");
