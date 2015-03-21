@@ -168,11 +168,11 @@ ParsingTreeNode
 						const auto& min = !subRange.start.IsInvalid() ? subRange.start : subRange.end;
 						const auto& max = !subRange.end.IsInvalid() ? subRange.end : subRange.start;
 
-						if (codeRange.start.IsInvalid() || !min.IsInvalid() && codeRange.start > min)
+						if (codeRange.start.IsInvalid() || (!min.IsInvalid() && codeRange.start > min))
 						{
 							codeRange.start = min;
 						}
-						if (codeRange.end.IsInvalid() || !max.IsInvalid() && codeRange.end < max)
+						if (codeRange.end.IsInvalid() || (!max.IsInvalid() && codeRange.end < max))
 						{
 							codeRange.end = max;
 						}
