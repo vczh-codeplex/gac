@@ -19,7 +19,6 @@ namespace vl
 {
 	namespace regex_internal
 	{
-		using namespace vl::collections;
 
 /***********************************************************************
 基础数据结构
@@ -28,7 +27,7 @@ namespace vl
 		class CharRange
 		{
 		public:
-			typedef SortedList<CharRange>			List;
+			typedef collections::SortedList<CharRange>		List;
 
 			wchar_t					begin;
 			wchar_t					end;

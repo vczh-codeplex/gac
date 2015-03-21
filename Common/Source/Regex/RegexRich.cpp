@@ -4,6 +4,7 @@ namespace vl
 {
 	namespace regex_internal
 	{
+		using namespace collections;
 
 /***********************************************************************
 回溯辅助数据结构
@@ -12,7 +13,7 @@ namespace vl
 		class SaverBase
 		{
 		public:
-			bool				available;
+			bool					available;
 			vint					previous;
 		};
 
@@ -26,14 +27,14 @@ namespace vl
 				Other
 			};
 
-			const wchar_t*		reading;					//当前字符串位置
-			State*				currentState;				//当前状态
+			const wchar_t*			reading;					//当前字符串位置
+			State*					currentState;				//当前状态
 			vint					minTransition;				//最小可用转换
 			vint					captureCount;				//有效capture数量
 			vint					stateSaverCount;			//有效回溯状态数量
 			vint					extensionSaverAvailable;	//有效未封闭扩展功能数量
 			vint					extensionSaverCount;		//所有未封闭扩展功能数量
-			StateStoreType		storeType;					//保存状态的原因
+			StateStoreType			storeType;					//保存状态的原因
 
 			bool operator==(const StateSaver& saver)const
 			{
@@ -49,8 +50,8 @@ namespace vl
 		{
 		public:
 			vint					captureListIndex;
-			Transition*			transition;
-			const wchar_t*		reading;
+			Transition*				transition;
+			const wchar_t*			reading;
 
 			bool operator==(const ExtensionSaver& saver)const
 			{

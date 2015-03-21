@@ -43,21 +43,21 @@ namespace vl
 				End					//Capture, Position, Negative
 			};
 
-			State*					source;
-			State*					target;
-			CharRange				range;
-			Type					type;
-			vint						capture;
-			vint						index;
+			State*								source;
+			State*								target;
+			CharRange							range;
+			Type								type;
+			vint								capture;
+			vint								index;
 		};
 
 		class State
 		{
 		public:
-			List<Transition*>		transitions;
-			List<Transition*>		inputs;
-			bool					finalState;
-			void*					userData;
+			collections::List<Transition*>		transitions;
+			collections::List<Transition*>		inputs;
+			bool								finalState;
+			void*								userData;
 		};
 
 		class Automaton
@@ -65,33 +65,33 @@ namespace vl
 		public:
 			typedef Ptr<Automaton>		Ref;
 
-			List<Ptr<State>>		states;
-			List<Ptr<Transition>>	transitions;
-			List<WString>			captureNames;
-			State*					startState;
+			collections::List<Ptr<State>>		states;
+			collections::List<Ptr<Transition>>	transitions;
+			collections::List<WString>			captureNames;
+			State*								startState;
 
 			Automaton();
 
-			State*					NewState();
-			Transition*				NewTransition(State* start, State* end);
-			Transition*				NewChars(State* start, State* end, CharRange range);
-			Transition*				NewEpsilon(State* start, State* end);
-			Transition*				NewBeginString(State* start, State* end);
-			Transition*				NewEndString(State* start, State* end);
-			Transition*				NewNop(State* start, State* end);
-			Transition*				NewCapture(State* start, State* end, vint capture);
-			Transition*				NewMatch(State* start, State* end, vint capture, vint index=-1);
-			Transition*				NewPositive(State* start, State* end);
-			Transition*				NewNegative(State* start, State* end);
-			Transition*				NewNegativeFail(State* start, State* end);
-			Transition*				NewEnd(State* start, State* end);
+			State*								NewState();
+			Transition*							NewTransition(State* start, State* end);
+			Transition*							NewChars(State* start, State* end, CharRange range);
+			Transition*							NewEpsilon(State* start, State* end);
+			Transition*							NewBeginString(State* start, State* end);
+			Transition*							NewEndString(State* start, State* end);
+			Transition*							NewNop(State* start, State* end);
+			Transition*							NewCapture(State* start, State* end, vint capture);
+			Transition*							NewMatch(State* start, State* end, vint capture, vint index=-1);
+			Transition*							NewPositive(State* start, State* end);
+			Transition*							NewNegative(State* start, State* end);
+			Transition*							NewNegativeFail(State* start, State* end);
+			Transition*							NewEnd(State* start, State* end);
 		};
 
-		extern bool					PureEpsilonChecker(Transition* transition);
-		extern bool					RichEpsilonChecker(Transition* transition);
-		extern bool					AreEqual(Transition* transA, Transition* transB);
-		extern Automaton::Ref		EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), Dictionary<State*, State*>& nfaStateMap);
-		extern Automaton::Ref		NfaToDfa(Automaton::Ref source, Group<State*, State*>& dfaStateMap);
+		extern bool								PureEpsilonChecker(Transition* transition);
+		extern bool								RichEpsilonChecker(Transition* transition);
+		extern bool								AreEqual(Transition* transA, Transition* transB);
+		extern Automaton::Ref					EpsilonNfaToNfa(Automaton::Ref source, bool(*epsilonChecker)(Transition*), collections::Dictionary<State*, State*>& nfaStateMap);
+		extern Automaton::Ref					NfaToDfa(Automaton::Ref source, collections::Group<State*, State*>& dfaStateMap);
 	}
 }
 

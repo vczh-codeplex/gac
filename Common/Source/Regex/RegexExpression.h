@@ -42,8 +42,8 @@ namespace vl
 		class Expression : public Object, private NotCopyable
 		{
 		public:
-			typedef Ptr<Expression>								Ref;
-			typedef Dictionary<WString, Expression::Ref>		Map;
+			typedef Ptr<Expression>											Ref;
+			typedef collections::Dictionary<WString, Expression::Ref>		Map;
 
 			virtual void				Apply(IRegexExpressionAlgorithm& algorithm)=0;
 			bool						IsEqual(Expression* expression);

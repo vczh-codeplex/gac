@@ -648,6 +648,9 @@
     <ClCompile Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.cpp">
       <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
     </ClCompile>
+    <ClCompile Include="AutoComplete_Grammar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
