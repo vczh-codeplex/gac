@@ -52,7 +52,7 @@ ParserParsingAnalyzer
 	{
 	protected:
 		RepeatingParsingExecutor*		executor;
-		vint							_type = -1, _token = -1, _rule = -1, _field = -1, _enumValue = -1, _literal = -1;
+		vint							_attribute = -1, _type = -1, _token = -1, _rule = -1, _field = -1, _enumValue = -1, _literal = -1;
 
 		class Cache : public Object, public Description<Cache>
 		{
@@ -70,6 +70,7 @@ ParserParsingAnalyzer
 		void Attach(RepeatingParsingExecutor* _executor)
 		{
 			executor = _executor;
+			_attribute = executor->GetSemanticId(L"Attribute");
 			_type = executor->GetSemanticId(L"Type");
 			_token = executor->GetSemanticId(L"Token");
 			_rule = executor->GetSemanticId(L"Rule");
@@ -267,8 +268,7 @@ ParserParsingAnalyzer
 		{
 			if (auto nameToken = GetMember(typeObj, L"name", output).Cast<ParsingTreeToken>())
 			{
-				auto name = nameToken->GetValue();
-				if (typeObj->GetType() == L"PrimitiveTypeObj")
+				auto name = nameToken->GetValue();if (typeObj->GetType() == L"PrimitiveTypeObj")
 				{
 					List<WString> typeScopes;
 					GetTypeScopes(typeObj, typeScopes, output);
@@ -299,7 +299,23 @@ ParserParsingAnalyzer
 		vint GetSemanticIdForTokenAsync(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output)
 		{
 			auto cache = output.cache.Cast<Cache>();
-			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj" || tokenContext.tokenParent->GetType() == L"SubTypeObj")
+			if (tokenContext.tokenParent->GetType() == L"AttributeDef")
+			{
+				if (tokenContext.field == L"name")
+				{
+					auto name = tokenContext.foundToken->GetValue();
+					if (
+						name == L"Color" ||
+						name == L"ContextColor" ||
+						name == L"Candidate" ||
+						name == L"AutoComplete" ||
+						name == L"Semantic")
+					{
+						return _attribute;
+					}
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj" || tokenContext.tokenParent->GetType() == L"SubTypeObj")
 			{
 				if (tokenContext.field == L"name") // Type
 				{
@@ -488,7 +504,26 @@ ParserParsingAnalyzer
 		void GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems)
 		{
 			auto cache = partialOutput.input.cache.Cast<Cache>();
-			if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")
+			if (tokenContext.tokenParent->GetType() == L"AttributeDef")
+			{
+				if (tokenContext.field == L"name") // Attribute
+				{
+					ParsingCandidateItem item;
+					item.semanticId = _attribute;
+
+					item.name = L"Color";
+					candidateItems.Add(item);
+					item.name = L"ContextColor";
+					candidateItems.Add(item);
+					item.name = L"Candidate";
+					candidateItems.Add(item);
+					item.name = L"AutoComplete";
+					candidateItems.Add(item);
+					item.name = L"Semantic";
+					candidateItems.Add(item);
+				}
+			}
+			else if (tokenContext.tokenParent->GetType() == L"PrimitiveTypeObj")
 			{
 				if (tokenContext.field == L"name") // Type
 				{
