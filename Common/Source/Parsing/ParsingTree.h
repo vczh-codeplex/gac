@@ -67,19 +67,31 @@ Location
 
 			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
 			{
-				if(a.index!=UnknownValue && b.index!=UnknownValue)
+				if (a.IsInvalid() && b.IsInvalid())
 				{
-					return a.index-b.index;
+					return 0;
 				}
-				else if(a.row!=UnknownValue && a.column!=UnknownValue && b.row!=UnknownValue && b.column!=UnknownValue)
+				else if (a.IsInvalid())
 				{
-					if(a.row==b.row)
+					return -1;
+				}
+				else if (b.IsInvalid())
+				{
+					return 1;
+				}
+				else if (a.index >= 0 && b.index >= 0)
+				{
+					return a.index - b.index;
+				}
+				else if (a.row >= 0 && a.column >= 0 && b.row >= 0 && b.column >= 0)
+				{
+					if (a.row == b.row)
 					{
-						return a.column-b.column;
+						return a.column - b.column;
 					}
 					else
 					{
-						return a.row-b.row;
+						return a.row - b.row;
 					}
 				}
 				else

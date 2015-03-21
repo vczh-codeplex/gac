@@ -10,7 +10,7 @@ namespace vl
 	{
 		vint CompareTextRange(Ptr<ParsingTreeNode> r1, Ptr<ParsingTreeNode> r2)
 		{
-			return r1->GetCodeRange().start.index-r2->GetCodeRange().start.index;
+			return ParsingTextPos::Compare(r1->GetCodeRange().start, r2->GetCodeRange().start);
 		}
 
 /***********************************************************************
@@ -160,7 +160,7 @@ ParsingTreeNode
 					node->InitializeQueryCache();
 				}
 
-				if (codeRange.start.IsInvalid() || codeRange.start.IsInvalid())
+				//if (codeRange.start.IsInvalid() || codeRange.start.IsInvalid())
 				{
 					FOREACH(Ptr<ParsingTreeNode>, subNode, subNodes)
 					{
