@@ -207,8 +207,7 @@ GuiGrammarAutoComplete
 					}
 					else
 					{
-						// if multiple TextEditNotifyStruct is found, choose the latest non-fake one
-						// if there are only fake traces, choose the latest one
+						// if multiple TextEditNotifyStruct is found, choose the latest one
 						while (middle < editTrace.Count() - 1)
 						{
 							if (editTrace[middle + 1].editVersion == editTrace[middle].editVersion)
@@ -217,21 +216,6 @@ GuiGrammarAutoComplete
 							}
 							else
 							{
-								break;
-							}
-						}
-
-						for (vint i = middle; i >= 0; i--)
-						{
-							auto& trace = editTrace[i];
-							if (trace.editVersion != editTrace[middle].editVersion)
-							{
-								break;
-							}
-
-							if (trace.originalText != L"" || trace.inputText != L"")
-							{
-								middle = i;
 								break;
 							}
 						}
