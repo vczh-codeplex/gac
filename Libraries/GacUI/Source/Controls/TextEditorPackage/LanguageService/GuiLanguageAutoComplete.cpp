@@ -919,7 +919,7 @@ GuiGrammarAutoComplete
 				}
 
 				// calculate the content of the list
-				if((!keepListState && openList) || IsListOpening())
+				if(autoComplete && ((!keepListState && openList) || IsListOpening()))
 				{
 					SortedList<WString> itemKeys;
 					List<ParsingCandidateItem> itemValues;
