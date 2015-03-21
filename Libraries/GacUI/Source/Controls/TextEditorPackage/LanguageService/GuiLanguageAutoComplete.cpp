@@ -921,15 +921,19 @@ GuiGrammarAutoComplete
 				// calculate the content of the list
 				if((!keepListState && openList) || IsListOpening())
 				{
-					SortedList<WString> items;
+					SortedList<WString> itemKeys;
+					List<ParsingCandidateItem> itemValues;
 
 					// copy all candidate keywords
 					FOREACH(vint, token, autoComplete->shownCandidates)
 					{
-						WString literal=parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
-						if(literal!=L"" && !items.Contains(literal))
+						WString literal = parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
+						if (literal != L"" && !itemKeys.Contains(literal))
 						{
-							items.Add(literal);
+							ParsingCandidateItem item;
+							item.name = literal;
+							item.semanticId = -1;
+							itemValues.Insert(itemKeys.Add(literal), item);
 						}
 					}
 
@@ -942,16 +946,33 @@ GuiGrammarAutoComplete
 							{
 								// add all acceptable display of a symbol
 								// because a symbol can has multiple representation in different places
-								if (item.name != L"" && !items.Contains(item.name))
+								if (item.name != L"" && !itemKeys.Contains(item.name))
 								{
-									items.Add(item.name);
+									itemValues.Insert(itemKeys.Add(item.name), item);
 								}
 							}
 						}
 					}
 
 					// fill the list
-					SetListContent(items);
+					List<GuiTextBoxAutoCompleteBase::AutoCompleteItem> candidateItems;
+					for (vint i = 0; i < itemValues.Count(); i++)
+					{
+						auto& item = itemValues[i];
+						if (item.tag.IsNull())
+						{
+							if (auto analyzer = parsingExecutor->GetAnalyzer())
+							{
+								item.tag = analyzer->CreateTagForCandidateItem(item);
+							}
+						}
+
+						GuiTextBoxAutoCompleteBase::AutoCompleteItem candidateItem;
+						candidateItem.text = item.name;
+						candidateItem.tag = item.tag;
+						candidateItems.Add(candidateItem);
+					}
+					SetListContent(candidateItems);
 				}
 
 				// set the list state

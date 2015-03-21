@@ -47,7 +47,7 @@ ParsingOutput
 				/// <summary>The code.</summary>
 				WString													code;
 				/// <summary>The cache created from [T:vl.presentation.controls.RepeatingParsingExecutor.IParsingAnalyzer].</summary>
-				Ptr<Object>												cache;
+				Ptr<DescriptableObject>									cache;
 			};
 
 /***********************************************************************
@@ -82,6 +82,8 @@ PartialParsingOutput
 				vint													semanticId = -1;
 				/// <summary>Display name.</summary>
 				WString													name;
+				/// <summary>Tag object for any purpose, e.g., data binding.</summary>
+				description::Value										tag;
 			};
 
 /***********************************************************************
@@ -161,7 +163,7 @@ RepeatingParsingExecutor
 					/// <summary>Called when a new parsing result is produced. A parsing analyzer can create a cache to be attached to the output containing anything necessary. This function does not run in UI thread.</summary>
 					/// <param name="output">The new parsing result.</param>
 					/// <returns>The created cache object, which can be null.</returns>
-					virtual Ptr<Object>										CreateCacheAsync(const RepeatingParsingOutput& output) = 0;
+					virtual Ptr<DescriptableObject>							CreateCacheAsync(const RepeatingParsingOutput& output) = 0;
 
 					/// <summary>Called when an semantic id for a token is needed. If an semantic id is returned, a context sensitive color can be assigned to this token. This functio does not run in UI thread, but it will only be called (for several times) after the cache object is initialized.</summary>
 					/// <param name="tokenContext">The token context.</param>
@@ -173,7 +175,12 @@ RepeatingParsingExecutor
 					/// <param name="tokenContext">The token context.</param>
 					/// <param name="partialOutput">The partial parsing result. It contains the current parsing result, and an incremental parsing result. If the calculation of candidate items are is very context sensitive, then you should be very careful when traversing the syntax tree, by carefully looking at the "originalNode" and the "modifiedNode" in the "partialOutput" parameter.</param>
 					/// <param name="candidateItems">The candidate items.</param>
-					virtual void											GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
+					virtual void											GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;					
+
+					/// <summary>Create a tag object for a candidate item without a tag object. An candidate item without a tag maybe created by calling <see cref="GetCandidateItemsAsync"/> or any token marked by a @Candidate attribute in the grammar.</summary>
+					/// <param name="item">The candidate item.</param>
+					/// <returns>The tag object. In most of the case this object is used for data binding or any other purpose when you want to customize the auto complete control. Returns null if the specified [T.vl.presentation.controls.GuiTextBoxAutoCompleteBase.IAutoCompleteControlProvider] can handle null tag correctly.</returns>
+					virtual description::Value								CreateTagForCandidateItem(ParsingCandidateItem& item) = 0;
 				};
 
 				/// <summary>A base class for implementing a callback.</summary>

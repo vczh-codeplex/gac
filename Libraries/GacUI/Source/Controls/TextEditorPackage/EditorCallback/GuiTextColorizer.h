@@ -41,6 +41,7 @@ GuiTextBoxColorizerBase
 				void										StopColorizer(bool forever);
 				void										StopColorizerForever();
 			public:
+				/// <summary>Create a colorrizer.</summary>
 				GuiTextBoxColorizerBase();
 				~GuiTextBoxColorizerBase();
 
