@@ -155,7 +155,31 @@ ParsingTreeNode
 			auto subNodesExists = &subNodes;
 			if(subNodesExists)
 			{
+				FOREACH(Ptr<ParsingTreeNode>, node, subNodes)
+				{
+					node->InitializeQueryCache();
+				}
+
 				ParsingTextRange emptyRange;
+				if (codeRange == emptyRange)
+				{
+					FOREACH(Ptr<ParsingTreeNode>, subNode, subNodes)
+					{
+						const auto& subRange = subNode->codeRange;
+						const auto& min = !subRange.start.IsInvalid() ? subRange.start : subRange.end;
+						const auto& max = !subRange.end.IsInvalid() ? subRange.end : subRange.start;
+
+						if (codeRange.start.IsInvalid() || !min.IsInvalid() && codeRange.start > min)
+						{
+							codeRange.start = min;
+						}
+						if (codeRange.end.IsInvalid() || !max.IsInvalid() && codeRange.end < max)
+						{
+							codeRange.end = max;
+						}
+					}
+				}
+
 				CopyFrom(
 					cachedOrderedSubNodes,
 					From(subNodes)
@@ -165,10 +189,6 @@ ParsingTreeNode
 						})
 						.OrderBy(&CompareTextRange)
 					);
-				FOREACH(Ptr<ParsingTreeNode>, node, cachedOrderedSubNodes)
-				{
-					node->InitializeQueryCache();
-				}
 			}
 		}
 
@@ -194,24 +214,24 @@ ParsingTreeNode
 
 		ParsingTreeNode* ParsingTreeNode::FindSubNode(const ParsingTextRange& range)
 		{
-			if(codeRange.start<=range.start && range.end<=codeRange.end)
+			if (codeRange.start <= range.start && range.end <= codeRange.end)
 			{
-				vint start=0;
-				vint end=cachedOrderedSubNodes.Count()-1;
-				while(start<=end)
+				vint start = 0;
+				vint end = cachedOrderedSubNodes.Count() - 1;
+				while (start <= end)
 				{
-					vint selected=(start+end)/2;
-					ParsingTreeNode* selectedNode=cachedOrderedSubNodes[selected].Obj();
-					const ParsingTextRange& selectedRange=selectedNode->codeRange;
-					if(range.end<selectedRange.start)
+					vint selected = (start + end) / 2;
+					ParsingTreeNode* selectedNode = cachedOrderedSubNodes[selected].Obj();
+					const ParsingTextRange& selectedRange = selectedNode->codeRange;
+					if (range.end<selectedRange.start)
 					{
-						end=selected-1;
+						end = selected - 1;
 					}
-					else if(range.start>selectedRange.end)
+					else if (range.start>selectedRange.end)
 					{
-						start=selected+1;
+						start = selected + 1;
 					}
-					else if(selectedRange.start<=range.start && range.end<=selectedRange.end)
+					else if (selectedRange.start <= range.start && range.end <= selectedRange.end)
 					{
 						return selectedNode;
 					}

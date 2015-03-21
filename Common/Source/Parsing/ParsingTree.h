@@ -60,6 +60,11 @@ Location
 			{
 			}
 
+			bool IsInvalid()const
+			{
+				return index < 0 && row < 0 && column < 0;
+			}
+
 			static vint Compare(const ParsingTextPos& a, const ParsingTextPos& b)
 			{
 				if(a.index!=UnknownValue && b.index!=UnknownValue)
