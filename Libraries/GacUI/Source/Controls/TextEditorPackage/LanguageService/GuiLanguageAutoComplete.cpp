@@ -484,11 +484,11 @@ GuiGrammarAutoComplete
 				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 				)
 			{
-				const List<ParsingState::TransitionResult>& transitions=transitionCollector.GetTransitions();
-				for(vint index=0;index<transitions.Count();index++)
+				const List<ParsingState::TransitionResult>& transitions = transitionCollector.GetTransitions();
+				for (vint index = 0; index < transitions.Count(); index++)
 				{
-					const ParsingState::TransitionResult& transition=transitions[index];
-					switch(transition.transitionType)
+					const ParsingState::TransitionResult& transition = transitions[index];
+					switch (transition.transitionType)
 					{
 					case ParsingState::TransitionResult::AmbiguityBegin:
 						break;
@@ -496,29 +496,29 @@ GuiGrammarAutoComplete
 						// ambiguity branches are not nested
 						// tokens in different braches are the same
 						// so we only need to run one branch, and skip the others
-						index=transitionCollector.GetAmbiguityEndFromBegin(transitionCollector.GetAmbiguityBeginFromBranch(index));
+						index = transitionCollector.GetAmbiguityEndFromBegin(transitionCollector.GetAmbiguityBeginFromBranch(index));
 						break;
 					case ParsingState::TransitionResult::AmbiguityEnd:
 						break;
 					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
 							// test does the token reach the stop position
-							if(transition.token)
+							if (transition.token)
 							{
 								// we treat "A|B" as editing A if token A is endless, otherwise treated as editing B
-								TextPos tokenEnd(transition.token->rowEnd, transition.token->columnEnd+1);
+								TextPos tokenEnd(transition.token->rowEnd, transition.token->columnEnd + 1);
 
 								// if the caret is not at the end of the token
-								if(tokenEnd>stopPosition)
+								if (tokenEnd > stopPosition)
 								{
 									// stop the traversing and return the editing token
 									return transition.token;
 								}
-								else if(tokenEnd==stopPosition)
+								else if (tokenEnd == stopPosition)
 								{
 									// if the caret is at the end of the token, and it is a closed token
 									// e.g. identifier is not a closed token, string is a closed token
-									if(!grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(transition.token->reading, transition.token->length))
+									if (!grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(transition.token->reading, transition.token->length))
 									{
 										// stop the traversing and return the editing token
 										return transition.token;
@@ -527,9 +527,9 @@ GuiGrammarAutoComplete
 							}
 
 							// traverse the PDA using the token specified in the current transition
-							vint tableTokenIndex=transition.tableTokenIndex;
+							vint tableTokenIndex = transition.tableTokenIndex;
 							List<ParsingState::Future*> possibilities;
-							if(recoveryFutures.Count()>0)
+							if (recoveryFutures.Count() > 0)
 							{
 								FOREACH(ParsingState::Future*, future, recoveryFutures)
 								{
@@ -546,36 +546,36 @@ GuiGrammarAutoComplete
 
 							// delete duplicated futures
 							List<ParsingState::Future*> selectedPossibilities;
-							for(vint i=0;i<possibilities.Count();i++)
+							for (vint i = 0; i < possibilities.Count(); i++)
 							{
-								ParsingState::Future* candidateFuture=possibilities[i];
-								bool duplicated=false;
+								ParsingState::Future* candidateFuture = possibilities[i];
+								bool duplicated = false;
 								FOREACH(ParsingState::Future*, future, selectedPossibilities)
 								{
-									if(
-										candidateFuture->currentState==future->currentState &&
-										candidateFuture->reduceStateCount==future->reduceStateCount &&
-										candidateFuture->shiftStates.Count()==future->shiftStates.Count()
+									if (
+										candidateFuture->currentState == future->currentState &&
+										candidateFuture->reduceStateCount == future->reduceStateCount &&
+										candidateFuture->shiftStates.Count() == future->shiftStates.Count()
 										)
 									{
-										bool same=true;
-										for(vint j=0;j<future->shiftStates.Count();j++)
+										bool same = true;
+										for (vint j = 0; j < future->shiftStates.Count(); j++)
 										{
-											if(candidateFuture->shiftStates[i]!=future->shiftStates[i])
+											if (candidateFuture->shiftStates[i] != future->shiftStates[i])
 											{
-												same=false;
+												same = false;
 												break;
 											}
 										}
 
-										if((duplicated=same))
+										if ((duplicated = same))
 										{
 											break;
 										}
 									}
 								}
 
-								if(duplicated)
+								if (duplicated)
 								{
 									delete candidateFuture;
 								}
@@ -586,7 +586,7 @@ GuiGrammarAutoComplete
 							}
 
 							// step forward
-							if(transition.token || transition.tableTokenIndex==ParsingTable::TokenBegin)
+							if (transition.token || transition.tableTokenIndex == ParsingTable::TokenBegin)
 							{
 								DeleteFutures(nonRecoveryFutures);
 								DeleteFutures(recoveryFutures);
@@ -621,14 +621,14 @@ GuiGrammarAutoComplete
 				// traverse the PDA until it reach the stop position
 				// nonRecoveryFutures store the state when the last token (existing) is reached
 				// recoveryFutures store the state when the last token (inserted by error recovery) is reached
-				RegexToken* token=TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
+				RegexToken* token = TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
 
 				// explore all possibilities from the last token before the stop position
 				List<ParsingState::Future*> possibilities;
 				FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
 				{
-					vint count=state.GetTable()->GetTokenCount();
-					for(vint i=0;i<count;i++)
+					vint count = state.GetTable()->GetTokenCount();
+					for (vint i = 0; i < count; i++)
 					{
 						state.Explore(i, future, possibilities);
 					}
@@ -637,7 +637,7 @@ GuiGrammarAutoComplete
 				// get all possible tokens that marked using @AutoCompleteCandidate
 				FOREACH(ParsingState::Future*, future, possibilities)
 				{
-					if(!tableTokenIndices.Contains(future->selectedToken))
+					if (!tableTokenIndices.Contains(future->selectedToken))
 					{
 						tableTokenIndices.Add(future->selectedToken);
 					}
