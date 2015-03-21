@@ -10,6 +10,50 @@ namespace vl
 			using namespace collections;
 
 /***********************************************************************
+GuiTextBoxAutoCompleteBase::TextListControlProvider
+***********************************************************************/
+
+			GuiTextBoxAutoCompleteBase::TextListControlProvider::TextListControlProvider(GuiTextList::IStyleProvider* styleProvider)
+			{
+				autoCompleteList = new GuiTextList(styleProvider ? styleProvider : theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
+				autoCompleteList->SetHorizontalAlwaysVisible(false);
+				autoCompleteList->SetVerticalAlwaysVisible(false);
+			}
+
+			GuiTextBoxAutoCompleteBase::TextListControlProvider::~TextListControlProvider()
+			{
+			}
+
+			GuiControl* GuiTextBoxAutoCompleteBase::TextListControlProvider::GetAutoCompleteControl()
+			{
+				return autoCompleteList;
+			}
+
+			GuiSelectableListControl* GuiTextBoxAutoCompleteBase::TextListControlProvider::GetListControl()
+			{
+				return autoCompleteList;
+			}
+
+			void GuiTextBoxAutoCompleteBase::TextListControlProvider::SetSortedContent(const collections::List<AutoCompleteItem>& items)
+			{
+				autoCompleteList->GetItems().Clear();
+				FOREACH(AutoCompleteItem, item, items)
+				{
+					autoCompleteList->GetItems().Add(new list::TextItem(item.text));
+				}
+			}
+
+			vint GuiTextBoxAutoCompleteBase::TextListControlProvider::GetItemCount()
+			{
+				return autoCompleteList->GetItems().Count();
+			}
+
+			WString GuiTextBoxAutoCompleteBase::TextListControlProvider::GetItemText(vint index)
+			{
+				return autoCompleteList->GetItems()[index]->GetText();
+			}
+
+/***********************************************************************
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 
@@ -25,18 +69,20 @@ GuiTextBoxAutoCompleteBase
 				return false;
 			}
 
-			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
+			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase(Ptr<IAutoCompleteControlProvider> _autoCompleteControlProvider)
 				:element(0)
 				,elementModifyLock(0)
 				,ownerComposition(0)
+				,autoCompleteControlProvider(_autoCompleteControlProvider)
 			{
-				autoCompleteList=new GuiTextList(theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
-				autoCompleteList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				autoCompleteList->SetHorizontalAlwaysVisible(false);
-				autoCompleteList->SetVerticalAlwaysVisible(false);
+				if (!autoCompleteControlProvider)
+				{
+					autoCompleteControlProvider = new TextListControlProvider;
+				}
+				autoCompleteControlProvider->GetAutoCompleteControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
-				autoCompletePopup=new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
-				autoCompletePopup->AddChild(autoCompleteList);
+				autoCompletePopup = new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
+				autoCompletePopup->AddChild(autoCompleteControlProvider->GetAutoCompleteControl());
 			}
 
 			GuiTextBoxAutoCompleteBase::~GuiTextBoxAutoCompleteBase()
@@ -125,32 +171,25 @@ GuiTextBoxAutoCompleteBase
 				autoCompletePopup->Close();
 			}
 
-			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
+			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::List<AutoCompleteItem>& items)
 			{
 				if(items.Count()==0)
 				{
 					CloseList();
 				}
-				List<WString> sortedItems;
+
+				List<AutoCompleteItem> sortedItems;
 				CopyFrom(
 					sortedItems,
 					From(items)
-						.OrderBy([](const WString& a, const WString& b)
+						.OrderBy([](const AutoCompleteItem& a, const AutoCompleteItem& b)
 						{
-							return INVLOC.Compare(a, b, Locale::IgnoreCase);
+							return INVLOC.Compare(a.text, b.text, Locale::IgnoreCase);
 						})
 					);
 
-				autoCompleteList->GetItems().Clear();
-				CopyFrom(
-					autoCompleteList->GetItems(),
-					From(sortedItems)
-						.Select([](const WString& item)
-						{
-							return new list::TextItem(item);
-						})
-					);
-				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
+				autoCompleteControlProvider->SetSortedContent(sortedItems);
+				autoCompleteControlProvider->GetAutoCompleteControl()->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
 			}
 
 			TextPos GuiTextBoxAutoCompleteBase::GetListStartPosition()
@@ -161,15 +200,16 @@ GuiTextBoxAutoCompleteBase
 			bool GuiTextBoxAutoCompleteBase::SelectPreviousListItem()
 			{
 				if(!IsListOpening()) return false;
-				if(autoCompleteList->GetSelectedItems().Count()==0)
+				if(autoCompleteControlProvider->GetListControl()->GetSelectedItems().Count()==0)
 				{
-					autoCompleteList->SetSelected(0, true);
+					autoCompleteControlProvider->GetListControl()->SetSelected(0, true);
 				}
 				else
 				{
-					vint index=autoCompleteList->GetSelectedItems()[0];
-					if(index>0) index--;
-					autoCompleteList->SetSelected(index, true);
+					vint index=autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+					if (index > 0) index--;
+					autoCompleteControlProvider->GetListControl()->SetSelected(index, true);
+					autoCompleteControlProvider->GetListControl()->EnsureItemVisible(index);
 				}
 				return true;
 			}
@@ -177,15 +217,16 @@ GuiTextBoxAutoCompleteBase
 			bool GuiTextBoxAutoCompleteBase::SelectNextListItem()
 			{
 				if(!IsListOpening()) return false;
-				if(autoCompleteList->GetSelectedItems().Count()==0)
+				if (autoCompleteControlProvider->GetListControl()->GetSelectedItems().Count() == 0)
 				{
-					autoCompleteList->SetSelected(0, true);
+					autoCompleteControlProvider->GetListControl()->SetSelected(0, true);
 				}
 				else
 				{
-					vint index=autoCompleteList->GetSelectedItems()[0];
-					if(index<autoCompleteList->GetItems().Count()-1) index++;
-					autoCompleteList->SetSelected(index, true);
+					vint index = autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+					if (index < autoCompleteControlProvider->GetItemCount() - 1) index++;
+					autoCompleteControlProvider->GetListControl()->SetSelected(index, true);
+					autoCompleteControlProvider->GetListControl()->EnsureItemVisible(index);
 				}
 				return true;
 			}
@@ -194,14 +235,14 @@ GuiTextBoxAutoCompleteBase
 			{
 				if(!IsListOpening()) return false;
 				if(!ownerComposition) return false;
-				if(autoCompleteList->GetSelectedItems().Count()==0) return false;
+				if (autoCompleteControlProvider->GetItemCount() == 0) return false;
 				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(ownerComposition->GetRelatedControl());
 				if(!ci) return false;
 
-				vint index=autoCompleteList->GetSelectedItems()[0];
-				WString selectedItem=autoCompleteList->GetItems()[index]->GetText();
-				TextPos begin=autoCompleteStartPosition;
-				TextPos end=ci->GetCaretEnd();
+				vint index = autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+				WString selectedItem = autoCompleteControlProvider->GetItemText(index);
+				TextPos begin = autoCompleteStartPosition;
+				TextPos end = ci->GetCaretEnd();
 				ci->Select(begin, end);
 				ci->SetSelectionText(selectedItem);
 				CloseList();
@@ -211,9 +252,9 @@ GuiTextBoxAutoCompleteBase
 			WString GuiTextBoxAutoCompleteBase::GetSelectedListItem()
 			{
 				if(!IsListOpening()) return L"";
-				if(autoCompleteList->GetSelectedItems().Count()==0) return L"";
-				vint index=autoCompleteList->GetSelectedItems()[0];
-				return autoCompleteList->GetItems()[index]->GetText();
+				if (autoCompleteControlProvider->GetItemCount() == 0) return L"";
+				vint index = autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+				return autoCompleteControlProvider->GetItemText(index);
 			}
 
 			void GuiTextBoxAutoCompleteBase::HighlightList(const WString& editingText)
@@ -221,34 +262,34 @@ GuiTextBoxAutoCompleteBase
 				if(IsListOpening())
 				{
 					vint first=0;
-					vint last=autoCompleteList->GetItems().Count()-1;
+					vint last = autoCompleteControlProvider->GetItemCount() - 1;
 					vint selected=-1;
 
-					while(first<=last)
+					while (first <= last)
 					{
-						vint middle=(first+last)/2;
-						WString text=autoCompleteList->GetItems()[middle]->GetText();
-						if(IsPrefix(editingText, text))
+						vint middle = (first + last) / 2;
+						WString text = autoCompleteControlProvider->GetItemText(middle);
+						if (IsPrefix(editingText, text))
 						{
-							selected=middle;
+							selected = middle;
 							break;
 						}
 
-						vint result=INVLOC.Compare(editingText, text, Locale::IgnoreCase);
-						if(result<=0)
+						vint result = INVLOC.Compare(editingText, text, Locale::IgnoreCase);
+						if (result <= 0)
 						{
-							last=middle-1;
+							last = middle - 1;
 						}
 						else
 						{
-							first=middle+1;
+							first = middle + 1;
 						}
 					}
 
 					while(selected>0)
 					{
-						WString text=autoCompleteList->GetItems()[selected-1]->GetText();
-						if(IsPrefix(editingText, text))
+						WString text = autoCompleteControlProvider->GetItemText(selected - 1);
+						if (IsPrefix(editingText, text))
 						{
 							selected--;
 						}
@@ -260,8 +301,8 @@ GuiTextBoxAutoCompleteBase
 
 					if(selected!=-1)
 					{
-						autoCompleteList->SetSelected(selected, true);
-						autoCompleteList->EnsureItemVisible(selected);
+						autoCompleteControlProvider->GetListControl()->SetSelected(selected, true);
+						autoCompleteControlProvider->GetListControl()->EnsureItemVisible(selected);
 					}
 				}
 			}

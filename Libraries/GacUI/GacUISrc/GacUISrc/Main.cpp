@@ -54,7 +54,7 @@ ParserParsingAnalyzer
 		RepeatingParsingExecutor*		executor;
 		vint							_type = -1, _token = -1, _rule = -1, _field = -1, _enumValue = -1, _literal = -1;
 
-		class Cache : public Object
+		class Cache : public Object, public Description<Cache>
 		{
 		public:
 			Group<WString, WString>						typeNames;
@@ -210,7 +210,7 @@ ParserParsingAnalyzer
 			}
 		}
 
-		Ptr<Object> CreateCacheAsync(const RepeatingParsingOutput& output)
+		Ptr<DescriptableObject> CreateCacheAsync(const RepeatingParsingOutput& output)
 		{
 			auto cache = MakePtr<Cache>();
 			if (auto definitions = output.node->GetMember(L"definitions").Cast<ParsingTreeArray>())
@@ -634,6 +634,11 @@ ParserParsingAnalyzer
 					}
 				}
 			}
+		}
+
+		description::Value CreateTagForCandidateItem(ParsingCandidateItem& item)
+		{
+			return description::Value();
 		}
 	};
 
