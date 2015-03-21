@@ -255,95 +255,95 @@ GuiGrammarAutoComplete
 				{
 					SPIN_LOCK(editTraceLock)
 					{
-						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
-						if(traceIndex==-1) return;
+						vint traceIndex = UnsafeGetEditTraceIndex(newContext.input.editVersion);
+						if (traceIndex == -1) return;
 
-						TextEditNotifyStruct& trace=editTrace[traceIndex];
-						startPos=trace.inputStart;
-						endPos=trace.inputEnd;
+						TextEditNotifyStruct& trace = editTrace[traceIndex];
+						startPos = trace.inputStart;
+						endPos = trace.inputEnd;
 					}
 
-					const RegexLexer& lexer=grammarParser->GetTable()->GetLexer();
-					RegexTokens tokens=lexer.Parse(newContext.input.code);
-					startPos=ChooseCorrectTextPos(startPos, tokens);
+					const RegexLexer& lexer = grammarParser->GetTable()->GetLexer();
+					RegexTokens tokens = lexer.Parse(newContext.input.code);
+					startPos = ChooseCorrectTextPos(startPos, tokens);
 				}
 
 				// locate the deepest node using the text selection
 				ParsingTextPos start(startPos.row, startPos.column);
 				ParsingTextPos end(endPos.row, endPos.column);
 				ParsingTextRange range(start, end);
-				ParsingTreeNode* found=newContext.input.node->FindDeepestNode(range);
-				ParsingTreeObject* selectedNode=0;
+				ParsingTreeNode* found = newContext.input.node->FindDeepestNode(range);
+				ParsingTreeObject* selectedNode = 0;
 
 				// if the location failed, choose the root node
-				if(!found || startPos==TextPos(0, 0))
+				if (!found || startPos == TextPos(0, 0))
 				{
-					found=newContext.input.node.Obj();
+					found = newContext.input.node.Obj();
 				}
 
-				if(!selectedNode)
+				if (!selectedNode)
 				{
 					// from the deepest node, traverse towards the root node
 					// find the deepest node whose created rule is a left recursive rule and whose parent is not
-					ParsingTreeObject* lrec=0;
-					ParsingTreeNode* current=found;
-					while(current)
+					ParsingTreeObject* lrec = 0;
+					ParsingTreeNode* current = found;
+					while (current)
 					{
-						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-						if(obj)
+						ParsingTreeObject* obj = dynamic_cast<ParsingTreeObject*>(current);
+						if (obj)
 						{
 							FOREACH(WString, rule, obj->GetCreatorRules())
 							{
-								if(leftRecursiveRules.Contains(rule))
+								if (leftRecursiveRules.Contains(rule))
 								{
-									lrec=obj;
+									lrec = obj;
 									break;
 								}
 							}
-							if(obj && lrec && lrec!=obj)
+							if (obj && lrec && lrec != obj)
 							{
-								selectedNode=lrec;
+								selectedNode = lrec;
 								break;
 							}
 						}
-						current=current->GetParent();
+						current = current->GetParent();
 					}
 				}
 
-				if(!selectedNode)
+				if (!selectedNode)
 				{
 					// if there is no left recursive rule that creates the deepest node and all indirect parents
 					// choose the deepest ParsingTreeObject
-					ParsingTreeNode* current=found;
-					while(current)
+					ParsingTreeNode* current = found;
+					while (current)
 					{
-						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-						if(obj)
+						ParsingTreeObject* obj = dynamic_cast<ParsingTreeObject*>(current);
+						if (obj)
 						{
-							selectedNode=obj;
+							selectedNode = obj;
 							break;
 						}
-						current=current->GetParent();
+						current = current->GetParent();
 					}
 				}
 
-				if(selectedNode)
+				if (selectedNode)
 				{
 					// get the code range of the selected node
-					start=selectedNode->GetCodeRange().start;
-					end=selectedNode->GetCodeRange().end;
+					start = selectedNode->GetCodeRange().start;
+					end = selectedNode->GetCodeRange().end;
 
 					// get all properties from the selected node
-					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
-					newContext.originalRange=selectedNode->GetCodeRange();
-					newContext.originalNode=dynamic_cast<ParsingTreeObject*>(selectedNode);
-					newContext.modifiedNode=newContext.originalNode;
-					newContext.modifiedEditVersion=newContext.input.editVersion;
+					newContext.rule = selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count() - 1];
+					newContext.originalRange = selectedNode->GetCodeRange();
+					newContext.originalNode = dynamic_cast<ParsingTreeObject*>(selectedNode);
+					newContext.modifiedNode = newContext.originalNode;
+					newContext.modifiedEditVersion = newContext.input.editVersion;
 
 					// get the corresponding code of the selected node
-					if(start.index>=0 && end.index>=0)
+					if (start.index >= 0 && end.index >= 0)
 					{
-						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1).Buffer();
+						newContext.modifiedCode = newContext.input.code.Sub(start.index, end.index - start.index + 1).Buffer();
 					}
 				}
 			}
@@ -355,19 +355,19 @@ GuiGrammarAutoComplete
 
 				// get the end position of the end of lines
 				TextPos end
-					=lines.GetCount()<=1
-					?TextPos(start.row, start.column+lines.GetLine(0).dataLength)
-					:TextPos(start.row+lines.GetCount()-1, lines.GetLine(lines.GetCount()-1).dataLength)
+					= lines.GetCount() <= 1
+					? TextPos(start.row, start.column + lines.GetLine(0).dataLength)
+					: TextPos(start.row + lines.GetCount() - 1, lines.GetLine(lines.GetCount() - 1).dataLength)
 					;
 
-				if(start<=pos && pos<=end)
+				if (start <= pos && pos <= end)
 				{
 					// if the pos is inside the range
 					// normalize the pos to a new coordinate that the beginning position of lines is (row=0, column=0)
-					pos.row-=start.row;
-					if(pos.row==0)
+					pos.row -= start.row;
+					if (pos.row == 0)
 					{
-						pos.column-=start.column;
+						pos.column -= start.column;
 					}
 					return true;
 				}
@@ -389,22 +389,22 @@ GuiGrammarAutoComplete
 						CopyFrom(
 							usedTrace,
 							From(editTrace)
-								.Where([&newContext](const TextEditNotifyStruct& value)
+							.Where([&newContext](const TextEditNotifyStruct& value)
 								{
-									return (value.originalText!=L"" || value.inputText!=L"") && value.editVersion>newContext.modifiedEditVersion;
+									return (value.originalText != L"" || value.inputText != L"") && value.editVersion > newContext.modifiedEditVersion;
 								})
-							);
+						);
 					}
 				}
 
 				// apply all modification to get the new modifiedCode
 				bool failed = false;
-				if(usedTrace.Count()>0)
+				if (usedTrace.Count() > 0)
 				{
-					if(usedTrace[0].editVersion!=newContext.modifiedEditVersion+1)
+					if (usedTrace[0].editVersion != newContext.modifiedEditVersion + 1)
 					{
 						// failed if any TextEditNotifyStruct is missing 
-						failed=true;
+						failed = true;
 					}
 					else
 					{
@@ -414,39 +414,39 @@ GuiGrammarAutoComplete
 						FOREACH(TextEditNotifyStruct, trace, usedTrace)
 						{
 							// apply a modification to lines
-							TextPos start=trace.originalStart;
-							TextPos end=trace.originalEnd;
+							TextPos start = trace.originalStart;
+							TextPos end = trace.originalEnd;
 
 							// only if the modification is meaningful
-							if(NormalizeTextPos(newContext, lines, start) && NormalizeTextPos(newContext, lines, end))
+							if (NormalizeTextPos(newContext, lines, start) && NormalizeTextPos(newContext, lines, end))
 							{
 								lines.Modify(start, end, trace.inputText);
 							}
 							else
 							{
 								// otherwise, failed
-								failed=true;
+								failed = true;
 								break;
 							}
 						}
-						
-						if(!failed)
+
+						if (!failed)
 						{
-							newContext.modifiedCode=lines.GetText();
+							newContext.modifiedCode = lines.GetText();
 						}
 					}
 				}
 
-				if(failed)
+				if (failed)
 				{
 					// clear originalNode to notify that the current context goes wrong
-					newContext.originalNode=0;
+					newContext.originalNode = 0;
 				}
 
-				if(usedTrace.Count()>0)
+				if (usedTrace.Count() > 0)
 				{
 					// update the edit version
-					newContext.modifiedEditVersion=usedTrace[usedTrace.Count()-1].editVersion;
+					newContext.modifiedEditVersion = usedTrace[usedTrace.Count() - 1].editVersion;
 				}
 			}
 
@@ -675,66 +675,66 @@ GuiGrammarAutoComplete
 				List<Ptr<ParsingError>> errors;
 
 				// reparse and get all transitions during parsing
-				if(grammarParser->Parse(state, collector, errors))
+				if (grammarParser->Parse(state, collector, errors))
 				{
 					// if modifiedNode is not prepared (the task is submitted because of text editing)
 					// use the transition to build the syntax tree
-					if(!newContext.modifiedNode)
+					if (!newContext.modifiedNode)
 					{
 						ParsingTreeBuilder builder;
 						builder.Reset();
-						bool succeeded=true;
+						bool succeeded = true;
 						FOREACH(ParsingState::TransitionResult, transition, collector.GetTransitions())
 						{
-							if(!(succeeded=builder.Run(transition)))
+							if (!(succeeded = builder.Run(transition)))
 							{
 								break;
 							}
 						}
 
-						if(succeeded)
+						if (succeeded)
 						{
-							Ptr<ParsingTreeNode> parsedNode=builder.GetNode();
-							newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+							Ptr<ParsingTreeNode> parsedNode = builder.GetNode();
+							newContext.modifiedNode = parsedNode.Cast<ParsingTreeObject>();
 							newContext.modifiedNode->InitializeQueryCache();
 						}
 					}
 
-					if(newContext.modifiedNode)
+					if (newContext.modifiedNode)
 					{
 						// get the latest text editing trace
 						TextEditNotifyStruct trace;
 						SPIN_LOCK(editTraceLock)
 						{
-							vint index=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
-							if(index==-1)
+							vint index = UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+							if (index == -1)
 							{
 								return;
 							}
 							else
 							{
-								trace=editTrace[index];
+								trace = editTrace[index];
 							}
 						}
-						
+
 						// calculate the stop position for PDA traversing
-						TextPos stopPosition=GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
+						TextPos stopPosition = GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
 
 						// find all possible token before the current caret using the PDA
-						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
+						Ptr<AutoCompleteData> autoComplete = new AutoCompleteData;
 						SortedList<vint> tableTokenIndices;
-						RegexToken* editingToken=SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
+						RegexToken* editingToken = SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
 
 						// collect all auto complete types
 						{
 							// collect all keywords that can be put into the auto complete list
 							FOREACH(vint, token, tableTokenIndices)
 							{
-								vint regexToken=token-ParsingTable::UserTokenStart;
-								if(regexToken>=0)
+								vint regexToken = token - ParsingTable::UserTokenStart;
+								if (regexToken >= 0)
 								{
 									autoComplete->candidates.Add(regexToken);
-									if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
+									if (parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
 									{
 										autoComplete->shownCandidates.Add(regexToken);
 									}
@@ -742,40 +742,40 @@ GuiGrammarAutoComplete
 							}
 
 							// calculate the arranged stopPosition
-							if(editingToken)
+							if (editingToken)
 							{
 								TextPos tokenPos(editingToken->rowStart, editingToken->columnStart);
-								if(tokenPos<stopPosition)
+								if (tokenPos < stopPosition)
 								{
-									stopPosition=tokenPos;
+									stopPosition = tokenPos;
 								}
 							}
 
 							// calculate the start/end position for PDA traversing
 							TextPos startPos, endPos;
 							{
-								startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
-								autoComplete->startPosition=startPos;
-								endPos=trace.inputEnd;
-								if(newContext.modifiedNode!=newContext.originalNode)
+								startPos = ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
+								autoComplete->startPosition = startPos;
+								endPos = trace.inputEnd;
+								if (newContext.modifiedNode != newContext.originalNode)
 								{
-									startPos=GlobalTextPosToModifiedTextPos(newContext, startPos);
-									endPos=GlobalTextPosToModifiedTextPos(newContext, endPos);
+									startPos = GlobalTextPosToModifiedTextPos(newContext, startPos);
+									endPos = GlobalTextPosToModifiedTextPos(newContext, endPos);
 								}
-								if(startPos<endPos && endPos.column>0)
+								if (startPos<endPos && endPos.column>0)
 								{
 									endPos.column--;
 								}
 							}
 
 							// calculate the auto complete type
-							if(editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
+							if (editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
 							{
 								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
 								AutoCompleteData::RetriveContext(*autoComplete.Obj(), range, newContext.modifiedNode.Obj(), parsingExecutor.Obj());
 							}
 						}
-						newContext.autoComplete=autoComplete;
+						newContext.autoComplete = autoComplete;
 					}
 				}
 			}
