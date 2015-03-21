@@ -190,32 +190,48 @@ GuiGrammarAutoComplete
 				// get the index of the latest TextEditNotifyStruct of a specified edit version
 				// this function should be called inside SPIN_LOCK(editTraceLock)
 				// perform a binary search
-				vint start=0;
-				vint end=editTrace.Count()-1;
-				while(start<=end)
+				vint start = 0;
+				vint end = editTrace.Count() - 1;
+				while (start <= end)
 				{
-					vint middle=(start+end)/2;
-					TextEditNotifyStruct& trace=editTrace[middle];
+					vint middle = (start + end) / 2;
+					TextEditNotifyStruct& trace = editTrace[middle];
 
-					if(editVersion<trace.editVersion)
+					if (editVersion<trace.editVersion)
 					{
-						end=middle-1;
+						end = middle - 1;
 					}
-					else if(editVersion>trace.editVersion)
+					else if (editVersion>trace.editVersion)
 					{
-						start=middle+1;
+						start = middle + 1;
 					}
 					else
 					{
-						// if multiple TextEditNotifyStruct is found, choose the latest one
-						while(middle<editTrace.Count()-1)
+						// if multiple TextEditNotifyStruct is found, choose the latest non-fake one
+						// if there are only fake traces, choose the latest one
+						while (middle < editTrace.Count() - 1)
 						{
-							if(editTrace[middle+1].editVersion==editTrace[middle].editVersion)
+							if (editTrace[middle + 1].editVersion == editTrace[middle].editVersion)
 							{
 								middle++;
 							}
 							else
 							{
+								break;
+							}
+						}
+
+						for (vint i = middle; i >= 0; i--)
+						{
+							auto& trace = editTrace[i];
+							if (trace.editVersion != editTrace[middle].editVersion)
+							{
+								break;
+							}
+
+							if (trace.originalText != L"" || trace.inputText != L"")
+							{
+								middle = i;
 								break;
 							}
 						}
