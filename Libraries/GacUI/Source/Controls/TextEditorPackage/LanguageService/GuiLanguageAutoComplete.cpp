@@ -609,10 +609,15 @@ GuiGrammarAutoComplete
 
 				// explore all possibilities from the last token before the stop position
 				List<ParsingState::Future*> possibilities;
+				for (vint i = 0; i < nonRecoveryFutures.Count(); i++)
+				{
+					state.Explore(ParsingTable::NormalReduce, nonRecoveryFutures[i], nonRecoveryFutures);
+					state.Explore(ParsingTable::LeftRecursiveReduce, nonRecoveryFutures[i], nonRecoveryFutures);
+				}
 				FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
 				{
 					vint count = state.GetTable()->GetTokenCount();
-					for (vint i = 0; i < count; i++)
+					for (vint i = ParsingTable::UserTokenStart; i < count; i++)
 					{
 						state.Explore(i, future, possibilities);
 					}
@@ -828,74 +833,74 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PostList(const AutoCompleteContext& newContext, bool byGlobalCorrection)
 			{
-				bool openList=true;			// true: make the list visible
-				bool keepListState=false;	// true: don't change the list visibility
-				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
+				bool openList = true;			// true: make the list visible
+				bool keepListState = false;		// true: don't change the list visibility
+				Ptr<AutoCompleteData> autoComplete = newContext.autoComplete;
 
 				// if failed to get the auto complete list, close
-				if(!autoComplete)
+				if (!autoComplete)
 				{
-					openList=false;
+					openList = false;
 				}
-				if(openList)
+				if (openList)
 				{
 					if (autoComplete->shownCandidates.Count() + autoComplete->candidateItems.Count() == 0)
 					{
-						openList=false;
+						openList = false;
 					}
 				}
-				
+
 				TextPos startPosition, endPosition;
 				WString editingText;
-				if(openList)
+				if (openList)
 				{
 					SPIN_LOCK(editTraceLock)
 					{
 						// if the edit version is invalid, cancel
-						vint traceIndex=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
-						if(traceIndex==-1)
+						vint traceIndex = UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+						if (traceIndex == -1)
 						{
 							return;
 						}
 						// an edit version has two trace at most, for text change and caret change, here we peak the text change
-						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.modifiedEditVersion)
+						if (traceIndex > 0 && editTrace[traceIndex - 1].editVersion == context.modifiedEditVersion)
 						{
 							traceIndex--;
 						}
 						// if the edit version is not created by keyboard input, close
-						if(traceIndex>=0)
+						if (traceIndex >= 0)
 						{
-							TextEditNotifyStruct& trace=editTrace[traceIndex];
-							if(!trace.keyInput)
+							TextEditNotifyStruct& trace = editTrace[traceIndex];
+							if (!trace.keyInput)
 							{
-								openList=false;
+								openList = false;
 							}
 						}
 
 						// scan all traces from the calculation's edit version until now
-						if(openList)
+						if (openList)
 						{
-							keepListState=true;
-							startPosition=autoComplete->startPosition;
-							endPosition=editTrace[editTrace.Count()-1].inputEnd;
-							for(vint i=traceIndex;i<editTrace.Count();i++)
+							keepListState = true;
+							startPosition = autoComplete->startPosition;
+							endPosition = editTrace[editTrace.Count() - 1].inputEnd;
+							for (vint i = traceIndex; i < editTrace.Count(); i++)
 							{
-								TextEditNotifyStruct& trace=editTrace[i];
+								TextEditNotifyStruct& trace = editTrace[i];
 								// if there are no text change trace until now, don't change the list
-								if(trace.originalText!=L"" || trace.inputText!=L"")
+								if (trace.originalText != L"" || trace.inputText != L"")
 								{
-									keepListState=false;
+									keepListState = false;
 								}
 								// if the edit position goes before the start position of the auto complete, refresh
-								if(trace.inputEnd<=startPosition)
+								if (trace.inputEnd <= startPosition)
 								{
-									openList=false;
+									openList = false;
 									break;
 								}
 							}
 						}
 
-						if(traceIndex>0)
+						if (traceIndex > 0)
 						{
 							editTrace.RemoveRange(0, traceIndex);
 						}
@@ -903,23 +908,23 @@ GuiGrammarAutoComplete
 				}
 
 				// if there is a global correction send to the UI thread but the list is not opening, cancel
-				if(byGlobalCorrection && !IsListOpening())
+				if (byGlobalCorrection && !IsListOpening())
 				{
 					return;
 				}
 
 				// if the input text from the start position to the current position crosses a token, close
-				if(openList && element)
+				if (openList && element)
 				{
-					editingText=element->GetLines().GetText(startPosition, endPosition);
-					if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+					editingText = element->GetLines().GetText(startPosition, endPosition);
+					if (grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
 					{
-						openList=false;
+						openList = false;
 					}
 				}
 
 				// calculate the content of the list
-				if(autoComplete && ((!keepListState && openList) || IsListOpening()))
+				if (autoComplete && ((!keepListState && openList) || IsListOpening()))
 				{
 					SortedList<WString> itemKeys;
 					List<ParsingCandidateItem> itemValues;
@@ -938,11 +943,11 @@ GuiGrammarAutoComplete
 					}
 
 					// copy all candidate symbols
-					if(autoComplete->acceptableSemanticIds)
+					if (autoComplete->acceptableSemanticIds)
 					{
 						FOREACH(ParsingCandidateItem, item, autoComplete->candidateItems)
 						{
-							if(autoComplete->acceptableSemanticIds->Contains(item.semanticId))
+							if (autoComplete->acceptableSemanticIds->Contains(item.semanticId))
 							{
 								// add all acceptable display of a symbol
 								// because a symbol can has multiple representation in different places
@@ -976,9 +981,9 @@ GuiGrammarAutoComplete
 				}
 
 				// set the list state
-				if(!keepListState)
+				if (!keepListState)
 				{
-					if(openList)
+					if (openList)
 					{
 						OpenList(startPosition);
 					}
@@ -988,7 +993,7 @@ GuiGrammarAutoComplete
 					}
 				}
 
-				if(IsListOpening())
+				if (IsListOpening())
 				{
 					HighlightList(editingText);
 				}
