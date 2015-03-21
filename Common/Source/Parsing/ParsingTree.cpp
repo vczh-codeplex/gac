@@ -160,8 +160,7 @@ ParsingTreeNode
 					node->InitializeQueryCache();
 				}
 
-				ParsingTextRange emptyRange;
-				if (codeRange == emptyRange)
+				if (codeRange.start.IsInvalid() || codeRange.start.IsInvalid())
 				{
 					FOREACH(Ptr<ParsingTreeNode>, subNode, subNodes)
 					{
@@ -185,7 +184,8 @@ ParsingTreeNode
 					From(subNodes)
 						.Where([=](Ptr<ParsingTreeNode> node)
 						{
-							return node->GetCodeRange()!=emptyRange;
+							const auto& range = node->GetCodeRange();
+							return !range.start.IsInvalid() && !range.end.IsInvalid();
 						})
 						.OrderBy(&CompareTextRange)
 					);
