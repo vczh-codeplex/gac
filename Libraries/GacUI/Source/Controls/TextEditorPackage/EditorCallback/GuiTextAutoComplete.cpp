@@ -168,7 +168,10 @@ GuiTextBoxAutoCompleteBase
 
 			void GuiTextBoxAutoCompleteBase::CloseList()
 			{
-				autoCompletePopup->Close();
+				if (autoCompletePopup->GetOpening())
+				{
+					autoCompletePopup->Close();
+				}
 			}
 
 			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::List<AutoCompleteItem>& items)
