@@ -235,11 +235,12 @@ GuiTextBoxAutoCompleteBase
 			{
 				if(!IsListOpening()) return false;
 				if(!ownerComposition) return false;
-				if (autoCompleteControlProvider->GetItemCount() == 0) return false;
+				const auto& selectedItems = autoCompleteControlProvider->GetListControl()->GetSelectedItems();
+				if (selectedItems.Count() == 0) return false;
 				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(ownerComposition->GetRelatedControl());
 				if(!ci) return false;
 
-				vint index = autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+				vint index = selectedItems[0];
 				WString selectedItem = autoCompleteControlProvider->GetItemText(index);
 				TextPos begin = autoCompleteStartPosition;
 				TextPos end = ci->GetCaretEnd();
@@ -252,8 +253,9 @@ GuiTextBoxAutoCompleteBase
 			WString GuiTextBoxAutoCompleteBase::GetSelectedListItem()
 			{
 				if(!IsListOpening()) return L"";
-				if (autoCompleteControlProvider->GetItemCount() == 0) return L"";
-				vint index = autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+				const auto& selectedItems = autoCompleteControlProvider->GetListControl()->GetSelectedItems();
+				if (selectedItems.Count() == 0) return L"";
+				vint index = selectedItems[0];
 				return autoCompleteControlProvider->GetItemText(index);
 			}
 
