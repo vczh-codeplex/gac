@@ -5,6 +5,7 @@ namespace vl
 {
 	namespace regex_internal
 	{
+		using namespace collections;
 
 /***********************************************************************
 Automaton

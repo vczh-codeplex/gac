@@ -11,6 +11,7 @@
 #include "../../Source/Collections/OperationCopyFrom.h"
 
 using namespace vl;
+using namespace vl::collections;
 using namespace vl::regex;
 using namespace vl::regex_internal;
 using namespace vl::stream;

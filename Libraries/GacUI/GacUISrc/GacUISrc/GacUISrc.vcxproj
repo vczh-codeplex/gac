@@ -424,6 +424,7 @@
     <ClCompile Include="..\..\Source\Resources\GuiParserManager.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiResource.cpp" />
     <ClCompile Include="..\..\Source\Resources\GuiResourceTypeResolvers.cpp" />
+    <ClCompile Include="AutoComplete_Grammar.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="TsfTestWindow.cpp" />
   </ItemGroup>

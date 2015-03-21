@@ -23,7 +23,7 @@ namespace vl
 			vint								start;
 			vint								length;
 
-			bool							operator==(const CaptureRecord& record)const;
+			bool								operator==(const CaptureRecord& record)const;
 		};
 	}
 
@@ -38,9 +38,9 @@ namespace vl
 		class RichResult
 		{
 		public:
-			vint							start;
-			vint							length;
-			List<CaptureRecord>			captures;
+			vint								start;
+			vint								length;
+			collections::List<CaptureRecord>	captures;
 		};
 
 		class RichInterpretor : public Object
@@ -50,18 +50,18 @@ namespace vl
 			class UserData
 			{
 			public:
-				bool						NeedKeepState;
+				bool							NeedKeepState;
 			};
 
-			Automaton::Ref					dfa;
-			UserData*						datas;
+			Automaton::Ref						dfa;
+			UserData*							datas;
 		public:
 			RichInterpretor(Automaton::Ref _dfa);
 			~RichInterpretor();
 
-			bool							MatchHead(const wchar_t* input, const wchar_t* start, RichResult& result);
-			bool							Match(const wchar_t* input, const wchar_t* start, RichResult& result);
-			const List<WString>&			CaptureNames();
+			bool								MatchHead(const wchar_t* input, const wchar_t* start, RichResult& result);
+			bool								Match(const wchar_t* input, const wchar_t* start, RichResult& result);
+			const collections::List<WString>&	CaptureNames();
 		};
 	};
 }

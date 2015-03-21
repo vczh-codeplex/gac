@@ -7,6 +7,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace collections;
 			using namespace parsing;
 			using namespace parsing::tabling;
 			using namespace regex_internal;
