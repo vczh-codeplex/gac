@@ -25886,6 +25886,50 @@ namespace vl
 			using namespace collections;
 
 /***********************************************************************
+GuiTextBoxAutoCompleteBase::TextListControlProvider
+***********************************************************************/
+
+			GuiTextBoxAutoCompleteBase::TextListControlProvider::TextListControlProvider(GuiTextList::IStyleProvider* styleProvider)
+			{
+				autoCompleteList = new GuiTextList(styleProvider ? styleProvider : theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
+				autoCompleteList->SetHorizontalAlwaysVisible(false);
+				autoCompleteList->SetVerticalAlwaysVisible(false);
+			}
+
+			GuiTextBoxAutoCompleteBase::TextListControlProvider::~TextListControlProvider()
+			{
+			}
+
+			GuiControl* GuiTextBoxAutoCompleteBase::TextListControlProvider::GetAutoCompleteControl()
+			{
+				return autoCompleteList;
+			}
+
+			GuiSelectableListControl* GuiTextBoxAutoCompleteBase::TextListControlProvider::GetListControl()
+			{
+				return autoCompleteList;
+			}
+
+			void GuiTextBoxAutoCompleteBase::TextListControlProvider::SetSortedContent(const collections::List<AutoCompleteItem>& items)
+			{
+				autoCompleteList->GetItems().Clear();
+				FOREACH(AutoCompleteItem, item, items)
+				{
+					autoCompleteList->GetItems().Add(new list::TextItem(item.text));
+				}
+			}
+
+			vint GuiTextBoxAutoCompleteBase::TextListControlProvider::GetItemCount()
+			{
+				return autoCompleteList->GetItems().Count();
+			}
+
+			WString GuiTextBoxAutoCompleteBase::TextListControlProvider::GetItemText(vint index)
+			{
+				return autoCompleteList->GetItems()[index]->GetText();
+			}
+
+/***********************************************************************
 GuiTextBoxAutoCompleteBase
 ***********************************************************************/
 
@@ -25901,18 +25945,20 @@ GuiTextBoxAutoCompleteBase
 				return false;
 			}
 
-			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase()
+			GuiTextBoxAutoCompleteBase::GuiTextBoxAutoCompleteBase(Ptr<IAutoCompleteControlProvider> _autoCompleteControlProvider)
 				:element(0)
 				,elementModifyLock(0)
 				,ownerComposition(0)
+				,autoCompleteControlProvider(_autoCompleteControlProvider)
 			{
-				autoCompleteList=new GuiTextList(theme::GetCurrentTheme()->CreateTextListStyle(), theme::GetCurrentTheme()->CreateTextListItemStyle());
-				autoCompleteList->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
-				autoCompleteList->SetHorizontalAlwaysVisible(false);
-				autoCompleteList->SetVerticalAlwaysVisible(false);
+				if (!autoCompleteControlProvider)
+				{
+					autoCompleteControlProvider = new TextListControlProvider;
+				}
+				autoCompleteControlProvider->GetAutoCompleteControl()->GetBoundsComposition()->SetAlignmentToParent(Margin(0, 0, 0, 0));
 
-				autoCompletePopup=new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
-				autoCompletePopup->AddChild(autoCompleteList);
+				autoCompletePopup = new GuiPopup(theme::GetCurrentTheme()->CreateMenuStyle());
+				autoCompletePopup->AddChild(autoCompleteControlProvider->GetAutoCompleteControl());
 			}
 
 			GuiTextBoxAutoCompleteBase::~GuiTextBoxAutoCompleteBase()
@@ -26001,32 +26047,25 @@ GuiTextBoxAutoCompleteBase
 				autoCompletePopup->Close();
 			}
 
-			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::SortedList<WString>& items)
+			void GuiTextBoxAutoCompleteBase::SetListContent(const collections::List<AutoCompleteItem>& items)
 			{
 				if(items.Count()==0)
 				{
 					CloseList();
 				}
-				List<WString> sortedItems;
+
+				List<AutoCompleteItem> sortedItems;
 				CopyFrom(
 					sortedItems,
 					From(items)
-						.OrderBy([](const WString& a, const WString& b)
+						.OrderBy([](const AutoCompleteItem& a, const AutoCompleteItem& b)
 						{
-							return INVLOC.Compare(a, b, Locale::IgnoreCase);
+							return INVLOC.Compare(a.text, b.text, Locale::IgnoreCase);
 						})
 					);
 
-				autoCompleteList->GetItems().Clear();
-				CopyFrom(
-					autoCompleteList->GetItems(),
-					From(sortedItems)
-						.Select([](const WString& item)
-						{
-							return new list::TextItem(item);
-						})
-					);
-				autoCompleteList->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
+				autoCompleteControlProvider->SetSortedContent(sortedItems);
+				autoCompleteControlProvider->GetAutoCompleteControl()->GetBoundsComposition()->SetPreferredMinSize(Size(200, 200));
 			}
 
 			TextPos GuiTextBoxAutoCompleteBase::GetListStartPosition()
@@ -26037,15 +26076,16 @@ GuiTextBoxAutoCompleteBase
 			bool GuiTextBoxAutoCompleteBase::SelectPreviousListItem()
 			{
 				if(!IsListOpening()) return false;
-				if(autoCompleteList->GetSelectedItems().Count()==0)
+				if(autoCompleteControlProvider->GetListControl()->GetSelectedItems().Count()==0)
 				{
-					autoCompleteList->SetSelected(0, true);
+					autoCompleteControlProvider->GetListControl()->SetSelected(0, true);
 				}
 				else
 				{
-					vint index=autoCompleteList->GetSelectedItems()[0];
-					if(index>0) index--;
-					autoCompleteList->SetSelected(index, true);
+					vint index=autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+					if (index > 0) index--;
+					autoCompleteControlProvider->GetListControl()->SetSelected(index, true);
+					autoCompleteControlProvider->GetListControl()->EnsureItemVisible(index);
 				}
 				return true;
 			}
@@ -26053,15 +26093,16 @@ GuiTextBoxAutoCompleteBase
 			bool GuiTextBoxAutoCompleteBase::SelectNextListItem()
 			{
 				if(!IsListOpening()) return false;
-				if(autoCompleteList->GetSelectedItems().Count()==0)
+				if (autoCompleteControlProvider->GetListControl()->GetSelectedItems().Count() == 0)
 				{
-					autoCompleteList->SetSelected(0, true);
+					autoCompleteControlProvider->GetListControl()->SetSelected(0, true);
 				}
 				else
 				{
-					vint index=autoCompleteList->GetSelectedItems()[0];
-					if(index<autoCompleteList->GetItems().Count()-1) index++;
-					autoCompleteList->SetSelected(index, true);
+					vint index = autoCompleteControlProvider->GetListControl()->GetSelectedItems()[0];
+					if (index < autoCompleteControlProvider->GetItemCount() - 1) index++;
+					autoCompleteControlProvider->GetListControl()->SetSelected(index, true);
+					autoCompleteControlProvider->GetListControl()->EnsureItemVisible(index);
 				}
 				return true;
 			}
@@ -26070,14 +26111,15 @@ GuiTextBoxAutoCompleteBase
 			{
 				if(!IsListOpening()) return false;
 				if(!ownerComposition) return false;
-				if(autoCompleteList->GetSelectedItems().Count()==0) return false;
+				const auto& selectedItems = autoCompleteControlProvider->GetListControl()->GetSelectedItems();
+				if (selectedItems.Count() == 0) return false;
 				GuiTextBoxCommonInterface* ci=dynamic_cast<GuiTextBoxCommonInterface*>(ownerComposition->GetRelatedControl());
 				if(!ci) return false;
 
-				vint index=autoCompleteList->GetSelectedItems()[0];
-				WString selectedItem=autoCompleteList->GetItems()[index]->GetText();
-				TextPos begin=autoCompleteStartPosition;
-				TextPos end=ci->GetCaretEnd();
+				vint index = selectedItems[0];
+				WString selectedItem = autoCompleteControlProvider->GetItemText(index);
+				TextPos begin = autoCompleteStartPosition;
+				TextPos end = ci->GetCaretEnd();
 				ci->Select(begin, end);
 				ci->SetSelectionText(selectedItem);
 				CloseList();
@@ -26087,9 +26129,10 @@ GuiTextBoxAutoCompleteBase
 			WString GuiTextBoxAutoCompleteBase::GetSelectedListItem()
 			{
 				if(!IsListOpening()) return L"";
-				if(autoCompleteList->GetSelectedItems().Count()==0) return L"";
-				vint index=autoCompleteList->GetSelectedItems()[0];
-				return autoCompleteList->GetItems()[index]->GetText();
+				const auto& selectedItems = autoCompleteControlProvider->GetListControl()->GetSelectedItems();
+				if (selectedItems.Count() == 0) return L"";
+				vint index = selectedItems[0];
+				return autoCompleteControlProvider->GetItemText(index);
 			}
 
 			void GuiTextBoxAutoCompleteBase::HighlightList(const WString& editingText)
@@ -26097,34 +26140,34 @@ GuiTextBoxAutoCompleteBase
 				if(IsListOpening())
 				{
 					vint first=0;
-					vint last=autoCompleteList->GetItems().Count()-1;
+					vint last = autoCompleteControlProvider->GetItemCount() - 1;
 					vint selected=-1;
 
-					while(first<=last)
+					while (first <= last)
 					{
-						vint middle=(first+last)/2;
-						WString text=autoCompleteList->GetItems()[middle]->GetText();
-						if(IsPrefix(editingText, text))
+						vint middle = (first + last) / 2;
+						WString text = autoCompleteControlProvider->GetItemText(middle);
+						if (IsPrefix(editingText, text))
 						{
-							selected=middle;
+							selected = middle;
 							break;
 						}
 
-						vint result=INVLOC.Compare(editingText, text, Locale::IgnoreCase);
-						if(result<=0)
+						vint result = INVLOC.Compare(editingText, text, Locale::IgnoreCase);
+						if (result <= 0)
 						{
-							last=middle-1;
+							last = middle - 1;
 						}
 						else
 						{
-							first=middle+1;
+							first = middle + 1;
 						}
 					}
 
 					while(selected>0)
 					{
-						WString text=autoCompleteList->GetItems()[selected-1]->GetText();
-						if(IsPrefix(editingText, text))
+						WString text = autoCompleteControlProvider->GetItemText(selected - 1);
+						if (IsPrefix(editingText, text))
 						{
 							selected--;
 						}
@@ -26136,8 +26179,8 @@ GuiTextBoxAutoCompleteBase
 
 					if(selected!=-1)
 					{
-						autoCompleteList->SetSelected(selected, true);
-						autoCompleteList->EnsureItemVisible(selected);
+						autoCompleteControlProvider->GetListControl()->SetSelected(selected, true);
+						autoCompleteControlProvider->GetListControl()->EnsureItemVisible(selected);
 					}
 				}
 			}
@@ -29399,27 +29442,27 @@ GuiGrammarAutoComplete
 				// get the index of the latest TextEditNotifyStruct of a specified edit version
 				// this function should be called inside SPIN_LOCK(editTraceLock)
 				// perform a binary search
-				vint start=0;
-				vint end=editTrace.Count()-1;
-				while(start<=end)
+				vint start = 0;
+				vint end = editTrace.Count() - 1;
+				while (start <= end)
 				{
-					vint middle=(start+end)/2;
-					TextEditNotifyStruct& trace=editTrace[middle];
+					vint middle = (start + end) / 2;
+					TextEditNotifyStruct& trace = editTrace[middle];
 
-					if(editVersion<trace.editVersion)
+					if (editVersion<trace.editVersion)
 					{
-						end=middle-1;
+						end = middle - 1;
 					}
-					else if(editVersion>trace.editVersion)
+					else if (editVersion>trace.editVersion)
 					{
-						start=middle+1;
+						start = middle + 1;
 					}
 					else
 					{
 						// if multiple TextEditNotifyStruct is found, choose the latest one
-						while(middle<editTrace.Count()-1)
+						while (middle < editTrace.Count() - 1)
 						{
-							if(editTrace[middle+1].editVersion==editTrace[middle].editVersion)
+							if (editTrace[middle + 1].editVersion == editTrace[middle].editVersion)
 							{
 								middle++;
 							}
@@ -29464,95 +29507,95 @@ GuiGrammarAutoComplete
 				{
 					SPIN_LOCK(editTraceLock)
 					{
-						vint traceIndex=UnsafeGetEditTraceIndex(newContext.input.editVersion);
-						if(traceIndex==-1) return;
+						vint traceIndex = UnsafeGetEditTraceIndex(newContext.input.editVersion);
+						if (traceIndex == -1) return;
 
-						TextEditNotifyStruct& trace=editTrace[traceIndex];
-						startPos=trace.inputStart;
-						endPos=trace.inputEnd;
+						TextEditNotifyStruct& trace = editTrace[traceIndex];
+						startPos = trace.inputStart;
+						endPos = trace.inputEnd;
 					}
 
-					const RegexLexer& lexer=grammarParser->GetTable()->GetLexer();
-					RegexTokens tokens=lexer.Parse(newContext.input.code);
-					startPos=ChooseCorrectTextPos(startPos, tokens);
+					const RegexLexer& lexer = grammarParser->GetTable()->GetLexer();
+					RegexTokens tokens = lexer.Parse(newContext.input.code);
+					startPos = ChooseCorrectTextPos(startPos, tokens);
 				}
 
 				// locate the deepest node using the text selection
 				ParsingTextPos start(startPos.row, startPos.column);
 				ParsingTextPos end(endPos.row, endPos.column);
 				ParsingTextRange range(start, end);
-				ParsingTreeNode* found=newContext.input.node->FindDeepestNode(range);
-				ParsingTreeObject* selectedNode=0;
+				ParsingTreeNode* found = newContext.input.node->FindDeepestNode(range);
+				ParsingTreeObject* selectedNode = 0;
 
 				// if the location failed, choose the root node
-				if(!found || startPos==TextPos(0, 0))
+				if (!found || startPos == TextPos(0, 0))
 				{
-					found=newContext.input.node.Obj();
+					found = newContext.input.node.Obj();
 				}
 
-				if(!selectedNode)
+				if (!selectedNode)
 				{
 					// from the deepest node, traverse towards the root node
 					// find the deepest node whose created rule is a left recursive rule and whose parent is not
-					ParsingTreeObject* lrec=0;
-					ParsingTreeNode* current=found;
-					while(current)
+					ParsingTreeObject* lrec = 0;
+					ParsingTreeNode* current = found;
+					while (current)
 					{
-						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-						if(obj)
+						ParsingTreeObject* obj = dynamic_cast<ParsingTreeObject*>(current);
+						if (obj)
 						{
 							FOREACH(WString, rule, obj->GetCreatorRules())
 							{
-								if(leftRecursiveRules.Contains(rule))
+								if (leftRecursiveRules.Contains(rule))
 								{
-									lrec=obj;
+									lrec = obj;
 									break;
 								}
 							}
-							if(obj && lrec && lrec!=obj)
+							if (obj && lrec && lrec != obj)
 							{
-								selectedNode=lrec;
+								selectedNode = lrec;
 								break;
 							}
 						}
-						current=current->GetParent();
+						current = current->GetParent();
 					}
 				}
 
-				if(!selectedNode)
+				if (!selectedNode)
 				{
 					// if there is no left recursive rule that creates the deepest node and all indirect parents
 					// choose the deepest ParsingTreeObject
-					ParsingTreeNode* current=found;
-					while(current)
+					ParsingTreeNode* current = found;
+					while (current)
 					{
-						ParsingTreeObject* obj=dynamic_cast<ParsingTreeObject*>(current);
-						if(obj)
+						ParsingTreeObject* obj = dynamic_cast<ParsingTreeObject*>(current);
+						if (obj)
 						{
-							selectedNode=obj;
+							selectedNode = obj;
 							break;
 						}
-						current=current->GetParent();
+						current = current->GetParent();
 					}
 				}
 
-				if(selectedNode)
+				if (selectedNode)
 				{
 					// get the code range of the selected node
-					start=selectedNode->GetCodeRange().start;
-					end=selectedNode->GetCodeRange().end;
+					start = selectedNode->GetCodeRange().start;
+					end = selectedNode->GetCodeRange().end;
 
 					// get all properties from the selected node
-					newContext.rule=selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count()-1];
-					newContext.originalRange=selectedNode->GetCodeRange();
-					newContext.originalNode=dynamic_cast<ParsingTreeObject*>(selectedNode);
-					newContext.modifiedNode=newContext.originalNode;
-					newContext.modifiedEditVersion=newContext.input.editVersion;
+					newContext.rule = selectedNode->GetCreatorRules()[selectedNode->GetCreatorRules().Count() - 1];
+					newContext.originalRange = selectedNode->GetCodeRange();
+					newContext.originalNode = dynamic_cast<ParsingTreeObject*>(selectedNode);
+					newContext.modifiedNode = newContext.originalNode;
+					newContext.modifiedEditVersion = newContext.input.editVersion;
 
 					// get the corresponding code of the selected node
-					if(start.index>=0 && end.index>=0)
+					if (start.index >= 0 && end.index >= 0)
 					{
-						newContext.modifiedCode=newContext.input.code.Sub(start.index, end.index-start.index+1).Buffer();
+						newContext.modifiedCode = newContext.input.code.Sub(start.index, end.index - start.index + 1).Buffer();
 					}
 				}
 			}
@@ -29564,19 +29607,19 @@ GuiGrammarAutoComplete
 
 				// get the end position of the end of lines
 				TextPos end
-					=lines.GetCount()<=1
-					?TextPos(start.row, start.column+lines.GetLine(0).dataLength)
-					:TextPos(start.row+lines.GetCount()-1, lines.GetLine(lines.GetCount()-1).dataLength)
+					= lines.GetCount() <= 1
+					? TextPos(start.row, start.column + lines.GetLine(0).dataLength)
+					: TextPos(start.row + lines.GetCount() - 1, lines.GetLine(lines.GetCount() - 1).dataLength)
 					;
 
-				if(start<=pos && pos<=end)
+				if (start <= pos && pos <= end)
 				{
 					// if the pos is inside the range
 					// normalize the pos to a new coordinate that the beginning position of lines is (row=0, column=0)
-					pos.row-=start.row;
-					if(pos.row==0)
+					pos.row -= start.row;
+					if (pos.row == 0)
 					{
-						pos.column-=start.column;
+						pos.column -= start.column;
 					}
 					return true;
 				}
@@ -29598,22 +29641,22 @@ GuiGrammarAutoComplete
 						CopyFrom(
 							usedTrace,
 							From(editTrace)
-								.Where([&newContext](const TextEditNotifyStruct& value)
+							.Where([&newContext](const TextEditNotifyStruct& value)
 								{
-									return (value.originalText!=L"" || value.inputText!=L"") && value.editVersion>newContext.modifiedEditVersion;
+									return (value.originalText != L"" || value.inputText != L"") && value.editVersion > newContext.modifiedEditVersion;
 								})
-							);
+						);
 					}
 				}
 
 				// apply all modification to get the new modifiedCode
 				bool failed = false;
-				if(usedTrace.Count()>0)
+				if (usedTrace.Count() > 0)
 				{
-					if(usedTrace[0].editVersion!=newContext.modifiedEditVersion+1)
+					if (usedTrace[0].editVersion != newContext.modifiedEditVersion + 1)
 					{
 						// failed if any TextEditNotifyStruct is missing 
-						failed=true;
+						failed = true;
 					}
 					else
 					{
@@ -29623,39 +29666,39 @@ GuiGrammarAutoComplete
 						FOREACH(TextEditNotifyStruct, trace, usedTrace)
 						{
 							// apply a modification to lines
-							TextPos start=trace.originalStart;
-							TextPos end=trace.originalEnd;
+							TextPos start = trace.originalStart;
+							TextPos end = trace.originalEnd;
 
 							// only if the modification is meaningful
-							if(NormalizeTextPos(newContext, lines, start) && NormalizeTextPos(newContext, lines, end))
+							if (NormalizeTextPos(newContext, lines, start) && NormalizeTextPos(newContext, lines, end))
 							{
 								lines.Modify(start, end, trace.inputText);
 							}
 							else
 							{
 								// otherwise, failed
-								failed=true;
+								failed = true;
 								break;
 							}
 						}
-						
-						if(!failed)
+
+						if (!failed)
 						{
-							newContext.modifiedCode=lines.GetText();
+							newContext.modifiedCode = lines.GetText();
 						}
 					}
 				}
 
-				if(failed)
+				if (failed)
 				{
 					// clear originalNode to notify that the current context goes wrong
-					newContext.originalNode=0;
+					newContext.originalNode = 0;
 				}
 
-				if(usedTrace.Count()>0)
+				if (usedTrace.Count() > 0)
 				{
 					// update the edit version
-					newContext.modifiedEditVersion=usedTrace[usedTrace.Count()-1].editVersion;
+					newContext.modifiedEditVersion = usedTrace[usedTrace.Count() - 1].editVersion;
 				}
 			}
 
@@ -29677,11 +29720,11 @@ GuiGrammarAutoComplete
 				collections::List<parsing::tabling::ParsingState::Future*>& recoveryFutures
 				)
 			{
-				const List<ParsingState::TransitionResult>& transitions=transitionCollector.GetTransitions();
-				for(vint index=0;index<transitions.Count();index++)
+				const List<ParsingState::TransitionResult>& transitions = transitionCollector.GetTransitions();
+				for (vint index = 0; index < transitions.Count(); index++)
 				{
-					const ParsingState::TransitionResult& transition=transitions[index];
-					switch(transition.transitionType)
+					const ParsingState::TransitionResult& transition = transitions[index];
+					switch (transition.transitionType)
 					{
 					case ParsingState::TransitionResult::AmbiguityBegin:
 						break;
@@ -29689,29 +29732,29 @@ GuiGrammarAutoComplete
 						// ambiguity branches are not nested
 						// tokens in different braches are the same
 						// so we only need to run one branch, and skip the others
-						index=transitionCollector.GetAmbiguityEndFromBegin(transitionCollector.GetAmbiguityBeginFromBranch(index));
+						index = transitionCollector.GetAmbiguityEndFromBegin(transitionCollector.GetAmbiguityBeginFromBranch(index));
 						break;
 					case ParsingState::TransitionResult::AmbiguityEnd:
 						break;
 					case ParsingState::TransitionResult::ExecuteInstructions:
 						{
 							// test does the token reach the stop position
-							if(transition.token)
+							if (transition.token)
 							{
 								// we treat "A|B" as editing A if token A is endless, otherwise treated as editing B
-								TextPos tokenEnd(transition.token->rowEnd, transition.token->columnEnd+1);
+								TextPos tokenEnd(transition.token->rowEnd, transition.token->columnEnd + 1);
 
 								// if the caret is not at the end of the token
-								if(tokenEnd>stopPosition)
+								if (tokenEnd > stopPosition)
 								{
 									// stop the traversing and return the editing token
 									return transition.token;
 								}
-								else if(tokenEnd==stopPosition)
+								else if (tokenEnd == stopPosition)
 								{
 									// if the caret is at the end of the token, and it is a closed token
 									// e.g. identifier is not a closed token, string is a closed token
-									if(!grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(transition.token->reading, transition.token->length))
+									if (!grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(transition.token->reading, transition.token->length))
 									{
 										// stop the traversing and return the editing token
 										return transition.token;
@@ -29720,9 +29763,9 @@ GuiGrammarAutoComplete
 							}
 
 							// traverse the PDA using the token specified in the current transition
-							vint tableTokenIndex=transition.tableTokenIndex;
+							vint tableTokenIndex = transition.tableTokenIndex;
 							List<ParsingState::Future*> possibilities;
-							if(recoveryFutures.Count()>0)
+							if (recoveryFutures.Count() > 0)
 							{
 								FOREACH(ParsingState::Future*, future, recoveryFutures)
 								{
@@ -29739,36 +29782,36 @@ GuiGrammarAutoComplete
 
 							// delete duplicated futures
 							List<ParsingState::Future*> selectedPossibilities;
-							for(vint i=0;i<possibilities.Count();i++)
+							for (vint i = 0; i < possibilities.Count(); i++)
 							{
-								ParsingState::Future* candidateFuture=possibilities[i];
-								bool duplicated=false;
+								ParsingState::Future* candidateFuture = possibilities[i];
+								bool duplicated = false;
 								FOREACH(ParsingState::Future*, future, selectedPossibilities)
 								{
-									if(
-										candidateFuture->currentState==future->currentState &&
-										candidateFuture->reduceStateCount==future->reduceStateCount &&
-										candidateFuture->shiftStates.Count()==future->shiftStates.Count()
+									if (
+										candidateFuture->currentState == future->currentState &&
+										candidateFuture->reduceStateCount == future->reduceStateCount &&
+										candidateFuture->shiftStates.Count() == future->shiftStates.Count()
 										)
 									{
-										bool same=true;
-										for(vint j=0;j<future->shiftStates.Count();j++)
+										bool same = true;
+										for (vint j = 0; j < future->shiftStates.Count(); j++)
 										{
-											if(candidateFuture->shiftStates[i]!=future->shiftStates[i])
+											if (candidateFuture->shiftStates[i] != future->shiftStates[i])
 											{
-												same=false;
+												same = false;
 												break;
 											}
 										}
 
-										if((duplicated=same))
+										if ((duplicated = same))
 										{
 											break;
 										}
 									}
 								}
 
-								if(duplicated)
+								if (duplicated)
 								{
 									delete candidateFuture;
 								}
@@ -29779,7 +29822,7 @@ GuiGrammarAutoComplete
 							}
 
 							// step forward
-							if(transition.token || transition.tableTokenIndex==ParsingTable::TokenBegin)
+							if (transition.token || transition.tableTokenIndex == ParsingTable::TokenBegin)
 							{
 								DeleteFutures(nonRecoveryFutures);
 								DeleteFutures(recoveryFutures);
@@ -29814,14 +29857,19 @@ GuiGrammarAutoComplete
 				// traverse the PDA until it reach the stop position
 				// nonRecoveryFutures store the state when the last token (existing) is reached
 				// recoveryFutures store the state when the last token (inserted by error recovery) is reached
-				RegexToken* token=TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
+				RegexToken* token = TraverseTransitions(state, transitionCollector, stopPosition, nonRecoveryFutures, recoveryFutures);
 
 				// explore all possibilities from the last token before the stop position
 				List<ParsingState::Future*> possibilities;
+				for (vint i = 0; i < nonRecoveryFutures.Count(); i++)
+				{
+					state.Explore(ParsingTable::NormalReduce, nonRecoveryFutures[i], nonRecoveryFutures);
+					state.Explore(ParsingTable::LeftRecursiveReduce, nonRecoveryFutures[i], nonRecoveryFutures);
+				}
 				FOREACH(ParsingState::Future*, future, nonRecoveryFutures)
 				{
-					vint count=state.GetTable()->GetTokenCount();
-					for(vint i=0;i<count;i++)
+					vint count = state.GetTable()->GetTokenCount();
+					for (vint i = ParsingTable::UserTokenStart; i < count; i++)
 					{
 						state.Explore(i, future, possibilities);
 					}
@@ -29830,7 +29878,7 @@ GuiGrammarAutoComplete
 				// get all possible tokens that marked using @AutoCompleteCandidate
 				FOREACH(ParsingState::Future*, future, possibilities)
 				{
-					if(!tableTokenIndices.Contains(future->selectedToken))
+					if (!tableTokenIndices.Contains(future->selectedToken))
 					{
 						tableTokenIndices.Add(future->selectedToken);
 					}
@@ -29879,66 +29927,66 @@ GuiGrammarAutoComplete
 				List<Ptr<ParsingError>> errors;
 
 				// reparse and get all transitions during parsing
-				if(grammarParser->Parse(state, collector, errors))
+				if (grammarParser->Parse(state, collector, errors))
 				{
 					// if modifiedNode is not prepared (the task is submitted because of text editing)
 					// use the transition to build the syntax tree
-					if(!newContext.modifiedNode)
+					if (!newContext.modifiedNode)
 					{
 						ParsingTreeBuilder builder;
 						builder.Reset();
-						bool succeeded=true;
+						bool succeeded = true;
 						FOREACH(ParsingState::TransitionResult, transition, collector.GetTransitions())
 						{
-							if(!(succeeded=builder.Run(transition)))
+							if (!(succeeded = builder.Run(transition)))
 							{
 								break;
 							}
 						}
 
-						if(succeeded)
+						if (succeeded)
 						{
-							Ptr<ParsingTreeNode> parsedNode=builder.GetNode();
-							newContext.modifiedNode=parsedNode.Cast<ParsingTreeObject>();
+							Ptr<ParsingTreeNode> parsedNode = builder.GetNode();
+							newContext.modifiedNode = parsedNode.Cast<ParsingTreeObject>();
 							newContext.modifiedNode->InitializeQueryCache();
 						}
 					}
 
-					if(newContext.modifiedNode)
+					if (newContext.modifiedNode)
 					{
 						// get the latest text editing trace
 						TextEditNotifyStruct trace;
 						SPIN_LOCK(editTraceLock)
 						{
-							vint index=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
-							if(index==-1)
+							vint index = UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+							if (index == -1)
 							{
 								return;
 							}
 							else
 							{
-								trace=editTrace[index];
+								trace = editTrace[index];
 							}
 						}
-						
+
 						// calculate the stop position for PDA traversing
-						TextPos stopPosition=GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
+						TextPos stopPosition = GlobalTextPosToModifiedTextPos(newContext, trace.inputStart);
 
 						// find all possible token before the current caret using the PDA
-						Ptr<AutoCompleteData> autoComplete=new AutoCompleteData;
+						Ptr<AutoCompleteData> autoComplete = new AutoCompleteData;
 						SortedList<vint> tableTokenIndices;
-						RegexToken* editingToken=SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
+						RegexToken* editingToken = SearchValidInputToken(state, collector, stopPosition, newContext, tableTokenIndices);
 
 						// collect all auto complete types
 						{
 							// collect all keywords that can be put into the auto complete list
 							FOREACH(vint, token, tableTokenIndices)
 							{
-								vint regexToken=token-ParsingTable::UserTokenStart;
-								if(regexToken>=0)
+								vint regexToken = token - ParsingTable::UserTokenStart;
+								if (regexToken >= 0)
 								{
 									autoComplete->candidates.Add(regexToken);
-									if(parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
+									if (parsingExecutor->GetTokenMetaData(regexToken).isCandidate)
 									{
 										autoComplete->shownCandidates.Add(regexToken);
 									}
@@ -29946,40 +29994,40 @@ GuiGrammarAutoComplete
 							}
 
 							// calculate the arranged stopPosition
-							if(editingToken)
+							if (editingToken)
 							{
 								TextPos tokenPos(editingToken->rowStart, editingToken->columnStart);
-								if(tokenPos<stopPosition)
+								if (tokenPos < stopPosition)
 								{
-									stopPosition=tokenPos;
+									stopPosition = tokenPos;
 								}
 							}
 
 							// calculate the start/end position for PDA traversing
 							TextPos startPos, endPos;
 							{
-								startPos=ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
-								autoComplete->startPosition=startPos;
-								endPos=trace.inputEnd;
-								if(newContext.modifiedNode!=newContext.originalNode)
+								startPos = ModifiedTextPosToGlobalTextPos(newContext, stopPosition);
+								autoComplete->startPosition = startPos;
+								endPos = trace.inputEnd;
+								if (newContext.modifiedNode != newContext.originalNode)
 								{
-									startPos=GlobalTextPosToModifiedTextPos(newContext, startPos);
-									endPos=GlobalTextPosToModifiedTextPos(newContext, endPos);
+									startPos = GlobalTextPosToModifiedTextPos(newContext, startPos);
+									endPos = GlobalTextPosToModifiedTextPos(newContext, endPos);
 								}
-								if(startPos<endPos && endPos.column>0)
+								if (startPos<endPos && endPos.column>0)
 								{
 									endPos.column--;
 								}
 							}
 
 							// calculate the auto complete type
-							if(editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
+							if (editingToken && parsingExecutor->GetTokenMetaData(editingToken->token).hasAutoComplete)
 							{
 								ParsingTextRange range(ParsingTextPos(startPos.row, startPos.column), ParsingTextPos(endPos.row, endPos.column));
 								AutoCompleteData::RetriveContext(*autoComplete.Obj(), range, newContext.modifiedNode.Obj(), parsingExecutor.Obj());
 							}
 						}
-						newContext.autoComplete=autoComplete;
+						newContext.autoComplete = autoComplete;
 					}
 				}
 			}
@@ -30037,74 +30085,74 @@ GuiGrammarAutoComplete
 
 			void GuiGrammarAutoComplete::PostList(const AutoCompleteContext& newContext, bool byGlobalCorrection)
 			{
-				bool openList=true;			// true: make the list visible
-				bool keepListState=false;	// true: don't change the list visibility
-				Ptr<AutoCompleteData> autoComplete=newContext.autoComplete;
+				bool openList = true;			// true: make the list visible
+				bool keepListState = false;		// true: don't change the list visibility
+				Ptr<AutoCompleteData> autoComplete = newContext.autoComplete;
 
 				// if failed to get the auto complete list, close
-				if(!autoComplete)
+				if (!autoComplete)
 				{
-					openList=false;
+					openList = false;
 				}
-				if(openList)
+				if (openList)
 				{
 					if (autoComplete->shownCandidates.Count() + autoComplete->candidateItems.Count() == 0)
 					{
-						openList=false;
+						openList = false;
 					}
 				}
-				
+
 				TextPos startPosition, endPosition;
 				WString editingText;
-				if(openList)
+				if (openList)
 				{
 					SPIN_LOCK(editTraceLock)
 					{
 						// if the edit version is invalid, cancel
-						vint traceIndex=UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
-						if(traceIndex==-1)
+						vint traceIndex = UnsafeGetEditTraceIndex(newContext.modifiedEditVersion);
+						if (traceIndex == -1)
 						{
 							return;
 						}
 						// an edit version has two trace at most, for text change and caret change, here we peak the text change
-						if(traceIndex>0 && editTrace[traceIndex-1].editVersion==context.modifiedEditVersion)
+						if (traceIndex > 0 && editTrace[traceIndex - 1].editVersion == context.modifiedEditVersion)
 						{
 							traceIndex--;
 						}
 						// if the edit version is not created by keyboard input, close
-						if(traceIndex>=0)
+						if (traceIndex >= 0)
 						{
-							TextEditNotifyStruct& trace=editTrace[traceIndex];
-							if(!trace.keyInput)
+							TextEditNotifyStruct& trace = editTrace[traceIndex];
+							if (!trace.keyInput)
 							{
-								openList=false;
+								openList = false;
 							}
 						}
 
 						// scan all traces from the calculation's edit version until now
-						if(openList)
+						if (openList)
 						{
-							keepListState=true;
-							startPosition=autoComplete->startPosition;
-							endPosition=editTrace[editTrace.Count()-1].inputEnd;
-							for(vint i=traceIndex;i<editTrace.Count();i++)
+							keepListState = true;
+							startPosition = autoComplete->startPosition;
+							endPosition = editTrace[editTrace.Count() - 1].inputEnd;
+							for (vint i = traceIndex; i < editTrace.Count(); i++)
 							{
-								TextEditNotifyStruct& trace=editTrace[i];
+								TextEditNotifyStruct& trace = editTrace[i];
 								// if there are no text change trace until now, don't change the list
-								if(trace.originalText!=L"" || trace.inputText!=L"")
+								if (trace.originalText != L"" || trace.inputText != L"")
 								{
-									keepListState=false;
+									keepListState = false;
 								}
 								// if the edit position goes before the start position of the auto complete, refresh
-								if(trace.inputEnd<=startPosition)
+								if (trace.inputEnd <= startPosition)
 								{
-									openList=false;
+									openList = false;
 									break;
 								}
 							}
 						}
 
-						if(traceIndex>0)
+						if (traceIndex > 0)
 						{
 							editTrace.RemoveRange(0, traceIndex);
 						}
@@ -30112,61 +30160,82 @@ GuiGrammarAutoComplete
 				}
 
 				// if there is a global correction send to the UI thread but the list is not opening, cancel
-				if(byGlobalCorrection && !IsListOpening())
+				if (byGlobalCorrection && !IsListOpening())
 				{
 					return;
 				}
 
 				// if the input text from the start position to the current position crosses a token, close
-				if(openList && element)
+				if (openList && element)
 				{
-					editingText=element->GetLines().GetText(startPosition, endPosition);
-					if(grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
+					editingText = element->GetLines().GetText(startPosition, endPosition);
+					if (grammarParser->GetTable()->GetLexer().Walk().IsClosedToken(editingText))
 					{
-						openList=false;
+						openList = false;
 					}
 				}
 
 				// calculate the content of the list
-				if((!keepListState && openList) || IsListOpening())
+				if (autoComplete && ((!keepListState && openList) || IsListOpening()))
 				{
-					SortedList<WString> items;
+					SortedList<WString> itemKeys;
+					List<ParsingCandidateItem> itemValues;
 
 					// copy all candidate keywords
 					FOREACH(vint, token, autoComplete->shownCandidates)
 					{
-						WString literal=parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
-						if(literal!=L"" && !items.Contains(literal))
+						WString literal = parsingExecutor->GetTokenMetaData(token).unescapedRegexText;
+						if (literal != L"" && !itemKeys.Contains(literal))
 						{
-							items.Add(literal);
+							ParsingCandidateItem item;
+							item.name = literal;
+							item.semanticId = -1;
+							itemValues.Insert(itemKeys.Add(literal), item);
 						}
 					}
 
 					// copy all candidate symbols
-					if(autoComplete->acceptableSemanticIds)
+					if (autoComplete->acceptableSemanticIds)
 					{
 						FOREACH(ParsingCandidateItem, item, autoComplete->candidateItems)
 						{
-							if(autoComplete->acceptableSemanticIds->Contains(item.semanticId))
+							if (autoComplete->acceptableSemanticIds->Contains(item.semanticId))
 							{
 								// add all acceptable display of a symbol
 								// because a symbol can has multiple representation in different places
-								if (item.name != L"" && !items.Contains(item.name))
+								if (item.name != L"" && !itemKeys.Contains(item.name))
 								{
-									items.Add(item.name);
+									itemValues.Insert(itemKeys.Add(item.name), item);
 								}
 							}
 						}
 					}
 
 					// fill the list
-					SetListContent(items);
+					List<GuiTextBoxAutoCompleteBase::AutoCompleteItem> candidateItems;
+					for (vint i = 0; i < itemValues.Count(); i++)
+					{
+						auto& item = itemValues[i];
+						if (item.tag.IsNull())
+						{
+							if (auto analyzer = parsingExecutor->GetAnalyzer())
+							{
+								item.tag = analyzer->CreateTagForCandidateItem(item);
+							}
+						}
+
+						GuiTextBoxAutoCompleteBase::AutoCompleteItem candidateItem;
+						candidateItem.text = item.name;
+						candidateItem.tag = item.tag;
+						candidateItems.Add(candidateItem);
+					}
+					SetListContent(candidateItems);
 				}
 
 				// set the list state
-				if(!keepListState)
+				if (!keepListState)
 				{
-					if(openList)
+					if (openList)
 					{
 						OpenList(startPosition);
 					}
@@ -30176,7 +30245,7 @@ GuiGrammarAutoComplete
 					}
 				}
 
-				if(IsListOpening())
+				if (IsListOpening())
 				{
 					HighlightList(editingText);
 				}
@@ -30481,6 +30550,7 @@ namespace vl
 	{
 		namespace controls
 		{
+			using namespace collections;
 			using namespace parsing;
 			using namespace parsing::tabling;
 			using namespace regex_internal;

@@ -270,6 +270,7 @@
     <ClCompile Include="..\..\..\..\Common\Source\String.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\Threading.cpp" />
     <ClCompile Include="..\..\..\..\Common\Source\ThreadingLinux.cpp" />
+    <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_BuildScope.cpp" />
     <ClCompile Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer_Errors.cpp" />
@@ -491,6 +492,7 @@
     <ClInclude Include="..\..\..\..\Common\Source\String.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Threading.h" />
     <ClInclude Include="..\..\..\..\Common\Source\Tuple.h" />
+    <ClInclude Include="..\..\..\..\Common\Source\UnitTest\UnitTest.h" />
     <ClInclude Include="..\..\..\Workflow\Source\Analyzer\WfAnalyzer.h" />
     <ClInclude Include="..\..\..\Workflow\Source\Expression\WfExpression.h" />
     <ClInclude Include="..\..\..\Workflow\Source\Expression\WfExpressionParser.h" />

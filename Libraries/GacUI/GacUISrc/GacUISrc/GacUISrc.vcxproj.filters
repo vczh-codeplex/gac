@@ -124,6 +124,9 @@
     <Filter Include="GacUI\Controls\TextEditorPackage\LanguageService">
       <UniqueIdentifier>{c798ad45-bfb9-4c86-98ef-9bbda7accb61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\UnitTest">
+      <UniqueIdentifier>{b10e67e1-1317-4bcb-8da1-3933ef223ebf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Common\Source\Basic.cpp">
@@ -651,6 +654,9 @@
     <ClCompile Include="AutoComplete_Grammar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\Source\UnitTest\UnitTest.cpp">
+      <Filter>Common\UnitTest</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\Common\Source\Basic.h">
@@ -1162,6 +1168,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Controls\TextEditorPackage\LanguageService\GuiLanguageOperations.h">
       <Filter>GacUI\Controls\TextEditorPackage\LanguageService</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\Source\UnitTest\UnitTest.h">
+      <Filter>Common\UnitTest</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

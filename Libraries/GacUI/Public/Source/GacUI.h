@@ -8522,17 +8522,54 @@ GuiTextBoxAutoCompleteBase
 			
 			class GuiTextBoxAutoCompleteBase : public Object, public virtual ICommonTextEditCallback
 			{
+			public:
+				struct AutoCompleteItem
+				{
+					description::Value								tag;
+					WString											text;
+				};
+
+				class IAutoCompleteControlProvider : public virtual Interface
+				{
+				public:
+					virtual GuiControl*								GetAutoCompleteControl() = 0;
+
+					virtual GuiSelectableListControl*				GetListControl() = 0;
+
+					virtual void									SetSortedContent(const collections::List<AutoCompleteItem>& items) = 0;
+
+					virtual vint									GetItemCount() = 0;
+
+					virtual WString									GetItemText(vint index) = 0;
+				};
+
+				class TextListControlProvider : public Object, public virtual IAutoCompleteControlProvider
+				{
+				protected:
+					GuiTextList*									autoCompleteList;
+
+				public:
+					TextListControlProvider(GuiTextList::IStyleProvider* styleProvider = nullptr);
+					~TextListControlProvider();
+
+					GuiControl*										GetAutoCompleteControl()override;
+					GuiSelectableListControl*						GetListControl()override;
+					void											SetSortedContent(const collections::List<AutoCompleteItem>& items)override;
+					vint											GetItemCount()override;
+					WString											GetItemText(vint index)override;
+				};
+
 			protected:
 				elements::GuiColorizedTextElement*					element;
 				SpinLock*											elementModifyLock;
 				compositions::GuiGraphicsComposition*				ownerComposition;
 				GuiPopup*											autoCompletePopup;
-				GuiTextList*										autoCompleteList;
+				Ptr<IAutoCompleteControlProvider>					autoCompleteControlProvider;
 				TextPos												autoCompleteStartPosition;
 
 				bool												IsPrefix(const WString& prefix, const WString& candidate);
 			public:
-				GuiTextBoxAutoCompleteBase();
+				GuiTextBoxAutoCompleteBase(Ptr<IAutoCompleteControlProvider> _autoCompleteControlProvider = nullptr);
 				~GuiTextBoxAutoCompleteBase();
 
 				void												Attach(elements::GuiColorizedTextElement* _element, SpinLock& _elementModifyLock, compositions::GuiGraphicsComposition* _ownerComposition, vuint editVersion)override;
@@ -8545,7 +8582,7 @@ GuiTextBoxAutoCompleteBase
 				bool												IsListOpening();
 				void												OpenList(TextPos startPosition);
 				void												CloseList();
-				void												SetListContent(const collections::SortedList<WString>& items);
+				void												SetListContent(const collections::List<AutoCompleteItem>& items);
 				TextPos												GetListStartPosition();
 				bool												SelectPreviousListItem();
 				bool												SelectNextListItem();
@@ -15253,7 +15290,7 @@ ParsingOutput
 				Ptr<parsing::ParsingTreeObject>							node;
 				vuint													editVersion = 0;
 				WString													code;
-				Ptr<Object>												cache;
+				Ptr<DescriptableObject>									cache;
 			};
 
 /***********************************************************************
@@ -15278,6 +15315,7 @@ PartialParsingOutput
 			{
 				vint													semanticId = -1;
 				WString													name;
+				description::Value										tag;
 			};
 
 /***********************************************************************
@@ -15328,11 +15366,13 @@ RepeatingParsingExecutor
 
 					virtual void											Detach(RepeatingParsingExecutor* executor) = 0;
 
-					virtual Ptr<Object>										CreateCacheAsync(const RepeatingParsingOutput& output) = 0;
+					virtual Ptr<DescriptableObject>							CreateCacheAsync(const RepeatingParsingOutput& output) = 0;
 
 					virtual vint											GetSemanticIdForTokenAsync(const ParsingTokenContext& tokenContext, const RepeatingParsingOutput& output) = 0;
 
-					virtual void											GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;
+					virtual void											GetCandidateItemsAsync(const ParsingTokenContext& tokenContext, const RepeatingPartialParsingOutput& partialOutput, collections::List<ParsingCandidateItem>& candidateItems) = 0;					
+
+					virtual description::Value								CreateTagForCandidateItem(ParsingCandidateItem& item) = 0;
 				};
 
 				class CallbackBase : public virtual ICallback, public virtual ICommonTextEditCallback

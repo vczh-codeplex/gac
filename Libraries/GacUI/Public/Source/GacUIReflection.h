@@ -1624,9 +1624,6 @@ Type List
 			F(presentation::controls::GuiDocumentLabel)\
 			F(presentation::controls::GuiDocumentLabel::IStyleController)\
 			F(presentation::controls::GuiTextBoxCommonInterface)\
-			F(presentation::controls::GuiTextBoxColorizerBase)\
-			F(presentation::controls::GuiTextBoxRegexColorizer)\
-			F(presentation::controls::GuiTextBoxAutoCompleteBase)\
 			F(presentation::controls::GuiMultilineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox)\
 			F(presentation::controls::GuiSinglelineTextBox::IStyleProvider)\
