@@ -16129,10 +16129,15 @@ WfRuntimeExceptionInfo
 			{
 			}
 				
+#pragma push_macro("GetMessage")
+#if defined GetMessage
+#undef GetMessage
+#endif
 			WString WfRuntimeExceptionInfo::GetMessage()
 			{
 				return message;
 			}
+#pragma pop_macro("GetMessage")
 
 			bool WfRuntimeExceptionInfo::GetFatal()
 			{
