@@ -1,0 +1,361 @@
+[
+  {
+    "Id": "0",
+    "Name": "0.7.6.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "! Release files are also host at [url:https://github.com/vczh/gac/]\n\nGaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* New Features\n** Add BindableDataGrid for XML Resource.\n** Add and for , which means that Workflow script in xml can access internal and external states of a UI class.\n** GacGen.exe supports code generation and exporting precompiled binary resources for full-featured XML resource.\n\n* Fix Bugs\n** ◦Update broken Demo XML resources to the latest version.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2015-02-25T13:27:05.92-08:00",
+    "Files": [
+      {
+        "Id": "340073f1-ef60-440b-8bb2-dd1bbc427e88",
+        "FileName": "ReleaseFolder.zip",
+        "Url": "./0/340073f1-ef60-440b-8bb2-dd1bbc427e88",
+        "Type": "Application",
+        "UploadDate": "2015-02-25T13:26:59.977-08:00"
+      }
+    ]
+  },
+  {
+    "Id": "1",
+    "Name": "0.7.5.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "! Release files are also host at [url:https://github.com/vczh/gac/]\n\nGaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* New Features\n** Add supporting about mouse scrolling on some content controls.\n** Add the \"Alt\" property on controls so that you can press *ALT* key and then press a series of letter keys to navigate to your target control. The navigation is multiple level, if you navigate into tab pages or menu items.\n** Supports compressable binary format to serialize the XML resource for a lot of performance improving.\n** When you are using GacUI under Windows, you have a chance to handle window messages.\n** Add control template for tooltip control.\n\n* Fix Bugs\n** Fix the Direct2D lost device problem.\n** Fix a GuiDocumentViewer editing bug.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2014-10-30T07:41:46.977-07:00",
+    "Files": []
+  },
+  {
+    "Id": "2",
+    "Name": "0.7.4.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "! Release files are also host at [url:https://github.com/vczh/gac/]\n\nGaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Persistant.LoadFromXml.ControlTemplate* shows how to apply a customized control template (skin) to all controls using XML, including a customized border window.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2014-07-24T00:42:47.243-07:00",
+    "Files": []
+  },
+  {
+    "Id": "3",
+    "Name": "0.7.3.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "! Release files are also host at [url:https://github.com/vczh/gac/]\n\nGaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 2 demos\n** *Persistant.LoadFromXml.ListViewModel* shows how to do item source binding to list/list view/tree view controls.\n** *Persistant.LoadFromXml.ItemTemplate* shows how to apply a customized item template (skin) to a list control using XML.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2014-05-07T23:35:37.313-07:00",
+    "Files": []
+  },
+  {
+    "Id": "4",
+    "Name": "0.7.2.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "! Release files are also host at [url:https://github.com/vczh/gac/]\n\nGaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Persistant.LoadFromXml.ViewModel* shows how to apply MVVM pattern on the XML window resource with GacGen.exe to generate C++ codes from XML.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2014-04-20T10:08:37.71-07:00",
+    "Files": [
+      {
+        "Id": "ec0087f8-54d8-4dfe-a030-f325ef8b1691",
+        "FileName": "Gaclib.zip",
+        "Url": "./4/ec0087f8-54d8-4dfe-a030-f325ef8b1691",
+        "Type": "Application",
+        "UploadDate": "2014-04-20T09:28:14.53-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "5",
+    "Name": "Gaclib 0.7.1.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Persistant.LoadFromXml.DataBinding* shows how to do data binding in the XML window resource with GacGen.exe to generate C++ codes from XML.\n* Added new features\n** *Workflow Script* adds exception handling, anonymous interface implementation and data binding.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2014-04-10T08:34:11.68-07:00",
+    "Files": [
+      {
+        "Id": "14e0e0b6-9109-4b71-890d-32ec3e31a32e",
+        "FileName": "Gaclib.zip",
+        "Url": "./5/14e0e0b6-9109-4b71-890d-32ec3e31a32e",
+        "Type": "Application",
+        "UploadDate": "2014-04-10T08:34:07.373-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "6",
+    "Name": "Gaclib 0.7.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Persistant.DirectCode.Scripting*\n* Added new features\n** *Workflow Script* enables you to access reflectable C++ classes from script.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2014-03-26T06:58:29.497-07:00",
+    "Files": [
+      {
+        "Id": "b1ef54ec-bd4f-4dbf-a6de-b5884ebc3249",
+        "FileName": "Gaclib.zip",
+        "Url": "./6/b1ef54ec-bd4f-4dbf-a6de-b5884ebc3249",
+        "Type": "Source Code",
+        "UploadDate": "2014-03-26T06:58:25.173-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "7",
+    "Name": "Gaclib 0.6.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Persistant.LoadFromXml.Controls*\n* Added new features\n** *Load From Xml* enables you to load a static window or customized control from an xml resource file. Xml support for data bindings and customized control style will be provided in the next few releases.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-11-13T07:30:44.863-08:00",
+    "Files": [
+      {
+        "Id": "e045e3e1-8acd-44da-8138-1d5527a4e38e",
+        "FileName": "Gaclib.zip",
+        "Url": "./7/e045e3e1-8acd-44da-8138-1d5527a4e38e",
+        "Type": "Application",
+        "UploadDate": "2013-11-13T07:30:42.43-08:00"
+      }
+    ]
+  },
+  {
+    "Id": "8",
+    "Name": "Gaclib 0.5.5.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Editor.Toolstrip.Document*\n* Added new features\n** *GuiDocumentViewer* and *GuiDocumentLabel* is editable like an RichTextEdit control.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-10-23T22:30:37.333-07:00",
+    "Files": [
+      {
+        "Id": "bcf52c03-ba12-4f0c-85c4-552447678661",
+        "FileName": "Gaclib.zip",
+        "Url": "./8/bcf52c03-ba12-4f0c-85c4-552447678661",
+        "Type": "Application",
+        "UploadDate": "2013-10-23T22:30:34.913-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "9",
+    "Name": "Gaclib 0.5.4.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 1 demos\n** *Editor.AutoComplete.Grammar*\n* Added new features\n** *GuiGrammarAutoComplete*",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-10-23T22:26:07.327-07:00",
+    "Files": [
+      {
+        "Id": "7285d2a7-5178-47bc-b363-4273097a3d3e",
+        "FileName": "Gaclib.zip",
+        "Url": "./9/7285d2a7-5178-47bc-b363-4273097a3d3e",
+        "Type": "Application",
+        "UploadDate": "2013-09-14T04:34:45.68-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "10",
+    "Name": "Gaclib 0.5.3.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 4 demos\n** *Controls.TextBox.ContextColorizer*\n** *Editor.Colorizer.Xml*\n** *Editor.Colorizer.Json*\n** *Editor.Colorizer.Grammar*\n* Added new features\n** Reflectable classes owns reference counter",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-08-12T09:04:40.707-07:00",
+    "Files": [
+      {
+        "Id": "6ba7b4af-3d27-4db5-8972-bf2563fefad1",
+        "FileName": "Gaclib.zip",
+        "Url": "./10/6ba7b4af-3d27-4db5-8972-bf2563fefad1",
+        "Type": "Application",
+        "UploadDate": "2013-08-12T09:03:07.483-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "11",
+    "Name": "Gaclib 0.5.2.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Add 4 demos\n** *Controls.DataGrid.ChemicalElements* This demo shows how to display data in a GuiVirtualDataGrid control using different styles for different cells.\n** *Controls.DataGrid.FileExplorer* This demo shows how to use GuiVirtualDataGrid with IStructuredDataProvider to do strong typed sorting and filtering.\n** *Controls.DataGrid.TableEditor* This demo shows how to use GuiStringGrid to perform simple table editing.\n** *Controls.DatePicker.DateAndLocale* This demo shows how to use GuiDatePicker and GuiDateComboBox to select a date under different locales and date formats.\n* Added new features\n** *VirtualDateGrid*\n** *StringGrid*\n** *DatePicker*\n** *DateComboBox*\n* Fixed bugs\n** Direct2D renderer uses the wrong scale under larget DPI setting\n** GetTreeViewData crashes in tree view control\n** Change the CheckBox graph because some users do not have \"Windings\" font",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-06-22T02:17:14.827-07:00",
+    "Files": [
+      {
+        "Id": "b87559a8-ca90-44b8-81c8-e6fa8a15eff3",
+        "FileName": "Gaclib.zip",
+        "Url": "./11/b87559a8-ca90-44b8-81c8-e6fa8a15eff3",
+        "Type": "Application",
+        "UploadDate": "2013-06-22T02:17:13.16-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "12",
+    "Name": "Gaclib 0.5.1.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Updated 1 demo\n** *Template.Window.CustomizedBorder* Add an icon in the window title of the skin.\n* Added new features\n** Parser generator supports ambiguous context-free grammar.\n** Reflection supports dictionary type.\n** Remove the old parser combinator library completely out of Gaclib.\n** Upgrade Fpmacro to use the new parser generator\n* Fixed bugs\n** Parser generator crashes when the input grammar contains conflict errors.\n** Reflection failed to unload and reload metadata.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-04-17T23:40:11.163-07:00",
+    "Files": [
+      {
+        "Id": "92d938f9-b97c-4b2e-a2d1-bd7b2f3932bb",
+        "FileName": "Gaclib.zip",
+        "Url": "./12/92d938f9-b97c-4b2e-a2d1-bd7b2f3932bb",
+        "Type": "Application",
+        "UploadDate": "2013-04-17T23:40:08.917-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "13",
+    "Name": "Gaclib 0.5.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Added 1 demo\n** *Persistant.DirectCode.SimpleWindow* that shows how to create a simple application totally using reflection, that is, without touching any types (symbols) of GacUI library.\n* Added new features\n** *Reflection* that can enumerate, create and execute types, methods, properties and events, with supporting to collection types.",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-03-12T06:35:17.593-07:00",
+    "Files": [
+      {
+        "Id": "332fe173-30cd-428e-9c43-90062cb8d721",
+        "FileName": "Gaclib.zip",
+        "Url": "./13/332fe173-30cd-428e-9c43-90062cb8d721",
+        "Type": "Application",
+        "UploadDate": "2013-03-12T06:35:16.173-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "14",
+    "Name": "Gaclib 0.4.3.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Added 1 demo\n** *Controls.Tooltip.RichTextAndResource* that shows how to load a rich text document and related images from resource files and show it in tooltips of buttons.\n* Added new features\n** Delay executation\n** Resource xml format that can bring images, texts, xmls and rich texts into a resource package\n** Rich text xml format with hyperlink, style and template\n** Tooltip control",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-02-23T04:40:39.28-08:00",
+    "Files": [
+      {
+        "Id": "c8b4c381-4e78-4d3b-a61e-28cf17bcac25",
+        "FileName": "Gaclib.zip",
+        "Url": "./14/c8b4c381-4e78-4d3b-a61e-28cf17bcac25",
+        "Type": "Application",
+        "UploadDate": "2013-02-23T04:40:37.753-08:00"
+      }
+    ]
+  },
+  {
+    "Id": "15",
+    "Name": "Gaclib 0.4.2.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Added 1 demo\n** *Controls.TextBox.AdvancedColorizer* that shows how to write a text code with context sensitive colorizing using GacUI\n* Added new features\n** x64 supports\n** Linq to C++\n** Linq to Xml\n** Linq to Json\n** Parser framework and generator (generate parser cpp code from a grammar definition)\n** Locale awared functions, like compare string with locale, format string with locale, etc\n** Test buffer encoding, that can test a byte buffer and try to guess the encoding of the text as accurately as possible\n* Fixed bugs\n** Close main form using GuiWindow::Close() will not exit the application",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2013-01-24T07:53:47.69-08:00",
+    "Files": [
+      {
+        "Id": "1d95c46c-9afa-4d89-8383-21a14d59f361",
+        "FileName": "Gaclib.zip",
+        "Url": "./15/1d95c46c-9afa-4d89-8383-21a14d59f361",
+        "Type": "Application",
+        "UploadDate": "2013-01-24T07:53:44.767-08:00"
+      }
+    ]
+  },
+  {
+    "Id": "16",
+    "Name": "Gaclib 0.4.1.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\n* Added 4 new features\n** *GuiSolidLabelElement* measures height when wrap line\n** *GuiGDIElement* enables programmers to directly access GDI resources in a window\n** *GuiDirect2DElement* enables programmers to directly access Direct2D resource in a window\n** *GuiDocumentElement* enables programmers to render rich text with embedded images\n* Fixed bugs\n** Fixed bug about compositions with wrap line labels\n** Fixed but about multiple window disposing\n** Fixed Template.Window.CustomizedBorder flicking\n* Added 1 new demo\n** Rendering.TextLayout.RichText",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-11-23T22:53:11.353-08:00",
+    "Files": [
+      {
+        "Id": "9147c0a9-122a-41a0-aa28-fe3ee13205de",
+        "FileName": "Gaclib.zip",
+        "Url": "./16/9147c0a9-122a-41a0-aa28-fe3ee13205de",
+        "Type": "Application",
+        "UploadDate": "2012-11-23T22:53:10.043-08:00"
+      }
+    ]
+  },
+  {
+    "Id": "17",
+    "Name": "Gaclib 0.4.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Added Windows 8 theme (except tab control, will be provided for the next release)\n* GacUI will choose to use Windows 7 theme or Windows 8 theme as default theme according to OS version\n* Added 1 new demos\n** Template.Window.CustomizedBorder\n* Fixed bugs\n* Fixed Controls.Toolstrip.TextEditor demo",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-10-18T08:29:43.377-07:00",
+    "Files": [
+      {
+        "Id": "69097752-5c6c-4cfa-a538-391e14e85ce6",
+        "FileName": "Gaclib.zip",
+        "Url": "./17/69097752-5c6c-4cfa-a538-391e14e85ce6",
+        "Type": "Source Code",
+        "UploadDate": "2012-10-18T08:29:42.22-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "18",
+    "Name": "Gaclib 0.3.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Added 1 new demos\n** Control.Scroll.ColorPicker\n* Modified 2 demos (updated to use the new toolstrip control package)\n** Controls.Toolstrip.TextEditor\n** Controls.ListView.SortingAndFiltering\n* Fixed bugs\n* Added toolstrip control pagkage\n* Added shortcut key manager\n* Added progress bar style",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-08-06T07:18:56.367-07:00",
+    "Files": [
+      {
+        "Id": "5388070b-40ae-45b1-93df-f2b8196520da",
+        "FileName": "Gaclib.zip",
+        "Url": "./18/5388070b-40ae-45b1-93df-f2b8196520da",
+        "Type": "Source Code",
+        "UploadDate": "2012-08-06T07:17:04.83-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "19",
+    "Name": "Gaclib 0.2.5.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Document* HTML document. Please start at reference_gacui.html\n** *Content* Necessary CSS/JPG files for document.\n\nImprovements to the previous release\n* Added 2 new demos\n** Controls.Toolstrip.TextEditor\n** Controls.TreeView.FileExplorer\n* Fixed bugs\n* Encapsulated OS's common dialog into INativeDialogService\n* Added undo/redo to text box\n* Add item/node related events to list control and treeview control\n* Refactor the whole website using ASP.NET MVC3 hosted in Windows Azure (the source code of the website is checked in codeplex, but not included in the release)",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-07-12T19:20:34.177-07:00",
+    "Files": [
+      {
+        "Id": "fd2deb90-a44a-4dcd-b34c-64be63b6eb86",
+        "FileName": "ReleaseFolder.zip",
+        "Url": "./19/fd2deb90-a44a-4dcd-b34c-64be63b6eb86",
+        "Type": "Source Code",
+        "UploadDate": "2012-07-12T19:20:33.443-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "20",
+    "Name": "Gaclib 0.2.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Doc* HTML document. Please start at reference_gacui.html\n\nImprovements to the previous release\n* Added 3 new demos\n** Controls.ListView.ViewSwitching\n** Controls.ListView.VirtualMode\n** Controls.ListView.SortingAndFiltering\n* Fixed bugs\n* Added a few more APIs\n* Added lost css files to the documentation folder",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-06-16T02:59:25.977-07:00",
+    "Files": [
+      {
+        "Id": "7a36d296-72d2-44aa-a6c7-0d8ef1298367",
+        "FileName": "Gaclib.zip",
+        "Url": "./20/7a36d296-72d2-44aa-a6c7-0d8ef1298367",
+        "Type": "Source Code",
+        "UploadDate": "2012-06-16T02:59:25.49-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "21",
+    "Name": "Gaclib 0.1.0.0",
+    "DevelopmentStatus": "Beta",
+    "Description": "Gaclib.zip contains the following content\n* *GacUIDemo* Demo solution and projects\n* *Public*\n** *Source* GacUI library\n** *Doc* HTML document. Please start at reference_gacui.html",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2012-05-28T07:21:28.43-07:00",
+    "Files": [
+      {
+        "Id": "5709f21f-a689-4c57-9e05-f2255c025d93",
+        "FileName": "Gaclib.zip",
+        "Url": "./21/5709f21f-a689-4c57-9e05-f2255c025d93",
+        "Type": "Source Code",
+        "UploadDate": "2012-05-28T07:21:27.993-07:00"
+      }
+    ]
+  },
+  {
+    "Id": "22",
+    "Name": "Moved to Github",
+    "DevelopmentStatus": "Beta",
+    "Description": "! Source code has been moved to [url:https://github.com/vczh-libraries].\n! Website for this project: [url:http://www.gaclib.net].\n! Release files are also host at [url:https://github.com/vczh-libraries/Release].",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2015-10-06T02:07:18.36-07:00",
+    "Files": []
+  }
+]
